@@ -85,6 +85,35 @@ impl MapModel {
         Ok(out)
     }
 
+    #[wasm_bindgen(js_name = toRouteSnapper)]
+    pub fn to_route_snapper(&self) -> Vec<u8> {
+        use route_snapper_graph::{Edge, NodeID, RouteSnapperMap};
+
+        let mut nodes = Vec::new();
+        for i in &self.intersections {
+            nodes.push(self.mercator.to_wgs84(i.point.into()));
+        }
+
+        let mut edges = Vec::new();
+        for r in &self.roads {
+            let mut linestring = r.linestring.clone();
+            linestring.map_coords_in_place(|c| self.mercator.to_wgs84(c));
+
+            edges.push(Edge {
+                node1: NodeID(r.src_i.0 as u32),
+                node2: NodeID(r.dst_i.0 as u32),
+                geometry: linestring,
+                // Isn't serialized, doesn't matter
+                length_meters: 0.0,
+                name: r.tags.get("name").cloned(),
+            });
+        }
+
+        let graph = RouteSnapperMap { nodes, edges };
+        let bytes = bincode::serialize(&graph).unwrap();
+        bytes
+    }
+
     fn find_edge(&self, i1: IntersectionID, i2: IntersectionID) -> &Road {
         // TODO Store lookup table
         for r in &self.intersections[i1.0].roads {

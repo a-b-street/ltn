@@ -1,10 +1,29 @@
-import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
+import type {
+  DataDrivenPropertyValueSpecification,
+  ExpressionSpecification,
+} from "maplibre-gl";
 
 export { default as Layout } from "./Layout.svelte";
 export { default as Legend } from "./Legend.svelte";
 export { default as Loading } from "./Loading.svelte";
 export { default as OverpassSelector } from "./OverpassSelector.svelte";
 export { default as PropertiesTable } from "./PropertiesTable.svelte";
+
+export const isPolygon: ExpressionSpecification = [
+  "==",
+  ["geometry-type"],
+  "Polygon",
+];
+export const isLine: ExpressionSpecification = [
+  "==",
+  ["geometry-type"],
+  "LineString",
+];
+export const isPoint: ExpressionSpecification = [
+  "==",
+  ["geometry-type"],
+  "Point",
+];
 
 export function constructMatchExpression<OutputType>(
   getter: any[],

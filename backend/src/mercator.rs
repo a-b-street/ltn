@@ -45,4 +45,6 @@ impl Mercator {
             + (self.wgs84_bounds.height() * (self.height - pt.y) / self.height);
         Coord { x, y }
     }
+
+    // TODO Take anything that can do mapcoords
 }

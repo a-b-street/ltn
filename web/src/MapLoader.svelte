@@ -1,6 +1,7 @@
 <script lang="ts">
   import init, { MapModel } from "backend";
   import type { Map } from "maplibre-gl";
+  import init2 from "route-snapper";
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "./common";
 
@@ -13,6 +14,7 @@
 
   onMount(async () => {
     await init();
+    await init2();
 
     // When running locally if a vite public/ directory is set up, load from that for speed
     try {
