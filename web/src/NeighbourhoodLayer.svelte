@@ -1,7 +1,13 @@
 <script lang="ts">
   import { MapModel } from "backend";
   import type { Feature, Polygon } from "geojson";
-  import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import {
+    CircleLayer,
+    FillLayer,
+    GeoJSON,
+    LineLayer,
+    Popup,
+  } from "svelte-maplibre";
   import { constructMatchExpression, isLine, isPoint } from "./common";
 
   export let model: MapModel;
@@ -46,5 +52,9 @@
         "red"
       ),
     }}
-  />
+  >
+    <Popup openOn="hover" let:data>
+      <p>{data.properties.dist}</p>
+    </Popup>
+  </CircleLayer>
 </GeoJSON>

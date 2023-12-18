@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use anyhow::Result;
 use geo::{Contains, EuclideanDistance, Intersects, Polygon};
@@ -9,7 +9,7 @@ use crate::{IntersectionID, MapModel, RoadID};
 pub struct Neighbourhood {
     interior_roads: HashSet<RoadID>,
     crosses: HashSet<RoadID>,
-    border_intersections: HashSet<IntersectionID>,
+    border_intersections: HashMap<IntersectionID, f64>,
 }
 
 impl Neighbourhood {
@@ -24,12 +24,14 @@ impl Neighbourhood {
             }
         }
 
-        let mut border_intersections = HashSet::new();
+        let mut border_intersections = HashMap::new();
         for i in &map.intersections {
-            // 0 if it's within...
-            let dist = i.point.euclidean_distance(&boundary);
-            if dist > 0.0 && dist < 5.0 {
-                border_intersections.insert(i.id);
+            // Check distance to the polygon's linestring, rather than the polygon itself. Points
+            // contained within a polygon and eight on the linestring both count as 0.
+            let dist = i.point.euclidean_distance(boundary.exterior());
+            // Allow a small tolerance
+            if dist < 0.1 {
+                border_intersections.insert(i.id, dist);
             }
         }
 
@@ -57,11 +59,12 @@ impl Neighbourhood {
             f.set_property("kind", "crosses");
             features.push(f);
         }
-        for i in &self.border_intersections {
+        for (i, dist) in &self.border_intersections {
             let mut f = Feature::from(Geometry::from(
                 &map.mercator.to_wgs84(&map.intersections[i.0].point),
             ));
             f.set_property("kind", "border_intersection");
+            f.set_property("dist", *dist);
             features.push(f);
         }
 
