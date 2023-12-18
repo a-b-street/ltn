@@ -8,7 +8,12 @@
     LineLayer,
     Popup,
   } from "svelte-maplibre";
-  import { constructMatchExpression, isLine, isPoint } from "./common";
+  import {
+    constructMatchExpression,
+    isLine,
+    isPoint,
+    PropertiesTable,
+  } from "./common";
 
   export let model: MapModel;
   export let boundary: Feature<Polygon>;
@@ -39,7 +44,12 @@
         "red"
       ),
     }}
-  />
+    on:click={(e) => window.open(e.detail.features[0].properties.way, "_blank")}
+  >
+    <Popup openOn="hover" let:data>
+      <PropertiesTable properties={data.properties} />
+    </Popup>
+  </LineLayer>
   <CircleLayer
     filter={isPoint}
     paint={{
@@ -54,7 +64,7 @@
     }}
   >
     <Popup openOn="hover" let:data>
-      <p>{data.properties.dist}</p>
+      <PropertiesTable properties={data.properties} />
     </Popup>
   </CircleLayer>
 </GeoJSON>
