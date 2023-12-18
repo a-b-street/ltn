@@ -1,14 +1,17 @@
 #[macro_use]
+extern crate anyhow;
+#[macro_use]
 extern crate log;
 
 use std::fmt;
 use std::sync::Once;
 
-use geo::{LineString, Point};
+use geo::{LineString, Point, Polygon};
 use geojson::{Feature, GeoJson, Geometry};
 use wasm_bindgen::prelude::*;
 
 mod mercator;
+mod neighbourhood;
 mod scrape;
 mod tags;
 
@@ -109,6 +112,18 @@ impl MapModel {
         let graph = RouteSnapperMap { nodes, edges };
         let bytes = bincode::serialize(&graph).unwrap();
         bytes
+    }
+
+    /// Takes boundary GJ polygon, returns GJ with more details
+    #[wasm_bindgen(js_name = analyzeNeighbourhood)]
+    pub fn analyze_neighbourhood(&self, input: JsValue) -> Result<String, JsValue> {
+        let boundary_gj: Feature = serde_wasm_bindgen::from_value(input)?;
+        let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
+        self.mercator.to_mercator_in_place(&mut boundary_geo);
+
+        let neighbourhood =
+            neighbourhood::Neighbourhood::new(self, boundary_geo).map_err(err_to_js)?;
+        Ok(serde_json::to_string(&neighbourhood.to_gj(self)).map_err(err_to_js)?)
     }
 
     fn find_edge(&self, i1: IntersectionID, i2: IntersectionID) -> &Road {

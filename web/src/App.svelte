@@ -82,7 +82,7 @@
     {/if}
     <div><button on:click={zoomToFit}>Zoom to fit</button></div>
 
-    {#if mode.mode == "network"}
+    {#if mode.mode == "network" && model}
       <button on:click={setBoundaryMode}>Set boundary</button>
     {:else if mode.mode == "set-boundary"}
       <p>Draw the boundary...</p>
@@ -104,7 +104,7 @@
         {:else if mode.mode == "set-boundary"}
           <RouteSnapperLayer />
         {:else if mode.mode == "neighbourhood"}
-          <NeighbourhoodLayer boundary={mode.boundary} />
+          <NeighbourhoodLayer {model} boundary={mode.boundary} />
         {/if}
       {/if}
     </MapLibre>
