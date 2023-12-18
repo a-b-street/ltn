@@ -1,0 +1,22 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+anyhow = "1.0.75"
+console_error_panic_hook = "0.1.6"
+console_log = "1.0.0"
+geo = "0.27.0"
+geojson = { git = "https://github.com/georust/geojson", features = ["geo-types"] }
+log = "0.4.20"
+osm-reader = { git = "https://github.com/a-b-street/osm-reader" }
+rstar = { version = "0.11.0" }
+serde = "1.0.188"
+serde_json = "1.0.105"
+serde-wasm-bindgen = "0.6.0"
+wasm-bindgen = "0.2.87"
+web-sys = { version = "0.3.64", features = ["console"] }
