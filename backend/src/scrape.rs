@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::Result;
-use geo::{Coord, Geometry, GeometryCollection, LineString, MapCoordsInPlace, Point};
+use geo::{Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
 
 use crate::mercator::Mercator;
@@ -49,11 +49,10 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         .into();
     let mercator = Mercator::from(collection).unwrap();
     for r in &mut roads {
-        r.linestring
-            .map_coords_in_place(|pt| mercator.to_mercator(pt));
+        mercator.to_mercator_in_place(&mut r.linestring);
     }
     for i in &mut intersections {
-        i.point.map_coords_in_place(|pt| mercator.to_mercator(pt));
+        mercator.to_mercator_in_place(&mut i.point);
     }
 
     Ok(MapModel {

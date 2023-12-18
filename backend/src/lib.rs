@@ -4,7 +4,7 @@ extern crate log;
 use std::fmt;
 use std::sync::Once;
 
-use geo::{LineString, MapCoordsInPlace, Point};
+use geo::{LineString, Point};
 use geojson::{Feature, GeoJson, Geometry};
 use wasm_bindgen::prelude::*;
 
@@ -91,18 +91,15 @@ impl MapModel {
 
         let mut nodes = Vec::new();
         for i in &self.intersections {
-            nodes.push(self.mercator.to_wgs84(i.point.into()));
+            nodes.push(self.mercator.to_wgs84(&i.point).into());
         }
 
         let mut edges = Vec::new();
         for r in &self.roads {
-            let mut linestring = r.linestring.clone();
-            linestring.map_coords_in_place(|c| self.mercator.to_wgs84(c));
-
             edges.push(Edge {
                 node1: NodeID(r.src_i.0 as u32),
                 node2: NodeID(r.dst_i.0 as u32),
-                geometry: linestring,
+                geometry: self.mercator.to_wgs84(&r.linestring),
                 // Isn't serialized, doesn't matter
                 length_meters: 0.0,
                 name: r.tags.get("name").cloned(),
@@ -128,10 +125,7 @@ impl MapModel {
 
 impl Road {
     fn to_gj(&self, mercator: &mercator::Mercator) -> Feature {
-        let mut linestring = self.linestring.clone();
-        linestring.map_coords_in_place(|c| mercator.to_wgs84(c));
-
-        let mut f = Feature::from(Geometry::from(&linestring));
+        let mut f = Feature::from(Geometry::from(&mercator.to_wgs84(&self.linestring)));
         f.set_property("id", self.id.0);
         f.set_property("way", self.way.to_string());
         f.set_property("node1", self.node1.to_string());
