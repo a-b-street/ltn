@@ -44,6 +44,9 @@
     }
     console.log("New map model loaded");
     zoomToFit();
+    mode = {
+      mode: "network",
+    };
     route_tool = new RouteTool(map, model.toRouteSnapper());
   }
   $: gotModel(model);
