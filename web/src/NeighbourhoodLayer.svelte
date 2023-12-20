@@ -19,6 +19,9 @@
   export let boundary: Feature<Polygon>;
 
   let details = JSON.parse(model.analyzeNeighbourhood(boundary));
+  let maxShortcuts = Math.max(
+    ...details.features.map((f) => f.properties.shortcuts ?? 0)
+  );
 </script>
 
 <GeoJSON data={boundary}>
@@ -38,13 +41,22 @@
       "line-color": constructMatchExpression(
         ["get", "kind"],
         {
-          interior_road: "black",
+          interior_road: [
+            "interpolate-hcl",
+            ["linear"],
+            ["get", "shortcuts"],
+            0,
+            "#F19A93",
+            maxShortcuts,
+            "#A32015",
+          ],
           crosses: "blue",
         },
         "red"
       ),
     }}
     on:click={(e) => window.open(e.detail.features[0].properties.way, "_blank")}
+    hoverCursor="pointer"
   >
     <Popup openOn="hover" let:data>
       <PropertiesTable properties={data.properties} />

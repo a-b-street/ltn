@@ -5,6 +5,7 @@ use geo::{
     BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, MultiLineString, Polygon,
 };
 use geojson::{Feature, GeoJson, Geometry};
+use petgraph::graphmap::DiGraphMap;
 
 use crate::{IntersectionID, MapModel, RoadID};
 
@@ -66,9 +67,15 @@ impl Neighbourhood {
     pub fn to_gj(&self, map: &MapModel) -> GeoJson {
         let mut features = Vec::new();
 
+        let shortcuts = Shortcuts::new(map, self);
+
         for r in &self.interior_roads {
             let mut f = map.roads[r.0].to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
+            f.set_property(
+                "shortcuts",
+                shortcuts.count_per_road.get(r).cloned().unwrap_or(0),
+            );
             features.push(f);
         }
         for (r, pct) in &self.crosses {
@@ -87,5 +94,49 @@ impl Neighbourhood {
         }
 
         GeoJson::from(features)
+    }
+}
+
+struct Shortcuts {
+    count_per_road: HashMap<RoadID, usize>,
+}
+
+impl Shortcuts {
+    fn new(map: &MapModel, neighbourhood: &Neighbourhood) -> Self {
+        let mut graph = DiGraphMap::new();
+        for r in &neighbourhood.interior_roads {
+            let road = &map.roads[r.0];
+            graph.add_edge(
+                road.src_i,
+                road.dst_i,
+                (road.id, road.linestring.euclidean_length()),
+            );
+            // TODO Look at one-way for driving
+            graph.add_edge(
+                road.dst_i,
+                road.src_i,
+                (road.id, road.linestring.euclidean_length()),
+            );
+        }
+
+        let mut count_per_road = HashMap::new();
+        for start in neighbourhood.border_intersections.keys() {
+            for end in neighbourhood.border_intersections.keys() {
+                if let Some((_, path)) = petgraph::algo::astar(
+                    &graph,
+                    *start,
+                    |i| i == *end,
+                    |(_, _, (_, dist))| *dist,
+                    |_| 0.0,
+                ) {
+                    for pair in path.windows(2) {
+                        let (r, _) = *graph.edge_weight(pair[0], pair[1]).unwrap();
+                        *count_per_road.entry(r).or_insert(0) += 1;
+                    }
+                }
+            }
+        }
+
+        Self { count_per_road }
     }
 }
