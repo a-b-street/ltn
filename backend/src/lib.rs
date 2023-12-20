@@ -12,11 +12,13 @@ use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
 use self::neighbourhood::Neighbourhood;
+use self::render_cells::RenderCells;
 use self::shortcuts::Shortcuts;
 
 mod cells;
 mod mercator;
 mod neighbourhood;
+mod render_cells;
 mod scrape;
 mod shortcuts;
 mod tags;

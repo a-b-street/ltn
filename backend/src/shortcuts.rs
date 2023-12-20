@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use petgraph::graphmap::DiGraphMap;
 
-use crate::{IntersectionID, MapModel, Neighbourhood, RoadID};
+use crate::{MapModel, Neighbourhood, RoadID};
 
 pub struct Shortcuts {
     pub count_per_road: HashMap<RoadID, usize>,

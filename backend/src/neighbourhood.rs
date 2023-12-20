@@ -6,12 +6,14 @@ use geo::{
 };
 use geojson::{Feature, GeoJson, Geometry};
 
-use crate::{Cell, IntersectionID, MapModel, RoadID, Shortcuts};
+use crate::render_cells::Color;
+use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
 pub struct Neighbourhood {
     pub interior_roads: HashSet<RoadID>,
     crosses: HashMap<RoadID, f64>,
     pub border_intersections: HashSet<IntersectionID>,
+    pub boundary_polygon: Polygon,
 }
 
 impl Neighbourhood {
@@ -60,6 +62,7 @@ impl Neighbourhood {
             interior_roads,
             crosses,
             border_intersections,
+            boundary_polygon: boundary,
         })
     }
 
@@ -69,15 +72,8 @@ impl Neighbourhood {
         // TODO Decide how/where state lives
         let modal_filters = BTreeMap::new();
         let cells = Cell::find_all(map, self, &modal_filters);
+        let render_cells = RenderCells::new(map, self, &cells);
         let shortcuts = Shortcuts::new(map, self);
-
-        // TODO Temporary rendering
-        let mut road_to_cell = HashMap::new();
-        for (idx, cell) in cells.iter().enumerate() {
-            for (r, _) in &cell.roads {
-                road_to_cell.insert(*r, idx);
-            }
-        }
 
         for r in &self.interior_roads {
             let mut f = map.get_r(*r).to_gj(&map.mercator);
@@ -86,11 +82,6 @@ impl Neighbourhood {
                 "shortcuts",
                 shortcuts.count_per_road.get(r).cloned().unwrap_or(0),
             );
-            if let Some(cell) = road_to_cell.get(r) {
-                f.set_property("cell", *cell);
-            } else {
-                error!("A road has no cell");
-            }
             features.push(f);
         }
         for (r, pct) in &self.crosses {
@@ -102,6 +93,19 @@ impl Neighbourhood {
         for i in &self.border_intersections {
             let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&map.get_i(*i).point)));
             f.set_property("kind", "border_intersection");
+            features.push(f);
+        }
+
+        for (polygons, color) in render_cells
+            .polygons_per_cell
+            .into_iter()
+            .zip(render_cells.colors)
+        {
+            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&polygons)));
+            match color {
+                Color::Disconnected => f.set_property("color", "disconnected"),
+                Color::Cell(idx) => f.set_property("color", idx),
+            }
             features.push(f);
         }
 
