@@ -3,12 +3,13 @@ extern crate anyhow;
 #[macro_use]
 extern crate log;
 
+use std::collections::BTreeMap;
 use std::fmt;
 use std::sync::Once;
 
 use geo::{EuclideanLength, LineString, Point, Polygon};
 use geojson::{Feature, GeoJson, Geometry};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
@@ -33,6 +34,9 @@ pub struct MapModel {
     intersections: Vec<Intersection>,
     // All geometry stored in worldspace, including rtrees
     mercator: mercator::Mercator,
+
+    // TODO Split stuff
+    modal_filters: BTreeMap<RoadID, ModalFilter>,
 }
 
 impl MapModel {
@@ -145,6 +149,13 @@ impl MapModel {
         Ok(serde_json::to_string(&neighbourhood.to_gj(self)).map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = addModalFilter)]
+    pub fn add_modal_filter(&self, input: JsValue) -> Result<(), JsValue> {
+        let pos: LngLat = serde_wasm_bindgen::from_value(input)?;
+        info!("add to {}, {}", pos.lng, pos.lat);
+        Ok(())
+    }
+
     fn find_edge(&self, i1: IntersectionID, i2: IntersectionID) -> &Road {
         // TODO Store lookup table
         for r in &self.get_i(i1).roads {
@@ -173,6 +184,16 @@ impl Road {
         }
         f
     }
+}
+
+#[derive(Deserialize)]
+struct LngLat {
+    lng: f64,
+    lat: f64,
+}
+
+pub struct ModalFilter {
+    pub distance: f64,
 }
 
 fn err_to_js<E: std::fmt::Display>(err: E) -> JsValue {

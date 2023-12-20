@@ -1,6 +1,8 @@
 <script lang="ts">
   import { MapModel } from "backend";
   import type { Feature, Polygon } from "geojson";
+  import type { Map, MapMouseEvent } from "maplibre-gl";
+  import { onDestroy } from "svelte";
   import {
     CircleLayer,
     FillLayer,
@@ -17,8 +19,10 @@
     PropertiesTable,
   } from "./common";
 
+  export let map: Map;
   export let model: MapModel;
   export let boundary: Feature<Polygon>;
+  export let addingFilter = false;
 
   // A qualitative palette from colorbrewer2.org, skipping the red hue (used
   // for levels of shortcutting) and grey (too close to the basemap)
@@ -45,6 +49,21 @@
     } else if (Object.hasOwn(f.properties, "color")) {
       f.properties.color = cell_colors[f.properties.color % cell_colors.length];
     }
+  }
+
+  $: if (addingFilter) {
+    map.on("click", onClick);
+    map.style.cursor = "crosshair";
+  }
+  onDestroy(stopAddingFilter);
+  function onClick(e: MapMouseEvent) {
+    model.addModalFilter(e.lngLat);
+    stopAddingFilter();
+  }
+  function stopAddingFilter() {
+    addingFilter = false;
+    map.off("click", onClick);
+    map.style.cursor = "inherit";
   }
 </script>
 
@@ -104,6 +123,7 @@
     </Popup>
   </CircleLayer>
   <FillLayer
+    beforeId="Building"
     filter={isPolygon}
     manageHoverState
     paint={{

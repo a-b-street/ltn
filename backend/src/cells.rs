@@ -19,16 +19,12 @@ impl Cell {
 
     /// Find all of the disconnected of reachable areas, bounded by border intersections. This is
     /// with respect to driving.
-    pub fn find_all(
-        map: &MapModel,
-        neighbourhood: &Neighbourhood,
-        modal_filters: &BTreeMap<RoadID, ModalFilter>,
-    ) -> Vec<Cell> {
+    pub fn find_all(map: &MapModel, neighbourhood: &Neighbourhood) -> Vec<Cell> {
         let mut cells = Vec::new();
         let mut visited = BTreeSet::new();
 
         for start in &neighbourhood.interior_roads {
-            if visited.contains(start) || modal_filters.contains_key(start) {
+            if visited.contains(start) || map.modal_filters.contains_key(start) {
                 continue;
             }
             let start = *start;
@@ -49,14 +45,14 @@ impl Cell {
                 continue;
             }
 
-            let cell = floodfill(map, start, neighbourhood, modal_filters);
+            let cell = floodfill(map, start, neighbourhood);
             visited.extend(cell.roads.keys().cloned());
 
             cells.push(cell);
         }
 
         // Filtered roads right along the perimeter have a tiny cell
-        for (r, filter) in modal_filters {
+        for (r, filter) in &map.modal_filters {
             let road = map.get_r(*r);
             if neighbourhood.border_intersections.contains(&road.src_i) {
                 let mut cell = Cell {
@@ -98,23 +94,14 @@ pub struct DistanceInterval {
     pub end: f64,
 }
 
-pub struct ModalFilter {
-    pub distance: f64,
-}
-
-fn floodfill(
-    map: &MapModel,
-    start: RoadID,
-    neighbourhood: &Neighbourhood,
-    modal_filters: &BTreeMap<RoadID, ModalFilter>,
-) -> Cell {
+fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Cell {
     let mut visited_roads: BTreeMap<RoadID, DistanceInterval> = BTreeMap::new();
     let mut cell_borders = BTreeSet::new();
     // We don't need a priority queue
     let mut queue = vec![start];
 
     // The caller should handle this case
-    assert!(!modal_filters.contains_key(&start));
+    assert!(!map.modal_filters.contains_key(&start));
     assert!(is_driveable(map.get_r(start)));
 
     while !queue.is_empty() {
@@ -147,7 +134,7 @@ fn floodfill(
                         continue;
                     }
                 }*/
-                if let Some(ref filter) = modal_filters.get(next) {
+                if let Some(ref filter) = map.modal_filters.get(next) {
                     // Which ends of the filtered road have we reached?
                     let mut visited_start = next_road.src_i == i;
                     let mut visited_end = next_road.dst_i == i;

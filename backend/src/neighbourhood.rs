@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 use anyhow::Result;
 use geo::{
@@ -70,8 +70,7 @@ impl Neighbourhood {
         let mut features = Vec::new();
 
         // TODO Decide how/where state lives
-        let modal_filters = BTreeMap::new();
-        let cells = Cell::find_all(map, self, &modal_filters);
+        let cells = Cell::find_all(map, self);
         let render_cells = RenderCells::new(map, self, &cells);
         let shortcuts = Shortcuts::new(map, self);
 

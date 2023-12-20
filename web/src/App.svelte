@@ -21,6 +21,7 @@
     | {
         mode: "neighbourhood";
         boundary: Feature<Polygon>;
+        addingFilter: boolean;
       };
 
   let mode = {
@@ -65,6 +66,7 @@
       mode = {
         mode: "neighbourhood",
         boundary: feature,
+        addingFilter: false,
       };
       route_tool.clearEventListeners();
     });
@@ -279,6 +281,7 @@
         },
         type: "Feature",
       },
+      addingFilter: false,
     };
   }
 
@@ -304,6 +307,11 @@
     {:else if mode.mode == "neighbourhood"}
       <div><button on:click={reset}>Reset</button></div>
       <div><button on:click={setBoundaryMode}>Edit boundary</button></div>
+      <div>
+        <button on:click={() => (mode.addingFilter = true)}
+          >Add a modal filter</button
+        >
+      </div>
       <p>Analyze and edit now</p>
     {/if}
   </div>
@@ -320,7 +328,12 @@
         {:else if mode.mode == "set-boundary"}
           <RouteSnapperLayer />
         {:else if mode.mode == "neighbourhood"}
-          <NeighbourhoodLayer {model} boundary={mode.boundary} />
+          <NeighbourhoodLayer
+            {map}
+            {model}
+            boundary={mode.boundary}
+            addingFilter={mode.addingFilter}
+          />
         {/if}
       {/if}
     </MapLibre>

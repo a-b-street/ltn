@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use anyhow::Result;
 use geo::{Coord, Geometry, GeometryCollection, LineString, Point};
@@ -59,6 +59,7 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         roads,
         intersections,
         mercator,
+        modal_filters: BTreeMap::new(),
     })
 }
 
