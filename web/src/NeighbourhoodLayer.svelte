@@ -42,7 +42,7 @@
   for (let f of details.features) {
     if (f.properties.color == "disconnected") {
       f.properties.color = "red";
-    } else if (f.properties.color) {
+    } else if (Object.hasOwn(f.properties, "color")) {
       f.properties.color = cell_colors[f.properties.color % cell_colors.length];
     }
   }

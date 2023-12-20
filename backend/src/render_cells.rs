@@ -1,6 +1,8 @@
 use std::collections::{HashSet, VecDeque};
 
-use geo::{BoundingRect, Densify, LineString, MultiPolygon, Polygon, Rect, Scale, Translate};
+use geo::{
+    BoundingRect, Coord, Densify, LineString, MultiPolygon, Polygon, Rect, Scale, Translate,
+};
 
 use crate::{Cell, MapModel, Neighbourhood};
 
@@ -101,7 +103,8 @@ impl RenderCells {
             }
         }
 
-        finalize(grid, cell_colors, bounds, boundary_polygon)
+        //finalize(grid, cell_colors, bounds, boundary_polygon)
+        debug_grid(grid, cell_colors, bounds, boundary_polygon)
     }
 }
 
@@ -147,8 +150,10 @@ fn finalize(
         for contour in contour_builder.contours(&grid.data, &thresholds).unwrap() {
             let (multipolygon, _) = contour.into_inner();
             cell_polygons.push(
-                multipolygon.scale(RESOLUTION_M)
-                    .translate(bounds.min().x, bounds.min().y));
+                multipolygon
+                    .scale(RESOLUTION_M)
+                    .translate(bounds.min().x, bounds.min().y),
+            );
         }
         assert_eq!(cell_polygons.len(), 1);
 
@@ -156,6 +161,46 @@ fn finalize(
         // can just clip the result.
 
         result.polygons_per_cell.push(cell_polygons.remove(0));
+        result.colors.push(color);
+    }
+
+    result
+}
+
+fn debug_grid(
+    grid: Grid<Option<usize>>,
+    cell_colors: Vec<Color>,
+    bounds: Rect,
+    boundary_polygon: Polygon,
+) -> RenderCells {
+    let mut result = RenderCells {
+        polygons_per_cell: Vec::new(),
+        colors: Vec::new(),
+    };
+
+    for (idx, color) in cell_colors.into_iter().enumerate() {
+        let mut squares = Vec::new();
+        for x in 0..grid.width {
+            for y in 0..grid.height {
+                if grid.data[grid.idx(x, y)] == Some(idx) {
+                    squares.push(
+                        Rect::new(
+                            Coord {
+                                x: (x as f64) * RESOLUTION_M + bounds.min().x,
+                                y: (y as f64) * RESOLUTION_M + bounds.min().y,
+                            },
+                            Coord {
+                                x: ((x + 1) as f64) * RESOLUTION_M + bounds.min().x,
+                                y: ((y + 1) as f64) * RESOLUTION_M + bounds.min().y,
+                            },
+                        )
+                        .to_polygon(),
+                    );
+                }
+            }
+        }
+
+        result.polygons_per_cell.push(MultiPolygon::new(squares));
         result.colors.push(color);
     }
 
