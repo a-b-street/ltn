@@ -1,11 +1,11 @@
 <script lang="ts">
-  import init, { MapModel } from "backend";
+  import init, { LTN } from "backend";
   import type { Map } from "maplibre-gl";
   import init2 from "route-snapper";
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "./common";
 
-  export let model: MapModel | undefined = undefined;
+  export let app: LTN | undefined = undefined;
   export let map: Map;
 
   let example = "";
@@ -30,7 +30,7 @@
   let fileInput: HTMLInputElement;
   async function loadFile(e: Event) {
     try {
-      loadModel(await fileInput.files![0].arrayBuffer());
+      loadMap(await fileInput.files![0].arrayBuffer());
       example = "";
     } catch (err) {
       window.alert(`Couldn't open this file: ${err}`);
@@ -38,17 +38,17 @@
     msg = null;
   }
 
-  function loadModel(buffer: ArrayBuffer) {
+  function loadMap(buffer: ArrayBuffer) {
     msg = "Building map model from OSM input";
     console.time("load");
-    model = new MapModel(new Uint8Array(buffer));
+    app = new LTN(new Uint8Array(buffer));
     console.timeEnd("load");
   }
 
   function gotXml(e: CustomEvent<string>) {
     try {
       // TODO Can we avoid turning into bytes?
-      loadModel(new TextEncoder().encode(e.detail));
+      loadMap(new TextEncoder().encode(e.detail));
       example = "";
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
@@ -73,7 +73,7 @@
     try {
       msg = `Downloading ${url}`;
       let resp = await fetch(url);
-      loadModel(await resp.arrayBuffer());
+      loadMap(await resp.arrayBuffer());
     } catch (err) {
       window.alert(`Couldn't open from URL ${url}: ${err}`);
     }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MapModel } from "backend";
+  import { LTN } from "backend";
   import type { Feature, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
@@ -20,7 +20,7 @@
   } from "./common";
 
   export let map: Map;
-  export let model: MapModel;
+  export let app: LTN;
   export let boundary: Feature<Polygon>;
   export let addingFilter = false;
 
@@ -39,25 +39,35 @@
     "#ffed6f",
   ];
 
-  let details = JSON.parse(model.analyzeNeighbourhood(boundary));
-  let maxShortcuts = Math.max(
-    ...details.features.map((f) => f.properties.shortcuts ?? 0)
-  );
-  for (let f of details.features) {
-    if (f.properties.color == "disconnected") {
-      f.properties.color = "red";
-    } else if (Object.hasOwn(f.properties, "color")) {
-      f.properties.color = cell_colors[f.properties.color % cell_colors.length];
+  let details;
+  let maxShortcuts;
+  render(JSON.parse(app.analyzeNeighbourhood(boundary)));
+
+  function render(gj) {
+    maxShortcuts = Math.max(
+      ...gj.features.map((f) => f.properties.shortcuts ?? 0)
+    );
+    for (let f of gj.features) {
+      if (f.properties.color == "disconnected") {
+        f.properties.color = "red";
+      } else if (Object.hasOwn(f.properties, "color")) {
+        f.properties.color =
+          cell_colors[f.properties.color % cell_colors.length];
+      }
     }
+    details = gj;
   }
 
   $: if (addingFilter) {
     map.on("click", onClick);
     map.style.cursor = "crosshair";
   }
-  onDestroy(stopAddingFilter);
+  onDestroy(() => {
+    stopAddingFilter();
+    app.unsetNeighbourhood();
+  });
   function onClick(e: MapMouseEvent) {
-    model.addModalFilter(e.lngLat);
+    render(JSON.parse(app.addModalFilter(e.lngLat)));
     stopAddingFilter();
   }
   function stopAddingFilter() {

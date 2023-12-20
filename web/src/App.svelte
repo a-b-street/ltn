@@ -1,6 +1,6 @@
 <script lang="ts">
   import turfBbox from "@turf/bbox";
-  import { MapModel } from "backend";
+  import { LTN } from "backend";
   import type { Feature, Polygon } from "geojson";
   import type { Map } from "maplibre-gl";
   import { MapLibre } from "svelte-maplibre";
@@ -27,20 +27,20 @@
   let mode = {
     mode: "network",
   };
-  let model: MapModel | undefined = undefined;
+  let app: LTN | undefined = undefined;
   let route_tool: RouteTool | undefined = undefined;
   let map: Map;
 
   function zoomToFit() {
-    if (map && model) {
+    if (map && app) {
       // TODO wasteful
-      let bbox = turfBbox(JSON.parse(model.render()));
+      let bbox = turfBbox(JSON.parse(app.render()));
       map.fitBounds(bbox, { animate: false });
     }
   }
 
-  function gotModel(_m: MapModel) {
-    if (!model) {
+  function gotApp(_x: LTN) {
+    if (!app) {
       return;
     }
     console.log("New map model loaded");
@@ -48,9 +48,9 @@
     mode = {
       mode: "network",
     };
-    route_tool = new RouteTool(map, model.toRouteSnapper());
+    route_tool = new RouteTool(map, app.toRouteSnapper());
   }
-  $: gotModel(model);
+  $: gotApp(app);
 
   function setBoundaryMode() {
     if (mode.mode == "network") {
@@ -295,11 +295,11 @@
 <Layout>
   <div slot="left">
     {#if map}
-      <MapLoader {map} bind:model />
+      <MapLoader {map} bind:app />
     {/if}
     <div><button on:click={zoomToFit}>Zoom to fit</button></div>
 
-    {#if mode.mode == "network" && model}
+    {#if mode.mode == "network" && app}
       <div><button on:click={setBoundaryMode}>Set boundary</button></div>
       <div><button on:click={devMode}>Quickset boundary (dev)</button></div>
     {:else if mode.mode == "set-boundary"}
@@ -322,15 +322,15 @@
       hash
       bind:map
     >
-      {#if model}
+      {#if app}
         {#if mode.mode == "network"}
-          <NetworkLayer {model} />
+          <NetworkLayer {app} />
         {:else if mode.mode == "set-boundary"}
           <RouteSnapperLayer />
         {:else if mode.mode == "neighbourhood"}
           <NeighbourhoodLayer
             {map}
-            {model}
+            {app}
             boundary={mode.boundary}
             addingFilter={mode.addingFilter}
           />

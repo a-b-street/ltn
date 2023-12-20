@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { MapModel } from "backend";
+  import { LTN } from "backend";
   import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { PropertiesTable } from "./common";
 
-  export let model: MapModel;
+  export let app: LTN;
 </script>
 
-<GeoJSON data={JSON.parse(model.render())}>
+<GeoJSON data={JSON.parse(app.render())}>
   <LineLayer
     id="network"
     paint={{

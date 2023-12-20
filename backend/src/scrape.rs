@@ -4,9 +4,7 @@ use anyhow::Result;
 use geo::{Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
 
-use crate::mercator::Mercator;
-use crate::tags::Tags;
-use crate::{Intersection, IntersectionID, MapModel, Road, RoadID};
+use crate::{Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Tags};
 
 struct Way {
     id: WayID,
