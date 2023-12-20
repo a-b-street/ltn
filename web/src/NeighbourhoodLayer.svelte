@@ -57,7 +57,7 @@
   />
 </GeoJSON>-->
 
-<GeoJSON data={details}>
+<GeoJSON data={details} generateId>
   <LineLayer
     filter={isLine}
     paint={{

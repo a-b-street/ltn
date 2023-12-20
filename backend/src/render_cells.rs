@@ -27,7 +27,6 @@ impl RenderCells {
         let boundary_polygon = neighbourhood.boundary_polygon.clone();
         // Make a 2D grid covering the polygon. Each tile in the grid contains a cell index, which
         // will become a color by the end. None means no cell is assigned yet.
-        //let bounds: Rect = boundary_polygon.bounding_rect().into().unwrap();
         let bounds = <Option<Rect>>::from(boundary_polygon.bounding_rect()).unwrap();
         let mut grid: Grid<Option<usize>> = Grid::new(
             (bounds.width() / RESOLUTION_M).ceil() as usize,
@@ -146,31 +145,17 @@ fn finalize(
 
         let mut cell_polygons = Vec::new();
         for contour in contour_builder.contours(&grid.data, &thresholds).unwrap() {
-            // TODO Check this API again
-            let (polygons, _) = contour.into_inner();
-            for p in polygons {
-                if let Ok(poly) = Polygon::try_from(p) {
-                    cell_polygons.push(
-                        poly.scale(RESOLUTION_M)
-                            .translate(bounds.min().x, bounds.min().y),
-                    );
-                }
-            }
+            let (multipolygon, _) = contour.into_inner();
+            cell_polygons.push(
+                multipolygon.scale(RESOLUTION_M)
+                    .translate(bounds.min().x, bounds.min().y));
         }
+        assert_eq!(cell_polygons.len(), 1);
 
-        // Sometimes one cell "leaks" out of the neighbourhood boundary. Not sure why. But we
+        // TODO Sometimes one cell "leaks" out of the neighbourhood boundary. Not sure why. But we
         // can just clip the result.
-        let mut clipped = Vec::new();
-        for p in cell_polygons {
-            // If clipping fails, just use the original polygon.
-            /*if let Ok(list) = p.intersection(&result.boundary_polygon) {
-                clipped.extend(list);
-            } else {*/
-            clipped.push(p);
-            //}
-        }
 
-        result.polygons_per_cell.push(MultiPolygon::new(clipped));
+        result.polygons_per_cell.push(cell_polygons.remove(0));
         result.colors.push(color);
     }
 
