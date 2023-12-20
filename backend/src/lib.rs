@@ -8,6 +8,7 @@ use std::sync::Once;
 
 use geo::{EuclideanLength, LineString, Point, Polygon};
 use geojson::{Feature, GeoJson, Geometry};
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
@@ -18,6 +19,7 @@ use self::shortcuts::Shortcuts;
 mod cells;
 mod mercator;
 mod neighbourhood;
+mod node_map;
 mod render_cells;
 mod scrape;
 mod shortcuts;
@@ -45,7 +47,7 @@ impl MapModel {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct RoadID(pub usize);
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
 pub struct IntersectionID(pub usize);
 
 impl fmt::Display for RoadID {
