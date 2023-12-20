@@ -1,18 +1,17 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use anyhow::Result;
 use geo::{
     BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, MultiLineString, Polygon,
 };
 use geojson::{Feature, GeoJson, Geometry};
-use petgraph::graphmap::DiGraphMap;
 
-use crate::{IntersectionID, MapModel, RoadID};
+use crate::{Cell, IntersectionID, MapModel, RoadID, Shortcuts};
 
 pub struct Neighbourhood {
-    interior_roads: HashSet<RoadID>,
+    pub interior_roads: HashSet<RoadID>,
     crosses: HashMap<RoadID, f64>,
-    border_intersections: HashMap<IntersectionID, f64>,
+    pub border_intersections: HashSet<IntersectionID>,
 }
 
 impl Neighbourhood {
@@ -42,14 +41,14 @@ impl Neighbourhood {
             }
         }
 
-        let mut border_intersections = HashMap::new();
+        let mut border_intersections = HashSet::new();
         for i in &map.intersections {
             // Check distance to the polygon's linestring, rather than the polygon itself. Points
             // contained within a polygon and eight on the linestring both count as 0.
             let dist = i.point.euclidean_distance(boundary.exterior());
             // Allow a small tolerance
             if dist < 0.1 {
-                border_intersections.insert(i.id, dist);
+                border_intersections.insert(i.id);
             }
         }
 
@@ -67,76 +66,45 @@ impl Neighbourhood {
     pub fn to_gj(&self, map: &MapModel) -> GeoJson {
         let mut features = Vec::new();
 
+        // TODO Decide how/where state lives
+        let modal_filters = BTreeMap::new();
+        let cells = Cell::find_all(map, self, &modal_filters);
         let shortcuts = Shortcuts::new(map, self);
 
+        // TODO Temporary rendering
+        let mut road_to_cell = HashMap::new();
+        for (idx, cell) in cells.iter().enumerate() {
+            for (r, _) in &cell.roads {
+                road_to_cell.insert(*r, idx);
+            }
+        }
+
         for r in &self.interior_roads {
-            let mut f = map.roads[r.0].to_gj(&map.mercator);
+            let mut f = map.get_r(*r).to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
             f.set_property(
                 "shortcuts",
                 shortcuts.count_per_road.get(r).cloned().unwrap_or(0),
             );
+            if let Some(cell) = road_to_cell.get(r) {
+                f.set_property("cell", *cell);
+            } else {
+                error!("A road has no cell");
+            }
             features.push(f);
         }
         for (r, pct) in &self.crosses {
-            let mut f = map.roads[r.0].to_gj(&map.mercator);
+            let mut f = map.get_r(*r).to_gj(&map.mercator);
             f.set_property("kind", "crosses");
             f.set_property("pct", *pct);
             features.push(f);
         }
-        for (i, dist) in &self.border_intersections {
-            let mut f = Feature::from(Geometry::from(
-                &map.mercator.to_wgs84(&map.intersections[i.0].point),
-            ));
+        for i in &self.border_intersections {
+            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&map.get_i(*i).point)));
             f.set_property("kind", "border_intersection");
-            f.set_property("dist", *dist);
             features.push(f);
         }
 
         GeoJson::from(features)
-    }
-}
-
-struct Shortcuts {
-    count_per_road: HashMap<RoadID, usize>,
-}
-
-impl Shortcuts {
-    fn new(map: &MapModel, neighbourhood: &Neighbourhood) -> Self {
-        let mut graph = DiGraphMap::new();
-        for r in &neighbourhood.interior_roads {
-            let road = &map.roads[r.0];
-            graph.add_edge(
-                road.src_i,
-                road.dst_i,
-                (road.id, road.linestring.euclidean_length()),
-            );
-            // TODO Look at one-way for driving
-            graph.add_edge(
-                road.dst_i,
-                road.src_i,
-                (road.id, road.linestring.euclidean_length()),
-            );
-        }
-
-        let mut count_per_road = HashMap::new();
-        for start in neighbourhood.border_intersections.keys() {
-            for end in neighbourhood.border_intersections.keys() {
-                if let Some((_, path)) = petgraph::algo::astar(
-                    &graph,
-                    *start,
-                    |i| i == *end,
-                    |(_, _, (_, dist))| *dist,
-                    |_| 0.0,
-                ) {
-                    for pair in path.windows(2) {
-                        let (r, _) = *graph.edge_weight(pair[0], pair[1]).unwrap();
-                        *count_per_road.entry(r).or_insert(0) += 1;
-                    }
-                }
-            }
-        }
-
-        Self { count_per_road }
     }
 }

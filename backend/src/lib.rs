@@ -6,13 +6,19 @@ extern crate log;
 use std::fmt;
 use std::sync::Once;
 
-use geo::{LineString, Point, Polygon};
+use geo::{EuclideanLength, LineString, Point, Polygon};
 use geojson::{Feature, GeoJson, Geometry};
 use wasm_bindgen::prelude::*;
 
+use self::cells::Cell;
+use self::neighbourhood::Neighbourhood;
+use self::shortcuts::Shortcuts;
+
+mod cells;
 mod mercator;
 mod neighbourhood;
 mod scrape;
+mod shortcuts;
 mod tags;
 
 static START: Once = Once::new();
@@ -23,6 +29,16 @@ pub struct MapModel {
     intersections: Vec<Intersection>,
     // All geometry stored in worldspace, including rtrees
     mercator: mercator::Mercator,
+}
+
+impl MapModel {
+    fn get_r(&self, r: RoadID) -> &Road {
+        &self.roads[r.0]
+    }
+
+    fn get_i(&self, i: IntersectionID) -> &Intersection {
+        &self.intersections[i.0]
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -121,15 +137,14 @@ impl MapModel {
         let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
         self.mercator.to_mercator_in_place(&mut boundary_geo);
 
-        let neighbourhood =
-            neighbourhood::Neighbourhood::new(self, boundary_geo).map_err(err_to_js)?;
+        let neighbourhood = Neighbourhood::new(self, boundary_geo).map_err(err_to_js)?;
         Ok(serde_json::to_string(&neighbourhood.to_gj(self)).map_err(err_to_js)?)
     }
 
     fn find_edge(&self, i1: IntersectionID, i2: IntersectionID) -> &Road {
         // TODO Store lookup table
-        for r in &self.intersections[i1.0].roads {
-            let road = &self.roads[r.0];
+        for r in &self.get_i(i1).roads {
+            let road = self.get_r(*r);
             if road.src_i == i2 || road.dst_i == i2 {
                 return road;
             }
@@ -139,6 +154,10 @@ impl MapModel {
 }
 
 impl Road {
+    fn length(&self) -> f64 {
+        self.linestring.euclidean_length()
+    }
+
     fn to_gj(&self, mercator: &mercator::Mercator) -> Feature {
         let mut f = Feature::from(Geometry::from(&mercator.to_wgs84(&self.linestring)));
         f.set_property("id", self.id.0);
