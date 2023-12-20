@@ -290,7 +290,17 @@
       mode: "network",
     };
   }
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key == "a") {
+      if (mode.mode == "neighbourhood" && !mode.addingFilter) {
+        mode.addingFilter = true;
+      }
+    }
+  }
 </script>
+
+<svelte:window on:keydown={onKeyDown} />
 
 <Layout>
   <div slot="left">
@@ -308,8 +318,9 @@
       <div><button on:click={reset}>Reset</button></div>
       <div><button on:click={setBoundaryMode}>Edit boundary</button></div>
       <div>
-        <button on:click={() => (mode.addingFilter = true)}
-          >Add a modal filter</button
+        <button
+          on:click={() => (mode.addingFilter = true)}
+          disabled={mode.addingFilter}>Add a modal filter</button
         >
       </div>
       <p>Analyze and edit now</p>
@@ -332,7 +343,7 @@
             {map}
             {app}
             boundary={mode.boundary}
-            addingFilter={mode.addingFilter}
+            bind:addingFilter={mode.addingFilter}
           />
         {/if}
       {/if}

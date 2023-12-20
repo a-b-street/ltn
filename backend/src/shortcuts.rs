@@ -15,6 +15,10 @@ impl Shortcuts {
         let mut node_map = NodeMap::new();
 
         for r in &neighbourhood.interior_roads {
+            if map.modal_filters.contains_key(r) {
+                continue;
+            }
+
             let road = map.get_r(*r);
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
