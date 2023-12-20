@@ -52,10 +52,15 @@
   $: gotModel(model);
 
   function setBoundaryMode() {
+    if (mode.mode == "network") {
+      route_tool.startArea();
+    } else if (mode.mode == "neighbourhood") {
+      route_tool.editExistingArea(mode.boundary);
+    }
+
     mode = {
       mode: "set-boundary",
     };
-    route_tool.startArea();
     route_tool.addEventListenerSuccess((feature) => {
       mode = {
         mode: "neighbourhood",
@@ -297,7 +302,8 @@
     {:else if mode.mode == "set-boundary"}
       <p>Draw the boundary...</p>
     {:else if mode.mode == "neighbourhood"}
-      <button on:click={reset}>Reset</button>
+      <div><button on:click={reset}>Reset</button></div>
+      <div><button on:click={setBoundaryMode}>Edit boundary</button></div>
       <p>Analyze and edit now</p>
     {/if}
   </div>
