@@ -123,6 +123,7 @@
         ["get", "kind"],
         {
           border_intersection: "green",
+          modal_filter: "white",
         },
         "red"
       ),

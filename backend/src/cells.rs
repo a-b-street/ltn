@@ -5,8 +5,8 @@ use crate::{IntersectionID, MapModel, Neighbourhood, Road, RoadID};
 /// A partitioning of the interior of a neighbourhood based on driving connectivity
 pub struct Cell {
     /// Most roads are fully in one cell. Roads with modal filters on them are sometimes split
-    /// between two cells, and the DistanceInterval indicates the split.
-    pub roads: BTreeMap<RoadID, DistanceInterval>,
+    /// between two cells, and the PercentInterval indicates the split.
+    pub roads: BTreeMap<RoadID, PercentInterval>,
     /// Intersections where this cell touches the boundary of the neighbourhood.
     pub borders: BTreeSet<IntersectionID>,
 }
@@ -61,9 +61,9 @@ impl Cell {
                 };
                 cell.roads.insert(
                     road.id,
-                    DistanceInterval {
+                    PercentInterval {
                         start: 0.0,
-                        end: filter.distance,
+                        end: filter.percent_along,
                     },
                 );
                 cells.push(cell);
@@ -75,9 +75,9 @@ impl Cell {
                 };
                 cell.roads.insert(
                     road.id,
-                    DistanceInterval {
-                        start: filter.distance,
-                        end: road.length(),
+                    PercentInterval {
+                        start: filter.percent_along,
+                        end: 1.0,
                     },
                 );
                 cells.push(cell);
@@ -88,14 +88,14 @@ impl Cell {
     }
 }
 
-/// An interval along a road's length, with start < end.
-pub struct DistanceInterval {
+/// An interval of percentages along a road's length, with start < end.
+pub struct PercentInterval {
     pub start: f64,
     pub end: f64,
 }
 
 fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Cell {
-    let mut visited_roads: BTreeMap<RoadID, DistanceInterval> = BTreeMap::new();
+    let mut visited_roads: BTreeMap<RoadID, PercentInterval> = BTreeMap::new();
     let mut cell_borders = BTreeSet::new();
     // We don't need a priority queue
     let mut queue = vec![start];
@@ -111,9 +111,9 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
         }
         visited_roads.insert(
             current.id,
-            DistanceInterval {
+            PercentInterval {
                 start: 0.0,
-                end: current.length(),
+                end: 1.0,
             },
         );
 
@@ -149,12 +149,16 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
                     }
                     visited_roads.insert(
                         *next,
-                        DistanceInterval {
-                            start: if visited_start { 0.0 } else { filter.distance },
-                            end: if visited_end {
-                                next_road.length()
+                        PercentInterval {
+                            start: if visited_start {
+                                0.0
                             } else {
-                                filter.distance
+                                filter.percent_along
+                            },
+                            end: if visited_end {
+                                1.0
+                            } else {
+                                filter.percent_along
                             },
                         },
                     );

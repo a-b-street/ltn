@@ -82,7 +82,7 @@ impl MapModel {
 
     pub fn add_modal_filter(&mut self, click_pt: Coord, candidate_roads: &HashSet<RoadID>) {
         // TODO prune with rtree?
-        let (_, r, dist_along) = candidate_roads
+        let (_, r, percent_along) = candidate_roads
             .iter()
             .map(|r| {
                 let road = self.get_r(*r);
@@ -92,18 +92,13 @@ impl MapModel {
                     Closest::Indeterminate => unreachable!(),
                 };
                 let score = Line::new(click_pt, hit_pt.into()).euclidean_length();
-                let dist_along = road.linestring.line_locate_point(&hit_pt).unwrap();
-                ((score * 100.0) as usize, road.id, dist_along)
+                let percent_along = road.linestring.line_locate_point(&hit_pt).unwrap();
+                ((score * 100.0) as usize, road.id, percent_along)
             })
-            .max_by_key(|pair| pair.0)
+            .min_by_key(|pair| pair.0)
             .unwrap();
-        self.modal_filters.insert(
-            r,
-            ModalFilter {
-                distance: dist_along,
-            },
-        );
-        info!("added a filter to {r} at {dist_along}");
+        self.modal_filters.insert(r, ModalFilter { percent_along });
+        info!("added a filter to {r} at {percent_along}%");
     }
 }
 
@@ -126,5 +121,5 @@ impl Road {
 }
 
 pub struct ModalFilter {
-    pub distance: f64,
+    pub percent_along: f64,
 }
