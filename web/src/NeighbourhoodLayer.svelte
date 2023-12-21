@@ -23,6 +23,7 @@
   export let app: LTN;
   export let boundary: Feature<Polygon>;
   export let addingFilter = false;
+  export let offlineMode: boolean;
 
   // A qualitative palette from colorbrewer2.org, skipping the red hue (used
   // for levels of shortcutting) and grey (too close to the basemap)
@@ -123,7 +124,7 @@
         ["get", "kind"],
         {
           border_intersection: "green",
-          modal_filter: "white",
+          modal_filter: "black",
         },
         "red"
       ),
@@ -134,12 +135,12 @@
     </Popup>
   </CircleLayer>
   <FillLayer
-    beforeId="Building"
+    beforeId={offlineMode ? undefined : "Building"}
     filter={isPolygon}
     manageHoverState
     paint={{
       "fill-color": ["get", "color"],
-      "fill-opacity": hoverStateFilter(0.6, 1.0),
+      "fill-opacity": hoverStateFilter(0.3, 0.5),
     }}
   />
 </GeoJSON>

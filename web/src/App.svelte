@@ -11,6 +11,15 @@
   import NeighbourhoodLayer from "./NeighbourhoodLayer.svelte";
   import NetworkLayer from "./NetworkLayer.svelte";
 
+  let offlineMode = true;
+  let mapStyle = offlineMode
+    ? {
+        version: 8,
+        sources: {},
+        layers: [],
+      }
+    : "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo";
+
   type Mode =
     | {
         mode: "network";
@@ -327,12 +336,7 @@
     {/if}
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
-    <MapLibre
-      style="https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
-      standardControls
-      hash
-      bind:map
-    >
+    <MapLibre style={mapStyle} standardControls hash bind:map>
       {#if app}
         {#if mode.mode == "network"}
           <NetworkLayer {app} />
@@ -344,6 +348,7 @@
             {app}
             boundary={mode.boundary}
             bind:addingFilter={mode.addingFilter}
+            {offlineMode}
           />
         {/if}
       {/if}
