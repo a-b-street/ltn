@@ -9,6 +9,7 @@ pub struct Mercator {
     height: f64,
 }
 
+#[allow(dead_code)]
 impl Mercator {
     // TODO The API is kind of annoying, or wasteful. Do builder style.
     /// Create a boundary covering some geometry

@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use fast_paths::InputGraph;
 
-use crate::node_map::NodeMap;
-use crate::{MapModel, Neighbourhood, RoadID};
+use crate::{MapModel, Neighbourhood, NodeMap, RoadID};
 
 pub struct Shortcuts {
     pub count_per_road: HashMap<RoadID, usize>,

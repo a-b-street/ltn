@@ -11,22 +11,19 @@ use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
+use self::common::*;
 use self::map_model::{Intersection, IntersectionID, MapModel, Road, RoadID};
-use self::mercator::Mercator;
 use self::neighbourhood::Neighbourhood;
 use self::render_cells::RenderCells;
 use self::shortcuts::Shortcuts;
-use self::tags::Tags;
 
 mod cells;
+mod common;
 mod map_model;
-mod mercator;
 mod neighbourhood;
-mod node_map;
 mod render_cells;
 mod scrape;
 mod shortcuts;
-mod tags;
 
 static START: Once = Once::new();
 

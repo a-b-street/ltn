@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Tags(pub BTreeMap<String, String>);
 
+#[allow(dead_code)]
 impl Tags {
     pub fn empty() -> Self {
         Self(BTreeMap::new())
