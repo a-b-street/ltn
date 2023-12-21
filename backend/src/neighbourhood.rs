@@ -117,6 +117,7 @@ impl Neighbourhood {
                 .unwrap();
             let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&pt)));
             f.set_property("kind", "modal_filter");
+            f.set_property("road", r.0);
             features.push(f);
         }
 

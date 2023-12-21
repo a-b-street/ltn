@@ -127,6 +127,15 @@ impl LTN {
                 .map_err(err_to_js)?,
         )
     }
+
+    #[wasm_bindgen(js_name = deleteModalFilter)]
+    pub fn delete_modal_filter(&mut self, road: usize) -> Result<String, JsValue> {
+        self.map.delete_modal_filter(RoadID(road));
+        Ok(
+            serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
+                .map_err(err_to_js)?,
+        )
+    }
 }
 
 #[derive(Deserialize)]

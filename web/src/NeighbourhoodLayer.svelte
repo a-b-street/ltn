@@ -8,6 +8,7 @@
     FillLayer,
     GeoJSON,
     hoverStateFilter,
+    type LayerClickInfo,
     LineLayer,
     Popup,
   } from "svelte-maplibre";
@@ -76,18 +77,26 @@
     map.off("click", onClick);
     map.style.cursor = "inherit";
   }
+
+  function deleteFilter(e: CustomEvent<LayerClickInfo>) {
+    let props = e.detail.features[0].properties;
+    if (props.kind == "modal_filter") {
+      render(JSON.parse(app.deleteModalFilter(props.road)));
+    }
+  }
 </script>
 
-<!--<GeoJSON data={boundary}>
+<GeoJSON data={details} generateId>
   <FillLayer
+    beforeId={offlineMode ? undefined : "Building"}
+    filter={isPolygon}
+    manageHoverState
     paint={{
-      "fill-color": "black",
-      "fill-opacity": 0.2,
+      "fill-color": ["get", "color"],
+      "fill-opacity": hoverStateFilter(0.3, 0.5),
     }}
   />
-</GeoJSON>-->
 
-<GeoJSON data={details} generateId>
   <LineLayer
     filter={isLine}
     paint={{
@@ -116,6 +125,7 @@
       <PropertiesTable properties={data.properties} />
     </Popup>
   </LineLayer>
+
   <CircleLayer
     filter={isPoint}
     paint={{
@@ -129,18 +139,10 @@
         "red"
       ),
     }}
+    on:click={deleteFilter}
   >
     <Popup openOn="hover" let:data>
       <PropertiesTable properties={data.properties} />
     </Popup>
   </CircleLayer>
-  <FillLayer
-    beforeId={offlineMode ? undefined : "Building"}
-    filter={isPolygon}
-    manageHoverState
-    paint={{
-      "fill-color": ["get", "color"],
-      "fill-opacity": hoverStateFilter(0.3, 0.5),
-    }}
-  />
 </GeoJSON>

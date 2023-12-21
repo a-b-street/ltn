@@ -100,6 +100,10 @@ impl MapModel {
         self.modal_filters.insert(r, ModalFilter { percent_along });
         info!("added a filter to {r} at {percent_along}%");
     }
+
+    pub fn delete_modal_filter(&mut self, r: RoadID) {
+        self.modal_filters.remove(&r);
+    }
 }
 
 impl Road {
