@@ -136,6 +136,21 @@ impl LTN {
                 .map_err(err_to_js)?,
         )
     }
+
+    pub fn undo(&mut self) {
+        self.map.undo();
+    }
+    pub fn redo(&mut self) {
+        self.map.redo();
+    }
+
+    // TODO Suddenly a different pattern...
+    pub fn rerender(&self) -> Result<String, JsValue> {
+        Ok(
+            serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
+                .map_err(err_to_js)?,
+        )
+    }
 }
 
 #[derive(Deserialize)]

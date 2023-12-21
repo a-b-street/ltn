@@ -18,6 +18,8 @@ pub struct MapModel {
 
     // TODO Keep edits / state here or not?
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
+    pub undo_stack: Vec<Command>,
+    pub redo_queue: Vec<Command>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -97,12 +99,48 @@ impl MapModel {
             })
             .min_by_key(|pair| pair.0)
             .unwrap();
-        self.modal_filters.insert(r, ModalFilter { percent_along });
-        info!("added a filter to {r} at {percent_along}%");
+
+        let cmd = self.do_edit(Command::SetModalFilter(
+            r,
+            Some(ModalFilter { percent_along }),
+        ));
+        self.undo_stack.push(cmd);
+        self.redo_queue.clear();
     }
 
     pub fn delete_modal_filter(&mut self, r: RoadID) {
-        self.modal_filters.remove(&r);
+        let cmd = self.do_edit(Command::SetModalFilter(r, None));
+        self.undo_stack.push(cmd);
+        self.redo_queue.clear();
+    }
+
+    // Returns the command to undo this one
+    fn do_edit(&mut self, cmd: Command) -> Command {
+        match cmd {
+            Command::SetModalFilter(r, filter) => {
+                let prev = self.modal_filters.get(&r).cloned();
+                if let Some(filter) = filter {
+                    info!("added a filter to {r} at {}%", filter.percent_along);
+                    self.modal_filters.insert(r, filter);
+                } else {
+                    info!("deleted a filter from {r}");
+                    self.modal_filters.remove(&r);
+                }
+                Command::SetModalFilter(r, prev)
+            }
+        }
+    }
+
+    pub fn undo(&mut self) {
+        let cmd = self.undo_stack.pop().unwrap();
+        let cmd = self.do_edit(cmd);
+        self.redo_queue.push(cmd);
+    }
+
+    pub fn redo(&mut self) {
+        let cmd = self.redo_queue.remove(0);
+        let cmd = self.do_edit(cmd);
+        self.undo_stack.push(cmd);
     }
 }
 
@@ -124,6 +162,11 @@ impl Road {
     }
 }
 
+#[derive(Clone)]
 pub struct ModalFilter {
     pub percent_along: f64,
+}
+
+pub enum Command {
+    SetModalFilter(RoadID, Option<ModalFilter>),
 }

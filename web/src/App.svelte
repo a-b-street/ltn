@@ -31,6 +31,9 @@
         mode: "neighbourhood";
         boundary: Feature<Polygon>;
         addingFilter: boolean;
+        undoLength: number;
+        redoLength: number;
+        rerender: number;
       };
 
   let mode = {
@@ -76,6 +79,9 @@
         mode: "neighbourhood",
         boundary: feature,
         addingFilter: false,
+        undoLength: 0,
+        redoLength: 0,
+        rerender: 0,
       };
       route_tool.clearEventListeners();
     });
@@ -291,6 +297,9 @@
         type: "Feature",
       },
       addingFilter: false,
+      undoLength: 0,
+      redoLength: 0,
+      rerender: 0,
     };
   }
 
@@ -300,12 +309,28 @@
     };
   }
 
+  // TODO Ideally all of this can live in the same component as the map, so we
+  // don't have to plumb stuff around and trigger events back and forth
   function onKeyDown(e: KeyboardEvent) {
-    if (e.key == "a") {
-      if (mode.mode == "neighbourhood" && !mode.addingFilter) {
+    if (mode.mode == "neighbourhood") {
+      if (e.key == "a" && !mode.addingFilter) {
         mode.addingFilter = true;
       }
+      if (e.key == "z" && e.ctrlKey) {
+        undo();
+      }
+      if (e.key == "y" && e.ctrlKey) {
+        redo();
+      }
     }
+  }
+  function undo() {
+    app.undo();
+    mode.rerender++;
+  }
+  function redo() {
+    app.redo();
+    mode.rerender++;
   }
 </script>
 
@@ -332,7 +357,23 @@
           disabled={mode.addingFilter}>Add a modal filter</button
         >
       </div>
-      <p>Analyze and edit now</p>
+
+      <div>
+        <button disabled={mode.undoLength == 0} on:click={undo}>
+          {#if mode.undoLength == 0}
+            Undo
+          {:else}
+            Undo ({mode.undoLength})
+          {/if}
+        </button>
+        <button disabled={mode.redoLength == 0} on:click={redo}>
+          {#if mode.redoLength == 0}
+            Redo
+          {:else}
+            Redo ({mode.redoLength})
+          {/if}
+        </button>
+      </div>
     {/if}
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
@@ -348,6 +389,9 @@
             {app}
             boundary={mode.boundary}
             bind:addingFilter={mode.addingFilter}
+            bind:undoLength={mode.undoLength}
+            bind:redoLength={mode.redoLength}
+            rerender={mode.rerender}
             {offlineMode}
           />
         {/if}

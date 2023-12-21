@@ -57,7 +57,10 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         roads,
         intersections,
         mercator,
+
         modal_filters: BTreeMap::new(),
+        undo_stack: Vec::new(),
+        redo_queue: Vec::new(),
     })
 }
 

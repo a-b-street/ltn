@@ -5,7 +5,7 @@ use geo::{
     BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
     MultiLineString, Polygon,
 };
-use geojson::{Feature, GeoJson, Geometry};
+use geojson::{Feature, FeatureCollection, Geometry};
 
 use crate::render_cells::Color;
 use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
@@ -67,7 +67,7 @@ impl Neighbourhood {
         })
     }
 
-    pub fn to_gj(&self, map: &MapModel) -> GeoJson {
+    pub fn to_gj(&self, map: &MapModel) -> FeatureCollection {
         let mut features = Vec::new();
 
         // TODO Decide how/where state lives
@@ -121,6 +121,18 @@ impl Neighbourhood {
             features.push(f);
         }
 
-        GeoJson::from(features)
+        FeatureCollection {
+            features,
+            bbox: None,
+            foreign_members: Some(
+                serde_json::json!({
+                    "undo_length": map.undo_stack.len(),
+                    "redo_length": map.redo_queue.len(),
+                })
+                .as_object()
+                .unwrap()
+                .clone(),
+            ),
+        }
     }
 }

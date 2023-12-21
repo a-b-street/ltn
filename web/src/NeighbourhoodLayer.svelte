@@ -8,9 +8,9 @@
     FillLayer,
     GeoJSON,
     hoverStateFilter,
-    type LayerClickInfo,
     LineLayer,
     Popup,
+    type LayerClickInfo,
   } from "svelte-maplibre";
   import {
     constructMatchExpression,
@@ -23,8 +23,12 @@
   export let map: Map;
   export let app: LTN;
   export let boundary: Feature<Polygon>;
-  export let addingFilter = false;
   export let offlineMode: boolean;
+
+  export let addingFilter = false;
+  export let undoLength = 0;
+  export let redoLength = 0;
+  export let rerender = 0;
 
   // A qualitative palette from colorbrewer2.org, skipping the red hue (used
   // for levels of shortcutting) and grey (too close to the basemap)
@@ -49,6 +53,7 @@
     maxShortcuts = Math.max(
       ...gj.features.map((f) => f.properties.shortcuts ?? 0)
     );
+
     for (let f of gj.features) {
       if (f.properties.color == "disconnected") {
         f.properties.color = "red";
@@ -57,6 +62,10 @@
           cell_colors[f.properties.color % cell_colors.length];
       }
     }
+
+    undoLength = gj.undo_length;
+    redoLength = gj.redo_length;
+
     details = gj;
   }
 
@@ -83,6 +92,10 @@
     if (props.kind == "modal_filter") {
       render(JSON.parse(app.deleteModalFilter(props.road)));
     }
+  }
+
+  $: if (rerender > 0) {
+    render(JSON.parse(app.rerender()));
   }
 </script>
 
