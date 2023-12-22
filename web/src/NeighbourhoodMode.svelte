@@ -22,7 +22,6 @@
   import SplitComponent from "./SplitComponent.svelte";
 
   export let mode: Mode;
-  export let setBoundaryMode;
   export let map: Map;
   export let app: LTN;
   export let boundary: Feature<Polygon>;
@@ -130,7 +129,12 @@
 <SplitComponent>
   <div slot="sidebar">
     <div><button on:click={reset}>Reset</button></div>
-    <div><button on:click={setBoundaryMode}>Edit boundary</button></div>
+    <div>
+      <button
+        on:click={() => (mode = { mode: "set-boundary", existing: boundary })}
+        >Edit boundary</button
+      >
+    </div>
     <div>
       <button on:click={() => (addingFilter = true)} disabled={addingFilter}
         >Add a modal filter</button

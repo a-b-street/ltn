@@ -6,7 +6,6 @@
 
   export let app: LTN;
   export let mode: Mode;
-  export let setBoundaryMode;
 
   function devMode() {
     mode = {
@@ -217,7 +216,11 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <div><button on:click={setBoundaryMode}>Set boundary</button></div>
+    <div>
+      <button on:click={() => (mode = { mode: "set-boundary", existing: null })}
+        >Set boundary</button
+      >
+    </div>
     <div><button on:click={devMode}>Quickset boundary (dev)</button></div>
   </div>
 
