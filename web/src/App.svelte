@@ -8,7 +8,6 @@
   import { RouteTool } from "./common/route_tool";
   import RouteSnapperLayer from "./common/RouteSnapperLayer.svelte";
   import MapLoader from "./MapLoader.svelte";
-  import NeighbourhoodLayer from "./NeighbourhoodLayer.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkLayer from "./NetworkLayer.svelte";
   import { mapContents, sidebarContents } from "./stores";
@@ -33,10 +32,6 @@
     | {
         mode: "neighbourhood";
         boundary: Feature<Polygon>;
-        addingFilter: boolean;
-        undoLength: number;
-        redoLength: number;
-        rerender: number;
       }
     | {
         mode: "view-shortcuts";
@@ -85,10 +80,6 @@
       mode = {
         mode: "neighbourhood",
         boundary: feature,
-        addingFilter: false,
-        undoLength: 0,
-        redoLength: 0,
-        rerender: 0,
       };
       route_tool.clearEventListeners();
     });
@@ -303,10 +294,6 @@
         },
         type: "Feature",
       },
-      addingFilter: false,
-      undoLength: 0,
-      redoLength: 0,
-      rerender: 0,
     };
   }
 
@@ -334,8 +321,6 @@
       <div><button on:click={devMode}>Quickset boundary (dev)</button></div>
     {:else if mode.mode == "set-boundary"}
       <p>Draw the boundary...</p>
-    {:else if mode.mode == "neighbourhood"}
-      <NeighbourhoodMode bind:mode {app} {setBoundaryMode} />
     {/if}
 
     <div bind:this={sidebarDiv} />
@@ -347,22 +332,20 @@
           <NetworkLayer {app} />
         {:else if mode.mode == "set-boundary"}
           <RouteSnapperLayer />
-        {:else if mode.mode == "neighbourhood"}
-          <NeighbourhoodLayer
-            {map}
-            {app}
-            boundary={mode.boundary}
-            bind:addingFilter={mode.addingFilter}
-            bind:undoLength={mode.undoLength}
-            bind:redoLength={mode.redoLength}
-            rerender={mode.rerender}
-            {offlineMode}
-          />
-        {/if}
+        {:else if mode.mode == "neighbourhood"}{/if}
       {/if}
 
       <div bind:this={mapDiv} />
-      {#if mode.mode == "view-shortcuts"}
+      {#if mode.mode == "neighbourhood"}
+        <NeighbourhoodMode
+          {map}
+          {app}
+          boundary={mode.boundary}
+          {offlineMode}
+          bind:mode
+          {setBoundaryMode}
+        />
+      {:else if mode.mode == "view-shortcuts"}
         <ViewShortcutsMode bind:mode {app} prevMode={mode.prevMode} {map} />
       {/if}
     </MapLibre>
