@@ -11,7 +11,7 @@
   import NeighbourhoodLayer from "./NeighbourhoodLayer.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkLayer from "./NetworkLayer.svelte";
-  import ViewShortcutsLayer from "./ViewShortcutsLayer.svelte";
+  import { mapContents, sidebarContents } from "./stores";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
   let offlineMode = true;
@@ -309,6 +309,17 @@
       rerender: 0,
     };
   }
+
+  let sidebarDiv;
+  let mapDiv;
+  $: if (sidebarDiv && $sidebarContents) {
+    sidebarDiv.innerHTML = "";
+    sidebarDiv.appendChild($sidebarContents);
+  }
+  $: if (mapDiv && $mapContents) {
+    mapDiv.innerHTML = "";
+    mapDiv.appendChild($mapContents);
+  }
 </script>
 
 <Layout>
@@ -325,9 +336,9 @@
       <p>Draw the boundary...</p>
     {:else if mode.mode == "neighbourhood"}
       <NeighbourhoodMode bind:mode {app} {setBoundaryMode} />
-    {:else if mode.mode == "view-shortcuts"}
-      <ViewShortcutsMode bind:mode {app} prevMode={mode.prevMode} {map} />
     {/if}
+
+    <div bind:this={sidebarDiv} />
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre style={mapStyle} standardControls hash bind:map>
@@ -347,9 +358,12 @@
             rerender={mode.rerender}
             {offlineMode}
           />
-        {:else if mode.mode == "view-shortcuts"}
-          <ViewShortcutsLayer {app} />
         {/if}
+      {/if}
+
+      <div bind:this={mapDiv} />
+      {#if mode.mode == "view-shortcuts"}
+        <ViewShortcutsMode bind:mode {app} prevMode={mode.prevMode} {map} />
       {/if}
     </MapLibre>
   </div>
