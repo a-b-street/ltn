@@ -6,7 +6,7 @@ extern crate log;
 use std::sync::Once;
 
 use geo::{Coord, Polygon};
-use geojson::{Feature, GeoJson};
+use geojson::{Feature, GeoJson, Geometry};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
@@ -150,6 +150,22 @@ impl LTN {
             serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
                 .map_err(err_to_js)?,
         )
+    }
+
+    #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]
+    pub fn get_shortcuts_crossing_road(&self, road: usize) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&GeoJson::from(
+            Shortcuts::new(&self.map, self.neighbourhood.as_ref().unwrap())
+                .subset(RoadID(road))
+                .into_iter()
+                .map(|path| {
+                    Feature::from(Geometry::from(
+                        &self.map.mercator.to_wgs84(&path.geometry(&self.map)),
+                    ))
+                })
+                .collect::<Vec<_>>(),
+        ))
+        .map_err(err_to_js)?)
     }
 }
 

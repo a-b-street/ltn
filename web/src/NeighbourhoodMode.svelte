@@ -44,6 +44,11 @@
     disabled={mode.addingFilter}>Add a modal filter</button
   >
 </div>
+<div>
+  <button on:click={() => (mode = { mode: "view-shortcuts", prevMode: mode })}
+    >View shortcuts</button
+  >
+</div>
 
 <div>
   <button disabled={mode.undoLength == 0} on:click={undo}>

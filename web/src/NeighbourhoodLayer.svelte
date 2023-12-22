@@ -75,7 +75,8 @@
   }
   onDestroy(() => {
     stopAddingFilter();
-    app.unsetNeighbourhood();
+    // TODO Then we can't "nest" ViewShortcuts beneath this
+    //app.unsetNeighbourhood();
   });
   function onClick(e: MapMouseEvent) {
     render(JSON.parse(app.addModalFilter(e.lngLat)));

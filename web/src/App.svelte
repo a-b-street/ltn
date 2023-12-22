@@ -11,6 +11,8 @@
   import NeighbourhoodLayer from "./NeighbourhoodLayer.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkLayer from "./NetworkLayer.svelte";
+  import ViewShortcutsLayer from "./ViewShortcutsLayer.svelte";
+  import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
   let offlineMode = true;
   let mapStyle = offlineMode
@@ -35,6 +37,10 @@
         undoLength: number;
         redoLength: number;
         rerender: number;
+      }
+    | {
+        mode: "view-shortcuts";
+        prevMode: Mode;
       };
 
   let mode = {
@@ -319,6 +325,8 @@
       <p>Draw the boundary...</p>
     {:else if mode.mode == "neighbourhood"}
       <NeighbourhoodMode bind:mode {app} {setBoundaryMode} />
+    {:else if mode.mode == "view-shortcuts"}
+      <ViewShortcutsMode bind:mode {app} prevMode={mode.prevMode} {map} />
     {/if}
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
@@ -339,6 +347,8 @@
             rerender={mode.rerender}
             {offlineMode}
           />
+        {:else if mode.mode == "view-shortcuts"}
+          <ViewShortcutsLayer {app} />
         {/if}
       {/if}
     </MapLibre>
