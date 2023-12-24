@@ -132,12 +132,18 @@ impl MapModel {
     }
 
     pub fn undo(&mut self) {
-        let cmd = self.undo_stack.pop().unwrap();
-        let cmd = self.do_edit(cmd);
-        self.redo_queue.push(cmd);
+        // The UI shouldn't call this when the stack is empty, but when holding down the redo key,
+        // it doesn't update fast enough
+        if let Some(cmd) = self.undo_stack.pop() {
+            let cmd = self.do_edit(cmd);
+            self.redo_queue.push(cmd);
+        }
     }
 
     pub fn redo(&mut self) {
+        if self.redo_queue.is_empty() {
+            return;
+        }
         let cmd = self.redo_queue.remove(0);
         let cmd = self.do_edit(cmd);
         self.undo_stack.push(cmd);
