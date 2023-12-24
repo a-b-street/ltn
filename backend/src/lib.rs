@@ -103,7 +103,8 @@ impl LTN {
         self.render_neighbourhood()
     }
 
-    fn render_neighbourhood(&self) -> Result<String, JsValue> {
+    #[wasm_bindgen(js_name = renderNeighbourhood)]
+    pub fn render_neighbourhood(&self) -> Result<String, JsValue> {
         Ok(
             serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
                 .map_err(err_to_js)?,

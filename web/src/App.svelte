@@ -111,7 +111,13 @@
             bind:mode
           />
         {:else if mode.mode == "view-shortcuts"}
-          <ViewShortcutsMode bind:mode {app} prevMode={mode.prevMode} {map} />
+          <ViewShortcutsMode
+            bind:mode
+            {app}
+            prevMode={mode.prevMode}
+            {map}
+            {showBasemap}
+          />
         {/if}
       {/if}
     </MapLibre>

@@ -3,22 +3,7 @@
   import type { Feature, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import {
-    CircleLayer,
-    FillLayer,
-    GeoJSON,
-    hoverStateFilter,
-    LineLayer,
-    Popup,
-    type LayerClickInfo,
-  } from "svelte-maplibre";
-  import {
-    constructMatchExpression,
-    isLine,
-    isPoint,
-    isPolygon,
-    PropertiesTable,
-  } from "./common";
+  import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
 
   export let mode: Mode;
@@ -46,29 +31,14 @@
     "#ffed6f",
   ];
 
-  let details;
-  let maxShortcuts;
+  let gjInput;
   render(app.analyzeNeighbourhood(boundary));
 
   function render(gjString) {
-    let gj = JSON.parse(gjString);
-    maxShortcuts = Math.max(
-      ...gj.features.map((f) => f.properties.shortcuts ?? 0)
-    );
+    gjInput = JSON.parse(gjString);
 
-    for (let f of gj.features) {
-      if (f.properties.color == "disconnected") {
-        f.properties.color = "red";
-      } else if (Object.hasOwn(f.properties, "color")) {
-        f.properties.color =
-          cell_colors[f.properties.color % cell_colors.length];
-      }
-    }
-
-    undoLength = gj.undo_length;
-    redoLength = gj.redo_length;
-
-    details = gj;
+    undoLength = gjInput.undo_length;
+    redoLength = gjInput.redo_length;
   }
 
   $: if (addingFilter) {
@@ -90,10 +60,9 @@
     map.style.cursor = "inherit";
   }
 
-  function deleteFilter(e: CustomEvent<LayerClickInfo>) {
-    let props = e.detail.features[0].properties;
-    if (props.kind == "modal_filter") {
-      render(app.deleteModalFilter(props.road));
+  function deleteFilter(f: Feature) {
+    if (f.properties.kind == "modal_filter") {
+      render(app.deleteModalFilter(f.properties.road));
     }
   }
 
@@ -164,66 +133,12 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={details} generateId>
-      <FillLayer
-        beforeId={showBasemap ? "Building" : undefined}
-        filter={isPolygon}
-        manageHoverState
-        paint={{
-          "fill-color": ["get", "color"],
-          "fill-opacity": hoverStateFilter(0.3, 0.5),
-        }}
-      />
-
-      <LineLayer
-        filter={isLine}
-        paint={{
-          "line-width": 5,
-          "line-color": constructMatchExpression(
-            ["get", "kind"],
-            {
-              interior_road: [
-                "interpolate-hcl",
-                ["linear"],
-                ["get", "shortcuts"],
-                0,
-                "#F19A93",
-                maxShortcuts,
-                "#A32015",
-              ],
-              crosses: "blue",
-            },
-            "red"
-          ),
-        }}
-        on:click={(e) =>
-          window.open(e.detail.features[0].properties.way, "_blank")}
-        hoverCursor="pointer"
-      >
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={data.properties} />
-        </Popup>
-      </LineLayer>
-
-      <CircleLayer
-        filter={isPoint}
-        paint={{
-          "circle-radius": 15,
-          "circle-color": constructMatchExpression(
-            ["get", "kind"],
-            {
-              border_intersection: "green",
-              modal_filter: "black",
-            },
-            "red"
-          ),
-        }}
-        on:click={deleteFilter}
-      >
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={data.properties} />
-        </Popup>
-      </CircleLayer>
-    </GeoJSON>
+    <RenderNeighbourhood
+      {gjInput}
+      {showBasemap}
+      onClickLine={(f) => window.open(f.properties.way, "_blank")}
+      onClickCircle={deleteFilter}
+      popups
+    />
   </div>
 </SplitComponent>

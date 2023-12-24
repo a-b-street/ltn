@@ -3,12 +3,14 @@
   import type { Map } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
 
   export let mode: Mode;
   export let app: LTN;
   export let prevMode: Mode;
   export let map: Map;
+  export let showBasemap: boolean;
 
   type State =
     | {
@@ -58,6 +60,10 @@
           state.shortcutIndex++;
         }
       }
+      if (e.key == "Escape") {
+        e.stopPropagation();
+        back();
+      }
     }
   }
 
@@ -95,16 +101,11 @@
 
   <div slot="map">
     {#if state.state == "neutral"}
-      <GeoJSON data={JSON.parse(app.render())}>
-        <LineLayer
-          paint={{
-            "line-width": 5,
-            "line-color": "black",
-          }}
-          on:click={(e) => choseRoad(app, e.detail.features[0].properties.id)}
-          hoverCursor="pointer"
-        />
-      </GeoJSON>
+      <RenderNeighbourhood
+        gjInput={JSON.parse(app.renderNeighbourhood())}
+        {showBasemap}
+        onClickLine={(f) => choseRoad(app, f.properties.id)}
+      />
     {:else if state.state == "chose-road"}
       {#if state.shortcutIndex == null}
         <GeoJSON data={state.gj}>
