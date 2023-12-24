@@ -100,6 +100,10 @@ impl LTN {
         self.map.mercator.to_mercator_in_place(&mut boundary_geo);
 
         self.neighbourhood = Some(Neighbourhood::new(&self.map, boundary_geo).map_err(err_to_js)?);
+        self.render_neighbourhood()
+    }
+
+    fn render_neighbourhood(&self) -> Result<String, JsValue> {
         Ok(
             serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
                 .map_err(err_to_js)?,
@@ -122,34 +126,22 @@ impl LTN {
             }),
             &self.neighbourhood.as_ref().unwrap().interior_roads,
         );
-        Ok(
-            serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
-                .map_err(err_to_js)?,
-        )
+        self.render_neighbourhood()
     }
 
     #[wasm_bindgen(js_name = deleteModalFilter)]
     pub fn delete_modal_filter(&mut self, road: usize) -> Result<String, JsValue> {
         self.map.delete_modal_filter(RoadID(road));
-        Ok(
-            serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
-                .map_err(err_to_js)?,
-        )
+        self.render_neighbourhood()
     }
 
-    pub fn undo(&mut self) {
+    pub fn undo(&mut self) -> Result<String, JsValue> {
         self.map.undo();
+        self.render_neighbourhood()
     }
-    pub fn redo(&mut self) {
+    pub fn redo(&mut self) -> Result<String, JsValue> {
         self.map.redo();
-    }
-
-    // TODO Suddenly a different pattern...
-    pub fn rerender(&self) -> Result<String, JsValue> {
-        Ok(
-            serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
-                .map_err(err_to_js)?,
-        )
+        self.render_neighbourhood()
     }
 
     #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]

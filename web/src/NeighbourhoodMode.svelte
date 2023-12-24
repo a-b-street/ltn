@@ -48,9 +48,10 @@
 
   let details;
   let maxShortcuts;
-  render(JSON.parse(app.analyzeNeighbourhood(boundary)));
+  render(app.analyzeNeighbourhood(boundary));
 
-  function render(gj) {
+  function render(gjString) {
+    let gj = JSON.parse(gjString);
     maxShortcuts = Math.max(
       ...gj.features.map((f) => f.properties.shortcuts ?? 0)
     );
@@ -80,7 +81,7 @@
     //app.unsetNeighbourhood();
   });
   function onClick(e: MapMouseEvent) {
-    render(JSON.parse(app.addModalFilter(e.lngLat)));
+    render(app.addModalFilter(e.lngLat));
     stopAddingFilter();
   }
   function stopAddingFilter() {
@@ -92,7 +93,7 @@
   function deleteFilter(e: CustomEvent<LayerClickInfo>) {
     let props = e.detail.features[0].properties;
     if (props.kind == "modal_filter") {
-      render(JSON.parse(app.deleteModalFilter(props.road)));
+      render(app.deleteModalFilter(props.road));
     }
   }
 
@@ -108,13 +109,10 @@
     }
   }
   function undo() {
-    // TODO Change this now
-    app.undo();
-    render(JSON.parse(app.rerender()));
+    render(app.undo());
   }
   function redo() {
-    app.redo();
-    render(JSON.parse(app.rerender()));
+    render(app.redo());
   }
 
   function reset() {
