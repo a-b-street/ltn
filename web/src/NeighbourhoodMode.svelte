@@ -25,7 +25,7 @@
   export let map: Map;
   export let app: LTN;
   export let boundary: Feature<Polygon>;
-  export let offlineMode: boolean;
+  export let showBasemap: boolean;
 
   let addingFilter = false;
   let undoLength = 0;
@@ -166,7 +166,7 @@
   <div slot="map">
     <GeoJSON data={details} generateId>
       <FillLayer
-        beforeId={offlineMode ? undefined : "Building"}
+        beforeId={showBasemap ? "Building" : undefined}
         filter={isPolygon}
         manageHoverState
         paint={{

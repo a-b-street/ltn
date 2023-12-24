@@ -13,14 +13,14 @@
   import { mapContents, sidebarContents } from "./stores";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
-  let offlineMode = true;
-  let mapStyle = offlineMode
-    ? {
+  let showBasemap = false;
+  $: mapStyle = showBasemap
+    ? "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
+    : {
         version: 8,
         sources: {},
         layers: [],
-      }
-    : "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo";
+      };
 
   type Mode =
     | {
@@ -85,6 +85,12 @@
       <MapLoader {map} bind:app />
     {/if}
     <div><button on:click={zoomToFit}>Zoom to fit</button></div>
+    <div>
+      <label
+        ><input type="checkbox" bind:checked={showBasemap} />Show basemap</label
+      >
+    </div>
+    <hr />
 
     <div bind:this={sidebarDiv} />
   </div>
@@ -101,7 +107,7 @@
             {map}
             {app}
             boundary={mode.boundary}
-            {offlineMode}
+            {showBasemap}
             bind:mode
           />
         {:else if mode.mode == "view-shortcuts"}
