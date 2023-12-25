@@ -95,7 +95,13 @@
     <div bind:this={sidebarDiv} />
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
-    <MapLibre style={mapStyle} standardControls hash bind:map>
+    <MapLibre
+      style={mapStyle}
+      standardControls
+      hash
+      bind:map
+      on:error={(e) => console.log(e.detail.error)}
+    >
       <div bind:this={mapDiv} />
       {#if app}
         {#if mode.mode == "network"}

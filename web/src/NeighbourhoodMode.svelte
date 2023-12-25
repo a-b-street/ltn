@@ -18,21 +18,6 @@
   let undoLength = 0;
   let redoLength = 0;
 
-  // A qualitative palette from colorbrewer2.org, skipping the red hue (used
-  // for levels of shortcutting) and grey (too close to the basemap)
-  let cell_colors = [
-    "#8dd3c7",
-    "#ffffb3",
-    "#bebada",
-    "#80b1d3",
-    "#fdb462",
-    "#b3de69",
-    "#fccde5",
-    "#bc80bd",
-    "#ccebc5",
-    "#ffed6f",
-  ];
-
   let gjInput;
   render(app.analyzeNeighbourhood(boundary));
 
