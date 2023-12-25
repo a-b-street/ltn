@@ -654,7 +654,7 @@ checksum = "cbf4a6aa5f6d6888f39e980649f3ad6b666acdce1d78e95b8a2cb076e687ae30"
 [[package]]
 name = "route-snapper-graph"
 version = "0.1.0"
-source = "git+https://github.com/dabreegster/route_snapper?branch=no_osm2streets#8950b76d331242b0e5ae1746370b948d83d5e690"
+source = "git+https://github.com/dabreegster/route_snapper?branch=no_osm2streets#250055d36fbbdc3391c3ff4d8f93a5b36654292d"
 dependencies = [
  "geo",
  "serde",
