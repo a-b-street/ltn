@@ -3,6 +3,8 @@
   import type { Feature, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
+  import { Popup } from "svelte-maplibre";
+  import { PropertiesTable } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
 
@@ -138,7 +140,17 @@
       {showBasemap}
       onClickLine={(f) => window.open(f.properties.way, "_blank")}
       onClickCircle={deleteFilter}
-      popups
-    />
+    >
+      <div slot="line-popup">
+        <Popup openOn="hover" let:data>
+          <PropertiesTable properties={data.properties} />
+        </Popup>
+      </div>
+      <div slot="circle-popup">
+        <Popup openOn="hover" let:data>
+          <PropertiesTable properties={data.properties} />
+        </Popup>
+      </div>
+    </RenderNeighbourhood>
   </div>
 </SplitComponent>

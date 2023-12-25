@@ -5,22 +5,18 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
-    Popup,
   } from "svelte-maplibre";
   import {
     constructMatchExpression,
     isLine,
     isPoint,
     isPolygon,
-    PropertiesTable,
   } from "./common";
 
   export let gjInput;
   export let showBasemap: boolean;
   export let onClickLine = (f) => {};
   export let onClickCircle = (f) => {};
-  // TODO Or take some named slots
-  export let popups = false;
 
   let gj;
   let maxShortcuts;
@@ -94,11 +90,7 @@
     on:click={(e) => onClickLine(e.detail.features[0])}
     hoverCursor="pointer"
   >
-    {#if popups}
-      <Popup openOn="hover" let:data>
-        <PropertiesTable properties={data.properties} />
-      </Popup>
-    {/if}
+    <slot name="line-popup" />
   </LineLayer>
 
   <CircleLayer
@@ -116,10 +108,6 @@
     }}
     on:click={(e) => onClickCircle(e.detail.features[0])}
   >
-    {#if popups}
-      <Popup openOn="hover" let:data>
-        <PropertiesTable properties={data.properties} />
-      </Popup>
-    {/if}
+    <slot name="circle-popup" />
   </CircleLayer>
 </GeoJSON>

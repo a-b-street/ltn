@@ -2,7 +2,7 @@
   import { LTN } from "backend";
   import type { Map } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
-  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
 
@@ -105,7 +105,11 @@
         gjInput={JSON.parse(app.renderNeighbourhood())}
         {showBasemap}
         onClickLine={(f) => choseRoad(app, f.properties.id)}
-      />
+      >
+        <div slot="line-popup">
+          <Popup openOn="hover" let:data>{data.properties.shortcuts}</Popup>
+        </div>
+      </RenderNeighbourhood>
     {:else if state.state == "chose-road"}
       {#if state.shortcutIndex == null}
         <GeoJSON data={state.gj}>
