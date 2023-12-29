@@ -75,6 +75,14 @@ impl Neighbourhood {
         let render_cells = RenderCells::new(map, self, &cells);
         let shortcuts = Shortcuts::new(map, self);
 
+        {
+            let mut f = Feature::from(Geometry::from(
+                &map.mercator.to_wgs84(&self.boundary_polygon),
+            ));
+            f.set_property("kind", "boundary");
+            features.push(f);
+        }
+
         for r in &self.interior_roads {
             let mut f = map.get_r(*r).to_gj(&map.mercator);
             f.set_property("kind", "interior_road");

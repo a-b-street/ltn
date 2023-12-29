@@ -205,7 +205,7 @@ impl MapModel {
         GeoJson::from(features)
     }
 
-    /// Returns the boundary polygon
+    /// Returns the optional boundary polygon
     pub fn load_savefile(&mut self, gj: FeatureCollection) -> Result<Option<Polygon>> {
         // Clear previous state
         self.modal_filters.clear();

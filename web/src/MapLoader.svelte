@@ -4,8 +4,8 @@
   import init2 from "route-snapper";
   import { onMount } from "svelte";
   import { downloadGeneratedFile, Loading, OverpassSelector } from "./common";
+  import { app, mode } from "./stores";
 
-  export let app: LTN | undefined = undefined;
   export let map: Map;
 
   let example = "";
@@ -41,7 +41,7 @@
   function loadMap(buffer: ArrayBuffer) {
     msg = "Building map model from OSM input";
     console.time("load");
-    app = new LTN(new Uint8Array(buffer));
+    $app = new LTN(new Uint8Array(buffer));
     console.timeEnd("load");
   }
 
@@ -83,7 +83,7 @@
   // TODO Could split this stuff; it just cares about the example
   function saveGj() {
     let filename = example || "custom";
-    downloadGeneratedFile(`ltn_${filename}.geojson`, app.toSavefile());
+    downloadGeneratedFile(`ltn_${filename}.geojson`, $app.toSavefile());
   }
 
   let editsFileInput: HTMLInputElement;
@@ -98,7 +98,12 @@
 
   function loadEdits(gj: string) {
     msg = "Loading edits from file";
-    app.loadSavefile(JSON.parse(gj));
+    // TODO If we're already in one of the states, nothing refreshes immediately...
+    if ($app.loadSavefile(JSON.parse(gj))) {
+      $mode = { mode: "neighbourhood" };
+    } else {
+      $mode = { mode: "network" };
+    }
   }
 </script>
 
@@ -139,7 +144,7 @@
     on:error={(e) => window.alert(e.detail)}
   />
 
-  {#if app}
+  {#if $app}
     <div><button on:click={saveGj}>Save to GJ</button></div>
     <div>
       <label>

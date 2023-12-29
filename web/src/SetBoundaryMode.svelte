@@ -2,8 +2,8 @@
   import { RouteTool } from "./common/route_tool";
   import RouteSnapperLayer from "./common/RouteSnapperLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
+  import { app, mode } from "./stores";
 
-  export let mode: Mode;
   export let route_tool;
   export let existing: Feature<Polygon> | null;
 
@@ -14,14 +14,14 @@
   }
 
   route_tool.addEventListenerSuccess((feature) => {
-    mode = {
+    $app.setNeighbourhood(feature);
+    $mode = {
       mode: "neighbourhood",
-      boundary: feature,
     };
     route_tool.clearEventListeners();
   });
   route_tool.addEventListenerFailure(() => {
-    mode = {
+    $mode = {
       mode: "network",
     };
     route_tool.clearEventListeners();

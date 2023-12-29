@@ -8,23 +8,25 @@
   import FreehandLine from "./FreehandLine.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
+  import { app, mode } from "./stores";
 
-  export let mode: Mode;
+  // Caller is responsible for doing app.setNeighbourhood
+
   export let map: Map;
-  export let app: LTN;
-  export let boundary: Feature<Polygon>;
   export let showBasemap: boolean;
 
   let addingFilter = false;
   let addingMultipleFilters = false;
   let undoLength = 0;
   let redoLength = 0;
+  let boundary: Feature<Polygon> | null;
 
   let gjInput;
-  render(app.analyzeNeighbourhood(boundary));
+  render($app.renderNeighbourhood());
 
   function render(gjString) {
     gjInput = JSON.parse(gjString);
+    boundary = gjInput.features.find((f) => f.properties.kind == "boundary");
 
     undoLength = gjInput.undo_length;
     redoLength = gjInput.redo_length;
@@ -37,10 +39,10 @@
   onDestroy(() => {
     stopAddingFilter();
     // TODO Then we can't "nest" ViewShortcuts beneath this
-    //app.unsetNeighbourhood();
+    //$app.unsetNeighbourhood();
   });
   function onClick(e: MapMouseEvent) {
-    render(app.addModalFilter(e.lngLat));
+    render($app.addModalFilter(e.lngLat));
     stopAddingFilter();
   }
   function stopAddingFilter() {
@@ -51,7 +53,7 @@
 
   function deleteFilter(f: Feature) {
     if (f.properties.kind == "modal_filter") {
-      render(app.deleteModalFilter(f.properties.road));
+      render($app.deleteModalFilter(f.properties.road));
     }
   }
 
@@ -67,14 +69,14 @@
     }
   }
   function undo() {
-    render(app.undo());
+    render($app.undo());
   }
   function redo() {
-    render(app.redo());
+    render($app.redo());
   }
 
   function reset() {
-    mode = {
+    $mode = {
       mode: "network",
     };
   }
@@ -82,7 +84,7 @@
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      render(app.addManyModalFilters(f));
+      render($app.addManyModalFilters(f));
     }
 
     addingMultipleFilters = false;
@@ -96,7 +98,7 @@
     <div><button on:click={reset}>Reset</button></div>
     <div>
       <button
-        on:click={() => (mode = { mode: "set-boundary", existing: boundary })}
+        on:click={() => ($mode = { mode: "set-boundary", existing: boundary })}
         >Edit boundary</button
       >
     </div>
@@ -114,7 +116,7 @@
     </div>
     <div>
       <button
-        on:click={() => (mode = { mode: "view-shortcuts", prevMode: mode })}
+        on:click={() => ($mode = { mode: "view-shortcuts", prevMode: $mode })}
         >View shortcuts</button
       >
     </div>

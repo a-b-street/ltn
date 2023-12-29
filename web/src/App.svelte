@@ -10,7 +10,7 @@
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
-  import { mapContents, sidebarContents } from "./stores";
+  import { app, mapContents, mode, sidebarContents } from "./stores";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
   let showBasemap = false;
@@ -22,48 +22,27 @@
         layers: [],
       };
 
-  type Mode =
-    | {
-        mode: "network";
-      }
-    | {
-        mode: "set-boundary";
-        existing: Feature<Polygon> | null;
-      }
-    | {
-        mode: "neighbourhood";
-        boundary: Feature<Polygon>;
-      }
-    | {
-        mode: "view-shortcuts";
-        prevMode: Mode;
-      };
-
-  let mode = {
-    mode: "network",
-  };
-  let app: LTN | undefined = undefined;
   let route_tool: RouteTool | undefined = undefined;
   let map: Map;
 
   function zoomToFit() {
     // TODO wasteful
-    let bbox = turfBbox(JSON.parse(app.render()));
+    let bbox = turfBbox(JSON.parse($app.render()));
     map.fitBounds(bbox, { animate: false });
   }
 
   function gotApp(_x: LTN) {
-    if (!app) {
+    if (!$app) {
       return;
     }
     console.log("New map model loaded");
     zoomToFit();
-    mode = {
+    $mode = {
       mode: "network",
     };
-    route_tool = new RouteTool(map, app.toRouteSnapper());
+    route_tool = new RouteTool(map, $app.toRouteSnapper());
   }
-  $: gotApp(app);
+  $: gotApp($app);
 
   let sidebarDiv;
   let mapDiv;
@@ -80,8 +59,8 @@
 <Layout>
   <div slot="left">
     {#if map}
-      <MapLoader {map} bind:app />
-      {#if app}
+      <MapLoader {map} />
+      {#if $app}
         <div><button on:click={zoomToFit}>Zoom to fit</button></div>
       {/if}
     {/if}
@@ -103,27 +82,15 @@
       on:error={(e) => console.log(e.detail.error)}
     >
       <div bind:this={mapDiv} />
-      {#if app}
-        {#if mode.mode == "network"}
-          <NetworkMode {app} bind:mode />
-        {:else if mode.mode == "set-boundary"}
-          <SetBoundaryMode bind:mode {route_tool} existing={mode.existing} />
-        {:else if mode.mode == "neighbourhood"}
-          <NeighbourhoodMode
-            {map}
-            {app}
-            boundary={mode.boundary}
-            {showBasemap}
-            bind:mode
-          />
-        {:else if mode.mode == "view-shortcuts"}
-          <ViewShortcutsMode
-            bind:mode
-            {app}
-            prevMode={mode.prevMode}
-            {map}
-            {showBasemap}
-          />
+      {#if $app}
+        {#if $mode.mode == "network"}
+          <NetworkMode />
+        {:else if $mode.mode == "set-boundary"}
+          <SetBoundaryMode {route_tool} existing={$mode.existing} />
+        {:else if $mode.mode == "neighbourhood"}
+          <NeighbourhoodMode {map} {showBasemap} />
+        {:else if $mode.mode == "view-shortcuts"}
+          <ViewShortcutsMode prevMode={$mode.prevMode} {map} {showBasemap} />
         {/if}
       {/if}
     </MapLibre>

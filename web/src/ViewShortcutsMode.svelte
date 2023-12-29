@@ -5,9 +5,8 @@
   import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
+  import { app, mode } from "./stores";
 
-  export let mode: Mode;
-  export let app: LTN;
   export let prevMode: Mode;
   export let map: Map;
   export let showBasemap: boolean;
@@ -24,8 +23,8 @@
       };
   let state = { state: "neutral" };
 
-  function choseRoad(app: LTN, road: number) {
-    let gj = JSON.parse(app.getShortcutsCrossingRoad(road));
+  function choseRoad(road: number) {
+    let gj = JSON.parse($app.getShortcutsCrossingRoad(road));
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");
       return;
@@ -68,7 +67,7 @@
   }
 
   function back() {
-    mode = prevMode;
+    $mode = prevMode;
   }
 </script>
 
@@ -102,9 +101,9 @@
   <div slot="map">
     {#if state.state == "neutral"}
       <RenderNeighbourhood
-        gjInput={JSON.parse(app.renderNeighbourhood())}
+        gjInput={JSON.parse($app.renderNeighbourhood())}
         {showBasemap}
-        onClickLine={(f) => choseRoad(app, f.properties.id)}
+        onClickLine={(f) => choseRoad(f.properties.id)}
       >
         <div slot="line-popup">
           <Popup openOn="hover" let:data>{data.properties.shortcuts}</Popup>

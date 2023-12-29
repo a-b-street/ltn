@@ -93,8 +93,8 @@ impl LTN {
     }
 
     /// Takes boundary GJ polygon, returns GJ with more details
-    #[wasm_bindgen(js_name = analyzeNeighbourhood)]
-    pub fn analyze_neighbourhood(&mut self, input: JsValue) -> Result<String, JsValue> {
+    #[wasm_bindgen(js_name = setNeighbourhood)]
+    pub fn set_neighbourhood(&mut self, input: JsValue) -> Result<String, JsValue> {
         let boundary_gj: Feature = serde_wasm_bindgen::from_value(input)?;
         let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut boundary_geo);
@@ -116,7 +116,7 @@ impl LTN {
         self.neighbourhood = None;
     }
 
-    /// Takes a LngLat, returns the same GJ as analyze_neighbourhood
+    /// Takes a LngLat
     #[wasm_bindgen(js_name = addModalFilter)]
     pub fn add_modal_filter(&mut self, input: JsValue) -> Result<String, JsValue> {
         let pos: LngLat = serde_wasm_bindgen::from_value(input)?;
@@ -185,18 +185,19 @@ impl LTN {
         )
     }
 
-    /// Doesn't return anything; the caller has to figure out what to render
+    /// Returns true if there was a neighbourhood set up
     #[wasm_bindgen(js_name = loadSavefile)]
-    pub fn load_savefile(&mut self, input: JsValue) -> Result<(), JsValue> {
+    pub fn load_savefile(&mut self, input: JsValue) -> Result<bool, JsValue> {
         let gj: FeatureCollection = serde_wasm_bindgen::from_value(input)?;
         let boundary = self.map.load_savefile(gj).map_err(err_to_js)?;
 
         self.neighbourhood = None;
         if let Some(boundary) = boundary {
             self.neighbourhood = Some(Neighbourhood::new(&self.map, boundary).map_err(err_to_js)?);
+            Ok(true)
+        } else {
+            Ok(false)
         }
-
-        Ok(())
     }
 }
 
