@@ -5,7 +5,7 @@ extern crate log;
 
 use std::sync::Once;
 
-use geo::{Coord, Polygon};
+use geo::{Coord, LineString, Polygon};
 use geojson::{Feature, GeoJson, Geometry};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
@@ -125,6 +125,22 @@ impl LTN {
                 x: pos.lng,
                 y: pos.lat,
             }),
+            &self.neighbourhood.as_ref().unwrap().interior_roads,
+        );
+        self.render_neighbourhood()
+    }
+
+    /// Takes a LineString feature
+    #[wasm_bindgen(js_name = addManyModalFilters)]
+    pub fn add_many_modal_filters(&mut self, input: JsValue) -> Result<String, JsValue> {
+        info!("parse it");
+        let gj: Feature = serde_wasm_bindgen::from_value(input)?;
+        info!("make it geo");
+        let mut linestring: LineString = gj.try_into().map_err(err_to_js)?;
+        self.map.mercator.to_mercator_in_place(&mut linestring);
+
+        self.map.add_many_modal_filters(
+            linestring,
             &self.neighbourhood.as_ref().unwrap().interior_roads,
         );
         self.render_neighbourhood()

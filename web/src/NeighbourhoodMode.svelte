@@ -1,10 +1,11 @@
 <script lang="ts">
   import { LTN } from "backend";
-  import type { Feature, Polygon } from "geojson";
+  import type { Feature, LineString, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
   import { PropertiesTable } from "./common";
+  import FreehandLine from "./FreehandLine.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
 
@@ -15,6 +16,7 @@
   export let showBasemap: boolean;
 
   let addingFilter = false;
+  let addingMultipleFilters = false;
   let undoLength = 0;
   let redoLength = 0;
 
@@ -54,7 +56,7 @@
   }
 
   function onKeyDown(e: KeyboardEvent) {
-    if (e.key == "a" && !addingFilter) {
+    if (e.key == "a" && !addingFilter && !addingMultipleFilters) {
       addingFilter = true;
     }
     if (e.key == "z" && e.ctrlKey) {
@@ -76,6 +78,15 @@
       mode: "network",
     };
   }
+
+  function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
+    let f = e.detail;
+    if (f) {
+      render(app.addManyModalFilters(f));
+    }
+
+    addingMultipleFilters = false;
+  }
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -90,8 +101,15 @@
       >
     </div>
     <div>
-      <button on:click={() => (addingFilter = true)} disabled={addingFilter}
+      <button
+        on:click={() => (addingFilter = true)}
+        disabled={addingFilter || addingMultipleFilters}
         >Add a modal filter</button
+      >
+      <button
+        on:click={() => (addingMultipleFilters = true)}
+        disabled={addingFilter || addingMultipleFilters}
+        >Add many modal filters along line</button
       >
     </div>
     <div>
@@ -137,5 +155,8 @@
         </Popup>
       </div>
     </RenderNeighbourhood>
+    {#if addingMultipleFilters}
+      <FreehandLine {map} on:done={gotFreehandLine} />
+    {/if}
   </div>
 </SplitComponent>

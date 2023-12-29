@@ -3,7 +3,8 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    Closest, ClosestPoint, Coord, EuclideanLength, Line, LineLocatePoint, LineString, Point,
+    Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineIntersection,
+    LineLocatePoint, LineString, Point,
 };
 use geojson::{Feature, Geometry};
 use serde::Serialize;
@@ -108,6 +109,26 @@ impl MapModel {
         self.redo_queue.clear();
     }
 
+    pub fn add_many_modal_filters(
+        &mut self,
+        along_line: LineString,
+        candidate_roads: &HashSet<RoadID>,
+    ) {
+        let mut edits = Vec::new();
+        for r in candidate_roads {
+            let road = self.get_r(*r);
+            if let Some(percent_along) = linestring_intersection(&road.linestring, &along_line) {
+                edits.push(Command::SetModalFilter(
+                    *r,
+                    Some(ModalFilter { percent_along }),
+                ));
+            }
+        }
+        let cmd = self.do_edit(Command::Multiple(edits));
+        self.undo_stack.push(cmd);
+        self.redo_queue.clear();
+    }
+
     pub fn delete_modal_filter(&mut self, r: RoadID) {
         let cmd = self.do_edit(Command::SetModalFilter(r, None));
         self.undo_stack.push(cmd);
@@ -127,6 +148,10 @@ impl MapModel {
                     self.modal_filters.remove(&r);
                 }
                 Command::SetModalFilter(r, prev)
+            }
+            Command::Multiple(list) => {
+                let undo_list = list.into_iter().map(|cmd| self.do_edit(cmd)).collect();
+                Command::Multiple(undo_list)
             }
         }
     }
@@ -175,4 +200,24 @@ pub struct ModalFilter {
 
 pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
+    Multiple(Vec<Command>),
+}
+
+// Looks for the first place ls2 crosses ls1. Returns the percent_along ls1 of that point.
+fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64> {
+    if !ls1.intersects(ls2) {
+        return None;
+    }
+    // TODO Urgh very brute force
+    for line1 in ls1.lines() {
+        for line2 in ls2.lines() {
+            if let Some(LineIntersection::SinglePoint { intersection, .. }) =
+                geo::algorithm::line_intersection::line_intersection(line1, line2)
+            {
+                return ls1.line_locate_point(&intersection.into());
+            }
+        }
+    }
+    // TODO Didn't find it...
+    None
 }
