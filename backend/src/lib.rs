@@ -6,7 +6,7 @@ extern crate log;
 use std::sync::Once;
 
 use geo::{Coord, LineString, Polygon};
-use geojson::{Feature, GeoJson, Geometry};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
@@ -179,7 +179,24 @@ impl LTN {
     #[wasm_bindgen(js_name = toSavefile)]
     pub fn to_savefile(&self) -> Result<String, JsValue> {
         // TODO Trim coordinates... in mercator?
-        Ok(serde_json::to_string(&self.map.to_savefile(self.neighbourhood.as_ref())).map_err(err_to_js)?)
+        Ok(
+            serde_json::to_string(&self.map.to_savefile(self.neighbourhood.as_ref()))
+                .map_err(err_to_js)?,
+        )
+    }
+
+    /// Doesn't return anything; the caller has to figure out what to render
+    #[wasm_bindgen(js_name = loadSavefile)]
+    pub fn load_savefile(&mut self, input: JsValue) -> Result<(), JsValue> {
+        let gj: FeatureCollection = serde_wasm_bindgen::from_value(input)?;
+        let boundary = self.map.load_savefile(gj).map_err(err_to_js)?;
+
+        self.neighbourhood = None;
+        if let Some(boundary) = boundary {
+            self.neighbourhood = Some(Neighbourhood::new(&self.map, boundary).map_err(err_to_js)?);
+        }
+
+        Ok(())
     }
 }
 

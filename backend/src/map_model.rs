@@ -3,13 +3,13 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    LineInterpolatePoint, Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineIntersection,
-    LineLocatePoint, LineString, Point,
+    Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineInterpolatePoint,
+    LineIntersection, LineLocatePoint, LineString, Point, Polygon,
 };
-use geojson::{Feature, Geometry, GeoJson};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Serialize;
 
-use crate::{Mercator, Tags, Neighbourhood};
+use crate::{Mercator, Neighbourhood, Tags};
 
 pub struct MapModel {
     pub roads: Vec<Road>,
@@ -87,16 +87,19 @@ impl MapModel {
         // TODO prune with rtree?
         let (_, r, percent_along) = candidate_roads
             .iter()
-            .map(|r| {
+            .filter_map(|r| {
                 let road = self.get_r(*r);
-                let hit_pt = match road.linestring.closest_point(&click_pt.into()) {
-                    Closest::Intersection(pt) => pt,
-                    Closest::SinglePoint(pt) => pt,
-                    Closest::Indeterminate => unreachable!(),
-                };
-                let score = Line::new(click_pt, hit_pt.into()).euclidean_length();
-                let percent_along = road.linestring.line_locate_point(&hit_pt).unwrap();
-                ((score * 100.0) as usize, road.id, percent_along)
+                if let Some(hit_pt) = match road.linestring.closest_point(&click_pt.into()) {
+                    Closest::Intersection(pt) => Some(pt),
+                    Closest::SinglePoint(pt) => Some(pt),
+                    Closest::Indeterminate => None,
+                } {
+                    let score = Line::new(click_pt, hit_pt.into()).euclidean_length();
+                    let percent_along = road.linestring.line_locate_point(&hit_pt).unwrap();
+                    Some(((score * 100.0) as usize, road.id, percent_along))
+                } else {
+                    None
+                }
             })
             .min_by_key(|pair| pair.0)
             .unwrap();
@@ -180,23 +183,60 @@ impl MapModel {
         // A point per modal filter
         // (When we detect existing, maybe need to instead compact edits)
         for (r, modal_filter) in &self.modal_filters {
-                let pt = self
-                    .get_r(*r)
-                    .linestring
-                    .line_interpolate_point(modal_filter.percent_along)
-                    .unwrap();
-                let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
-                f.set_property("kind", "modal_filter");
-                features.push(f);
+            let pt = self
+                .get_r(*r)
+                .linestring
+                .line_interpolate_point(modal_filter.percent_along)
+                .unwrap();
+            // TODO Maybe make the WASM API always do the mercator stuff
+            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
+            f.set_property("kind", "modal_filter");
+            features.push(f);
         }
 
         if let Some(neighbourhood) = neighbourhood {
-            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&neighbourhood.boundary_polygon)));
+            let mut f = Feature::from(Geometry::from(
+                &self.mercator.to_wgs84(&neighbourhood.boundary_polygon),
+            ));
             f.set_property("kind", "boundary");
             features.push(f);
         }
 
         GeoJson::from(features)
+    }
+
+    /// Returns the boundary polygon
+    pub fn load_savefile(&mut self, gj: FeatureCollection) -> Result<Option<Polygon>> {
+        // Clear previous state
+        self.modal_filters.clear();
+        self.undo_stack.clear();
+        self.redo_queue.clear();
+
+        let all_roads: HashSet<RoadID> = self.roads.iter().map(|r| r.id).collect();
+        let mut boundary = None;
+
+        for f in gj.features {
+            match f.property("kind").unwrap().as_str().unwrap() {
+                "modal_filter" => {
+                    let gj_pt: Point = f.geometry.unwrap().try_into()?;
+                    let pt = self.mercator.pt_to_mercator(gj_pt.into());
+                    // Filters could be defined for multiple neighbourhoods, not just the one
+                    // in the savefile
+                    self.add_modal_filter(pt, &all_roads);
+                }
+                "boundary" => {
+                    if boundary.is_some() {
+                        bail!("Multiple boundaries in savefile");
+                    }
+                    let mut polygon: Polygon = f.geometry.unwrap().value.try_into()?;
+                    self.mercator.to_mercator_in_place(&mut polygon);
+                    boundary = Some(polygon);
+                }
+                x => bail!("Unknown kind in savefile {x}"),
+            }
+        }
+
+        Ok(boundary)
     }
 }
 
