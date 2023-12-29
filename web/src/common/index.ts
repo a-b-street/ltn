@@ -56,3 +56,15 @@ export function makeColorRamp(
   step.push(colorScale[colorScale.length - 1]);
   return step as DataDrivenPropertyValueSpecification<string>;
 }
+
+export function downloadGeneratedFile(filename: string, textInput: string) {
+  let element = document.createElement("a");
+  element.setAttribute(
+    "href",
+    "data:text/plain;charset=utf-8, " + encodeURIComponent(textInput)
+  );
+  element.setAttribute("download", filename);
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}

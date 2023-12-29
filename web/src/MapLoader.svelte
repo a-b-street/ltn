@@ -3,7 +3,7 @@
   import type { Map } from "maplibre-gl";
   import init2 from "route-snapper";
   import { onMount } from "svelte";
-  import { Loading, OverpassSelector } from "./common";
+  import { downloadGeneratedFile, Loading, OverpassSelector } from "./common";
 
   export let app: LTN | undefined = undefined;
   export let map: Map;
@@ -23,7 +23,7 @@
       console.log("Using local cache, not od2net.org");
 
       // For quicker dev
-      loadExample("bristol");
+      example = "bristol";
     } catch (err) {}
   });
 
@@ -79,6 +79,11 @@
     }
     msg = null;
   }
+
+  function saveGj() {
+    let filename = example || "custom";
+    downloadGeneratedFile(`ltn_${filename}.geojson`, app.toSavefile());
+  }
 </script>
 
 <Loading {msg} />
@@ -117,4 +122,8 @@
     on:loading={(e) => (msg = e.detail)}
     on:error={(e) => window.alert(e.detail)}
   />
+
+  {#if app}
+    <div><button on:click={saveGj}>Save to GJ</button></div>
+  {/if}
 </div>

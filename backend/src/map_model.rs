@@ -3,13 +3,13 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineIntersection,
+    LineInterpolatePoint, Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineIntersection,
     LineLocatePoint, LineString, Point,
 };
-use geojson::{Feature, Geometry};
+use geojson::{Feature, Geometry, GeoJson};
 use serde::Serialize;
 
-use crate::{Mercator, Tags};
+use crate::{Mercator, Tags, Neighbourhood};
 
 pub struct MapModel {
     pub roads: Vec<Road>,
@@ -172,6 +172,31 @@ impl MapModel {
         let cmd = self.redo_queue.remove(0);
         let cmd = self.do_edit(cmd);
         self.undo_stack.push(cmd);
+    }
+
+    pub fn to_savefile(&self, neighbourhood: Option<&Neighbourhood>) -> GeoJson {
+        let mut features = Vec::new();
+
+        // A point per modal filter
+        // (When we detect existing, maybe need to instead compact edits)
+        for (r, modal_filter) in &self.modal_filters {
+                let pt = self
+                    .get_r(*r)
+                    .linestring
+                    .line_interpolate_point(modal_filter.percent_along)
+                    .unwrap();
+                let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
+                f.set_property("kind", "modal_filter");
+                features.push(f);
+        }
+
+        if let Some(neighbourhood) = neighbourhood {
+            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&neighbourhood.boundary_polygon)));
+            f.set_property("kind", "boundary");
+            features.push(f);
+        }
+
+        GeoJson::from(features)
     }
 }
 

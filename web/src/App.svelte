@@ -47,11 +47,9 @@
   let map: Map;
 
   function zoomToFit() {
-    if (map && app) {
-      // TODO wasteful
-      let bbox = turfBbox(JSON.parse(app.render()));
-      map.fitBounds(bbox, { animate: false });
-    }
+    // TODO wasteful
+    let bbox = turfBbox(JSON.parse(app.render()));
+    map.fitBounds(bbox, { animate: false });
   }
 
   function gotApp(_x: LTN) {
@@ -83,8 +81,10 @@
   <div slot="left">
     {#if map}
       <MapLoader {map} bind:app />
+      {#if app}
+        <div><button on:click={zoomToFit}>Zoom to fit</button></div>
+      {/if}
     {/if}
-    <div><button on:click={zoomToFit}>Zoom to fit</button></div>
     <div>
       <label
         ><input type="checkbox" bind:checked={showBasemap} />Show basemap</label

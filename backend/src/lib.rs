@@ -133,9 +133,7 @@ impl LTN {
     /// Takes a LineString feature
     #[wasm_bindgen(js_name = addManyModalFilters)]
     pub fn add_many_modal_filters(&mut self, input: JsValue) -> Result<String, JsValue> {
-        info!("parse it");
         let gj: Feature = serde_wasm_bindgen::from_value(input)?;
-        info!("make it geo");
         let mut linestring: LineString = gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut linestring);
 
@@ -175,6 +173,13 @@ impl LTN {
                 .collect::<Vec<_>>(),
         ))
         .map_err(err_to_js)?)
+    }
+
+    /// GJ with modal filters and optionally the neighbourhood boundary
+    #[wasm_bindgen(js_name = toSavefile)]
+    pub fn to_savefile(&self) -> Result<String, JsValue> {
+        // TODO Trim coordinates... in mercator?
+        Ok(serde_json::to_string(&self.map.to_savefile(self.neighbourhood.as_ref())).map_err(err_to_js)?)
     }
 }
 
