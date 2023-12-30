@@ -1,3 +1,5 @@
+import turfBbox from "@turf/bbox";
+import type { GeoJSON } from "geojson";
 import type {
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
@@ -67,4 +69,9 @@ export function downloadGeneratedFile(filename: string, textInput: string) {
   document.body.appendChild(element);
   element.click();
   document.body.removeChild(element);
+}
+
+// Suitable for passing to map.fitBounds. Work around https://github.com/Turfjs/turf/issues/1807.
+export function bbox(gj: GeoJSON): [number, number, number, number] {
+  return turfBbox(gj) as [number, number, number, number];
 }

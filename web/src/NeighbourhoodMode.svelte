@@ -1,6 +1,10 @@
 <script lang="ts">
-  import { LTN } from "backend";
-  import type { Feature, LineString, Polygon } from "geojson";
+  import type {
+    Feature,
+    FeatureCollection,
+    LineString,
+    Polygon,
+  } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
@@ -21,39 +25,43 @@
   let redoLength = 0;
   let boundary: Feature<Polygon> | null;
 
-  let gjInput;
-  render($app.renderNeighbourhood());
+  let gjInput: FeatureCollection;
+  render($app!.renderNeighbourhood());
 
-  function render(gjString) {
+  function render(gjString: string) {
     gjInput = JSON.parse(gjString);
-    boundary = gjInput.features.find((f) => f.properties.kind == "boundary");
+    boundary = gjInput.features.find(
+      (f) => f.properties!.kind == "boundary"
+    )! as Feature<Polygon>;
 
+    // @ts-ignore These foreign members exist
     undoLength = gjInput.undo_length;
+    // @ts-ignore These foreign members exist
     redoLength = gjInput.redo_length;
   }
 
   $: if (addingFilter) {
     map.on("click", onClick);
-    map.style.cursor = "crosshair";
+    map.getCanvas().style.cursor = "crosshair";
   }
   onDestroy(() => {
     stopAddingFilter();
     // TODO Then we can't "nest" ViewShortcuts beneath this
-    //$app.unsetNeighbourhood();
+    //$app!.unsetNeighbourhood();
   });
   function onClick(e: MapMouseEvent) {
-    render($app.addModalFilter(e.lngLat));
+    render($app!.addModalFilter(e.lngLat));
     stopAddingFilter();
   }
   function stopAddingFilter() {
     addingFilter = false;
     map.off("click", onClick);
-    map.style.cursor = "inherit";
+    map.getCanvas().style.cursor = "inherit";
   }
 
   function deleteFilter(f: Feature) {
-    if (f.properties.kind == "modal_filter") {
-      render($app.deleteModalFilter(f.properties.road));
+    if (f.properties!.kind == "modal_filter") {
+      render($app!.deleteModalFilter(f.properties!.road));
     }
   }
 
@@ -69,10 +77,10 @@
     }
   }
   function undo() {
-    render($app.undo());
+    render($app!.undo());
   }
   function redo() {
-    render($app.redo());
+    render($app!.redo());
   }
 
   function reset() {
@@ -84,7 +92,7 @@
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      render($app.addManyModalFilters(f));
+      render($app!.addManyModalFilters(f));
     }
 
     addingMultipleFilters = false;

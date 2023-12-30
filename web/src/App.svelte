@@ -1,10 +1,8 @@
 <script lang="ts">
-  import turfBbox from "@turf/bbox";
   import { LTN } from "backend";
-  import type { Feature, Polygon } from "geojson";
   import type { Map } from "maplibre-gl";
   import { MapLibre } from "svelte-maplibre";
-  import { Layout } from "./common";
+  import { bbox, Layout } from "./common";
   import { RouteTool } from "./common/route_tool";
   import MapLoader from "./MapLoader.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
@@ -17,7 +15,7 @@
   $: mapStyle = showBasemap
     ? "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
     : {
-        version: 8,
+        version: 8 as const,
         sources: {},
         layers: [],
       };
@@ -27,11 +25,10 @@
 
   function zoomToFit() {
     // TODO wasteful
-    let bbox = turfBbox(JSON.parse($app.render()));
-    map.fitBounds(bbox, { animate: false });
+    map.fitBounds(bbox(JSON.parse($app!.render())), { animate: false });
   }
 
-  function gotApp(_x: LTN) {
+  function gotApp(_x: LTN | null) {
     if (!$app) {
       return;
     }
@@ -44,8 +41,8 @@
   }
   $: gotApp($app);
 
-  let sidebarDiv;
-  let mapDiv;
+  let sidebarDiv: HTMLDivElement;
+  let mapDiv: HTMLDivElement;
   $: if (sidebarDiv && $sidebarContents) {
     sidebarDiv.innerHTML = "";
     sidebarDiv.appendChild($sidebarContents);

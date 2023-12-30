@@ -1,10 +1,11 @@
 <script lang="ts">
+  import type { Feature, Polygon } from "geojson";
   import { RouteTool } from "./common/route_tool";
   import RouteSnapperLayer from "./common/RouteSnapperLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
 
-  export let route_tool;
+  export let route_tool: RouteTool;
   export let existing: Feature<Polygon> | null;
 
   if (existing) {
@@ -14,7 +15,7 @@
   }
 
   route_tool.addEventListenerSuccess((feature) => {
-    $app.setNeighbourhood(feature);
+    $app!.setNeighbourhood(feature);
     $mode = {
       mode: "neighbourhood",
     };

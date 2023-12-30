@@ -9,7 +9,7 @@
 
   // TODO Could split this stuff; it just cares about the example
   function saveGj() {
-    downloadGeneratedFile(filename, $app.toSavefile());
+    downloadGeneratedFile(filename, $app!.toSavefile());
   }
 
   let fileInput: HTMLInputElement;
@@ -25,7 +25,7 @@
   function loadEdits(gj: string) {
     msg = "Loading edits from file or local storage";
     // TODO If we're already in one of the states, nothing refreshes immediately...
-    if ($app.loadSavefile(JSON.parse(gj))) {
+    if ($app!.loadSavefile(JSON.parse(gj))) {
       $mode = { mode: "neighbourhood" };
     } else {
       $mode = { mode: "network" };
@@ -43,7 +43,7 @@
   }
 
   function saveLocalStorage() {
-    window.localStorage.setItem(filename, $app.toSavefile());
+    window.localStorage.setItem(filename, $app!.toSavefile());
   }
 </script>
 

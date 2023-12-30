@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Feature, FeatureCollection } from "geojson";
   import {
     CircleLayer,
     FillLayer,
@@ -13,16 +14,16 @@
     isPolygon,
   } from "./common";
 
-  export let gjInput;
+  export let gjInput: FeatureCollection;
   export let showBasemap: boolean;
-  export let onClickLine = (f) => {};
-  export let onClickCircle = (f) => {};
+  export let onClickLine = (f: Feature) => {};
+  export let onClickCircle = (f: Feature) => {};
 
-  let gj;
-  let maxShortcuts;
+  let gj: FeatureCollection;
+  let maxShortcuts: number;
   $: render(gjInput, showBasemap);
 
-  function render(x, y) {
+  function render(x: FeatureCollection, y: boolean) {
     // A qualitative palette from colorbrewer2.org, skipping the red hue (used
     // for levels of shortcutting) and grey (too close to the basemap)
     let cell_colors = [
@@ -39,10 +40,11 @@
     ];
 
     maxShortcuts = Math.max(
-      ...gjInput.features.map((f) => f.properties.shortcuts ?? 0)
+      ...gjInput.features.map((f) => f.properties!.shortcuts ?? 0)
     );
 
     for (let f of gjInput.features) {
+      f.properties ??= {};
       if (f.properties.color == "disconnected") {
         f.properties.color = "red";
       } else if (Object.hasOwn(f.properties, "color")) {

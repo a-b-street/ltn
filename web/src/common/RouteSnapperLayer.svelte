@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Feature } from "geojson";
   import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import {
     constructMatchExpression,

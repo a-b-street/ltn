@@ -177,6 +177,9 @@ export class RouteTool {
   // the route was produced by a different tool, or an older version of this
   // tool), the edited line-string may differ from the input.
   editExistingRoute(feature: Feature<LineString>) {
+    // Pacify TS
+    feature.properties ??= {};
+
     if (this.active) {
       window.alert("Bug: editExistingRoute called when tool is already active");
     }
@@ -209,6 +212,9 @@ export class RouteTool {
 
   // This only handles features previously returned by this tool.
   editExistingArea(feature: Feature<Polygon>) {
+    // Pacify TS
+    feature.properties ??= {};
+
     if (this.active) {
       window.alert("Bug: editExistingArea called when tool is already active");
     }

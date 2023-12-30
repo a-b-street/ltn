@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
-  import { app, mode } from "./stores";
+  import { app } from "./stores";
 
   export let map: Map;
 

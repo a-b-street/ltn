@@ -1,4 +1,5 @@
 <script lang="ts">
+  // @ts-ignore No types
   import MapboxDraw from "@mapbox/mapbox-gl-draw";
   import type { Feature, Polygon } from "geojson";
   import type { IControl, LngLat, Map } from "maplibre-gl";

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { LTN } from "backend";
+  import type { FeatureCollection } from "geojson";
   import type { Map } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode } from "./stores";
+  import { app, mode, type Mode } from "./stores";
 
   export let prevMode: Mode;
   export let map: Map;
@@ -21,10 +21,10 @@
         gj: FeatureCollection;
         shortcutIndex: number | null;
       };
-  let state = { state: "neutral" };
+  let state: State = { state: "neutral" };
 
   function choseRoad(road: number) {
-    let gj = JSON.parse($app.getShortcutsCrossingRoad(road));
+    let gj = JSON.parse($app!.getShortcutsCrossingRoad(road));
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");
       return;
@@ -47,7 +47,7 @@
 
   function onKeyDown(e: KeyboardEvent) {
     if (state.state == "chose-road") {
-      if (e.key == "ArrowLeft" && state.shortcutIndex != 0) {
+      if (e.key == "ArrowLeft" && state.shortcutIndex) {
         e.stopPropagation();
         state.shortcutIndex--;
       }
