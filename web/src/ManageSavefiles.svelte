@@ -3,13 +3,13 @@
   import { app, mode } from "./stores";
 
   export let example: string;
+  $: filename = `ltn_${example || "custom"}.geojson`;
 
   let msg: string | null = null;
 
   // TODO Could split this stuff; it just cares about the example
   function saveGj() {
-    let filename = example || "custom";
-    downloadGeneratedFile(`ltn_${filename}.geojson`, $app.toSavefile());
+    downloadGeneratedFile(filename, $app.toSavefile());
   }
 
   let fileInput: HTMLInputElement;
@@ -23,13 +23,27 @@
   }
 
   function loadEdits(gj: string) {
-    msg = "Loading edits from file";
+    msg = "Loading edits from file or local storage";
     // TODO If we're already in one of the states, nothing refreshes immediately...
     if ($app.loadSavefile(JSON.parse(gj))) {
       $mode = { mode: "neighbourhood" };
     } else {
       $mode = { mode: "network" };
     }
+    msg = null;
+  }
+
+  function loadLocalStorage() {
+    let gj = window.localStorage.getItem(filename);
+    if (gj) {
+      loadEdits(gj);
+    } else {
+      window.alert("Nothing saved");
+    }
+  }
+
+  function saveLocalStorage() {
+    window.localStorage.setItem(filename, $app.toSavefile());
   }
 </script>
 
@@ -40,6 +54,11 @@
       Load edits from GJ
       <input bind:this={fileInput} on:change={loadFile} type="file" />
     </label>
+  </div>
+  <div>
+    <button on:click={saveLocalStorage}>Save to local storage</button><button
+      on:click={loadLocalStorage}>Load from local storage</button
+    >
   </div>
 {/if}
 
