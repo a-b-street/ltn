@@ -3,7 +3,8 @@
   import type { Map } from "maplibre-gl";
   import init2 from "route-snapper";
   import { onMount } from "svelte";
-  import { downloadGeneratedFile, Loading, OverpassSelector } from "./common";
+  import { Loading, OverpassSelector } from "./common";
+  import ManageSavefiles from "./ManageSavefiles.svelte";
   import { app, mode } from "./stores";
 
   export let map: Map;
@@ -27,10 +28,10 @@
     } catch (err) {}
   });
 
-  let mapFileInput: HTMLInputElement;
-  async function loadMapFile(e: Event) {
+  let fileInput: HTMLInputElement;
+  async function loadFile(e: Event) {
     try {
-      loadMap(await mapFileInput.files![0].arrayBuffer());
+      loadMap(await fileInput.files![0].arrayBuffer());
       example = "";
     } catch (err) {
       window.alert(`Couldn't open this file: ${err}`);
@@ -79,32 +80,6 @@
     }
     msg = null;
   }
-
-  // TODO Could split this stuff; it just cares about the example
-  function saveGj() {
-    let filename = example || "custom";
-    downloadGeneratedFile(`ltn_${filename}.geojson`, $app.toSavefile());
-  }
-
-  let editsFileInput: HTMLInputElement;
-  async function loadEditsFile(e: Event) {
-    try {
-      loadEdits(await editsFileInput.files![0].text());
-    } catch (err) {
-      window.alert(`Couldn't open this file: ${err}`);
-    }
-    msg = null;
-  }
-
-  function loadEdits(gj: string) {
-    msg = "Loading edits from file";
-    // TODO If we're already in one of the states, nothing refreshes immediately...
-    if ($app.loadSavefile(JSON.parse(gj))) {
-      $mode = { mode: "neighbourhood" };
-    } else {
-      $mode = { mode: "network" };
-    }
-  }
 </script>
 
 <Loading {msg} />
@@ -113,7 +88,7 @@
   <div>
     <label>
       Load an osm.xml or a .pbf file:
-      <input bind:this={mapFileInput} on:change={loadMapFile} type="file" />
+      <input bind:this={fileInput} on:change={loadFile} type="file" />
     </label>
   </div>
 
@@ -144,17 +119,6 @@
     on:error={(e) => window.alert(e.detail)}
   />
 
-  {#if $app}
-    <div><button on:click={saveGj}>Save to GJ</button></div>
-    <div>
-      <label>
-        Load edits from GJ
-        <input
-          bind:this={editsFileInput}
-          on:change={loadEditsFile}
-          type="file"
-        />
-      </label>
-    </div>
-  {/if}
+  <hr />
+  <ManageSavefiles {example} />
 </div>
