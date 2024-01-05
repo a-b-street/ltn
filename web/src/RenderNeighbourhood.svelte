@@ -66,7 +66,7 @@
     manageHoverState
     paint={{
       "fill-color": ["get", "color"],
-      "fill-opacity": hoverStateFilter(0.3, 0.5),
+      "fill-opacity": interactive ? hoverStateFilter(0.3, 0.5) : 0.3,
     }}
   />
 

@@ -2,7 +2,7 @@
   import { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
-  import { bbox } from "./common";
+  import { bbox, constructMatchExpression } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
@@ -48,6 +48,10 @@
     <div><button on:click={back}>Back to editing</button></div>
 
     <p>Drag markers for a route</p>
+    <p>
+      <span style="color: red">Route before</span>,
+      <span style="color: blue">route after</span>
+    </p>
   </div>
 
   <div slot="map">
@@ -58,8 +62,15 @@
     <GeoJSON data={gj}>
       <LineLayer
         paint={{
-          "line-width": 5,
-          "line-color": "red",
+          "line-width": 10,
+          "line-color": constructMatchExpression(
+            ["get", "kind"],
+            {
+              before: "red",
+              after: "blue",
+            },
+            "red"
+          ),
         }}
       />
     </GeoJSON>

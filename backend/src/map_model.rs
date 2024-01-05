@@ -16,7 +16,9 @@ pub struct MapModel {
     pub intersections: Vec<Intersection>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
-    pub router: Router,
+    // TODO Wasteful, can share some
+    pub router_original: Router,
+    pub router_current: Router,
 
     // TODO Keep edits / state here or not?
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
@@ -111,6 +113,11 @@ impl MapModel {
         ));
         self.undo_stack.push(cmd);
         self.redo_queue.clear();
+        self.after_edited();
+    }
+
+    fn after_edited(&mut self) {
+        self.router_current = Router::new(&self.roads, &self.intersections, &self.modal_filters);
     }
 
     pub fn add_many_modal_filters(
@@ -131,12 +138,14 @@ impl MapModel {
         let cmd = self.do_edit(Command::Multiple(edits));
         self.undo_stack.push(cmd);
         self.redo_queue.clear();
+        self.after_edited();
     }
 
     pub fn delete_modal_filter(&mut self, r: RoadID) {
         let cmd = self.do_edit(Command::SetModalFilter(r, None));
         self.undo_stack.push(cmd);
         self.redo_queue.clear();
+        self.after_edited();
     }
 
     // Returns the command to undo this one
@@ -166,6 +175,7 @@ impl MapModel {
         if let Some(cmd) = self.undo_stack.pop() {
             let cmd = self.do_edit(cmd);
             self.redo_queue.push(cmd);
+            self.after_edited();
         }
     }
 
@@ -176,6 +186,7 @@ impl MapModel {
         let cmd = self.redo_queue.remove(0);
         let cmd = self.do_edit(cmd);
         self.undo_stack.push(cmd);
+        self.after_edited();
     }
 
     pub fn to_savefile(&self, neighbourhood: Option<&Neighbourhood>) -> GeoJson {
@@ -236,14 +247,19 @@ impl MapModel {
                 x => bail!("Unknown kind in savefile {x}"),
             }
         }
+        self.router_current = Router::new(&self.roads, &self.intersections, &self.modal_filters);
 
         Ok(boundary)
     }
 
     pub fn compare_route(&self, pt1: Coord, pt2: Coord) -> GeoJson {
         let mut features = Vec::new();
-        // TODO before, after
-        if let Some(linestring) = self.router.route(self, pt1, pt2) {
+        if let Some(linestring) = self.router_original.route(self, pt1, pt2) {
+            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
+            f.set_property("kind", "before");
+            features.push(f);
+        }
+        if let Some(linestring) = self.router_current.route(self, pt1, pt2) {
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
             f.set_property("kind", "after");
             features.push(f);

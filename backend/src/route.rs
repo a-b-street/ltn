@@ -7,6 +7,7 @@ use rstar::RTree;
 
 use crate::{Intersection, IntersectionID, MapModel, ModalFilter, NodeMap, Road, RoadID};
 
+#[derive(Clone)]
 pub struct Router {
     ch: FastGraph,
     node_map: NodeMap<IntersectionID>,
