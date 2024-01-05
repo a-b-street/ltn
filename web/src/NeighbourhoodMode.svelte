@@ -5,19 +5,16 @@
     LineString,
     Polygon,
   } from "geojson";
-  import type { Map, MapMouseEvent } from "maplibre-gl";
+  import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
   import { PropertiesTable } from "./common";
   import FreehandLine from "./FreehandLine.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode } from "./stores";
+  import { app, map, mode } from "./stores";
 
   // Caller is responsible for doing app.setNeighbourhood
-
-  export let map: Map;
-  export let showBasemap: boolean;
 
   let addingFilter = false;
   let addingMultipleFilters = false;
@@ -41,9 +38,9 @@
   }
 
   $: if (addingFilter) {
-    map.on("click", onClick);
+    $map!.on("click", onClick);
     // TODO Still doesn't last long
-    map.getCanvas().style.cursor = "crosshair";
+    $map!.getCanvas().style.cursor = "crosshair";
   }
   onDestroy(() => {
     stopAddingFilter();
@@ -56,8 +53,8 @@
   }
   function stopAddingFilter() {
     addingFilter = false;
-    map.off("click", onClick);
-    map.getCanvas().style.cursor = "inherit";
+    $map!.off("click", onClick);
+    $map!.getCanvas().style.cursor = "inherit";
   }
 
   function deleteFilter(f: Feature) {
@@ -84,7 +81,7 @@
     render($app!.redo());
   }
 
-  function reset() {
+  function pickNewNeighbourhood() {
     $mode = {
       mode: "network",
     };
@@ -104,7 +101,9 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <div><button on:click={reset}>Reset</button></div>
+    <div>
+      <button on:click={pickNewNeighbourhood}>Pick new neighbourghood</button>
+    </div>
     <div>
       <button
         on:click={() => ($mode = { mode: "set-boundary", existing: boundary })}
@@ -124,10 +123,12 @@
       >
     </div>
     <div>
-      <button
-        on:click={() => ($mode = { mode: "view-shortcuts", prevMode: $mode })}
+      <button on:click={() => ($mode = { mode: "view-shortcuts" })}
         >View shortcuts</button
       >
+    </div>
+    <div>
+      <button on:click={() => ($mode = { mode: "route" })}>Route</button>
     </div>
 
     <div>
@@ -151,8 +152,7 @@
   <div slot="map">
     <RenderNeighbourhood
       {gjInput}
-      {showBasemap}
-      interactive={!addingFilter}
+      interactive={!addingFilter && !addingMultipleFilters}
       onClickLine={(f) => window.open(f.properties.way, "_blank")}
       onClickCircle={deleteFilter}
     >
@@ -168,7 +168,7 @@
       </div>
     </RenderNeighbourhood>
     {#if addingMultipleFilters}
-      <FreehandLine {map} on:done={gotFreehandLine} />
+      <FreehandLine map={$map} on:done={gotFreehandLine} />
     {/if}
   </div>
 </SplitComponent>

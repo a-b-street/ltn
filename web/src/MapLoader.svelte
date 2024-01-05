@@ -1,13 +1,10 @@
 <script lang="ts">
   import init, { LTN } from "backend";
-  import type { Map } from "maplibre-gl";
   import init2 from "route-snapper";
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
-  import { app } from "./stores";
-
-  export let map: Map;
+  import { app, map } from "./stores";
 
   let example = "";
   let msg: string | null = null;
@@ -113,7 +110,7 @@
   </div>
 
   <OverpassSelector
-    {map}
+    map={$map}
     on:gotXml={gotXml}
     on:loading={(e) => (msg = e.detail)}
     on:error={(e) => window.alert(e.detail)}

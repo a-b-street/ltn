@@ -7,12 +7,19 @@
   import MapLoader from "./MapLoader.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
+  import RouteMode from "./RouteMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
-  import { app, mapContents, mode, sidebarContents } from "./stores";
+  import {
+    app,
+    mapContents,
+    map as mapStore,
+    mode,
+    showBasemap,
+    sidebarContents,
+  } from "./stores";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
-  let showBasemap = false;
-  $: mapStyle = showBasemap
+  $: mapStyle = $showBasemap
     ? "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
     : {
         version: 8 as const,
@@ -22,10 +29,13 @@
 
   let route_tool: RouteTool | undefined = undefined;
   let map: Map;
+  $: if (map) {
+    mapStore.set(map);
+  }
 
   function zoomToFit() {
     // TODO wasteful
-    map.fitBounds(bbox(JSON.parse($app!.render())), { animate: false });
+    $mapStore!.fitBounds(bbox(JSON.parse($app!.render())), { animate: false });
   }
 
   function gotApp(_x: LTN | null) {
@@ -37,7 +47,7 @@
     $mode = {
       mode: "network",
     };
-    route_tool = new RouteTool(map, $app.toRouteSnapper());
+    route_tool = new RouteTool($mapStore!, $app.toRouteSnapper());
   }
   $: gotApp($app);
 
@@ -55,15 +65,15 @@
 
 <Layout>
   <div slot="left">
-    {#if map}
-      <MapLoader {map} />
+    {#if $mapStore}
+      <MapLoader />
       {#if $app}
         <div><button on:click={zoomToFit}>Zoom to fit</button></div>
       {/if}
     {/if}
     <div>
       <label
-        ><input type="checkbox" bind:checked={showBasemap} />Show basemap</label
+        ><input type="checkbox" bind:checked={$showBasemap} />Show basemap</label
       >
     </div>
     <hr />
@@ -85,9 +95,11 @@
         {:else if $mode.mode == "set-boundary"}
           <SetBoundaryMode {route_tool} existing={$mode.existing} />
         {:else if $mode.mode == "neighbourhood"}
-          <NeighbourhoodMode {map} {showBasemap} />
+          <NeighbourhoodMode />
         {:else if $mode.mode == "view-shortcuts"}
-          <ViewShortcutsMode prevMode={$mode.prevMode} {map} {showBasemap} />
+          <ViewShortcutsMode />
+        {:else if $mode.mode == "route"}
+          <RouteMode />
         {/if}
       {/if}
     </MapLibre>

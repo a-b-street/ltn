@@ -1,15 +1,10 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
-  import type { Map } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode, type Mode } from "./stores";
-
-  export let prevMode: Mode;
-  export let map: Map;
-  export let showBasemap: boolean;
+  import { app, map, mode } from "./stores";
 
   type State =
     | {
@@ -39,10 +34,10 @@
   }
 
   onMount(() => {
-    map.keyboard.disable();
+    $map?.keyboard.disable();
   });
   onDestroy(() => {
-    map.keyboard.enable();
+    $map?.keyboard.enable();
   });
 
   function onKeyDown(e: KeyboardEvent) {
@@ -67,7 +62,7 @@
   }
 
   function back() {
-    $mode = prevMode;
+    $mode = { mode: "neighbourhood" };
   }
 </script>
 
@@ -102,7 +97,6 @@
     {#if state.state == "neutral"}
       <RenderNeighbourhood
         gjInput={JSON.parse($app.renderNeighbourhood())}
-        {showBasemap}
         onClickLine={(f) => choseRoad(f.properties.id)}
       >
         <div slot="line-popup">

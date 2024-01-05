@@ -15,11 +15,19 @@
   }
 
   route_tool.addEventListenerSuccess((feature) => {
-    $app!.setNeighbourhood(feature);
-    $mode = {
-      mode: "neighbourhood",
-    };
-    route_tool.clearEventListeners();
+    try {
+      $app!.setNeighbourhood(feature);
+      $mode = {
+        mode: "neighbourhood",
+      };
+      route_tool.clearEventListeners();
+    } catch (err) {
+      window.alert("Known georust bug hit, sorry");
+      $mode = {
+        mode: "network",
+      };
+      route_tool.clearEventListeners();
+    }
   });
   route_tool.addEventListenerFailure(() => {
     $mode = {

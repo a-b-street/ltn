@@ -13,9 +13,9 @@
     isPoint,
     isPolygon,
   } from "./common";
+  import { showBasemap } from "./stores";
 
   export let gjInput: FeatureCollection;
-  export let showBasemap: boolean;
   // When disabled, can't click lines or circles, no slots, no hoverCursor
   export let interactive = true;
   export let onClickLine = (f: Feature) => {};
@@ -23,7 +23,7 @@
 
   let gj: FeatureCollection;
   let maxShortcuts: number;
-  $: render(gjInput, showBasemap);
+  $: render(gjInput, $showBasemap);
 
   function render(x: FeatureCollection, y: boolean) {
     // A qualitative palette from colorbrewer2.org, skipping the red hue (used
@@ -61,7 +61,7 @@
 
 <GeoJSON data={gj} generateId>
   <FillLayer
-    beforeId={showBasemap ? "Building" : undefined}
+    beforeId={$showBasemap ? "Building" : undefined}
     filter={isPolygon}
     manageHoverState
     paint={{
