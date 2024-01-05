@@ -87,6 +87,13 @@ impl MapModel {
     }
 
     pub fn add_modal_filter(&mut self, click_pt: Coord, candidate_roads: &HashSet<RoadID>) {
+        let cmd = self.do_edit(self.add_modal_filter_cmd(click_pt, candidate_roads));
+        self.undo_stack.push(cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+    }
+
+    fn add_modal_filter_cmd(&self, click_pt: Coord, candidate_roads: &HashSet<RoadID>) -> Command {
         // TODO prune with rtree?
         let (_, r, percent_along) = candidate_roads
             .iter()
@@ -106,14 +113,7 @@ impl MapModel {
             })
             .min_by_key(|pair| pair.0)
             .unwrap();
-
-        let cmd = self.do_edit(Command::SetModalFilter(
-            r,
-            Some(ModalFilter { percent_along }),
-        ));
-        self.undo_stack.push(cmd);
-        self.redo_queue.clear();
-        self.after_edited();
+        Command::SetModalFilter(r, Some(ModalFilter { percent_along }))
     }
 
     fn after_edited(&mut self) {
@@ -224,17 +224,22 @@ impl MapModel {
         self.undo_stack.clear();
         self.redo_queue.clear();
 
+        // Filters could be defined for multiple neighbourhoods, not just the one
+        // in the savefile
         let all_roads: HashSet<RoadID> = self.roads.iter().map(|r| r.id).collect();
         let mut boundary = None;
+        let mut cmds = Vec::new();
 
         for f in gj.features {
             match f.property("kind").unwrap().as_str().unwrap() {
                 "modal_filter" => {
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
-                    let pt = self.mercator.pt_to_mercator(gj_pt.into());
-                    // Filters could be defined for multiple neighbourhoods, not just the one
-                    // in the savefile
-                    self.add_modal_filter(pt, &all_roads);
+                    cmds.push(
+                        self.add_modal_filter_cmd(
+                            self.mercator.pt_to_mercator(gj_pt.into()),
+                            &all_roads,
+                        ),
+                    );
                 }
                 "boundary" => {
                     if boundary.is_some() {
@@ -247,7 +252,13 @@ impl MapModel {
                 x => bail!("Unknown kind in savefile {x}"),
             }
         }
-        self.router_current = Router::new(&self.roads, &self.intersections, &self.modal_filters);
+
+        if !cmds.is_empty() {
+            let cmd = self.do_edit(Command::Multiple(cmds));
+            self.undo_stack.push(cmd);
+            self.redo_queue.clear();
+        }
+        self.after_edited();
 
         Ok(boundary)
     }
