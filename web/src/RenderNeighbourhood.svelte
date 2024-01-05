@@ -23,9 +23,10 @@
 
   let gj: FeatureCollection;
   let maxShortcuts: number;
-  $: render(gjInput, $showBasemap);
+  // TODO if we could set both reactively, thatd be ideal
+  $: render(gjInput);
 
-  function render(x: FeatureCollection, y: boolean) {
+  function render(x: FeatureCollection) {
     // A qualitative palette from colorbrewer2.org, skipping the red hue (used
     // for levels of shortcutting) and grey (too close to the basemap)
     let cell_colors = [
@@ -50,6 +51,7 @@
       if (f.properties.color == "disconnected") {
         f.properties.color = "red";
       } else if (Object.hasOwn(f.properties, "color")) {
+        // TODO Uhh weird when this runs twice
         f.properties.color =
           cell_colors[f.properties.color % cell_colors.length];
       }
