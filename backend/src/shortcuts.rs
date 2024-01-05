@@ -23,8 +23,12 @@ impl Shortcuts {
             if map.modal_filters.contains_key(r) {
                 continue;
             }
-
             let road = map.get_r(*r);
+            // Loops can't be part of a shortest path
+            if road.src_i == road.dst_i {
+                continue;
+            }
+
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
             let cost = (road.length() * 100.0) as usize;
@@ -73,7 +77,7 @@ impl Shortcuts {
 impl Path {
     pub fn geometry(&self, map: &MapModel) -> LineString {
         let mut pts = Vec::new();
-        for (r, i1, i2) in &self.steps {
+        for (r, i1, _i2) in &self.steps {
             let road = map.get_r(*r);
             if *i1 == road.src_i {
                 pts.extend(road.linestring.0.clone());

@@ -30,6 +30,10 @@ impl Router {
             if modal_filters.contains_key(&road.id) {
                 continue;
             }
+            // Loops can't be part of a shortest path
+            if road.src_i == road.dst_i {
+                continue;
+            }
 
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
