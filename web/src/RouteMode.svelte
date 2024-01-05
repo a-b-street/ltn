@@ -1,10 +1,18 @@
 <script lang="ts">
-  import type { FeatureCollection } from "geojson";
+  import { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
-  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
+  import { bbox } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
+
+  let pt_a: LngLat = randomPoint();
+  let pt_b: LngLat = randomPoint();
+
+  $: gj = JSON.parse(
+    $app!.compareRoute(pt_a.lng, pt_a.lat, pt_b.lng, pt_b.lat)
+  );
 
   onMount(() => {
     $map?.keyboard.disable();
@@ -12,6 +20,14 @@
   onDestroy(() => {
     $map?.keyboard.enable();
   });
+
+  function randomPoint(): LngLat {
+    // TODO Wasteful, can we remember these somewhere?
+    let bounds = bbox(JSON.parse($app!.render()));
+    let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
+    let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
+    return new LngLat(lng, lat);
+  }
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key == "Escape") {
@@ -39,5 +55,26 @@
       gjInput={JSON.parse($app.renderNeighbourhood())}
       interactive={false}
     />
+    <GeoJSON data={gj}>
+      <LineLayer
+        paint={{
+          "line-width": 5,
+          "line-color": "red",
+        }}
+      />
+    </GeoJSON>
+    <Marker bind:lngLat={pt_a} draggable><span class="dot">A</span></Marker>
+    <Marker bind:lngLat={pt_b} draggable><span class="dot">B</span></Marker>
   </div>
 </SplitComponent>
+
+<style>
+  .dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: grey;
+    text-align: center;
+  }
+</style>

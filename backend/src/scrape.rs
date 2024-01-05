@@ -4,7 +4,7 @@ use anyhow::Result;
 use geo::{Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
 
-use crate::{Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Tags};
+use crate::{Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router, Tags};
 
 struct Way {
     id: WayID,
@@ -53,12 +53,16 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         mercator.to_mercator_in_place(&mut i.point);
     }
 
+    let modal_filters = BTreeMap::new();
+    let router = Router::new(&roads, &intersections, &modal_filters);
+
     Ok(MapModel {
         roads,
         intersections,
         mercator,
+        router,
 
-        modal_filters: BTreeMap::new(),
+        modal_filters,
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
     })

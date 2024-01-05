@@ -80,6 +80,7 @@ dependencies = [
  "log",
  "osm-reader",
  "route-snapper-graph",
+ "rstar",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",

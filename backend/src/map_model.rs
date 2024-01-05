@@ -9,13 +9,14 @@ use geo::{
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Serialize;
 
-use crate::{Mercator, Neighbourhood, Tags};
+use crate::{Mercator, Neighbourhood, Router, Tags};
 
 pub struct MapModel {
     pub roads: Vec<Road>,
     pub intersections: Vec<Intersection>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
+    pub router: Router,
 
     // TODO Keep edits / state here or not?
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
@@ -237,6 +238,17 @@ impl MapModel {
         }
 
         Ok(boundary)
+    }
+
+    pub fn compare_route(&self, pt1: Coord, pt2: Coord) -> GeoJson {
+        let mut features = Vec::new();
+        // TODO before, after
+        if let Some(linestring) = self.router.route(self, pt1, pt2) {
+            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
+            f.set_property("kind", "after");
+            features.push(f);
+        }
+        GeoJson::from(features)
     }
 }
 
