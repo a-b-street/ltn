@@ -16,6 +16,8 @@
 
   export let gjInput: FeatureCollection;
   export let showBasemap: boolean;
+  // When disabled, can't click lines or circles, no slots, no hoverCursor
+  export let interactive = true;
   export let onClickLine = (f: Feature) => {};
   export let onClickCircle = (f: Feature) => {};
 
@@ -89,10 +91,12 @@
         "red"
       ),
     }}
-    on:click={(e) => onClickLine(e.detail.features[0])}
-    hoverCursor="pointer"
+    on:click={(e) => interactive && onClickLine(e.detail.features[0])}
+    hoverCursor={interactive ? "pointer" : null}
   >
-    <slot name="line-popup" />
+    {#if interactive}
+      <slot name="line-popup" />
+    {/if}
   </LineLayer>
 
   <CircleLayer
@@ -108,8 +112,10 @@
         "red"
       ),
     }}
-    on:click={(e) => onClickCircle(e.detail.features[0])}
+    on:click={(e) => interactive && onClickCircle(e.detail.features[0])}
   >
-    <slot name="circle-popup" />
+    {#if interactive}
+      <slot name="circle-popup" />
+    {/if}
   </CircleLayer>
 </GeoJSON>

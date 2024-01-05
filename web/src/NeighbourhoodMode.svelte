@@ -42,6 +42,7 @@
 
   $: if (addingFilter) {
     map.on("click", onClick);
+    // TODO Still doesn't last long
     map.getCanvas().style.cursor = "crosshair";
   }
   onDestroy(() => {
@@ -151,6 +152,7 @@
     <RenderNeighbourhood
       {gjInput}
       {showBasemap}
+      interactive={!addingFilter}
       onClickLine={(f) => window.open(f.properties.way, "_blank")}
       onClickCircle={deleteFilter}
     >
