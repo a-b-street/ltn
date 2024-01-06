@@ -16,6 +16,8 @@ pub struct MapModel {
     pub intersections: Vec<Intersection>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
+    pub boundary_polygon: Polygon,
+
     // TODO Wasteful, can share some
     pub router_original: Router,
     pub router_current: Router,
@@ -300,6 +302,21 @@ impl MapModel {
             features.push(f);
         }
         GeoJson::from(features)
+    }
+
+    /// Return a polygon covering the world, minus a hole for the boundary, in WGS84
+    pub fn invert_boundary(&self) -> Polygon {
+        let (boundary, _) = self.mercator.to_wgs84(&self.boundary_polygon).into_inner();
+        Polygon::new(
+            LineString::from(vec![
+                (180.0, 90.0),
+                (-180.0, 90.0),
+                (-180.0, -90.0),
+                (180.0, -90.0),
+                (180.0, 90.0),
+            ]),
+            vec![boundary],
+        )
     }
 }
 

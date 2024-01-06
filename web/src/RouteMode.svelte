@@ -2,7 +2,7 @@
   import { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
-  import { bbox, constructMatchExpression } from "./common";
+  import { constructMatchExpression } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
@@ -22,8 +22,7 @@
   });
 
   function randomPoint(): LngLat {
-    // TODO Wasteful, can we remember these somewhere?
-    let bounds = bbox(JSON.parse($app!.render()));
+    let bounds = $app!.getBounds();
     let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
     let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
     return new LngLat(lng, lat);

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { LTN } from "backend";
   import type { Map } from "maplibre-gl";
-  import { MapLibre } from "svelte-maplibre";
-  import { bbox, Layout } from "./common";
+  import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
+  import { Layout } from "./common";
   import { RouteTool } from "./common/route_tool";
   import MapLoader from "./MapLoader.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
@@ -34,8 +34,7 @@
   }
 
   function zoomToFit() {
-    // TODO wasteful
-    $mapStore!.fitBounds(bbox(JSON.parse($app!.render())), { animate: false });
+    $mapStore!.fitBounds(Array.from($app!.getBounds()), { animate: false });
   }
 
   function gotApp(_x: LTN | null) {
@@ -90,6 +89,9 @@
     >
       <div bind:this={mapDiv} />
       {#if $app}
+        <GeoJSON data={JSON.parse($app.getInvertedBoundary())}>
+          <FillLayer paint={{ "fill-color": "black", "fill-opacity": 0.3 }} />
+        </GeoJSON>
         {#if $mode.mode == "network"}
           <NetworkMode />
         {:else if $mode.mode == "set-boundary"}

@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 
 use anyhow::Result;
-use geo::{Coord, Geometry, GeometryCollection, LineString, Point};
+use geo::{ConvexHull, Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
 
 use crate::{Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router, Tags};
@@ -35,7 +35,7 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
     let (mut roads, mut intersections) = split_edges(&node_mapping, highways);
 
     // TODO expensive
-    let collection: GeometryCollection = roads
+    let mut collection: GeometryCollection = roads
         .iter()
         .map(|r| Geometry::LineString(r.linestring.clone()))
         .chain(
@@ -45,13 +45,16 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         )
         .collect::<Vec<_>>()
         .into();
-    let mercator = Mercator::from(collection).unwrap();
+    let mercator = Mercator::from(collection.clone()).unwrap();
     for r in &mut roads {
         mercator.to_mercator_in_place(&mut r.linestring);
     }
     for i in &mut intersections {
         mercator.to_mercator_in_place(&mut i.point);
     }
+
+    mercator.to_mercator_in_place(&mut collection);
+    let boundary_polygon = collection.convex_hull();
 
     let modal_filters = BTreeMap::new();
     let router_original = Router::new(&roads, &intersections, &modal_filters);
@@ -61,6 +64,8 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         roads,
         intersections,
         mercator,
+        boundary_polygon,
+
         router_original,
         router_current,
 

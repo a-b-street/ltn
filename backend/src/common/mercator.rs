@@ -4,7 +4,7 @@ use geo::{BoundingRect, Coord, HaversineLength, LineString, MapCoords, MapCoords
 /// 0) and grows to the right and down (screen-drawing order, not Cartesian), with units of meters.
 /// The accuracy of this weakens for larger areas.
 pub struct Mercator {
-    wgs84_bounds: Rect,
+    pub wgs84_bounds: Rect,
     width: f64,
     height: f64,
 }
