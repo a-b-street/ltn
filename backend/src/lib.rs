@@ -12,7 +12,9 @@ use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
 use self::common::*;
-use self::map_model::{Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID};
+use self::map_model::{
+    FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID,
+};
 use self::neighbourhood::Neighbourhood;
 use self::render_cells::RenderCells;
 use self::route::Router;
@@ -120,7 +122,7 @@ impl LTN {
 
     /// Takes a LngLat
     #[wasm_bindgen(js_name = addModalFilter)]
-    pub fn add_modal_filter(&mut self, input: JsValue) -> Result<String, JsValue> {
+    pub fn add_modal_filter(&mut self, input: JsValue, kind: String) -> Result<String, JsValue> {
         let pos: LngLat = serde_wasm_bindgen::from_value(input)?;
         self.map.add_modal_filter(
             self.map.mercator.pt_to_mercator(Coord {
@@ -128,13 +130,18 @@ impl LTN {
                 y: pos.lat,
             }),
             &self.neighbourhood.as_ref().unwrap().interior_roads,
+            FilterKind::from_string(&kind).unwrap(),
         );
         self.render_neighbourhood()
     }
 
     /// Takes a LineString feature
     #[wasm_bindgen(js_name = addManyModalFilters)]
-    pub fn add_many_modal_filters(&mut self, input: JsValue) -> Result<String, JsValue> {
+    pub fn add_many_modal_filters(
+        &mut self,
+        input: JsValue,
+        kind: String,
+    ) -> Result<String, JsValue> {
         let gj: Feature = serde_wasm_bindgen::from_value(input)?;
         let mut linestring: LineString = gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut linestring);
@@ -142,6 +149,7 @@ impl LTN {
         self.map.add_many_modal_filters(
             linestring,
             &self.neighbourhood.as_ref().unwrap().interior_roads,
+            FilterKind::from_string(&kind).unwrap(),
         );
         self.render_neighbourhood()
     }

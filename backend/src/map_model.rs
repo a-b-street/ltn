@@ -86,14 +86,24 @@ impl MapModel {
         panic!("no road from {i1} to {i2} or vice versa");
     }
 
-    pub fn add_modal_filter(&mut self, click_pt: Coord, candidate_roads: &HashSet<RoadID>) {
-        let cmd = self.do_edit(self.add_modal_filter_cmd(click_pt, candidate_roads));
+    pub fn add_modal_filter(
+        &mut self,
+        click_pt: Coord,
+        candidate_roads: &HashSet<RoadID>,
+        kind: FilterKind,
+    ) {
+        let cmd = self.do_edit(self.add_modal_filter_cmd(click_pt, candidate_roads, kind));
         self.undo_stack.push(cmd);
         self.redo_queue.clear();
         self.after_edited();
     }
 
-    fn add_modal_filter_cmd(&self, click_pt: Coord, candidate_roads: &HashSet<RoadID>) -> Command {
+    fn add_modal_filter_cmd(
+        &self,
+        click_pt: Coord,
+        candidate_roads: &HashSet<RoadID>,
+        kind: FilterKind,
+    ) -> Command {
         // TODO prune with rtree?
         let (_, r, percent_along) = candidate_roads
             .iter()
@@ -113,7 +123,13 @@ impl MapModel {
             })
             .min_by_key(|pair| pair.0)
             .unwrap();
-        Command::SetModalFilter(r, Some(ModalFilter { percent_along }))
+        Command::SetModalFilter(
+            r,
+            Some(ModalFilter {
+                percent_along,
+                kind,
+            }),
+        )
     }
 
     fn after_edited(&mut self) {
@@ -124,6 +140,7 @@ impl MapModel {
         &mut self,
         along_line: LineString,
         candidate_roads: &HashSet<RoadID>,
+        kind: FilterKind,
     ) {
         let mut edits = Vec::new();
         for r in candidate_roads {
@@ -131,7 +148,10 @@ impl MapModel {
             if let Some(percent_along) = linestring_intersection(&road.linestring, &along_line) {
                 edits.push(Command::SetModalFilter(
                     *r,
-                    Some(ModalFilter { percent_along }),
+                    Some(ModalFilter {
+                        percent_along,
+                        kind,
+                    }),
                 ));
             }
         }
@@ -203,6 +223,7 @@ impl MapModel {
             // TODO Maybe make the WASM API always do the mercator stuff
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
             f.set_property("kind", "modal_filter");
+            f.set_property("filter_kind", modal_filter.kind.to_string());
             features.push(f);
         }
 
@@ -233,13 +254,16 @@ impl MapModel {
         for f in gj.features {
             match f.property("kind").unwrap().as_str().unwrap() {
                 "modal_filter" => {
+                    let kind = FilterKind::from_string(
+                        f.property("filter_kind").unwrap().as_str().unwrap(),
+                    )
+                    .unwrap();
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
-                    cmds.push(
-                        self.add_modal_filter_cmd(
-                            self.mercator.pt_to_mercator(gj_pt.into()),
-                            &all_roads,
-                        ),
-                    );
+                    cmds.push(self.add_modal_filter_cmd(
+                        self.mercator.pt_to_mercator(gj_pt.into()),
+                        &all_roads,
+                        kind,
+                    ));
                 }
                 "boundary" => {
                     if boundary.is_some() {
@@ -299,7 +323,38 @@ impl Road {
 
 #[derive(Clone)]
 pub struct ModalFilter {
+    pub kind: FilterKind,
     pub percent_along: f64,
+}
+
+#[derive(Clone, Copy)]
+pub enum FilterKind {
+    WalkCycleOnly,
+    NoEntry,
+    BusGate,
+    SchoolStreet,
+}
+
+// TODO strum?
+impl FilterKind {
+    pub fn to_string(self) -> &'static str {
+        match self {
+            FilterKind::WalkCycleOnly => "walk_cycle_only",
+            FilterKind::NoEntry => "no_entry",
+            FilterKind::BusGate => "bus_gate",
+            FilterKind::SchoolStreet => "school_street",
+        }
+    }
+
+    pub fn from_string(x: &str) -> Option<Self> {
+        match x {
+            "walk_cycle_only" => Some(FilterKind::WalkCycleOnly),
+            "no_entry" => Some(FilterKind::NoEntry),
+            "bus_gate" => Some(FilterKind::BusGate),
+            "school_street" => Some(FilterKind::SchoolStreet),
+            _ => None,
+        }
+    }
 }
 
 pub enum Command {

@@ -51,7 +51,7 @@
     //$app!.unsetNeighbourhood();
   });
   function onClick(e: MapMouseEvent) {
-    render($app!.addModalFilter(e.lngLat));
+    render($app!.addModalFilter(e.lngLat, filterType));
     stopAddingFilter();
   }
   function stopAddingFilter() {
@@ -93,7 +93,7 @@
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      render($app!.addManyModalFilters(f));
+      render($app!.addManyModalFilters(f, filterType));
     }
 
     addingMultipleFilters = false;
