@@ -16,7 +16,7 @@
 
     // When running locally if a vite public/ directory is set up, load from that for speed
     try {
-      let resp = await fetch("/kowloon.pbf", { method: "HEAD" });
+      let resp = await fetch("/osm/kowloon.pbf", { method: "HEAD" });
       useLocalVite = resp.ok;
       console.log("Using local cache, not od2net.org");
 
@@ -57,7 +57,7 @@
   async function loadExample(example: string) {
     if (example != "") {
       if (useLocalVite) {
-        await loadFromUrl(`/${example}.pbf`);
+        await loadFromUrl(`/osm/${example}.pbf`);
       } else {
         await loadFromUrl(
           `https://assets.od2net.org/severance_pbfs/${example}.pbf`

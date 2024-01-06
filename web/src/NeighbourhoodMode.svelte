@@ -8,6 +8,7 @@
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
+  import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import { PropertiesTable } from "./common";
   import FreehandLine from "./FreehandLine.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
@@ -16,8 +17,10 @@
 
   // Caller is responsible for doing app.setNeighbourhood
 
+  let filterType = "walk_cycle_only";
   let addingFilter = false;
   let addingMultipleFilters = false;
+  let settingFilterType = false;
   let undoLength = 0;
   let redoLength = 0;
   let boundary: Feature<Polygon> | null;
@@ -121,6 +124,11 @@
         disabled={addingFilter || addingMultipleFilters}
         >Add many modal filters along line</button
       >
+      <button
+        on:click={() => (settingFilterType = true)}
+        disabled={addingFilter || addingMultipleFilters}
+        >Change modal filter type</button
+      >
     </div>
     <div>
       <button on:click={() => ($mode = { mode: "view-shortcuts" })}
@@ -147,6 +155,13 @@
         {/if}
       </button>
     </div>
+
+    {#if settingFilterType}
+      <ChangeModalFilter
+        bind:filterType
+        on:close={() => (settingFilterType = false)}
+      />
+    {/if}
   </div>
 
   <div slot="map">

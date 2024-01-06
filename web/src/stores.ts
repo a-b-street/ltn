@@ -23,7 +23,7 @@ export type Mode =
 
 export let app: Writable<LTN | null> = writable(null);
 export let mode: Writable<Mode> = writable({ mode: "network" });
-export let showBasemap: Writable<boolean> = writable(false);
+export let showBasemap: Writable<boolean> = writable(true);
 export let map: Writable<Map | null> = writable(null);
 
 export let sidebarContents: Writable<HTMLDivElement | null> = writable(null);
