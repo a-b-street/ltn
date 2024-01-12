@@ -75,7 +75,7 @@ dependencies = [
  "console_log",
  "contour",
  "fast_paths",
- "geo",
+ "geo 0.27.0 (git+https://github.com/dabreegster/geo?branch=boolops_and_linesplit)",
  "geojson",
  "log",
  "osm-reader",
@@ -270,6 +270,22 @@ name = "geo"
 version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4841b40fdbccd4b7042bd6195e4de91da54af34c50632e371bcbfcdfb558b873"
+dependencies = [
+ "earcutr",
+ "float_next_after",
+ "geo-types",
+ "geographiclib-rs",
+ "log",
+ "num-traits",
+ "robust",
+ "rstar",
+ "spade",
+]
+
+[[package]]
+name = "geo"
+version = "0.27.0"
+source = "git+https://github.com/dabreegster/geo?branch=boolops_and_linesplit#74b7c687ec8a7f9d47db3b02a729a1de76d5758b"
 dependencies = [
  "earcutr",
  "float_next_after",
@@ -657,7 +673,7 @@ name = "route-snapper-graph"
 version = "0.1.0"
 source = "git+https://github.com/dabreegster/route_snapper?branch=no_osm2streets#250055d36fbbdc3391c3ff4d8f93a5b36654292d"
 dependencies = [
- "geo",
+ "geo 0.27.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
 ]
 

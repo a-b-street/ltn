@@ -11,7 +11,7 @@ anyhow = "1.0.75"
 console_error_panic_hook = "0.1.6"
 console_log = "1.0.0"
 fast_paths = { git = "https://github.com/easbar/fast_paths" }
-geo = "0.27.0"
+geo = { git = "https://github.com/dabreegster/geo", branch = "boolops_and_linesplit" }
 geojson = { git = "https://github.com/georust/geojson", features = ["geo-types"] }
 log = "0.4.20"
 osm-reader = { git = "https://github.com/a-b-street/osm-reader" }
