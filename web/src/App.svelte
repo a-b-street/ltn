@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { LTN } from "backend";
+  import initLtn, { LTN } from "backend";
   import type { Map } from "maplibre-gl";
+  import initRouteSnapper from "route-snapper";
+  import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { Layout } from "./common";
   import { RouteTool } from "./common/route_tool";
-  import MapLoader from "./MapLoader.svelte";
+  import ManageSavefiles from "./ManageSavefiles.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
@@ -17,7 +19,15 @@
     showBasemap,
     sidebarContents,
   } from "./stores";
+  import TitleMode from "./TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
+
+  let wasmReady = false;
+  onMount(async () => {
+    await initLtn();
+    await initRouteSnapper();
+    wasmReady = true;
+  });
 
   $: mapStyle = $showBasemap
     ? "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
@@ -27,16 +37,18 @@
         layers: [],
       };
 
-  let route_tool: RouteTool | undefined = undefined;
   let map: Map;
   $: if (map) {
     mapStore.set(map);
   }
 
+  // TODO Move stuff like this out...
+  let route_tool: RouteTool | undefined = undefined;
   function zoomToFit() {
     $mapStore!.fitBounds(Array.from($app!.getBounds()), { animate: false });
   }
 
+  // TODO Can we make the title screen mode do this?
   function gotApp(_x: LTN | null) {
     if (!$app) {
       return;
@@ -64,17 +76,17 @@
 
 <Layout>
   <div slot="left">
-    {#if $mapStore}
-      <MapLoader />
-      {#if $app}
-        <div><button on:click={zoomToFit}>Zoom to fit</button></div>
-      {/if}
+    {#if $app}
+      <div><button on:click={zoomToFit}>Zoom to fit</button></div>
     {/if}
     <div>
       <label
         ><input type="checkbox" bind:checked={$showBasemap} />Show basemap</label
       >
     </div>
+    {#if $app}
+      <ManageSavefiles />
+    {/if}
     <hr />
 
     <div bind:this={sidebarDiv} />
@@ -88,6 +100,9 @@
       on:error={(e) => console.log(e.detail.error)}
     >
       <div bind:this={mapDiv} />
+      {#if $mode.mode == "title"}
+        <TitleMode {wasmReady} />
+      {/if}
       {#if $app}
         <GeoJSON data={JSON.parse($app.getInvertedBoundary())}>
           <FillLayer paint={{ "fill-color": "black", "fill-opacity": 0.3 }} />

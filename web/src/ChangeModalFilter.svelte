@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Modal } from "./common";
+
   export let filterType: string;
 
   let choices = [
@@ -23,54 +25,29 @@
       "A closure during school hours only. The barrier usually allows teachers and staff to access the school.",
     ],
   ];
-
-  let dialog;
 </script>
 
-<dialog open on:close bind:this={dialog}>
-  <div>
-    <h3>Choose a modal filter to place on streets</h3>
-    <table>
-      <tr>
-        <td>
-          {#each choices as [name, label, description]}
-            <div>
-              <button
-                style="width: 100%"
-                disabled={filterType == name}
-                on:click={() => (filterType = name)}
-                ><img src={`/filters/${name}.svg`} />{label}</button
-              >
-            </div>
-          {/each}
-        </td>
-        <td>
-          <img src={`/filters/${filterType}.gif`} height="300" />
-          <p>{choices.find((x) => x[0] == filterType)[2]}</p>
-        </td>
-      </tr>
-    </table>
-    <center><button on:click={() => dialog.close()}>Confirm</button></center>
-  </div>
-</dialog>
-
-<style>
-  dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-  }
-
-  div {
-    width: 80%;
-    height: 80%;
-    background: white;
-  }
-</style>
+<Modal on:close let:dialog>
+  <h3>Choose a modal filter to place on streets</h3>
+  <table>
+    <tr>
+      <td>
+        {#each choices as [name, label, description]}
+          <div>
+            <button
+              style="width: 100%"
+              disabled={filterType == name}
+              on:click={() => (filterType = name)}
+              ><img src={`/filters/${name}.svg`} />{label}</button
+            >
+          </div>
+        {/each}
+      </td>
+      <td>
+        <img src={`/filters/${filterType}.gif`} height="300" />
+        <p>{choices.find((x) => x[0] == filterType)[2]}</p>
+      </td>
+    </tr>
+  </table>
+  <center><button on:click={() => dialog.close()}>Confirm</button></center>
+</Modal>

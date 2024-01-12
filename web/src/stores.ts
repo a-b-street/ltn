@@ -5,6 +5,9 @@ import { writable, type Writable } from "svelte/store";
 
 export type Mode =
   | {
+      mode: "title";
+    }
+  | {
       mode: "network";
     }
   | {
@@ -22,9 +25,11 @@ export type Mode =
     };
 
 export let app: Writable<LTN | null> = writable(null);
-export let mode: Writable<Mode> = writable({ mode: "network" });
+export let mode: Writable<Mode> = writable({ mode: "title" });
 export let showBasemap: Writable<boolean> = writable(true);
 export let map: Writable<Map | null> = writable(null);
+
+export let example: Writable<string> = writable("");
 
 export let sidebarContents: Writable<HTMLDivElement | null> = writable(null);
 export let mapContents: Writable<HTMLDivElement | null> = writable(null);

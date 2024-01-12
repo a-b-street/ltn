@@ -3,10 +3,8 @@
   import init2 from "route-snapper";
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "./common";
-  import ManageSavefiles from "./ManageSavefiles.svelte";
-  import { app, map } from "./stores";
+  import { app, example, map } from "./stores";
 
-  let example = "";
   let msg: string | null = null;
   let useLocalVite = false;
 
@@ -21,7 +19,7 @@
       console.log("Using local cache, not od2net.org");
 
       // For quicker dev
-      example = "bristol";
+      //$example = "bristol";
     } catch (err) {}
   });
 
@@ -29,7 +27,7 @@
   async function loadFile(e: Event) {
     try {
       loadMap(await fileInput.files![0].arrayBuffer());
-      example = "";
+      $example = "";
     } catch (err) {
       window.alert(`Couldn't open this file: ${err}`);
     }
@@ -47,25 +45,23 @@
     try {
       // TODO Can we avoid turning into bytes?
       loadMap(new TextEncoder().encode(e.detail));
-      example = "";
+      $example = "";
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
     msg = null;
   }
 
-  async function loadExample(example: string) {
-    if (example != "") {
+  async function loadExample(ex: string) {
+    if (ex != "") {
       if (useLocalVite) {
-        await loadFromUrl(`/osm/${example}.pbf`);
+        await loadFromUrl(`/osm/${ex}.pbf`);
       } else {
-        await loadFromUrl(
-          `https://assets.od2net.org/severance_pbfs/${example}.pbf`
-        );
+        await loadFromUrl(`https://assets.od2net.org/severance_pbfs/${ex}.pbf`);
       }
     }
   }
-  $: loadExample(example);
+  $: loadExample($example);
 
   async function loadFromUrl(url: string) {
     try {
@@ -92,7 +88,7 @@
   <div>
     <label>
       Or load an example:
-      <select bind:value={example}>
+      <select bind:value={$example}>
         <option value="">Custom file loaded</option>
         <option value="akihabara">Akihabara</option>
         <option value="hanegi">Hanegi Park</option>
@@ -115,7 +111,4 @@
     on:loading={(e) => (msg = e.detail)}
     on:error={(e) => window.alert(e.detail)}
   />
-
-  <hr />
-  <ManageSavefiles {example} />
 </div>
