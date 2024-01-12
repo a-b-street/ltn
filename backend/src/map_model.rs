@@ -385,6 +385,8 @@ fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64> {
         return None;
     }
     // TODO Urgh very brute force
+    // TODO Could use https://docs.rs/geo/latest/geo/algorithm/sweep/struct.Intersections.html, but
+    // not sure about the order, so we'd do line_locate_point for everything and take the min
     for line1 in ls1.lines() {
         for line2 in ls2.lines() {
             if let Some(LineIntersection::SinglePoint { intersection, .. }) =
