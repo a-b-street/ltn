@@ -6,7 +6,7 @@ use geo::{
     Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineInterpolatePoint,
     LineIntersection, LineLocatePoint, LineString, Point, Polygon,
 };
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonObject};
 use serde::Serialize;
 
 use crate::{Mercator, Neighbourhood, Router, Tags};
@@ -234,6 +234,9 @@ impl MapModel {
                 &self.mercator.to_wgs84(&neighbourhood.boundary_polygon),
             ));
             f.set_property("kind", "boundary");
+            for (k, v) in &neighbourhood.boundary_polygon_props {
+                f.set_property(k, v.clone());
+            }
             features.push(f);
         }
 
@@ -241,7 +244,10 @@ impl MapModel {
     }
 
     /// Returns the optional boundary polygon
-    pub fn load_savefile(&mut self, gj: FeatureCollection) -> Result<Option<Polygon>> {
+    pub fn load_savefile(
+        &mut self,
+        gj: FeatureCollection,
+    ) -> Result<Option<(Polygon, JsonObject)>> {
         // Clear previous state
         self.modal_filters.clear();
         self.undo_stack.clear();
@@ -273,7 +279,7 @@ impl MapModel {
                     }
                     let mut polygon: Polygon = f.geometry.unwrap().value.try_into()?;
                     self.mercator.to_mercator_in_place(&mut polygon);
-                    boundary = Some(polygon);
+                    boundary = Some((polygon, f.properties.unwrap()));
                 }
                 x => bail!("Unknown kind in savefile {x}"),
             }

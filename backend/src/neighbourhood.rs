@@ -5,7 +5,7 @@ use geo::{
     BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
     MultiLineString, Polygon,
 };
-use geojson::{Feature, FeatureCollection, Geometry};
+use geojson::{Feature, FeatureCollection, Geometry, JsonObject};
 
 use crate::render_cells::Color;
 use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
@@ -15,10 +15,15 @@ pub struct Neighbourhood {
     crosses: HashMap<RoadID, f64>,
     pub border_intersections: HashSet<IntersectionID>,
     pub boundary_polygon: Polygon,
+    pub boundary_polygon_props: JsonObject,
 }
 
 impl Neighbourhood {
-    pub fn new(map: &MapModel, boundary: Polygon) -> Result<Self> {
+    pub fn new(
+        map: &MapModel,
+        boundary: Polygon,
+        boundary_polygon_props: JsonObject,
+    ) -> Result<Self> {
         let mut interior_roads = HashSet::new();
         let mut crosses = HashMap::new();
         for r in &map.roads {
@@ -64,6 +69,7 @@ impl Neighbourhood {
             crosses,
             border_intersections,
             boundary_polygon: boundary,
+            boundary_polygon_props,
         })
     }
 
@@ -80,6 +86,9 @@ impl Neighbourhood {
                 &map.mercator.to_wgs84(&self.boundary_polygon),
             ));
             f.set_property("kind", "boundary");
+            for (k, v) in &self.boundary_polygon_props {
+                f.set_property(k, v.clone());
+            }
             features.push(f);
         }
 

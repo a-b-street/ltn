@@ -70,8 +70,8 @@ impl LTN {
         Ok(out)
     }
 
-    #[wasm_bindgen()]
-    pub fn getInvertedBoundary(&self) -> Result<String, JsValue> {
+    #[wasm_bindgen(js_name = getInvertedBoundary)]
+    pub fn get_inverted_boundary(&self) -> Result<String, JsValue> {
         let f = Feature::from(Geometry::from(&self.map.invert_boundary()));
         let out = serde_json::to_string(&f).map_err(err_to_js)?;
         Ok(out)
@@ -113,10 +113,14 @@ impl LTN {
     #[wasm_bindgen(js_name = setNeighbourhood)]
     pub fn set_neighbourhood(&mut self, input: JsValue) -> Result<String, JsValue> {
         let boundary_gj: Feature = serde_wasm_bindgen::from_value(input)?;
+        let boundary_polygon_props = boundary_gj.properties.clone().unwrap();
         let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut boundary_geo);
 
-        self.neighbourhood = Some(Neighbourhood::new(&self.map, boundary_geo).map_err(err_to_js)?);
+        self.neighbourhood = Some(
+            Neighbourhood::new(&self.map, boundary_geo, boundary_polygon_props)
+                .map_err(err_to_js)?,
+        );
         self.render_neighbourhood()
     }
 
@@ -212,11 +216,14 @@ impl LTN {
     #[wasm_bindgen(js_name = loadSavefile)]
     pub fn load_savefile(&mut self, input: JsValue) -> Result<bool, JsValue> {
         let gj: FeatureCollection = serde_wasm_bindgen::from_value(input)?;
-        let boundary = self.map.load_savefile(gj).map_err(err_to_js)?;
+        let maybe_boundary = self.map.load_savefile(gj).map_err(err_to_js)?;
 
         self.neighbourhood = None;
-        if let Some(boundary) = boundary {
-            self.neighbourhood = Some(Neighbourhood::new(&self.map, boundary).map_err(err_to_js)?);
+        if let Some((boundary, boundary_polygon_props)) = maybe_boundary {
+            self.neighbourhood = Some(
+                Neighbourhood::new(&self.map, boundary, boundary_polygon_props)
+                    .map_err(err_to_js)?,
+            );
             Ok(true)
         } else {
             Ok(false)
