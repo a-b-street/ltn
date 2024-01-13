@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from "./common";
+  import { Modal, notNull } from "./common";
   import MapLoader from "./MapLoader.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { map } from "./stores";
@@ -16,7 +16,10 @@
       <Modal on:close={() => (showModal = false)} let:dialog>
         <h1>The LTN tool</h1>
         <p>...</p>
-        <center><button on:click={() => dialog.close()}>Start!</button></center>
+        <center
+          ><button on:click={() => notNull(dialog).close()}>Start!</button
+          ></center
+        >
       </Modal>
     {/if}
 

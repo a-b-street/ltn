@@ -76,6 +76,7 @@
     filter={isLine}
     paint={{
       "line-width": 5,
+      // @ts-ignore line-color type seems wrong?
       "line-color": constructMatchExpression(
         ["get", "kind"],
         {
@@ -94,7 +95,7 @@
       ),
     }}
     on:click={(e) => interactive && onClickLine(e.detail.features[0])}
-    hoverCursor={interactive ? "pointer" : null}
+    hoverCursor={interactive ? "pointer" : undefined}
   >
     {#if interactive}
       <slot name="line-popup" />

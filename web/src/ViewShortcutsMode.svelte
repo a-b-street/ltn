@@ -2,6 +2,7 @@
   import type { FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
+  import { notNull } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
@@ -96,11 +97,13 @@
   <div slot="map">
     {#if state.state == "neutral"}
       <RenderNeighbourhood
-        gjInput={JSON.parse($app.renderNeighbourhood())}
-        onClickLine={(f) => choseRoad(f.properties.id)}
+        gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
+        onClickLine={(f) => choseRoad(notNull(f.properties).id)}
       >
         <div slot="line-popup">
-          <Popup openOn="hover" let:data>{data.properties.shortcuts}</Popup>
+          <Popup openOn="hover" let:data
+            >{notNull(data).properties.shortcuts}</Popup
+          >
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}

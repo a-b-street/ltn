@@ -1,4 +1,3 @@
-import type { GeoJSON } from "geojson";
 import type {
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
@@ -69,4 +68,14 @@ export function downloadGeneratedFile(filename: string, textInput: string) {
   document.body.appendChild(element);
   element.click();
   document.body.removeChild(element);
+}
+
+// Hack around
+// https://stackoverflow.com/questions/67336062/typescript-not-parsed-in-svelte-html-section
+// until we're using Svelte 5
+export function notNull<T>(x: T | null | undefined): T {
+  if (x == null || x == undefined) {
+    throw new Error("Oops, notNull given something null");
+  }
+  return x;
 }

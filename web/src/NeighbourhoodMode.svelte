@@ -9,7 +9,7 @@
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
-  import { PropertiesTable } from "./common";
+  import { notNull, PropertiesTable } from "./common";
   import FreehandLine from "./FreehandLine.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -168,22 +168,22 @@
     <RenderNeighbourhood
       {gjInput}
       interactive={!addingFilter && !addingMultipleFilters}
-      onClickLine={(f) => window.open(f.properties.way, "_blank")}
+      onClickLine={(f) => window.open(notNull(f.properties).way, "_blank")}
       onClickCircle={deleteFilter}
     >
       <div slot="line-popup">
         <Popup openOn="hover" let:data>
-          <PropertiesTable properties={data.properties} />
+          <PropertiesTable properties={notNull(data).properties} />
         </Popup>
       </div>
       <div slot="circle-popup">
         <Popup openOn="hover" let:data>
-          <PropertiesTable properties={data.properties} />
+          <PropertiesTable properties={notNull(data).properties} />
         </Popup>
       </div>
     </RenderNeighbourhood>
     {#if addingMultipleFilters}
-      <FreehandLine map={$map} on:done={gotFreehandLine} />
+      <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
     {/if}
   </div>
 </SplitComponent>

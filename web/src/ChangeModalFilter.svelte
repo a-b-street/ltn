@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from "./common";
+  import { Modal, notNull } from "./common";
 
   export let filterType: string;
 
@@ -25,6 +25,8 @@
       "A closure during school hours only. The barrier usually allows teachers and staff to access the school.",
     ],
   ];
+
+  $: currentTriple = choices.find((x) => x[0] == filterType)!;
 </script>
 
 <Modal on:close let:dialog>
@@ -32,22 +34,28 @@
   <table>
     <tr>
       <td>
-        {#each choices as [name, label, description]}
+        {#each choices as [name, label, _description]}
           <div>
             <button
               style="width: 100%"
               disabled={filterType == name}
               on:click={() => (filterType = name)}
-              ><img src={`/filters/${name}.svg`} />{label}</button
+              ><img src={`/filters/${name}.svg`} alt={label} />{label}</button
             >
           </div>
         {/each}
       </td>
       <td>
-        <img src={`/filters/${filterType}.gif`} height="300" />
-        <p>{choices.find((x) => x[0] == filterType)[2]}</p>
+        <img
+          src={`/filters/${filterType}.gif`}
+          height="300"
+          alt={currentTriple[1]}
+        />
+        <p>{currentTriple[2]}</p>
       </td>
     </tr>
   </table>
-  <center><button on:click={() => dialog.close()}>Confirm</button></center>
+  <center
+    ><button on:click={() => notNull(dialog).close()}>Confirm</button></center
+  >
 </Modal>

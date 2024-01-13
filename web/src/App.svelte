@@ -45,7 +45,10 @@
   // TODO Move stuff like this out...
   let route_tool: RouteTool | undefined = undefined;
   function zoomToFit() {
-    $mapStore!.fitBounds(Array.from($app!.getBounds()), { animate: false });
+    $mapStore!.fitBounds(
+      Array.from($app!.getBounds()) as [number, number, number, number],
+      { animate: false }
+    );
   }
 
   // TODO Can we make the title screen mode do this?
@@ -97,7 +100,10 @@
       standardControls
       hash
       bind:map
-      on:error={(e) => console.log(e.detail.error)}
+      on:error={(e) => {
+        // @ts-ignore ErrorEvent isn't exported
+        console.log(e.detail.error);
+      }}
     >
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
