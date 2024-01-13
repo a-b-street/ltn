@@ -22,7 +22,9 @@
       };
       route_tool.clearEventListeners();
     } catch (err) {
-      window.alert("Known georust bug hit, sorry");
+      window.alert(
+        "Known georust bug hit, sorry. You may need to just refresh the page now."
+      );
       $mode = {
         mode: "network",
       };

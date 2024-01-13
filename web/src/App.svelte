@@ -6,7 +6,6 @@
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { Layout } from "./common";
   import { RouteTool } from "./common/route_tool";
-  import ManageSavefiles from "./ManageSavefiles.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
@@ -79,20 +78,18 @@
 
 <Layout>
   <div slot="left">
+    <div bind:this={sidebarDiv} />
+
+    <hr />
+
     {#if $app}
-      <div><button on:click={zoomToFit}>Zoom to fit</button></div>
+      <div><button on:click={zoomToFit}>Zoom to fit study area</button></div>
     {/if}
     <div>
       <label
         ><input type="checkbox" bind:checked={$showBasemap} />Show basemap</label
       >
     </div>
-    {#if $app}
-      <ManageSavefiles />
-    {/if}
-    <hr />
-
-    <div bind:this={sidebarDiv} />
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre

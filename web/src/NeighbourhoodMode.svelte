@@ -11,6 +11,7 @@
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import { notNull, PropertiesTable } from "./common";
   import FreehandLine from "./FreehandLine.svelte";
+  import ManageSavefiles from "./ManageSavefiles.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
@@ -98,21 +99,45 @@
 
     addingMultipleFilters = false;
   }
+
+  function resetTitle() {
+    // TODO Confirm
+    $mode = { mode: "title" };
+    $app = null;
+  }
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
   <div slot="sidebar">
+    <h1>Editing modal filters</h1>
+    <p>
+      Now that you've defined a neighbourhood boundary, you can see the possible
+      shortcuts that vehicles are currently able to take through it. You can add
+      a new modal filter to try and solve this. The colored "cell" areas show
+      what's reachable for drivers without leaving the boundary you've drawn.
+    </p>
+
     <div>
-      <button on:click={pickNewNeighbourhood}>Pick new neighbourghood</button>
+      <button on:click={resetTitle}
+        >Start over and change your study area</button
+      >
+    </div>
+    <div>
+      <button on:click={pickNewNeighbourhood}
+        >Pick a different neighbourhood boundary</button
+      >
     </div>
     <div>
       <button
         on:click={() => ($mode = { mode: "set-boundary", existing: boundary })}
-        >Edit boundary</button
+        >Change this neighbourhood boundary</button
       >
     </div>
+
+    <hr />
+
     <div>
       <button
         on:click={() => (addingFilter = true)}
@@ -130,15 +155,6 @@
         >Change modal filter type</button
       >
     </div>
-    <div>
-      <button on:click={() => ($mode = { mode: "view-shortcuts" })}
-        >View shortcuts</button
-      >
-    </div>
-    <div>
-      <button on:click={() => ($mode = { mode: "route" })}>Route</button>
-    </div>
-
     <div>
       <button disabled={undoLength == 0} on:click={undo}>
         {#if undoLength == 0}
@@ -162,6 +178,20 @@
         on:close={() => (settingFilterType = false)}
       />
     {/if}
+
+    <hr />
+
+    <div>
+      <button on:click={() => ($mode = { mode: "view-shortcuts" })}
+        >View shortcuts</button
+      >
+    </div>
+    <div>
+      <button on:click={() => ($mode = { mode: "route" })}>Route</button>
+    </div>
+
+    <hr />
+    <ManageSavefiles />
   </div>
 
   <div slot="map">

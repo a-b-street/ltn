@@ -45,17 +45,20 @@
   }
 </script>
 
-<div><button on:click={saveGj}>Save to GJ</button></div>
-<div>
-  <label>
-    Load edits from GJ
-    <input bind:this={fileInput} on:change={loadFile} type="file" />
-  </label>
-</div>
-<div>
-  <button on:click={saveLocalStorage}>Save to local storage</button><button
-    on:click={loadLocalStorage}>Load from local storage</button
-  >
-</div>
+<details>
+  <summary>Save / load project</summary>
+  <div><button on:click={saveGj}>Save to GJ</button></div>
+  <div>
+    <label>
+      Load edits from GJ
+      <input bind:this={fileInput} on:change={loadFile} type="file" />
+    </label>
+  </div>
+  <div>
+    <button on:click={saveLocalStorage}>Save to local storage</button><button
+      on:click={loadLocalStorage}>Load from local storage</button
+    >
+  </div>
+</details>
 
 <Loading {msg} />
