@@ -85,6 +85,8 @@
             ["linear"],
             ["get", "shortcuts"],
             0,
+            "white",
+            1,
             "#F19A93",
             maxShortcuts,
             "#A32015",
