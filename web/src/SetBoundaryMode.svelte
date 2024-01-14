@@ -7,6 +7,7 @@
   import { app, mode } from "./stores";
 
   export let route_tool: RouteTool;
+  export let name: string;
   export let existing: Feature<Polygon> | null;
 
   if (existing) {
@@ -24,8 +25,8 @@
 
   route_tool.addEventListenerSuccess((feature) => {
     try {
-      $app!.setNeighbourhoodBoundary("fixed", feature);
-      $app!.setCurrentNeighbourhood("fixed");
+      $app!.setNeighbourhoodBoundary(name, feature);
+      $app!.setCurrentNeighbourhood(name);
       $mode = {
         mode: "neighbourhood",
       };
@@ -42,7 +43,7 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <h1>Draw your neighbourhood boundary</h1>
+    <h1>Draw your neighbourhood boundary for {name}</h1>
     <p>TODO: maybe move the instructions from the previous screen to here...</p>
 
     <SnapPolygonControls {route_tool} />

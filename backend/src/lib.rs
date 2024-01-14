@@ -56,20 +56,6 @@ impl LTN {
         })
     }
 
-    /// Returns a GeoJSON string. Just shows the full network
-    #[wasm_bindgen()]
-    pub fn render(&self) -> Result<String, JsValue> {
-        let mut features = Vec::new();
-
-        for r in &self.map.roads {
-            features.push(r.to_gj(&self.map.mercator));
-        }
-
-        let gj = GeoJson::from(features);
-        let out = serde_json::to_string(&gj).map_err(err_to_js)?;
-        Ok(out)
-    }
-
     #[wasm_bindgen(js_name = getInvertedBoundary)]
     pub fn get_inverted_boundary(&self) -> Result<String, JsValue> {
         let f = Feature::from(Geometry::from(&self.map.invert_boundary()));

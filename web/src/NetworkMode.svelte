@@ -1,14 +1,41 @@
 <script lang="ts">
-  import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
-  import { notNull, PropertiesTable } from "./common";
+  import type { Feature } from "geojson";
+  import { FillLayer, GeoJSON, hoverStateFilter, Popup } from "svelte-maplibre";
+  import { isPolygon, notNull } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
+
+  // Note we do this to trigger a refresh when loading stuff
+  $: gj = JSON.parse(notNull($app).toSavefile());
+  $: boundaryNames = gj.features
+    .filter((f: Feature) => notNull(f.properties).kind == "boundary")
+    .map((f: Feature) => notNull(f.properties).name);
 
   function resetTitle() {
     $mode = { mode: "title" };
     $app = null;
   }
+
+  function pickNeighbourhood(name: string) {
+    $app!.setCurrentNeighbourhood(name);
+    $mode = { mode: "neighbourhood" };
+  }
+
+  function deleteNeighbourhood(name: string) {
+    $app!.deleteNeighbourhoodBoundary(name);
+    gj = JSON.parse(notNull($app).toSavefile());
+  }
+
+  function newBoundary() {
+    let name = window.prompt("What do you want to name the neighbourhood?");
+    if (name) {
+      $mode = { mode: "set-boundary", name, existing: null };
+    }
+  }
+
+  // TODO Also render filters here
+  // TODO Hover on button and highlight on map
 </script>
 
 <SplitComponent>
@@ -31,32 +58,36 @@
       >
     </div>
     <div>
-      <button
-        on:click={() => ($mode = { mode: "set-boundary", existing: null })}
-        >Draw a new boundary</button
-      >
+      <button on:click={newBoundary}>Draw a new boundary</button>
     </div>
+    {#each boundaryNames as name}
+      <div>
+        <button on:click={() => pickNeighbourhood(name)}>{name}</button>
+        <button on:click={() => deleteNeighbourhood(name)}>X</button>
+      </div>
+    {/each}
 
     <hr />
     <ManageSavefiles />
   </div>
 
   <div slot="map">
-    <GeoJSON data={JSON.parse(notNull($app).render())}>
-      <LineLayer
-        id="network"
+    <GeoJSON data={gj} generateId>
+      <FillLayer
+        filter={isPolygon}
         paint={{
-          "line-width": 5,
-          "line-color": "black",
+          "fill-color": "red",
+          "fill-opacity": hoverStateFilter(0.3, 0.5),
         }}
+        manageHoverState
         on:click={(e) =>
-          window.open(notNull(e.detail.features[0].properties).way, "_blank")}
+          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
         hoverCursor="pointer"
       >
         <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
+          <p>{notNull(data).properties.name}</p>
         </Popup>
-      </LineLayer>
+      </FillLayer>
     </GeoJSON>
   </div>
 </SplitComponent>

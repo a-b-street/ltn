@@ -12,6 +12,7 @@ export type Mode =
     }
   | {
       mode: "set-boundary";
+      name: string;
       existing: Feature<Polygon> | null;
     }
   | {

@@ -113,7 +113,11 @@
         {#if $mode.mode == "network"}
           <NetworkMode />
         {:else if $mode.mode == "set-boundary"}
-          <SetBoundaryMode {route_tool} existing={$mode.existing} />
+          <SetBoundaryMode
+            {route_tool}
+            name={$mode.name}
+            existing={$mode.existing}
+          />
         {:else if $mode.mode == "neighbourhood"}
           <NeighbourhoodMode />
         {:else if $mode.mode == "view-shortcuts"}

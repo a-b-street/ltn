@@ -12,9 +12,9 @@
 
   let fileInput: HTMLInputElement;
   async function loadFile(e: Event) {
-    msg = "Loading edits from file";
+    msg = "Loading project from file";
     try {
-      loadEdits(await fileInput.files![0].text());
+      loadProject(await fileInput.files![0].text());
     } catch (err) {
       window.alert(`Couldn't open this file: ${err}`);
     }
@@ -22,13 +22,13 @@
   }
 
   function loadLocalStorage() {
-    msg = "Loading edits from local storage";
+    msg = "Loading projects from local storage";
     try {
       let gj = window.localStorage.getItem(filename);
       if (gj) {
-        loadEdits(gj);
+        loadProject(gj);
       } else {
-        window.alert("Nothing was saved");
+        window.alert("Nothing was saved in local storage");
       }
     } catch (err) {
       window.alert(`Couldn't load from local storage: ${err}`);
@@ -40,10 +40,11 @@
     window.localStorage.setItem(filename, $app!.toSavefile());
   }
 
-  function loadEdits(gj: string) {
+  function loadProject(gj: string) {
     $app!.loadSavefile(JSON.parse(gj));
-    // TODO Make sure this refreshes if we're already there?
     $mode = { mode: "network" };
+    // Force a refresh in that mode maybe
+    $app = $app;
   }
 </script>
 

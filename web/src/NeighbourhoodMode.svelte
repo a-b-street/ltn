@@ -109,7 +109,9 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <h1>Editing modal filters in {boundary.properties.name}</h1>
+    <h1>
+      Editing modal filters in {notNull(notNull(boundary).properties).name}
+    </h1>
     <p>
       Now that you've defined a neighbourhood boundary, you can see the possible
       shortcuts that vehicles are currently able to take through it. You can add
@@ -129,8 +131,12 @@
     </div>
     <div>
       <button
-        on:click={() => ($mode = { mode: "set-boundary", existing: boundary })}
-        >Change this neighbourhood boundary</button
+        on:click={() =>
+          ($mode = {
+            mode: "set-boundary",
+            name: notNull(notNull(boundary).properties).name,
+            existing: boundary,
+          })}>Change this neighbourhood boundary</button
       >
     </div>
 
