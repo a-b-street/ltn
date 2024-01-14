@@ -21,12 +21,9 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
             node_mapping.insert(id, pt);
         }
         Element::Way { id, node_ids, tags } => {
-            if tags.contains_key("highway") && tags.get("area") != Some(&"yes".to_string()) {
-                highways.push(Way {
-                    id,
-                    node_ids,
-                    tags: tags.into(),
-                });
+            let tags = tags.into();
+            if is_road(&tags) {
+                highways.push(Way { id, node_ids, tags });
             }
         }
         Element::Relation { .. } => {}
@@ -144,4 +141,17 @@ fn split_edges(
     }
 
     (roads, intersections)
+}
+
+fn is_road(tags: &Tags) -> bool {
+    if !tags.has("highway") || tags.is("area", "yes") {
+        return false;
+    }
+    if tags.is_any(
+        "highway",
+        vec!["cycleway", "footway", "steps", "path", "track", "corridor"],
+    ) {
+        return false;
+    }
+    true
 }
