@@ -6,10 +6,10 @@ use geo::{
     Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineInterpolatePoint,
     LineIntersection, LineLocatePoint, LineString, Point, Polygon,
 };
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonObject};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Serialize;
 
-use crate::{Mercator, Neighbourhood, Router, Tags};
+use crate::{Mercator, Router, Tags};
 
 pub struct MapModel {
     pub roads: Vec<Road>,
@@ -26,6 +26,8 @@ pub struct MapModel {
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
     pub undo_stack: Vec<Command>,
     pub redo_queue: Vec<Command>,
+    // Stores boundary polygons in WGS84, with ALL of their GeoJSON props.
+    pub boundaries: BTreeMap<String, Feature>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
@@ -211,7 +213,7 @@ impl MapModel {
         self.after_edited();
     }
 
-    pub fn to_savefile(&self, neighbourhood: Option<&Neighbourhood>) -> GeoJson {
+    pub fn to_savefile(&self) -> GeoJson {
         let mut features = Vec::new();
 
         // A point per modal filter
@@ -229,26 +231,14 @@ impl MapModel {
             features.push(f);
         }
 
-        if let Some(neighbourhood) = neighbourhood {
-            let mut f = Feature::from(Geometry::from(
-                &self.mercator.to_wgs84(&neighbourhood.boundary_polygon),
-            ));
-            f.set_property("kind", "boundary");
-            for (k, v) in &neighbourhood.boundary_polygon_props {
-                f.set_property(k, v.clone());
-            }
-            features.push(f);
-        }
+        features.extend(self.boundaries.values().cloned());
 
         GeoJson::from(features)
     }
 
-    /// Returns the optional boundary polygon
-    pub fn load_savefile(
-        &mut self,
-        gj: FeatureCollection,
-    ) -> Result<Option<(Polygon, JsonObject)>> {
+    pub fn load_savefile(&mut self, gj: FeatureCollection) -> Result<()> {
         // Clear previous state
+        self.boundaries.clear();
         self.modal_filters.clear();
         self.undo_stack.clear();
         self.redo_queue.clear();
@@ -256,16 +246,12 @@ impl MapModel {
         // Filters could be defined for multiple neighbourhoods, not just the one
         // in the savefile
         let all_roads: HashSet<RoadID> = self.roads.iter().map(|r| r.id).collect();
-        let mut boundary = None;
         let mut cmds = Vec::new();
 
         for f in gj.features {
             match f.property("kind").unwrap().as_str().unwrap() {
                 "modal_filter" => {
-                    let kind = FilterKind::from_string(
-                        f.property("filter_kind").unwrap().as_str().unwrap(),
-                    )
-                    .unwrap();
+                    let kind = FilterKind::from_string(get_str_prop(&f, "filter_kind")?)?;
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
                     cmds.push(self.add_modal_filter_cmd(
                         self.mercator.pt_to_mercator(gj_pt.into()),
@@ -274,12 +260,11 @@ impl MapModel {
                     ));
                 }
                 "boundary" => {
-                    if boundary.is_some() {
-                        bail!("Multiple boundaries in savefile");
+                    let name = get_str_prop(&f, "name")?;
+                    if self.boundaries.contains_key(name) {
+                        bail!("Multiple boundaries named {name} in savefile");
                     }
-                    let mut polygon: Polygon = f.geometry.unwrap().value.try_into()?;
-                    self.mercator.to_mercator_in_place(&mut polygon);
-                    boundary = Some((polygon, f.properties.unwrap()));
+                    self.boundaries.insert(name.to_string(), f);
                 }
                 x => bail!("Unknown kind in savefile {x}"),
             }
@@ -292,7 +277,7 @@ impl MapModel {
         }
         self.after_edited();
 
-        Ok(boundary)
+        Ok(())
     }
 
     pub fn compare_route(&self, pt1: Coord, pt2: Coord) -> GeoJson {
@@ -369,13 +354,13 @@ impl FilterKind {
         }
     }
 
-    pub fn from_string(x: &str) -> Option<Self> {
+    pub fn from_string(x: &str) -> Result<Self> {
         match x {
-            "walk_cycle_only" => Some(FilterKind::WalkCycleOnly),
-            "no_entry" => Some(FilterKind::NoEntry),
-            "bus_gate" => Some(FilterKind::BusGate),
-            "school_street" => Some(FilterKind::SchoolStreet),
-            _ => None,
+            "walk_cycle_only" => Ok(FilterKind::WalkCycleOnly),
+            "no_entry" => Ok(FilterKind::NoEntry),
+            "bus_gate" => Ok(FilterKind::BusGate),
+            "school_street" => Ok(FilterKind::SchoolStreet),
+            _ => bail!("Invalid FilterKind: {x}"),
         }
     }
 }
@@ -404,4 +389,14 @@ fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64> {
     }
     // TODO Didn't find it...
     None
+}
+
+fn get_str_prop<'a>(f: &'a Feature, key: &str) -> Result<&'a str> {
+    let Some(value) = f.property(key) else {
+        bail!("Feature doesn't have a {key} property");
+    };
+    let Some(string) = value.as_str() else {
+        bail!("Feature's {key} property isn't a string");
+    };
+    Ok(string)
 }

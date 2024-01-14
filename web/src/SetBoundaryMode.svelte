@@ -24,7 +24,8 @@
 
   route_tool.addEventListenerSuccess((feature) => {
     try {
-      $app!.setNeighbourhood(feature);
+      $app!.setNeighbourhoodBoundary("fixed", feature);
+      $app!.setCurrentNeighbourhood("fixed");
       $mode = {
         mode: "neighbourhood",
       };

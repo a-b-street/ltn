@@ -48,8 +48,6 @@
   }
   onDestroy(() => {
     stopAddingFilter();
-    // TODO Then we can't "nest" ViewShortcuts beneath this
-    //$app!.unsetNeighbourhood();
   });
   function onClick(e: MapMouseEvent) {
     render($app!.addModalFilter(e.lngLat, filterType));
@@ -111,7 +109,7 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <h1>Editing modal filters</h1>
+    <h1>Editing modal filters in {boundary.properties.name}</h1>
     <p>
       Now that you've defined a neighbourhood boundary, you can see the possible
       shortcuts that vehicles are currently able to take through it. You can add

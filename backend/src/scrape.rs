@@ -69,6 +69,7 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         modal_filters,
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
+        boundaries: BTreeMap::new(),
     })
 }
 

@@ -109,21 +109,6 @@ impl LTN {
         bytes
     }
 
-    /// Takes boundary GJ polygon, returns GJ with more details
-    #[wasm_bindgen(js_name = setNeighbourhood)]
-    pub fn set_neighbourhood(&mut self, input: JsValue) -> Result<String, JsValue> {
-        let boundary_gj: Feature = serde_wasm_bindgen::from_value(input)?;
-        let boundary_polygon_props = boundary_gj.properties.clone().unwrap();
-        let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
-        self.map.mercator.to_mercator_in_place(&mut boundary_geo);
-
-        self.neighbourhood = Some(
-            Neighbourhood::new(&self.map, boundary_geo, boundary_polygon_props)
-                .map_err(err_to_js)?,
-        );
-        self.render_neighbourhood()
-    }
-
     #[wasm_bindgen(js_name = renderNeighbourhood)]
     pub fn render_neighbourhood(&self) -> Result<String, JsValue> {
         Ok(
@@ -132,9 +117,34 @@ impl LTN {
         )
     }
 
-    #[wasm_bindgen(js_name = unsetNeighbourhood)]
-    pub fn unset_neighbourhood(&mut self) {
-        self.neighbourhood = None;
+    /// Takes a name and boundary GJ polygon
+    #[wasm_bindgen(js_name = setNeighbourhoodBoundary)]
+    pub fn set_neighbourhood_boundary(
+        &mut self,
+        name: String,
+        input: JsValue,
+    ) -> Result<(), JsValue> {
+        let mut boundary_gj: Feature = serde_wasm_bindgen::from_value(input)?;
+        boundary_gj.set_property("kind", "boundary");
+        boundary_gj.set_property("name", name.clone());
+        self.map.boundaries.insert(name, boundary_gj);
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = deleteNeighbourhoodBoundary)]
+    pub fn delete_neighbourhood_boundary(&mut self, name: String) {
+        self.map.boundaries.remove(&name);
+    }
+
+    #[wasm_bindgen(js_name = setCurrentNeighbourhood)]
+    pub fn set_current_neighbourhood(&mut self, name: String) -> Result<String, JsValue> {
+        let boundary_gj = self.map.boundaries.get(&name).cloned().unwrap();
+        let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
+        self.map.mercator.to_mercator_in_place(&mut boundary_geo);
+
+        self.neighbourhood =
+            Some(Neighbourhood::new(&self.map, name, boundary_geo).map_err(err_to_js)?);
+        self.render_neighbourhood()
     }
 
     /// Takes a LngLat
@@ -202,32 +212,19 @@ impl LTN {
         .map_err(err_to_js)?)
     }
 
-    /// GJ with modal filters and optionally the neighbourhood boundary
+    /// GJ with modal filters and named boundaries
     #[wasm_bindgen(js_name = toSavefile)]
     pub fn to_savefile(&self) -> Result<String, JsValue> {
         // TODO Trim coordinates... in mercator?
-        Ok(
-            serde_json::to_string(&self.map.to_savefile(self.neighbourhood.as_ref()))
-                .map_err(err_to_js)?,
-        )
+        Ok(serde_json::to_string(&self.map.to_savefile()).map_err(err_to_js)?)
     }
 
-    /// Returns true if there was a neighbourhood set up
     #[wasm_bindgen(js_name = loadSavefile)]
-    pub fn load_savefile(&mut self, input: JsValue) -> Result<bool, JsValue> {
+    pub fn load_savefile(&mut self, input: JsValue) -> Result<(), JsValue> {
         let gj: FeatureCollection = serde_wasm_bindgen::from_value(input)?;
-        let maybe_boundary = self.map.load_savefile(gj).map_err(err_to_js)?;
-
+        self.map.load_savefile(gj).map_err(err_to_js)?;
         self.neighbourhood = None;
-        if let Some((boundary, boundary_polygon_props)) = maybe_boundary {
-            self.neighbourhood = Some(
-                Neighbourhood::new(&self.map, boundary, boundary_polygon_props)
-                    .map_err(err_to_js)?,
-            );
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+        Ok(())
     }
 
     /// Returns GJ with two LineStrings, before and after

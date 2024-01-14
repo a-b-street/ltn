@@ -5,7 +5,7 @@ use geo::{
     BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
     MultiLineString, Polygon,
 };
-use geojson::{Feature, FeatureCollection, Geometry, JsonObject};
+use geojson::{Feature, FeatureCollection, Geometry};
 
 use crate::render_cells::Color;
 use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
@@ -14,25 +14,22 @@ pub struct Neighbourhood {
     pub interior_roads: HashSet<RoadID>,
     crosses: HashMap<RoadID, f64>,
     pub border_intersections: HashSet<IntersectionID>,
+    name: String,
     pub boundary_polygon: Polygon,
-    pub boundary_polygon_props: JsonObject,
 }
 
 impl Neighbourhood {
-    pub fn new(
-        map: &MapModel,
-        boundary: Polygon,
-        boundary_polygon_props: JsonObject,
-    ) -> Result<Self> {
+    pub fn new(map: &MapModel, name: String, boundary_polygon: Polygon) -> Result<Self> {
         let mut interior_roads = HashSet::new();
         let mut crosses = HashMap::new();
         for r in &map.roads {
-            if boundary.contains(&r.linestring) {
+            if boundary_polygon.contains(&r.linestring) {
                 interior_roads.insert(r.id);
-            } else if boundary.intersects(&r.linestring) {
+            } else if boundary_polygon.intersects(&r.linestring) {
                 // Clip the linestring to the polygon
                 let invert = false;
-                let clipped = boundary.clip(&MultiLineString::from(r.linestring.clone()), invert);
+                let clipped =
+                    boundary_polygon.clip(&MultiLineString::from(r.linestring.clone()), invert);
                 // How much of the clipped linestring is inside the boundary? If it's nearly 1,
                 // then this road is interior.
                 let pct = clipped.euclidean_length() / r.linestring.euclidean_length();
@@ -53,7 +50,7 @@ impl Neighbourhood {
         for i in &map.intersections {
             // Check distance to the polygon's linestring, rather than the polygon itself. Points
             // contained within a polygon and eight on the linestring both count as 0.
-            let dist = i.point.euclidean_distance(boundary.exterior());
+            let dist = i.point.euclidean_distance(boundary_polygon.exterior());
             // Allow a small tolerance
             if dist < 0.1 {
                 border_intersections.insert(i.id);
@@ -68,29 +65,21 @@ impl Neighbourhood {
             interior_roads,
             crosses,
             border_intersections,
-            boundary_polygon: boundary,
-            boundary_polygon_props,
+            name,
+            boundary_polygon,
         })
     }
 
     pub fn to_gj(&self, map: &MapModel) -> FeatureCollection {
         let mut features = Vec::new();
 
+        // Just one boundary
+        features.push(map.boundaries.get(&self.name).cloned().unwrap());
+
         // TODO Decide how/where state lives
         let cells = Cell::find_all(map, self);
         let render_cells = RenderCells::new(map, self, &cells);
         let shortcuts = Shortcuts::new(map, self);
-
-        {
-            let mut f = Feature::from(Geometry::from(
-                &map.mercator.to_wgs84(&self.boundary_polygon),
-            ));
-            f.set_property("kind", "boundary");
-            for (k, v) in &self.boundary_polygon_props {
-                f.set_property(k, v.clone());
-            }
-            features.push(f);
-        }
 
         for r in &self.interior_roads {
             let mut f = map.get_r(*r).to_gj(&map.mercator);
