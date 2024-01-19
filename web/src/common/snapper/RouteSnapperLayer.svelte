@@ -1,11 +1,6 @@
 <script lang="ts">
   import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import {
-    constructMatchExpression,
-    isLine,
-    isPoint,
-    isPolygon,
-  } from "./index";
+  import { constructMatchExpression, isLine, isPoint, isPolygon } from "../";
   import { routeToolGj } from "./stores";
 
   const circleRadiusPixels = 10;

@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { Layout } from "./common";
-  import { RouteTool } from "./common/route_tool";
+  import { RouteTool } from "./common/snapper/route_tool";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";

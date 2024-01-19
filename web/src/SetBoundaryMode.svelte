@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
-  import { RouteTool } from "./common/route_tool";
-  import RouteSnapperLayer from "./common/RouteSnapperLayer.svelte";
-  import SnapPolygonControls from "./common/SnapPolygonControls.svelte";
+  import { RouteTool } from "./common/snapper/route_tool";
+  import RouteSnapperLayer from "./common/snapper/RouteSnapperLayer.svelte";
+  import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
 
