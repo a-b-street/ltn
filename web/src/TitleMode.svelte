@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Modal, notNull } from "./common";
+  import PolygonToolLayer from "./common/draw_polygon/PolygonToolLayer.svelte";
   import MapLoader from "./MapLoader.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { map } from "./stores";
@@ -64,5 +65,7 @@
     {/if}
   </div>
 
-  <div slot="map" />
+  <div slot="map">
+    <PolygonToolLayer />
+  </div>
 </SplitComponent>

@@ -6,6 +6,7 @@
 
 <GeoJSON data={$polygonToolGj}>
   <FillLayer
+    id="edit-polygon-fill"
     filter={isPolygon}
     paint={{
       "fill-color": "red",
@@ -27,6 +28,7 @@
     }}
   />
   <CircleLayer
+    id="edit-polygon-vertices"
     filter={isPoint}
     paint={{
       "circle-color": "black",
