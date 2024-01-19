@@ -1,3 +1,4 @@
+import type { Feature, Point, Position } from "geojson";
 import type {
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
@@ -78,4 +79,21 @@ export function notNull<T>(x: T | null | undefined): T {
     throw new Error("Oops, notNull given something null");
   }
   return x;
+}
+
+export function pointFeature(pt: Position): Feature<Point> {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "Point",
+      coordinates: setPrecision(pt),
+    },
+  };
+}
+
+// Per https://datatracker.ietf.org/doc/html/rfc7946#section-11.2, 6 decimal
+// places (10cm) is plenty of precision
+export function setPrecision(pt: Position): Position {
+  return [Math.round(pt[0] * 10e6) / 10e6, Math.round(pt[1] * 10e6) / 10e6];
 }
