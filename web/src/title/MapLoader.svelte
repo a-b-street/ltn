@@ -93,6 +93,7 @@
       <option value="elephant_castle">Elephant & Castle</option>
       <option value="westminster">Westminster</option>
       <option value="montlake">Montlake</option>
+      <option value="strasbourg">Strasbourg</option>
     </select>
   </label>
 </div>
