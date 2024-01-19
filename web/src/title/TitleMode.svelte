@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Modal, notNull } from "./common";
-  import PolygonToolLayer from "./common/draw_polygon/PolygonToolLayer.svelte";
+  import { Modal, notNull } from "../common";
+  import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
+  import SplitComponent from "../SplitComponent.svelte";
+  import { map } from "../stores";
   import MapLoader from "./MapLoader.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
-  import { map } from "./stores";
 
   export let wasmReady: boolean;
 

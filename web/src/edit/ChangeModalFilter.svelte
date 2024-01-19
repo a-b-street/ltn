@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal, notNull } from "./common";
+  import { Modal, notNull } from "../common";
 
   export let filterType: string;
 

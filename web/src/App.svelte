@@ -7,7 +7,7 @@
   import { Layout } from "./common";
   import { RouteTool } from "./common/snapper/route_tool";
   import DebugMode from "./DebugMode.svelte";
-  import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
+  import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
@@ -19,7 +19,7 @@
     showBasemap,
     sidebarContents,
   } from "./stores";
-  import TitleMode from "./TitleMode.svelte";
+  import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
   let wasmReady = false;

@@ -2,8 +2,8 @@
   import init, { LTN } from "backend";
   import init2 from "route-snapper";
   import { onMount } from "svelte";
-  import { Loading, OverpassSelector } from "./common";
-  import { app, example, map } from "./stores";
+  import { Loading, OverpassSelector } from "../common";
+  import { app, example, map } from "../stores";
 
   let msg: string | null = null;
   let useLocalVite = false;

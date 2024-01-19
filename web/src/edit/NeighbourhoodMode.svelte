@@ -8,13 +8,13 @@
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
+  import { notNull } from "../common";
+  import ManageSavefiles from "../ManageSavefiles.svelte";
+  import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
+  import SplitComponent from "../SplitComponent.svelte";
+  import { app, map, mode } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
-  import { notNull } from "./common";
   import FreehandLine from "./FreehandLine.svelte";
-  import ManageSavefiles from "./ManageSavefiles.svelte";
-  import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
-  import { app, map, mode } from "./stores";
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
