@@ -9,14 +9,14 @@
   import { onDestroy } from "svelte";
   import { Popup } from "svelte-maplibre";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
-  import { notNull, PropertiesTable } from "./common";
+  import { notNull } from "./common";
   import FreehandLine from "./FreehandLine.svelte";
   import ManageSavefiles from "./ManageSavefiles.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
 
-  // Caller is responsible for doing app.setNeighbourhood
+  // Caller is responsible for doing app.setCurrentNeighbourhood
 
   let filterType = "walk_cycle_only";
   let addingFilter = false;
@@ -193,6 +193,9 @@
     <div>
       <button on:click={() => ($mode = { mode: "route" })}>Route</button>
     </div>
+    <div>
+      <button on:click={() => ($mode = { mode: "debug" })}>Debug</button>
+    </div>
 
     <hr />
     <ManageSavefiles />
@@ -202,18 +205,12 @@
     <RenderNeighbourhood
       {gjInput}
       interactive={!addingFilter && !addingMultipleFilters}
-      onClickLine={(f) => window.open(notNull(f.properties).way, "_blank")}
       onClickCircle={deleteFilter}
     >
       <div slot="line-popup">
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
-        </Popup>
-      </div>
-      <div slot="circle-popup">
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
-        </Popup>
+        <Popup openOn="hover" let:data
+          ><p>{notNull(data).properties.shortcuts} shortcuts</p></Popup
+        >
       </div>
     </RenderNeighbourhood>
     {#if addingMultipleFilters}

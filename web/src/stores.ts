@@ -23,6 +23,9 @@ export type Mode =
     }
   | {
       mode: "route";
+    }
+  | {
+      mode: "debug";
     };
 
 export let app: Writable<LTN | null> = writable(null);

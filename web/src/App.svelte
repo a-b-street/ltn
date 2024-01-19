@@ -6,6 +6,7 @@
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { Layout } from "./common";
   import { RouteTool } from "./common/route_tool";
+  import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
@@ -124,6 +125,8 @@
           <ViewShortcutsMode />
         {:else if $mode.mode == "route"}
           <RouteMode />
+        {:else if $mode.mode == "debug"}
+          <DebugMode />
         {/if}
       {/if}
     </MapLibre>
