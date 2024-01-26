@@ -1,13 +1,7 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
-  import {
-    CircleLayer,
-    FillLayer,
-    GeoJSON,
-    hoverStateFilter,
-    LineLayer,
-  } from "svelte-maplibre";
-  import { constructMatchExpression, isLine, isPolygon } from "./common";
+  import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { constructMatchExpression, isPolygon } from "./common";
   import { showBasemap } from "./stores";
 
   export let gjInput: FeatureCollection;
@@ -59,36 +53,27 @@
   <FillLayer
     beforeId={$showBasemap ? "Building" : undefined}
     filter={isPolygon}
-    manageHoverState
     paint={{
       "fill-color": ["get", "color"],
-      "fill-opacity": interactive ? hoverStateFilter(0.3, 0.5) : 0.3,
+      "fill-opacity": 0.3,
     }}
   />
 
   <LineLayer
-    filter={isLine}
+    filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
       "line-width": 5,
-      // @ts-ignore line-color type seems wrong?
-      "line-color": constructMatchExpression(
-        ["get", "kind"],
-        {
-          interior_road: [
-            "interpolate-hcl",
-            ["linear"],
-            ["get", "shortcuts"],
-            0,
-            "white",
-            1,
-            "#F19A93",
-            maxShortcuts,
-            "#A32015",
-          ],
-          crosses: "blue",
-        },
-        "red"
-      ),
+      "line-color": [
+        "interpolate-hcl",
+        ["linear"],
+        ["get", "shortcuts"],
+        0,
+        "white",
+        1,
+        "#F19A93",
+        maxShortcuts,
+        "#A32015",
+      ],
     }}
     on:click={(e) => interactive && onClickLine(e.detail.features[0])}
     hoverCursor={interactive ? "pointer" : undefined}

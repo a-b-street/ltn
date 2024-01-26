@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleLayer, Popup } from "svelte-maplibre";
+  import { CircleLayer, LineLayer, Popup } from "svelte-maplibre";
   import { notNull, PropertiesTable } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -45,6 +45,17 @@
             <PropertiesTable properties={notNull(data).properties} />
           </Popup>
         </CircleLayer>
+        <LineLayer
+          filter={["==", ["get", "kind"], "crosses"]}
+          paint={{
+            "line-width": 5,
+            "line-color": "blue",
+          }}
+        >
+          <Popup openOn="hover" let:data>
+            <PropertiesTable properties={notNull(data).properties} />
+          </Popup>
+        </LineLayer>
       </svelte:fragment>
     </RenderNeighbourhood>
   </div>
