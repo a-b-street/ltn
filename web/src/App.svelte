@@ -44,7 +44,7 @@
   function zoomToFit() {
     $mapStore!.fitBounds(
       Array.from($app!.getBounds()) as [number, number, number, number],
-      { animate: false }
+      { animate: false },
     );
   }
 

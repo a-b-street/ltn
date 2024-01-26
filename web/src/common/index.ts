@@ -30,7 +30,7 @@ export const isPoint: ExpressionSpecification = [
 export function constructMatchExpression<OutputType>(
   getter: any[],
   map: { [name: string]: OutputType },
-  fallback: OutputType
+  fallback: OutputType,
 ): DataDrivenPropertyValueSpecification<OutputType> {
   let x: any[] = ["match", getter];
   for (let [key, value] of Object.entries(map)) {
@@ -45,7 +45,7 @@ export function constructMatchExpression<OutputType>(
 export function makeColorRamp(
   input: DataDrivenPropertyValueSpecification<number>,
   limits: number[],
-  colorScale: string[]
+  colorScale: string[],
 ): DataDrivenPropertyValueSpecification<string> {
   let step: any[] = ["step", input];
   for (let i = 1; i < limits.length; i++) {
@@ -63,7 +63,7 @@ export function downloadGeneratedFile(filename: string, textInput: string) {
   let element = document.createElement("a");
   element.setAttribute(
     "href",
-    "data:text/plain;charset=utf-8, " + encodeURIComponent(textInput)
+    "data:text/plain;charset=utf-8, " + encodeURIComponent(textInput),
   );
   element.setAttribute("download", filename);
   document.body.appendChild(element);

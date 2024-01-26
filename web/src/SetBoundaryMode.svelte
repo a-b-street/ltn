@@ -32,7 +32,7 @@
       $route_tool!.clearEventListeners();
     } catch (err) {
       window.alert(
-        "Known georust bug hit, sorry. You may need to just refresh the page now."
+        "Known georust bug hit, sorry. You may need to just refresh the page now.",
       );
       onFailure();
     }

@@ -30,7 +30,7 @@
     ];
 
     maxShortcuts = Math.max(
-      ...gjInput.features.map((f) => f.properties!.shortcuts ?? 0)
+      ...gjInput.features.map((f) => f.properties!.shortcuts ?? 0),
     );
 
     for (let f of gjInput.features) {

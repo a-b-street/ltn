@@ -12,7 +12,7 @@
   let pt_b: LngLat = randomPoint();
 
   $: gj = JSON.parse(
-    $app!.compareRoute(pt_a.lng, pt_a.lat, pt_b.lng, pt_b.lat)
+    $app!.compareRoute(pt_a.lng, pt_a.lat, pt_b.lng, pt_b.lat),
   );
 
   onMount(() => {
@@ -70,7 +70,7 @@
               before: "red",
               after: "blue",
             },
-            "red"
+            "red",
           ),
         }}
       />

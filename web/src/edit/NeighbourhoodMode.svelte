@@ -33,7 +33,7 @@
   function rerender(_x: number) {
     gjInput = JSON.parse($app!.renderNeighbourhood());
     boundary = gjInput.features.find(
-      (f) => f.properties!.kind == "boundary"
+      (f) => f.properties!.kind == "boundary",
     )! as Feature<Polygon>;
 
     // @ts-ignore These foreign members exist

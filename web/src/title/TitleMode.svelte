@@ -25,13 +25,13 @@
         // TODO HACK! MapLoader will restore from local storage, so just set that
         window.localStorage.setItem(
           `ltn_${gj.study_area_name}.geojson`,
-          JSON.stringify(gj)
+          JSON.stringify(gj),
         );
         await mapLoader!.loadExample(gj.study_area_name);
       } else {
         $example = "";
         let study_area_boundary = gj.features.find(
-          (f: Feature) => f.properties!.kind == "study_area_boundary"
+          (f: Feature) => f.properties!.kind == "study_area_boundary",
         )!;
         let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
         let bytes = await resp.arrayBuffer();

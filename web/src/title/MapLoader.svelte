@@ -36,7 +36,7 @@
     console.time("load");
     $app = new LTN(
       new Uint8Array(buffer),
-      $example == "" ? undefined : $example
+      $example == "" ? undefined : $example,
     );
     console.timeEnd("load");
 
@@ -57,7 +57,7 @@
     $route_tool = new RouteTool($map!, $app.toRouteSnapper());
     $map!.fitBounds(
       Array.from($app.getBounds()) as [number, number, number, number],
-      { animate: false }
+      { animate: false },
     );
   }
 

@@ -221,7 +221,7 @@ export class RouteTool {
 
     if (!feature.properties.waypoints) {
       window.alert(
-        "Bug: editExistingArea called for a polygon not produced by the route-snapper"
+        "Bug: editExistingArea called for a polygon not produced by the route-snapper",
       );
     }
 
@@ -231,12 +231,12 @@ export class RouteTool {
   }
 
   addEventListenerSuccess(
-    callback: (f: Feature<LineString | Polygon>) => void
+    callback: (f: Feature<LineString | Polygon>) => void,
   ) {
     this.eventListenersSuccess.push(callback);
   }
   addEventListenerUpdated(
-    callback: (f: Feature<LineString | Polygon>) => void
+    callback: (f: Feature<LineString | Polygon>) => void,
   ) {
     this.eventListenersUpdated.push(callback);
   }
