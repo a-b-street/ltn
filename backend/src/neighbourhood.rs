@@ -10,11 +10,20 @@ use crate::render_cells::Color;
 use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
 pub struct Neighbourhood {
+    // Immutable once created
     pub interior_roads: HashSet<RoadID>,
     crosses: HashMap<RoadID, f64>,
     pub border_intersections: HashSet<IntersectionID>,
     name: String,
     pub boundary_polygon: Polygon,
+
+    // Updated after mutations
+    derived: Option<DerivedNeighbourhoodState>,
+}
+
+struct DerivedNeighbourhoodState {
+    render_cells: RenderCells,
+    shortcuts: Shortcuts,
 }
 
 impl Neighbourhood {
@@ -60,32 +69,47 @@ impl Neighbourhood {
             bail!("No roads inside the boundary");
         }
 
-        Ok(Self {
+        let mut n = Self {
             interior_roads,
             crosses,
             border_intersections,
             name,
             boundary_polygon,
-        })
+            derived: None,
+        };
+        n.after_edit(map);
+        Ok(n)
+    }
+
+    pub fn after_edit(&mut self, map: &MapModel) {
+        let cells = Cell::find_all(map, self);
+        let render_cells = RenderCells::new(map, self, &cells);
+        let shortcuts = Shortcuts::new(map, self);
+        self.derived = Some(DerivedNeighbourhoodState {
+            render_cells,
+            shortcuts,
+        });
     }
 
     pub fn to_gj(&self, map: &MapModel) -> FeatureCollection {
         let mut features = Vec::new();
 
+        let derived = self.derived.as_ref().unwrap();
+
         // Just one boundary
         features.push(map.boundaries.get(&self.name).cloned().unwrap());
-
-        // TODO Decide how/where state lives
-        let cells = Cell::find_all(map, self);
-        let render_cells = RenderCells::new(map, self, &cells);
-        let shortcuts = Shortcuts::new(map, self);
 
         for r in &self.interior_roads {
             let mut f = map.get_r(*r).to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
             f.set_property(
                 "shortcuts",
-                shortcuts.count_per_road.get(r).cloned().unwrap_or(0),
+                derived
+                    .shortcuts
+                    .count_per_road
+                    .get(r)
+                    .cloned()
+                    .unwrap_or(0),
             );
             features.push(f);
         }
@@ -101,15 +125,16 @@ impl Neighbourhood {
             features.push(f);
         }
 
-        for (polygons, color) in render_cells
+        for (polygons, color) in derived
+            .render_cells
             .polygons_per_cell
-            .into_iter()
-            .zip(render_cells.colors)
+            .iter()
+            .zip(derived.render_cells.colors.iter())
         {
-            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&polygons)));
+            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(polygons)));
             match color {
                 Color::Disconnected => f.set_property("cell_color", "disconnected"),
-                Color::Cell(idx) => f.set_property("cell_color", idx),
+                Color::Cell(idx) => f.set_property("cell_color", *idx),
             }
             features.push(f);
         }

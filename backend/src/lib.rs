@@ -150,6 +150,7 @@ impl LTN {
             &self.neighbourhood.as_ref().unwrap().interior_roads,
             FilterKind::from_string(&kind).unwrap(),
         );
+        self.after_edit();
         Ok(())
     }
 
@@ -165,19 +166,23 @@ impl LTN {
             &self.neighbourhood.as_ref().unwrap().interior_roads,
             FilterKind::from_string(&kind).unwrap(),
         );
+        self.after_edit();
         Ok(())
     }
 
     #[wasm_bindgen(js_name = deleteModalFilter)]
     pub fn delete_modal_filter(&mut self, road: usize) {
         self.map.delete_modal_filter(RoadID(road));
+        self.after_edit();
     }
 
     pub fn undo(&mut self) {
         self.map.undo();
+        self.after_edit();
     }
     pub fn redo(&mut self) {
         self.map.redo();
+        self.after_edit();
     }
 
     #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]
@@ -217,6 +222,14 @@ impl LTN {
         let pt1 = self.map.mercator.pt_to_mercator(Coord { x: x1, y: y1 });
         let pt2 = self.map.mercator.pt_to_mercator(Coord { x: x2, y: y2 });
         Ok(serde_json::to_string(&self.map.compare_route(pt1, pt2)).map_err(err_to_js)?)
+    }
+
+    // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
+    // plumb, so duplicting here.
+    fn after_edit(&mut self) {
+        if let Some(ref mut n) = self.neighbourhood {
+            n.after_edit(&self.map);
+        }
     }
 }
 
