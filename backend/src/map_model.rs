@@ -291,6 +291,9 @@ impl MapModel {
                     }
                     self.boundaries.insert(name.to_string(), f);
                 }
+                "study_area_boundary" => {
+                    // TODO Detect if it's close enough to boundary_polygon? Overwrite?
+                }
                 x => bail!("Unknown kind in savefile {x}"),
             }
         }

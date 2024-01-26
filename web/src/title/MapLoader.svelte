@@ -72,7 +72,7 @@
     msg = null;
   }
 
-  async function loadExample(ex: string) {
+  export async function loadExample(ex: string) {
     if (ex != "") {
       if (useLocalVite) {
         await loadFromUrl(`/osm/${ex}.pbf`);
@@ -81,7 +81,6 @@
       }
     }
   }
-  $: loadExample($example);
 
   async function loadFromUrl(url: string) {
     try {
@@ -100,7 +99,7 @@
 <div>
   <label>
     Load an example:
-    <select bind:value={$example}>
+    <select bind:value={$example} on:change={() => loadExample($example)}>
       <option value="">Custom file loaded</option>
       <option value="akihabara">Akihabara</option>
       <option value="hanegi">Hanegi Park</option>
