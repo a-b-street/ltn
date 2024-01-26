@@ -3,7 +3,7 @@
   import { overpassQueryForPolygon } from "../common";
   import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, example, map, route_tool } from "../stores";
+  import { app, example, map, route_tool, showAbout } from "../stores";
   import About from "./About.svelte";
   import MapLoader from "./MapLoader.svelte";
 
@@ -12,9 +12,6 @@
   // When other modes reset here, they can't clear state without a race condition
   $app = null;
   $route_tool = null;
-
-  // TODO Once per session
-  let showModal = true;
 
   let mapLoader: MapLoader | undefined;
 
@@ -50,10 +47,10 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <About bind:showModal />
+    <About />
 
     <h1>Choose your study area</h1>
-    <button on:click={() => (showModal = true)}>About the LTN tool</button>
+    <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
 
     {#if mapLoader}
       <div>

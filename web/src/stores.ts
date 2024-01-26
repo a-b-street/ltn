@@ -39,6 +39,7 @@ export let map: Writable<Map | null> = writable(null);
 export let route_tool: Writable<RouteTool | null> = writable(null);
 
 export let example: Writable<string> = writable("");
+export let showAbout: Writable<boolean> = writable(true);
 
 export let sidebarContents: Writable<HTMLDivElement | null> = writable(null);
 export let mapContents: Writable<HTMLDivElement | null> = writable(null);
