@@ -34,7 +34,10 @@
   function loadMap(buffer: ArrayBuffer) {
     msg = "Building map model from OSM input";
     console.time("load");
-    $app = new LTN(new Uint8Array(buffer), $example == "" ? undefined : $example);
+    $app = new LTN(
+      new Uint8Array(buffer),
+      $example == "" ? undefined : $example
+    );
     console.timeEnd("load");
 
     // Autoload from local storage
@@ -115,12 +118,16 @@
   </label>
 </div>
 
+<i>or...</i>
+
 <div>
   <label>
     Load an osm.xml or a .pbf file:
     <input bind:this={fileInput} on:change={loadFile} type="file" />
   </label>
 </div>
+
+<i>or...</i>
 
 <OverpassSelector
   map={$map}
