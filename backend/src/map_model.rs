@@ -213,27 +213,35 @@ impl MapModel {
         self.after_edited();
     }
 
-    pub fn to_savefile(&self) -> GeoJson {
+    pub fn filters_to_gj(&self) -> FeatureCollection {
         let mut features = Vec::new();
-
-        // A point per modal filter
-        // (When we detect existing, maybe need to instead compact edits)
-        for (r, modal_filter) in &self.modal_filters {
+        for (r, filter) in &self.modal_filters {
             let pt = self
                 .get_r(*r)
                 .linestring
-                .line_interpolate_point(modal_filter.percent_along)
+                .line_interpolate_point(filter.percent_along)
                 .unwrap();
-            // TODO Maybe make the WASM API always do the mercator stuff
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
-            f.set_property("kind", "modal_filter");
-            f.set_property("filter_kind", modal_filter.kind.to_string());
+            f.set_property("filter_kind", filter.kind.to_string());
+            f.set_property("road", r.0);
             features.push(f);
         }
+        FeatureCollection {
+            features,
+            bbox: None,
+            foreign_members: None,
+        }
+    }
 
-        features.extend(self.boundaries.values().cloned());
-
-        GeoJson::from(features)
+    pub fn to_savefile(&self) -> FeatureCollection {
+        let mut gj = self.filters_to_gj();
+        // TODO When we detect existing filters, maybe need to instead compact edits
+        for f in &mut gj.features {
+            f.set_property("kind", "modal_filter");
+            f.remove_property("road");
+        }
+        gj.features.extend(self.boundaries.values().cloned());
+        gj
     }
 
     pub fn load_savefile(&mut self, gj: FeatureCollection) -> Result<()> {

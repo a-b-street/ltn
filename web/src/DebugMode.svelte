@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleLayer, LineLayer, Popup } from "svelte-maplibre";
+  import { CircleLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { notNull, PropertiesTable } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -24,11 +24,6 @@
       onClickLine={(f) => window.open(notNull(f.properties).way, "_blank")}
     >
       <div slot="line-popup">
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
-        </Popup>
-      </div>
-      <div slot="circle-popup">
         <Popup openOn="hover" let:data>
           <PropertiesTable properties={notNull(data).properties} />
         </Popup>
@@ -58,5 +53,18 @@
         </LineLayer>
       </svelte:fragment>
     </RenderNeighbourhood>
+
+    <GeoJSON data={notNull($app).renderModalFilters()} generateId>
+      <CircleLayer
+        paint={{
+          "circle-radius": 15,
+          "circle-color": "black",
+        }}
+      >
+        <Popup openOn="hover" let:data>
+          <PropertiesTable properties={notNull(data).properties} />
+        </Popup>
+      </CircleLayer>
+    </GeoJSON>
   </div>
 </SplitComponent>

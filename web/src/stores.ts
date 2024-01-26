@@ -29,6 +29,9 @@ export type Mode =
     };
 
 export let app: Writable<LTN | null> = writable(null);
+// A way for different components to know when internal app state has changed
+// and they might need to rerender
+export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title" });
 export let showBasemap: Writable<boolean> = writable(true);
 export let map: Writable<Map | null> = writable(null);

@@ -3,6 +3,7 @@
   import { FillLayer, GeoJSON, hoverStateFilter, Popup } from "svelte-maplibre";
   import { isPolygon, notNull } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
+  import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
 
@@ -88,6 +89,7 @@
           <p>{notNull(data).properties.name}</p>
         </Popup>
       </FillLayer>
+      <ModalFilterLayer />
     </GeoJSON>
   </div>
 </SplitComponent>

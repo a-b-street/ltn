@@ -2,8 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use anyhow::Result;
 use geo::{
-    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
-    MultiLineString, Polygon,
+    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, MultiLineString, Polygon,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
 
@@ -112,19 +111,6 @@ impl Neighbourhood {
                 Color::Disconnected => f.set_property("cell_color", "disconnected"),
                 Color::Cell(idx) => f.set_property("cell_color", idx),
             }
-            features.push(f);
-        }
-
-        for (r, filter) in &map.modal_filters {
-            let pt = map
-                .get_r(*r)
-                .linestring
-                .line_interpolate_point(filter.percent_along)
-                .unwrap();
-            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&pt)));
-            f.set_property("kind", "modal_filter");
-            f.set_property("filter_kind", filter.kind.to_string());
-            f.set_property("road", r.0);
             features.push(f);
         }
 

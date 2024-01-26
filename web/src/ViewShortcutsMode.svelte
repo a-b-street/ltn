@@ -3,6 +3,7 @@
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { notNull } from "./common";
+  import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
@@ -127,5 +128,6 @@
         </GeoJSON>
       {/if}
     {/if}
+    <ModalFilterLayer />
   </div>
 </SplitComponent>

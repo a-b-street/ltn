@@ -1,14 +1,13 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
-  import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { constructMatchExpression, isPolygon } from "./common";
+  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { isPolygon } from "./common";
   import { showBasemap } from "./stores";
 
   export let gjInput: FeatureCollection;
   // When disabled, can't click lines or circles, no slots, no hoverCursor
   export let interactive = true;
   export let onClickLine = (f: Feature) => {};
-  export let onClickCircle = (f: Feature) => {};
 
   let gj: FeatureCollection;
   let maxShortcuts: number;
@@ -82,18 +81,5 @@
       <slot name="line-popup" />
     {/if}
   </LineLayer>
-
-  <CircleLayer
-    filter={["==", ["get", "kind"], "modal_filter"]}
-    paint={{
-      "circle-radius": 15,
-      "circle-color": "black",
-    }}
-    on:click={(e) => interactive && onClickCircle(e.detail.features[0])}
-  >
-    {#if interactive}
-      <slot name="circle-popup" />
-    {/if}
-  </CircleLayer>
   <slot name="more-layers" />
 </GeoJSON>

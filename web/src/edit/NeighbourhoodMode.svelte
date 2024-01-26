@@ -7,12 +7,12 @@
   } from "geojson";
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import { Popup } from "svelte-maplibre";
+  import { CircleLayer, GeoJSON, Popup } from "svelte-maplibre";
   import { notNull } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, map, mode } from "../stores";
+  import { app, map, mode, mutationCounter } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
 
@@ -27,9 +27,10 @@
   let boundary: Feature<Polygon> | null;
 
   let gjInput: FeatureCollection;
-  rerender();
+  let modalFilterGj: FeatureCollection;
+  $: rerender($mutationCounter);
 
-  function rerender() {
+  function rerender(_x: number) {
     gjInput = JSON.parse($app!.renderNeighbourhood());
     boundary = gjInput.features.find(
       (f) => f.properties!.kind == "boundary"
@@ -39,6 +40,8 @@
     undoLength = gjInput.undo_length;
     // @ts-ignore These foreign members exist
     redoLength = gjInput.redo_length;
+
+    modalFilterGj = JSON.parse($app!.renderModalFilters());
   }
 
   $: if (addingFilter) {
@@ -51,7 +54,7 @@
   });
   function onClick(e: MapMouseEvent) {
     $app!.addModalFilter(e.lngLat, filterType);
-    rerender();
+    $mutationCounter++;
     stopAddingFilter();
   }
   function stopAddingFilter() {
@@ -60,10 +63,11 @@
     $map!.getCanvas().style.cursor = "inherit";
   }
 
-  function deleteFilter(f: Feature) {
+  function deleteFilter(e) {
+    let f = e.detail.features[0];
     if (f.properties!.kind == "modal_filter") {
       $app!.deleteModalFilter(f.properties!.road);
-      rerender();
+      $mutationCounter++;
     }
   }
 
@@ -80,11 +84,11 @@
   }
   function undo() {
     $app!.undo();
-    rerender();
+    $mutationCounter++;
   }
   function redo() {
     $app!.redo();
-    rerender();
+    $mutationCounter++;
   }
 
   function pickNewNeighbourhood() {
@@ -97,7 +101,7 @@
     let f = e.detail;
     if (f) {
       $app!.addManyModalFilters(f, filterType);
-      rerender();
+      $mutationCounter++;
     }
 
     addingMultipleFilters = false;
@@ -210,7 +214,6 @@
     <RenderNeighbourhood
       {gjInput}
       interactive={!addingFilter && !addingMultipleFilters}
-      onClickCircle={deleteFilter}
     >
       <div slot="line-popup">
         <Popup openOn="hover" let:data
@@ -218,6 +221,17 @@
         >
       </div>
     </RenderNeighbourhood>
+    <GeoJSON data={modalFilterGj} generateId>
+      <CircleLayer
+        paint={{
+          "circle-radius": 15,
+          "circle-color": "black",
+        }}
+        on:click={deleteFilter}
+      >
+        <Popup openOn="hover">Click to delete</Popup>
+      </CircleLayer>
+    </GeoJSON>
     {#if addingMultipleFilters}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
     {/if}

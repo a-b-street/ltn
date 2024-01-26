@@ -95,6 +95,11 @@ impl LTN {
         bytes
     }
 
+    #[wasm_bindgen(js_name = renderModalFilters)]
+    pub fn render_modal_filters(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&self.map.filters_to_gj()).map_err(err_to_js)?)
+    }
+
     #[wasm_bindgen(js_name = renderNeighbourhood)]
     pub fn render_neighbourhood(&self) -> Result<String, JsValue> {
         Ok(

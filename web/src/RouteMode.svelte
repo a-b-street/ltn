@@ -3,6 +3,7 @@
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
   import { constructMatchExpression, notNull } from "./common";
+  import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
@@ -58,6 +59,7 @@
       gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
       interactive={false}
     />
+    <ModalFilterLayer />
     <GeoJSON data={gj}>
       <LineLayer
         paint={{
