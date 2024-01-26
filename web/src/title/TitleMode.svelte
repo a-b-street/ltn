@@ -3,11 +3,15 @@
   import { overpassQueryForPolygon } from "../common";
   import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { example, map } from "../stores";
+  import { app, example, map, route_tool } from "../stores";
   import About from "./About.svelte";
   import MapLoader from "./MapLoader.svelte";
 
   export let wasmReady: boolean;
+
+  // When other modes reset here, they can't clear state without a race condition
+  $app = null;
+  $route_tool = null;
 
   // TODO Once per session
   let showModal = true;

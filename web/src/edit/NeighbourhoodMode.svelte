@@ -104,12 +104,6 @@
 
     addingMultipleFilters = false;
   }
-
-  function resetTitle() {
-    // TODO Confirm
-    $mode = { mode: "title" };
-    $app = null;
-  }
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -127,7 +121,7 @@
     </p>
 
     <div>
-      <button on:click={resetTitle}
+      <button on:click={() => ($mode = { mode: "title" })}
         >Start over and change your study area</button
       >
     </div>

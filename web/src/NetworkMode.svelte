@@ -13,12 +13,6 @@
     .filter((f: Feature) => notNull(f.properties).kind == "boundary")
     .map((f: Feature) => notNull(f.properties).name);
 
-  function resetTitle() {
-    $mode = { mode: "title" };
-    $app = null;
-    // TODO If we were being paranoid, route_tool as well
-  }
-
   function pickNeighbourhood(name: string) {
     $app!.setCurrentNeighbourhood(name);
     $mode = { mode: "neighbourhood" };
@@ -55,7 +49,7 @@
     </p>
 
     <div>
-      <button on:click={resetTitle}
+      <button on:click={() => ($mode = { mode: "title" })}
         >Start over and change your study area</button
       >
     </div>
