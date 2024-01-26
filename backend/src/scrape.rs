@@ -20,10 +20,22 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
             let pt = Coord { x: lon, y: lat };
             node_mapping.insert(id, pt);
         }
-        Element::Way { id, node_ids, tags } => {
+        Element::Way {
+            id,
+            mut node_ids,
+            tags,
+        } => {
             let tags = tags.into();
             if is_road(&tags) {
-                highways.push(Way { id, node_ids, tags });
+                // TODO This sometimes happens from Overpass?
+                let num = node_ids.len();
+                node_ids.retain(|n| node_mapping.contains_key(n));
+                if node_ids.len() != num {
+                    warn!("{id} refers to nodes outside the imported area");
+                }
+                if node_ids.len() >= 2 {
+                    highways.push(Way { id, node_ids, tags });
+                }
             }
         }
         Element::Relation { .. } => {}

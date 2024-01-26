@@ -1,4 +1,4 @@
-import type { Feature, Point, Position } from "geojson";
+import type { Feature, Point, Polygon, Position } from "geojson";
 import type {
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
@@ -96,4 +96,16 @@ export function pointFeature(pt: Position): Feature<Point> {
 // places (10cm) is plenty of precision
 export function setPrecision(pt: Position): Position {
   return [Math.round(pt[0] * 10e6) / 10e6, Math.round(pt[1] * 10e6) / 10e6];
+}
+
+// Construct a query to extract all XML data in the polygon clip. See
+// https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL
+export function overpassQueryForPolygon(feature: Feature<Polygon>): string {
+  let filter = 'poly:"';
+  for (let [lng, lat] of feature.geometry.coordinates[0]) {
+    filter += `${lat} ${lng} `;
+  }
+  filter = filter.slice(0, -1) + '"';
+  let query = `(nwr(${filter}); node(w)->.x; <;); out meta;`;
+  return `https://overpass-api.de/api/interpreter?data=${query}`;
 }

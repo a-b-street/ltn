@@ -31,7 +31,7 @@
     msg = null;
   }
 
-  function loadMap(buffer: ArrayBuffer) {
+  export function loadMap(buffer: ArrayBuffer) {
     msg = "Building map model from OSM input";
     console.time("load");
     $app = new LTN(

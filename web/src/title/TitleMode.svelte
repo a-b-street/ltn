@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { Feature } from "geojson";
+  import { overpassQueryForPolygon } from "../common";
   import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
   import SplitComponent from "../SplitComponent.svelte";
   import { example, map } from "../stores";
@@ -24,9 +26,17 @@
           `ltn_${gj.study_area_name}.geojson`,
           JSON.stringify(gj)
         );
-        await mapLoader.loadExample(gj.study_area_name);
+        await mapLoader!.loadExample(gj.study_area_name);
       } else {
-        // TODO
+        $example = "";
+        let study_area_boundary = gj.features.find(
+          (f: Feature) => f.properties!.kind == "study_area_boundary"
+        )!;
+        let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
+        let bytes = await resp.arrayBuffer();
+        // TODO HACK! MapLoader will restore from local storage, so just set that
+        window.localStorage.setItem("ltn_custom.geojson", JSON.stringify(gj));
+        mapLoader!.loadMap(bytes);
       }
     } catch (err) {
       window.alert(`Couldn't open this file: ${err}`);

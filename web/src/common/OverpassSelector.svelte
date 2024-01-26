@@ -2,6 +2,7 @@
   import type { Feature, Polygon } from "geojson";
   import type { LngLat, Map } from "maplibre-gl";
   import { createEventDispatcher } from "svelte";
+  import { overpassQueryForPolygon } from "./";
   import { PolygonTool } from "./draw_polygon/polygon_tool";
   import PolygonControls from "./draw_polygon/PolygonControls.svelte";
 
@@ -15,12 +16,6 @@
 
   let polygonTool: PolygonTool | null = null;
 
-  /*map.on("draw.create", async (e) => {
-      let boundaryGj = e.features[0];
-      drawControls!.deleteAll();
-      await importPolygon(boundaryGj);
-    });*/
-
   async function importPolygon(boundaryGj: Feature<Polygon>) {
     try {
       dispatch("loading", "Loading from Overpass");
@@ -31,18 +26,6 @@
     } catch (err: any) {
       dispatch("error", err.toString());
     }
-  }
-
-  // Construct a query to extract all XML data in the polygon clip. See
-  // https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL
-  function overpassQueryForPolygon(feature: Feature<Polygon>): string {
-    let filter = 'poly:"';
-    for (let [lng, lat] of feature.geometry.coordinates[0]) {
-      filter += `${lat} ${lng} `;
-    }
-    filter = filter.slice(0, -1) + '"';
-    let query = `(nwr(${filter}); node(w)->.x; <;); out meta;`;
-    return `https://overpass-api.de/api/interpreter?data=${query}`;
   }
 
   function latLngToGeojson(pt: LngLat): [number, number] {
