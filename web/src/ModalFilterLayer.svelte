@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON } from "svelte-maplibre";
+  import { GeoJSON, SymbolLayer } from "svelte-maplibre";
   import { app, mutationCounter } from "./stores";
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
@@ -7,10 +7,11 @@
 </script>
 
 <GeoJSON data={gj}>
-  <CircleLayer
-    paint={{
-      "circle-radius": 15,
-      "circle-color": "black",
+  <SymbolLayer
+    layout={{
+      "icon-image": ["get", "filter_kind"],
+      "icon-allow-overlap": true,
+      "icon-size": 0.1,
     }}
   />
 </GeoJSON>

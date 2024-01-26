@@ -4,7 +4,7 @@
   import { showBasemap } from "./stores";
 
   export let gjInput: FeatureCollection;
-  // When disabled, can't click lines or circles, no slots, no hoverCursor
+  // When disabled, can't click lines or filters, no slots, no hoverCursor
   export let interactive = true;
   export let onClickLine = (f: Feature) => {};
 

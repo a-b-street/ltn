@@ -7,7 +7,7 @@
   } from "geojson";
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import { CircleLayer, GeoJSON, Popup } from "svelte-maplibre";
+  import { GeoJSON, Popup, SymbolLayer } from "svelte-maplibre";
   import { notNull } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
@@ -65,10 +65,8 @@
 
   function deleteFilter(e) {
     let f = e.detail.features[0];
-    if (f.properties!.kind == "modal_filter") {
-      $app!.deleteModalFilter(f.properties!.road);
-      $mutationCounter++;
-    }
+    $app!.deleteModalFilter(f.properties!.road);
+    $mutationCounter++;
   }
 
   function onKeyDown(e: KeyboardEvent) {
@@ -222,15 +220,16 @@
       </div>
     </RenderNeighbourhood>
     <GeoJSON data={modalFilterGj} generateId>
-      <CircleLayer
-        paint={{
-          "circle-radius": 15,
-          "circle-color": "black",
+      <SymbolLayer
+        layout={{
+          "icon-image": ["get", "filter_kind"],
+          "icon-allow-overlap": true,
+          "icon-size": 0.1,
         }}
         on:click={deleteFilter}
       >
         <Popup openOn="hover">Click to delete</Popup>
-      </CircleLayer>
+      </SymbolLayer>
     </GeoJSON>
     {#if addingMultipleFilters}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />

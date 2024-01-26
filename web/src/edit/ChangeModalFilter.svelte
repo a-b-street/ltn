@@ -40,7 +40,11 @@
               style="width: 100%"
               disabled={filterType == name}
               on:click={() => (filterType = name)}
-              ><img src={`/filters/${name}.svg`} alt={label} />{label}</button
+              ><img
+                src={`/filters/${name}_icon.gif`}
+                width="80"
+                alt={label}
+              /><br/>{label}</button
             >
           </div>
         {/each}
