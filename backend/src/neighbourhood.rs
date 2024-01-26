@@ -109,8 +109,8 @@ impl Neighbourhood {
         {
             let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&polygons)));
             match color {
-                Color::Disconnected => f.set_property("color", "disconnected"),
-                Color::Cell(idx) => f.set_property("color", idx),
+                Color::Disconnected => f.set_property("cell_color", "disconnected"),
+                Color::Cell(idx) => f.set_property("cell_color", idx),
             }
             features.push(f);
         }

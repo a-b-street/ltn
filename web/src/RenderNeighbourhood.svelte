@@ -7,12 +7,7 @@
     hoverStateFilter,
     LineLayer,
   } from "svelte-maplibre";
-  import {
-    constructMatchExpression,
-    isLine,
-    isPoint,
-    isPolygon,
-  } from "./common";
+  import { constructMatchExpression, isLine, isPolygon } from "./common";
   import { showBasemap } from "./stores";
 
   export let gjInput: FeatureCollection;
@@ -48,12 +43,11 @@
 
     for (let f of gjInput.features) {
       f.properties ??= {};
-      if (f.properties.color == "disconnected") {
+      if (f.properties.cell_color == "disconnected") {
         f.properties.color = "red";
-      } else if (Object.hasOwn(f.properties, "color")) {
-        // TODO Uhh weird when this runs twice
+      } else if (Object.hasOwn(f.properties, "cell_color")) {
         f.properties.color =
-          cell_colors[f.properties.color % cell_colors.length];
+          cell_colors[f.properties.cell_color % cell_colors.length];
       }
     }
 
