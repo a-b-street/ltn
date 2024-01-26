@@ -105,17 +105,10 @@
   </LineLayer>
 
   <CircleLayer
-    filter={isPoint}
+    filter={["==", ["get", "kind"], "modal_filter"]}
     paint={{
       "circle-radius": 15,
-      "circle-color": constructMatchExpression(
-        ["get", "kind"],
-        {
-          border_intersection: "green",
-          modal_filter: "black",
-        },
-        "red"
-      ),
+      "circle-color": "black",
     }}
     on:click={(e) => interactive && onClickCircle(e.detail.features[0])}
   >
@@ -123,4 +116,5 @@
       <slot name="circle-popup" />
     {/if}
   </CircleLayer>
+  <slot name="more-layers" />
 </GeoJSON>
