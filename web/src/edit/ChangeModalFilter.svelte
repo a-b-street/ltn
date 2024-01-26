@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Modal, notNull } from "../common";
 
+  // TODO Use of import.meta.env.BASE_URL below is to workaround https://github.com/vitejs/vite/issues/10601
+
   export let filterType: string;
 
   let choices = [
@@ -41,17 +43,17 @@
               disabled={filterType == name}
               on:click={() => (filterType = name)}
               ><img
-                src={`/filters/${name}_icon.gif`}
+                src={`${import.meta.env.BASE_URL}/filters/${name}_icon.gif`}
                 width="80"
                 alt={label}
-              /><br/>{label}</button
+              /><br />{label}</button
             >
           </div>
         {/each}
       </td>
       <td>
         <img
-          src={`/filters/${filterType}.gif`}
+          src={`${import.meta.env.BASE_URL}/filters/${filterType}.gif`}
           height="300"
           alt={currentTriple[1]}
         />
