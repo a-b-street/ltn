@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { isPolygon } from "./common";
   import { showBasemap } from "./stores";
 
   export let gjInput: FeatureCollection;
@@ -51,7 +50,7 @@
 <GeoJSON data={gj} generateId>
   <FillLayer
     beforeId={$showBasemap ? "Building" : undefined}
-    filter={isPolygon}
+    filter={["==", ["get", "kind"], "cell"]}
     paint={{
       "fill-color": ["get", "color"],
       "fill-opacity": 0.3,
