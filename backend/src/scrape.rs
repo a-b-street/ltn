@@ -12,7 +12,7 @@ struct Way {
     tags: Tags,
 }
 
-pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
+pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result<MapModel> {
     let mut node_mapping = HashMap::new();
     let mut highways = Vec::new();
     osm_reader::parse(input_bytes, |elem| match elem {
@@ -62,6 +62,7 @@ pub fn scrape_osm(input_bytes: &[u8]) -> Result<MapModel> {
         intersections,
         mercator,
         boundary_polygon,
+        study_area_name,
 
         router_original,
         router_current,

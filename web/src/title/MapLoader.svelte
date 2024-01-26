@@ -34,7 +34,7 @@
   function loadMap(buffer: ArrayBuffer) {
     msg = "Building map model from OSM input";
     console.time("load");
-    $app = new LTN(new Uint8Array(buffer));
+    $app = new LTN(new Uint8Array(buffer), $example == "" ? undefined : $example);
     console.timeEnd("load");
 
     // Autoload from local storage

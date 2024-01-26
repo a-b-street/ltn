@@ -16,6 +16,7 @@ pub struct MapModel {
     pub intersections: Vec<Intersection>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
+    pub study_area_name: Option<String>,
     pub boundary_polygon: Polygon,
 
     // TODO Wasteful, can share some
@@ -67,8 +68,8 @@ pub struct Intersection {
 
 impl MapModel {
     /// Call with bytes of an osm.pbf or osm.xml string
-    pub fn new(input_bytes: &[u8]) -> Result<MapModel> {
-        crate::scrape::scrape_osm(input_bytes)
+    pub fn new(input_bytes: &[u8], study_area_name: Option<String>) -> Result<MapModel> {
+        crate::scrape::scrape_osm(input_bytes, study_area_name)
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
@@ -241,6 +242,22 @@ impl MapModel {
             f.remove_property("road");
         }
         gj.features.extend(self.boundaries.values().cloned());
+
+        let mut f = Feature::from(Geometry::from(
+            &self.mercator.to_wgs84(&self.boundary_polygon),
+        ));
+        f.set_property("kind", "study_area_boundary");
+        gj.features.push(f);
+
+        gj.foreign_members = Some(
+            serde_json::json!({
+                "study_area_name": self.study_area_name,
+            })
+            .as_object()
+            .unwrap()
+            .clone(),
+        );
+
         gj
     }
 
