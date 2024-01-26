@@ -2,6 +2,7 @@ import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
 import type { Map } from "maplibre-gl";
 import { writable, type Writable } from "svelte/store";
+import { RouteTool } from "./common/snapper/route_tool";
 
 export type Mode =
   | {
@@ -35,6 +36,7 @@ export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title" });
 export let showBasemap: Writable<boolean> = writable(true);
 export let map: Writable<Map | null> = writable(null);
+export let route_tool: Writable<RouteTool | null> = writable(null);
 
 export let example: Writable<string> = writable("");
 

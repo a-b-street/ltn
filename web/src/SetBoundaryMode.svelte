@@ -1,36 +1,35 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
-  import { RouteTool } from "./common/snapper/route_tool";
+  import { notNull } from "./common";
   import RouteSnapperLayer from "./common/snapper/RouteSnapperLayer.svelte";
   import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode } from "./stores";
+  import { app, mode, route_tool } from "./stores";
 
-  export let route_tool: RouteTool;
   export let name: string;
   export let existing: Feature<Polygon> | null;
 
   if (existing) {
-    route_tool.editExistingArea(existing);
+    $route_tool!.editExistingArea(existing);
   } else {
-    route_tool.startArea();
+    $route_tool!.startArea();
   }
 
   function onFailure() {
     $mode = {
       mode: "network",
     };
-    route_tool.clearEventListeners();
+    $route_tool!.clearEventListeners();
   }
 
-  route_tool.addEventListenerSuccess((feature) => {
+  $route_tool!.addEventListenerSuccess((feature) => {
     try {
       $app!.setNeighbourhoodBoundary(name, feature);
       $app!.setCurrentNeighbourhood(name);
       $mode = {
         mode: "neighbourhood",
       };
-      route_tool.clearEventListeners();
+      $route_tool!.clearEventListeners();
     } catch (err) {
       window.alert(
         "Known georust bug hit, sorry. You may need to just refresh the page now."
@@ -38,7 +37,7 @@
       onFailure();
     }
   });
-  route_tool.addEventListenerFailure(onFailure);
+  $route_tool!.addEventListenerFailure(onFailure);
 </script>
 
 <SplitComponent>
@@ -46,10 +45,10 @@
     <h1>Draw your neighbourhood boundary for {name}</h1>
     <p>TODO: maybe move the instructions from the previous screen to here...</p>
 
-    <SnapPolygonControls {route_tool} />
+    <SnapPolygonControls route_tool={notNull($route_tool)} />
 
     <div>
-      <button on:click={() => route_tool.finish()}>Finish</button>
+      <button on:click={() => notNull($route_tool).finish()}>Finish</button>
       <button on:click={onFailure}>Cancel</button>
     </div>
   </div>

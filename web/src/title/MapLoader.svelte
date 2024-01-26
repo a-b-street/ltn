@@ -2,7 +2,8 @@
   import { LTN } from "backend";
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "../common";
-  import { app, example, map } from "../stores";
+  import { RouteTool } from "../common/snapper/route_tool";
+  import { app, example, map, mode, route_tool } from "../stores";
 
   let msg: string | null = null;
   let useLocalVite = false;
@@ -35,6 +36,15 @@
     console.time("load");
     $app = new LTN(new Uint8Array(buffer));
     console.timeEnd("load");
+
+    $mode = {
+      mode: "network",
+    };
+    $route_tool = new RouteTool($map!, $app.toRouteSnapper());
+    $map!.fitBounds(
+      Array.from($app.getBounds()) as [number, number, number, number],
+      { animate: false }
+    );
   }
 
   function gotXml(e: CustomEvent<string>) {

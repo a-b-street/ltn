@@ -1,11 +1,10 @@
 <script lang="ts">
-  import initLtn, { LTN } from "backend";
+  import initLtn from "backend";
   import type { Map } from "maplibre-gl";
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { Layout } from "./common";
-  import { RouteTool } from "./common/snapper/route_tool";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
@@ -42,28 +41,12 @@
     mapStore.set(map);
   }
 
-  // TODO Move stuff like this out...
-  let route_tool: RouteTool | undefined = undefined;
   function zoomToFit() {
     $mapStore!.fitBounds(
       Array.from($app!.getBounds()) as [number, number, number, number],
       { animate: false }
     );
   }
-
-  // TODO Can we make the title screen mode do this?
-  function gotApp(_x: LTN | null) {
-    if (!$app) {
-      return;
-    }
-    console.log("New map model loaded");
-    zoomToFit();
-    $mode = {
-      mode: "network",
-    };
-    route_tool = new RouteTool($mapStore!, $app.toRouteSnapper());
-  }
-  $: gotApp($app);
 
   let sidebarDiv: HTMLDivElement;
   let mapDiv: HTMLDivElement;
@@ -114,11 +97,7 @@
         {#if $mode.mode == "network"}
           <NetworkMode />
         {:else if $mode.mode == "set-boundary"}
-          <SetBoundaryMode
-            {route_tool}
-            name={$mode.name}
-            existing={$mode.existing}
-          />
+          <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
         {:else if $mode.mode == "neighbourhood"}
           <NeighbourhoodMode />
         {:else if $mode.mode == "view-shortcuts"}

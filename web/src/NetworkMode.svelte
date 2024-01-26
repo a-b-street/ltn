@@ -16,6 +16,7 @@
   function resetTitle() {
     $mode = { mode: "title" };
     $app = null;
+    // TODO If we were being paranoid, route_tool as well
   }
 
   function pickNeighbourhood(name: string) {
