@@ -37,6 +37,17 @@
     $app = new LTN(new Uint8Array(buffer));
     console.timeEnd("load");
 
+    // Autoload from local storage
+    let filename = `ltn_${$example || "custom"}.geojson`;
+    let gj = window.localStorage.getItem(filename);
+    if (gj) {
+      try {
+        $app.loadSavefile(JSON.parse(gj));
+      } catch (err) {
+        console.log(`Didn't restore from local storage ${filename}: ${err}`);
+      }
+    }
+
     $mode = {
       mode: "network",
     };
