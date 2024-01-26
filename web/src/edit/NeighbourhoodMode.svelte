@@ -27,10 +27,10 @@
   let boundary: Feature<Polygon> | null;
 
   let gjInput: FeatureCollection;
-  render($app!.renderNeighbourhood());
+  rerender();
 
-  function render(gjString: string) {
-    gjInput = JSON.parse(gjString);
+  function rerender() {
+    gjInput = JSON.parse($app!.renderNeighbourhood());
     boundary = gjInput.features.find(
       (f) => f.properties!.kind == "boundary"
     )! as Feature<Polygon>;
@@ -50,7 +50,8 @@
     stopAddingFilter();
   });
   function onClick(e: MapMouseEvent) {
-    render($app!.addModalFilter(e.lngLat, filterType));
+    $app!.addModalFilter(e.lngLat, filterType);
+    rerender();
     stopAddingFilter();
   }
   function stopAddingFilter() {
@@ -61,7 +62,8 @@
 
   function deleteFilter(f: Feature) {
     if (f.properties!.kind == "modal_filter") {
-      render($app!.deleteModalFilter(f.properties!.road));
+      $app!.deleteModalFilter(f.properties!.road);
+      rerender();
     }
   }
 
@@ -77,10 +79,12 @@
     }
   }
   function undo() {
-    render($app!.undo());
+    $app!.undo();
+    rerender();
   }
   function redo() {
-    render($app!.redo());
+    $app!.redo();
+    rerender();
   }
 
   function pickNewNeighbourhood() {
@@ -92,7 +96,8 @@
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      render($app!.addManyModalFilters(f, filterType));
+      $app!.addManyModalFilters(f, filterType);
+      rerender();
     }
 
     addingMultipleFilters = false;

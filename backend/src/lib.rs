@@ -123,19 +123,19 @@ impl LTN {
     }
 
     #[wasm_bindgen(js_name = setCurrentNeighbourhood)]
-    pub fn set_current_neighbourhood(&mut self, name: String) -> Result<String, JsValue> {
+    pub fn set_current_neighbourhood(&mut self, name: String) -> Result<(), JsValue> {
         let boundary_gj = self.map.boundaries.get(&name).cloned().unwrap();
         let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut boundary_geo);
 
         self.neighbourhood =
             Some(Neighbourhood::new(&self.map, name, boundary_geo).map_err(err_to_js)?);
-        self.render_neighbourhood()
+        Ok(())
     }
 
     /// Takes a LngLat
     #[wasm_bindgen(js_name = addModalFilter)]
-    pub fn add_modal_filter(&mut self, input: JsValue, kind: String) -> Result<String, JsValue> {
+    pub fn add_modal_filter(&mut self, input: JsValue, kind: String) -> Result<(), JsValue> {
         let pos: LngLat = serde_wasm_bindgen::from_value(input)?;
         self.map.add_modal_filter(
             self.map.mercator.pt_to_mercator(Coord {
@@ -145,16 +145,12 @@ impl LTN {
             &self.neighbourhood.as_ref().unwrap().interior_roads,
             FilterKind::from_string(&kind).unwrap(),
         );
-        self.render_neighbourhood()
+        Ok(())
     }
 
     /// Takes a LineString feature
     #[wasm_bindgen(js_name = addManyModalFilters)]
-    pub fn add_many_modal_filters(
-        &mut self,
-        input: JsValue,
-        kind: String,
-    ) -> Result<String, JsValue> {
+    pub fn add_many_modal_filters(&mut self, input: JsValue, kind: String) -> Result<(), JsValue> {
         let gj: Feature = serde_wasm_bindgen::from_value(input)?;
         let mut linestring: LineString = gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut linestring);
@@ -164,22 +160,19 @@ impl LTN {
             &self.neighbourhood.as_ref().unwrap().interior_roads,
             FilterKind::from_string(&kind).unwrap(),
         );
-        self.render_neighbourhood()
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = deleteModalFilter)]
-    pub fn delete_modal_filter(&mut self, road: usize) -> Result<String, JsValue> {
+    pub fn delete_modal_filter(&mut self, road: usize) {
         self.map.delete_modal_filter(RoadID(road));
-        self.render_neighbourhood()
     }
 
-    pub fn undo(&mut self) -> Result<String, JsValue> {
+    pub fn undo(&mut self) {
         self.map.undo();
-        self.render_neighbourhood()
     }
-    pub fn redo(&mut self) -> Result<String, JsValue> {
+    pub fn redo(&mut self) {
         self.map.redo();
-        self.render_neighbourhood()
     }
 
     #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]
