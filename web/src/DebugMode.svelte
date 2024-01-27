@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
+  import {
+    hoverStateFilter,
+    CircleLayer,
+    GeoJSON,
+    LineLayer,
+    Popup,
+  } from "svelte-maplibre";
   import { notNull, PropertiesTable } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -56,6 +62,33 @@
 
     <GeoJSON data={JSON.parse(notNull($app).renderModalFilters())} generateId>
       <CircleLayer
+        paint={{
+          "circle-radius": 15,
+          "circle-color": "black",
+        }}
+      >
+        <Popup openOn="hover" let:data>
+          <PropertiesTable properties={notNull(data).properties} />
+        </Popup>
+      </CircleLayer>
+    </GeoJSON>
+
+    <GeoJSON data={JSON.parse(notNull($app).snapperSplits())} generateId>
+      <LineLayer
+        filter={["==", ["get", "kind"], "split road"]}
+        paint={{
+          "line-width": 5,
+          "line-color": "red",
+          "line-opacity": hoverStateFilter(0.5, 1.0),
+        }}
+        manageHoverState
+      >
+        <Popup openOn="hover" let:data>
+          <PropertiesTable properties={notNull(data).properties} />
+        </Popup>
+      </LineLayer>
+      <CircleLayer
+        filter={["==", ["get", "kind"], "split point"]}
         paint={{
           "circle-radius": 15,
           "circle-color": "black",

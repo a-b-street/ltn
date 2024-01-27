@@ -340,6 +340,7 @@ impl MapModel {
 
     pub fn snapper_splits(&self) -> FeatureCollection {
         use geo::sweep::Intersections;
+        use geo::LineSplit;
 
         let mut features = Vec::new();
 
@@ -350,6 +351,9 @@ impl MapModel {
                 all_lines.push(LineWithData { line, id: r.id });
             }
         }
+
+        // Split roads at these fractions
+        let mut split_roads_at: BTreeMap<RoadID, Vec<f64>> = BTreeMap::new();
 
         for (r1, r2, cross) in Intersections::<_>::from_iter(all_lines) {
             if let LineIntersection::SinglePoint {
@@ -362,10 +366,45 @@ impl MapModel {
                     let mut f = Feature::from(Geometry::from(
                         &self.mercator.to_wgs84(&Point::from(intersection)),
                     ));
+                    f.set_property("kind", "split point");
                     f.set_property("r1", r1.id.0);
                     f.set_property("r2", r2.id.0);
                     features.push(f);
+
+                    let r1_dist = self
+                        .get_r(r1.id)
+                        .linestring
+                        .line_locate_point(&intersection.into())
+                        .unwrap();
+                    let r2_dist = self
+                        .get_r(r2.id)
+                        .linestring
+                        .line_locate_point(&intersection.into())
+                        .unwrap();
+                    split_roads_at
+                        .entry(r1.id)
+                        .or_insert_with(Vec::new)
+                        .push(r1_dist);
+                    split_roads_at
+                        .entry(r2.id)
+                        .or_insert_with(Vec::new)
+                        .push(r2_dist);
                 }
+            }
+        }
+
+        for (r, fractions) in split_roads_at {
+            for split_ls in self
+                .get_r(r)
+                .linestring
+                .line_split_many(&fractions)
+                .unwrap()
+            {
+                let mut f =
+                    Feature::from(Geometry::from(&self.mercator.to_wgs84(&split_ls.unwrap())));
+                f.set_property("kind", "split road");
+                f.set_property("split_road", r.0);
+                features.push(f);
             }
         }
 
