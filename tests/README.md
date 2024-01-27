@@ -3,7 +3,7 @@
 This directory has project files for areas with boundaries that've proven buggy in the past. Eventually, we can also save the neighbourhood GeoJSON dump here too and have automated regression tests. Each file can be loaded from the title screen.
 
 - `bristol_west`: used in a previous consultation
-  - the SW portion is broken currently; the route snapper needs to allow freehand and snapped points
+  - Working fine, using new planarizing snapper!
   - <https://play.abstreet.org/0.3.36/ltn.html?system/gb/bristol/maps/east.bin&--consultation=pt1> is reference for when it was working
 - `bristol_east`: used in a previous consultation
   - the southern portion should stretch to the river; same freehand problem

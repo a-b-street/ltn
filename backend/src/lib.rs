@@ -346,5 +346,6 @@ impl geo::sweep::Cross for LineWithData {
 }
 
 fn hashify_point(pt: Coord) -> (isize, isize) {
-    ((pt.x * 10e6) as isize, (pt.y * 10e6) as isize)
+    // cm resolution
+    ((pt.x * 100.0) as isize, (pt.y * 100.0) as isize)
 }
