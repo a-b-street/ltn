@@ -54,7 +54,7 @@
       </svelte:fragment>
     </RenderNeighbourhood>
 
-    <GeoJSON data={notNull($app).renderModalFilters()} generateId>
+    <GeoJSON data={JSON.parse(notNull($app).renderModalFilters())} generateId>
       <CircleLayer
         paint={{
           "circle-radius": 15,

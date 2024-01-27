@@ -231,6 +231,11 @@ impl LTN {
             n.after_edit(&self.map);
         }
     }
+
+    #[wasm_bindgen(js_name = snapperSplits)]
+    pub fn snapper_splits(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&self.map.snapper_splits()).map_err(err_to_js)?)
+    }
 }
 
 #[derive(Deserialize)]

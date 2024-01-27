@@ -337,6 +337,58 @@ impl MapModel {
             vec![boundary],
         )
     }
+
+    pub fn snapper_splits(&self) -> FeatureCollection {
+        use geo::sweep::Intersections;
+
+        let mut features = Vec::new();
+
+        // TODO Ultimately this would be a great method on RouteSnapperMap
+        let mut all_lines = Vec::new();
+        for r in &self.roads {
+            for line in r.linestring.lines() {
+                all_lines.push(LineWithData { line, id: r.id });
+            }
+        }
+
+        for (r1, r2, cross) in Intersections::<_>::from_iter(all_lines) {
+            if let LineIntersection::SinglePoint {
+                intersection,
+                is_proper,
+            } = cross
+            {
+                // Intersections are expected constantly at endpoints, so ignore those
+                if is_proper {
+                    let mut f = Feature::from(Geometry::from(
+                        &self.mercator.to_wgs84(&Point::from(intersection)),
+                    ));
+                    f.set_property("r1", r1.id.0);
+                    f.set_property("r2", r2.id.0);
+                    features.push(f);
+                }
+            }
+        }
+
+        FeatureCollection {
+            features,
+            bbox: None,
+            foreign_members: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct LineWithData {
+    line: geo::Line,
+    id: RoadID,
+}
+
+impl geo::sweep::Cross for LineWithData {
+    type Scalar = f64;
+
+    fn line(&self) -> geo::sweep::LineOrPoint<Self::Scalar> {
+        self.line.line()
+    }
 }
 
 impl Road {
