@@ -6,6 +6,7 @@
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { Layout } from "./common";
   import DebugMode from "./DebugMode.svelte";
+  import DebugGJ from "./DebugGJ.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
@@ -124,6 +125,8 @@
           <RouteMode />
         {:else if $mode.mode == "debug"}
           <DebugMode />
+        {:else if $mode.mode == "debug-gj"}
+          <DebugGJ />
         {/if}
       {/if}
     </MapLibre>

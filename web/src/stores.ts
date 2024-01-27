@@ -27,6 +27,9 @@ export type Mode =
     }
   | {
       mode: "debug";
+    }
+  | {
+      mode: "debug-gj";
     };
 
 export let app: Writable<LTN | null> = writable(null);

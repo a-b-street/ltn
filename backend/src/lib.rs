@@ -69,8 +69,7 @@ impl LTN {
         vec![b.min().x, b.min().y, b.max().x, b.max().y]
     }
 
-    #[wasm_bindgen(js_name = toRouteSnapper)]
-    pub fn to_route_snapper(&self) -> Vec<u8> {
+    fn to_route_snapper_graph(&self) -> route_snapper_graph::RouteSnapperMap {
         use geo::{LineIntersection, LineLocatePoint, LineSplit, Point};
         use route_snapper_graph::{Edge, NodeID, RouteSnapperMap};
         use std::collections::BTreeMap;
@@ -178,9 +177,37 @@ impl LTN {
             edges.remove(r.0);
         }
 
-        let graph = RouteSnapperMap { nodes, edges };
-        let bytes = bincode::serialize(&graph).unwrap();
-        bytes
+        RouteSnapperMap { nodes, edges }
+    }
+
+    #[wasm_bindgen(js_name = toRouteSnapper)]
+    pub fn to_route_snapper(&self) -> Vec<u8> {
+        let graph = self.to_route_snapper_graph();
+        bincode::serialize(&graph).unwrap()
+    }
+
+    #[wasm_bindgen(js_name = toRouteSnapperGj)]
+    pub fn to_route_snapper_gj(&self) -> Result<String, JsValue> {
+        let graph = self.to_route_snapper_graph();
+
+        let mut features = Vec::new();
+        for (idx, edge) in graph.edges.iter().enumerate() {
+            let mut f = Feature::from(Geometry::from(&edge.geometry));
+            f.set_property("edge_id", idx);
+            f.set_property("node1", edge.node1.0);
+            f.set_property("node2", edge.node2.0);
+            f.set_property("length_meters", edge.length_meters);
+            f.set_property("name", edge.name.clone());
+            features.push(f);
+        }
+        for (idx, pt) in graph.nodes.iter().enumerate() {
+            let mut f = Feature::from(Geometry::from(&geo::Point::from(*pt)));
+            f.set_property("node_id", idx);
+            features.push(f);
+        }
+        let gj =
+            geojson::GeoJson::from(features.into_iter().collect::<geojson::FeatureCollection>());
+        Ok(serde_json::to_string(&gj).map_err(err_to_js)?)
     }
 
     #[wasm_bindgen(js_name = renderModalFilters)]

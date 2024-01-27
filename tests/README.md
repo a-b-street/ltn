@@ -6,7 +6,10 @@ This directory has project files for areas with boundaries that've proven buggy 
   - Working fine, using new planarizing snapper!
   - <https://play.abstreet.org/0.3.36/ltn.html?system/gb/bristol/maps/east.bin&--consultation=pt1> is reference for when it was working
 - `bristol_east`: used in a previous consultation
-  - the southern portion should stretch to the river; same freehand problem
+  - The southern portion should stretch to the river
+    - option 1: allow freehand points
+    - option 2: include waterways in the snapper graph, not sure how connections will work
+    - option 3: include footpaths in the snapper graph -- but we get lucky here
   - <https://play.abstreet.org/0.3.36/ltn.html?system/gb/bristol/maps/east.bin&--consultation=pt2> is reference for when it was working
 - `strasbourg`: from <https://github.com/a-b-street/abstreet/issues/1006>
   - Working fine!

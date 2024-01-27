@@ -62,6 +62,11 @@
         <button on:click={() => deleteNeighbourhood(name)}>X</button>
       </div>
     {/each}
+    <div>
+      <button on:click={() => ($mode = { mode: "debug-gj" })}
+        >Debug route snapper</button
+      >
+    </div>
 
     <hr />
     <ManageSavefiles />
