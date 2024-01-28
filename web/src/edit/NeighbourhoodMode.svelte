@@ -192,7 +192,10 @@
       >
     </div>
     <div>
-      <button on:click={() => ($mode = { mode: "route" })}>Route</button>
+      <button
+        on:click={() => ($mode = { mode: "route", prevMode: "neighbourhood" })}
+        >Route</button
+      >
     </div>
     <div>
       <button on:click={() => ($mode = { mode: "debug" })}>Debug</button>

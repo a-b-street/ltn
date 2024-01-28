@@ -63,6 +63,11 @@
       </div>
     {/each}
     <div>
+      <button on:click={() => ($mode = { mode: "route", prevMode: "network" })}
+        >Route</button
+      >
+    </div>
+    <div>
       <button on:click={() => ($mode = { mode: "debug-gj" })}
         >Debug route snapper</button
       >

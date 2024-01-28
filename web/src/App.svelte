@@ -122,7 +122,7 @@
         {:else if $mode.mode == "view-shortcuts"}
           <ViewShortcutsMode />
         {:else if $mode.mode == "route"}
-          <RouteMode />
+          <RouteMode prevMode={$mode.prevMode} />
         {:else if $mode.mode == "debug"}
           <DebugMode />
         {:else if $mode.mode == "debug-gj"}

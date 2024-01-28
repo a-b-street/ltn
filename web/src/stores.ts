@@ -24,6 +24,7 @@ export type Mode =
     }
   | {
       mode: "route";
+      prevMode: "network" | "neighbourhood";
     }
   | {
       mode: "debug";

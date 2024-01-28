@@ -8,6 +8,8 @@
   import SplitComponent from "./SplitComponent.svelte";
   import { app, map, mode } from "./stores";
 
+  export let prevMode: "network" | "neighbourhood";
+
   let pt_a: LngLat = randomPoint();
   let pt_b: LngLat = randomPoint();
 
@@ -37,7 +39,7 @@
   }
 
   function back() {
-    $mode = { mode: "neighbourhood" };
+    $mode = { mode: prevMode };
   }
 </script>
 
@@ -45,7 +47,7 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <div><button on:click={back}>Back to editing</button></div>
+    <div><button on:click={back}>Back</button></div>
 
     <p>Drag markers for a route</p>
     <p>
@@ -55,10 +57,12 @@
   </div>
 
   <div slot="map">
-    <RenderNeighbourhood
-      gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
-      interactive={false}
-    />
+    {#if prevMode == "neighbourhood"}
+      <RenderNeighbourhood
+        gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
+        interactive={false}
+      />
+    {/if}
     <ModalFilterLayer />
     <GeoJSON data={gj}>
       <LineLayer
