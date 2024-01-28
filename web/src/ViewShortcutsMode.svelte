@@ -66,6 +66,19 @@
   function back() {
     $mode = { mode: "neighbourhood" };
   }
+
+  function prev() {
+    if (state.state == "chose-road") {
+      state.shortcutIndex!--;
+    }
+  }
+
+  function next() {
+    if (state.state == "chose-road") {
+      state.shortcutIndex =
+        state.shortcutIndex == null ? 0 : state.shortcutIndex + 1;
+    }
+  }
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -80,14 +93,14 @@
       <div>
         <button
           disabled={state.shortcutIndex == null || state.shortcutIndex == 0}
-          on:click={() => state.shortcutIndex--}
+          on:click={prev}
         >
           Prev
         </button>
         {state.shortcutIndex} / {state.gj.features.length}
         <button
           disabled={state.shortcutIndex == state.gj.features.length - 1}
-          on:click={() => state.shortcutIndex++}
+          on:click={next}
         >
           Next
         </button>

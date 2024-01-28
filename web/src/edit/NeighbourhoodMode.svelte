@@ -7,7 +7,7 @@
   } from "geojson";
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import { GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
   import { notNull, Popup } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
@@ -63,7 +63,7 @@
     $map!.getCanvas().style.cursor = "inherit";
   }
 
-  function deleteFilter(e) {
+  function deleteFilter(e: CustomEvent<LayerClickInfo>) {
     let f = e.detail.features[0];
     $app!.deleteModalFilter(f.properties!.road);
     $mutationCounter++;
