@@ -67,7 +67,6 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
 
     let modal_filters = BTreeMap::new();
     let router_original = Router::new(&roads, &intersections, &modal_filters);
-    let router_current = router_original.clone();
 
     Ok(MapModel {
         roads,
@@ -77,7 +76,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         study_area_name,
 
         router_original,
-        router_current,
+        router_current: None,
 
         modal_filters,
         undo_stack: Vec::new(),

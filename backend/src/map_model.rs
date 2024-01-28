@@ -21,7 +21,8 @@ pub struct MapModel {
 
     // TODO Wasteful, can share some
     pub router_original: Router,
-    pub router_current: Router,
+    // Calculated lazily
+    pub router_current: Option<Router>,
 
     // TODO Keep edits / state here or not?
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
@@ -138,7 +139,8 @@ impl MapModel {
     }
 
     fn after_edited(&mut self) {
-        self.router_current = Router::new(&self.roads, &self.intersections, &self.modal_filters);
+        // Invalidate it
+        self.router_current = None;
     }
 
     pub fn add_many_modal_filters(
@@ -308,14 +310,23 @@ impl MapModel {
         Ok(())
     }
 
-    pub fn compare_route(&self, pt1: Coord, pt2: Coord) -> GeoJson {
+    // Lazily builds the router if needed.
+    pub fn compare_route(&mut self, pt1: Coord, pt2: Coord) -> GeoJson {
+        if self.router_current.is_none() {
+            self.router_current = Some(Router::new(
+                &self.roads,
+                &self.intersections,
+                &self.modal_filters,
+            ));
+        }
+
         let mut features = Vec::new();
         if let Some(linestring) = self.router_original.route(self, pt1, pt2) {
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
             f.set_property("kind", "before");
             features.push(f);
         }
-        if let Some(linestring) = self.router_current.route(self, pt1, pt2) {
+        if let Some(linestring) = self.router_current.as_ref().unwrap().route(self, pt1, pt2) {
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
             f.set_property("kind", "after");
             features.push(f);
