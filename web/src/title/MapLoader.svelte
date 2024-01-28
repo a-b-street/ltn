@@ -1,9 +1,18 @@
 <script lang="ts">
+  import { LngLat } from "maplibre-gl";
   import { LTN } from "backend";
   import { onMount } from "svelte";
   import { Loading, OverpassSelector } from "../common";
   import { RouteTool } from "../common/snapper/route_tool";
-  import { app, example, map, mode, route_tool } from "../stores";
+  import {
+    app,
+    example,
+    map,
+    mode,
+    route_tool,
+    route_pt_a,
+    route_pt_b,
+  } from "../stores";
 
   let msg: string | null = null;
   let useLocalVite = false;
@@ -59,6 +68,8 @@
       Array.from($app.getBounds()) as [number, number, number, number],
       { animate: false },
     );
+    $route_pt_a = randomPoint();
+    $route_pt_b = randomPoint();
   }
 
   function gotXml(e: CustomEvent<string>) {
@@ -91,6 +102,13 @@
       window.alert(`Couldn't open from URL ${url}: ${err}`);
     }
     msg = null;
+  }
+
+  function randomPoint(): LngLat {
+    let bounds = $app!.getBounds();
+    let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
+    let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
+    return new LngLat(lng, lat);
   }
 </script>
 
