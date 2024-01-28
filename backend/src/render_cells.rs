@@ -1,8 +1,6 @@
 use std::collections::{HashSet, VecDeque};
 
-use geo::{
-    BoundingRect, Coord, Densify, LineString, MultiPolygon, Polygon, Rect, Scale, Translate,
-};
+use geo::{BoundingRect, Coord, Densify, LineString, MultiPolygon, Rect};
 
 use crate::{Cell, MapModel, Neighbourhood};
 
@@ -103,17 +101,15 @@ impl RenderCells {
             }
         }
 
-        //finalize(grid, cell_colors, bounds, boundary_polygon)
-        debug_grid(grid, cell_colors, bounds, boundary_polygon)
+        if true {
+            finalize(grid, cell_colors, bounds)
+        } else {
+            debug_grid(grid, cell_colors, bounds)
+        }
     }
 }
 
-fn finalize(
-    grid: Grid<Option<usize>>,
-    cell_colors: Vec<Color>,
-    bounds: Rect,
-    boundary_polygon: Polygon,
-) -> RenderCells {
+fn finalize(main_grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rect) -> RenderCells {
     let mut result = RenderCells {
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
@@ -124,9 +120,9 @@ fn finalize(
         // number per cell, so we can't directly use it -- the area >= some cell index is
         // meaningless. Per cell, make a new grid that just has that cell.
         let grid: Grid<f64> = Grid {
-            width: grid.width,
-            height: grid.height,
-            data: grid
+            width: main_grid.width,
+            height: main_grid.height,
+            data: main_grid
                 .data
                 .iter()
                 .map(
@@ -143,17 +139,17 @@ fn finalize(
 
         let smooth = false;
         let contour_builder =
-            contour::ContourBuilder::new(grid.width as u32, grid.height as u32, smooth);
+            contour::ContourBuilder::new(grid.width as u32, grid.height as u32, smooth)
+                .x_origin(bounds.min().x)
+                .y_origin(bounds.min().y)
+                .x_step(RESOLUTION_M)
+                .y_step(RESOLUTION_M);
         let thresholds = vec![1.0];
 
         let mut cell_polygons = Vec::new();
         for contour in contour_builder.contours(&grid.data, &thresholds).unwrap() {
             let (multipolygon, _) = contour.into_inner();
-            cell_polygons.push(
-                multipolygon
-                    .scale(RESOLUTION_M)
-                    .translate(bounds.min().x, bounds.min().y),
-            );
+            cell_polygons.push(multipolygon);
         }
         assert_eq!(cell_polygons.len(), 1);
 
@@ -167,12 +163,7 @@ fn finalize(
     result
 }
 
-fn debug_grid(
-    grid: Grid<Option<usize>>,
-    cell_colors: Vec<Color>,
-    bounds: Rect,
-    boundary_polygon: Polygon,
-) -> RenderCells {
+fn debug_grid(grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rect) -> RenderCells {
     let mut result = RenderCells {
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
