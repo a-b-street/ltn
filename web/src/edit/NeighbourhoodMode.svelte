@@ -209,7 +209,11 @@
     >
       <div slot="line-popup">
         <Popup openOn="hover" let:data
-          ><p>{notNull(data).properties.shortcuts} shortcuts</p></Popup
+          ><p>
+            {notNull(data).properties.shortcuts} shortcuts through {notNull(
+              data,
+            ).properties.name ?? "unnamed road"}
+          </p></Popup
         >
       </div>
     </RenderNeighbourhood>
