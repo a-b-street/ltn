@@ -155,7 +155,10 @@ impl LTN {
                 .line_split_many(&fractions)
                 .unwrap()
             {
-                let split_ls = split_ls.unwrap();
+                let Some(split_ls) = split_ls else {
+                    // Sometimes the split points are too close together
+                    continue;
+                };
                 // Make a new edge
                 edges.push(Edge {
                     node1: pt_to_node_id[&hashify_point(split_ls.0[0])],
