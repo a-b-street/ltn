@@ -119,6 +119,8 @@ fn finalize(main_grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rec
         // contour will find where the grid is >= a threshold value. The main grid has one
         // number per cell, so we can't directly use it -- the area >= some cell index is
         // meaningless. Per cell, make a new grid that just has that cell.
+        //
+        // TODO Try isobands
         let grid: Grid<f64> = Grid {
             width: main_grid.width,
             height: main_grid.height,

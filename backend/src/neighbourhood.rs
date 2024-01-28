@@ -5,6 +5,7 @@ use geo::{
     BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, MultiLineString, Polygon,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
+use web_time::Instant;
 
 use crate::render_cells::Color;
 use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
@@ -82,13 +83,20 @@ impl Neighbourhood {
     }
 
     pub fn after_edit(&mut self, map: &MapModel) {
+        let t1 = Instant::now();
         let cells = Cell::find_all(map, self);
+        let t2 = Instant::now();
         let render_cells = RenderCells::new(map, self, &cells);
+        let t3 = Instant::now();
         let shortcuts = Shortcuts::new(map, self);
+        let t4 = Instant::now();
         self.derived = Some(DerivedNeighbourhoodState {
             render_cells,
             shortcuts,
         });
+        if false {
+            info!("Neighbourhood edited. Finding cells took {:?}, rendering cells took {:?}, finding shortcuts took {:?}", t2 - t1, t3 - t2, t4 - t3);
+        }
     }
 
     pub fn to_gj(&self, map: &MapModel) -> FeatureCollection {
