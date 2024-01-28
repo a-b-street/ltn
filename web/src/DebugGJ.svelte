@@ -4,9 +4,8 @@
     CircleLayer,
     GeoJSON,
     LineLayer,
-    Popup,
   } from "svelte-maplibre";
-  import { notNull, PropertiesTable } from "./common";
+  import { Popup, notNull, PropertiesTable } from "./common";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
 
@@ -32,8 +31,8 @@
           "line-opacity": hoverStateFilter(0.5, 1.0),
         }}
       >
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
+        <Popup openOn="hover" let:props>
+          <PropertiesTable properties={props} />
         </Popup>
       </LineLayer>
       <CircleLayer
@@ -44,8 +43,8 @@
           "circle-opacity": hoverStateFilter(0.5, 1.0),
         }}
       >
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
+        <Popup openOn="hover" let:props>
+          <PropertiesTable properties={props} />
         </Popup>
       </CircleLayer>
     </GeoJSON>

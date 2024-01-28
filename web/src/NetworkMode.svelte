@@ -1,17 +1,17 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import { FillLayer, GeoJSON, hoverStateFilter, Popup } from "svelte-maplibre";
-  import { notNull } from "./common";
+  import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
+  import { notNull, Popup } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = JSON.parse(notNull($app).toSavefile());
+  $: gj = JSON.parse($app!.toSavefile());
   $: boundaryNames = gj.features
-    .filter((f: Feature) => notNull(f.properties).kind == "boundary")
-    .map((f: Feature) => notNull(f.properties).name);
+    .filter((f: Feature) => f.properties!.kind == "boundary")
+    .map((f: Feature) => f.properties!.name);
 
   function pickNeighbourhood(name: string) {
     $app!.setCurrentNeighbourhood(name);
@@ -20,7 +20,7 @@
 
   function deleteNeighbourhood(name: string) {
     $app!.deleteNeighbourhoodBoundary(name);
-    gj = JSON.parse(notNull($app).toSavefile());
+    gj = JSON.parse($app!.toSavefile());
   }
 
   function newBoundary() {
@@ -90,8 +90,8 @@
           pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
         hoverCursor="pointer"
       >
-        <Popup openOn="hover" let:data>
-          <p>{notNull(data).properties.name}</p>
+        <Popup openOn="hover" let:props>
+          <p>{props.name}</p>
         </Popup>
       </FillLayer>
       <ModalFilterLayer />

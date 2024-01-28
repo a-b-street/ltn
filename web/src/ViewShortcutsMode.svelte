@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
-  import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
-  import { notNull } from "./common";
+  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { notNull, Popup } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -102,9 +102,7 @@
         onClickLine={(f) => choseRoad(notNull(f.properties).id)}
       >
         <div slot="line-popup">
-          <Popup openOn="hover" let:data
-            >{notNull(data).properties.shortcuts}</Popup
-          >
+          <Popup openOn="hover" let:props>{props.shortcuts}</Popup>
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}

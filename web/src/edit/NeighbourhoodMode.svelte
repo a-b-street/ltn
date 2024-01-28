@@ -7,8 +7,8 @@
   } from "geojson";
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import { GeoJSON, Popup, SymbolLayer } from "svelte-maplibre";
-  import { notNull } from "../common";
+  import { GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import { notNull, Popup } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
@@ -211,13 +211,11 @@
       interactive={!addingFilter && !addingMultipleFilters}
     >
       <div slot="line-popup">
-        <Popup openOn="hover" let:data
-          ><p>
-            {notNull(data).properties.shortcuts} shortcuts through {notNull(
-              data,
-            ).properties.name ?? "unnamed road"}
-          </p></Popup
-        >
+        <Popup openOn="hover" let:props>
+          <p>
+            {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
+          </p>
+        </Popup>
       </div>
     </RenderNeighbourhood>
     <GeoJSON data={modalFilterGj} generateId>

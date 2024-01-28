@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
-  import { notNull, PropertiesTable } from "./common";
+  import { CircleLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { notNull, PropertiesTable, Popup } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
@@ -24,8 +24,8 @@
       onClickLine={(f) => window.open(notNull(f.properties).way, "_blank")}
     >
       <div slot="line-popup">
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
+        <Popup openOn="hover" let:props>
+          <PropertiesTable properties={props} />
         </Popup>
       </div>
       <svelte:fragment slot="more-layers">
@@ -36,8 +36,8 @@
             "circle-color": "green",
           }}
         >
-          <Popup openOn="hover" let:data>
-            <PropertiesTable properties={notNull(data).properties} />
+          <Popup openOn="hover" let:props>
+            <PropertiesTable properties={props} />
           </Popup>
         </CircleLayer>
         <LineLayer
@@ -47,8 +47,8 @@
             "line-color": "blue",
           }}
         >
-          <Popup openOn="hover" let:data>
-            <PropertiesTable properties={notNull(data).properties} />
+          <Popup openOn="hover" let:props>
+            <PropertiesTable properties={props} />
           </Popup>
         </LineLayer>
       </svelte:fragment>
@@ -61,8 +61,8 @@
           "circle-color": "black",
         }}
       >
-        <Popup openOn="hover" let:data>
-          <PropertiesTable properties={notNull(data).properties} />
+        <Popup openOn="hover" let:props>
+          <PropertiesTable properties={props} />
         </Popup>
       </CircleLayer>
     </GeoJSON>
