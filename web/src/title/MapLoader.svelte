@@ -119,18 +119,36 @@
     Load an example:
     <select bind:value={$example} on:change={() => loadExample($example)}>
       <option value="">Custom file loaded</option>
-      <option value="akihabara">Akihabara</option>
-      <option value="hanegi">Hanegi Park</option>
-      <option value="harujuku">Harujuku</option>
-      <option value="taipei_main_station">Taipei main station</option>
-      <option value="ximending">Ximending</option>
-      <option value="hong_kong">Hong Kong</option>
-      <option value="kowloon">Kowloon</option>
-      <option value="bristol">Bristol</option>
-      <option value="elephant_castle">Elephant & Castle</option>
-      <option value="westminster">Westminster</option>
-      <option value="montlake">Montlake</option>
-      <option value="strasbourg">Strasbourg</option>
+      <optgroup label="England">
+        <option value="bristol">Bristol</option>
+        <option value="elephant_castle">Elephant & Castle</option>
+        <option value="westminster">Westminster</option>
+      </optgroup>
+      <optgroup label="France">
+        <option value="strasbourg">Strasbourg</option>
+        <option value="lyon">Lyon</option>
+        <option value="brest">Brest</option>
+      </optgroup>
+      <optgroup label="Scotland">
+        <option value="edinburgh">Edinburgh</option>
+        <option value="inverness">Inverness</option>
+      </optgroup>
+      <optgroup label="Hong Kong">
+        <option value="hong_kong">Hong Kong</option>
+        <option value="kowloon">Kowloon</option>
+      </optgroup>
+      <optgroup label="Japan">
+        <option value="akihabara">Akihabara</option>
+        <option value="hanegi">Hanegi Park</option>
+        <option value="harujuku">Harujuku</option>
+      </optgroup>
+      <optgroup label="Taiwan">
+        <option value="taipei_main_station">Taipei main station</option>
+        <option value="ximending">Ximending</option>
+      </optgroup>
+      <optgroup label="USA">
+        <option value="montlake">Montlake</option>
+      </optgroup>
     </select>
   </label>
 </div>
