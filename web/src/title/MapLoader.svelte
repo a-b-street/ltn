@@ -16,13 +16,22 @@
 
   let msg: string | null = null;
   let useLocalVite = false;
+  let exampleAreas: [string, [string, string][]][] = [];
 
   onMount(async () => {
     // When running locally if a vite public/ directory is set up, load from that for speed
     try {
-      let resp = await fetch("/osm/kowloon.pbf", { method: "HEAD" });
-      useLocalVite = resp.ok;
-      console.log("Using local cache, not od2net.org");
+      let resp = await fetch("/osm/areas.json");
+      if (resp.ok) {
+        useLocalVite = true;
+        console.log("Using local cache, not od2net.org");
+        exampleAreas = await resp.json();
+      } else {
+        let resp = await fetch(
+          `https://assets.od2net.org/severance_pbfs/areas.json`,
+        );
+        exampleAreas = await resp.json();
+      }
 
       // For quicker dev
       //$example = "bristol";
@@ -119,36 +128,13 @@
     Load an example:
     <select bind:value={$example} on:change={() => loadExample($example)}>
       <option value="">Custom file loaded</option>
-      <optgroup label="England">
-        <option value="bristol">Bristol</option>
-        <option value="elephant_castle">Elephant & Castle</option>
-        <option value="westminster">Westminster</option>
-      </optgroup>
-      <optgroup label="France">
-        <option value="strasbourg">Strasbourg</option>
-        <option value="lyon">Lyon</option>
-        <option value="brest">Brest</option>
-      </optgroup>
-      <optgroup label="Scotland">
-        <option value="edinburgh">Edinburgh</option>
-        <option value="inverness">Inverness</option>
-      </optgroup>
-      <optgroup label="Hong Kong">
-        <option value="hong_kong">Hong Kong</option>
-        <option value="kowloon">Kowloon</option>
-      </optgroup>
-      <optgroup label="Japan">
-        <option value="akihabara">Akihabara</option>
-        <option value="hanegi">Hanegi Park</option>
-        <option value="harujuku">Harujuku</option>
-      </optgroup>
-      <optgroup label="Taiwan">
-        <option value="taipei_main_station">Taipei main station</option>
-        <option value="ximending">Ximending</option>
-      </optgroup>
-      <optgroup label="USA">
-        <option value="montlake">Montlake</option>
-      </optgroup>
+      {#each exampleAreas as [country, areas]}
+        <optgroup label={country}>
+          {#each areas as [value, label]}
+            <option {value}>{label}</option>
+          {/each}
+        </optgroup>
+      {/each}
     </select>
   </label>
 </div>
