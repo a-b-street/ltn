@@ -1,12 +1,13 @@
 <script lang="ts">
+  import { setCellColors } from "./cells";
   import type { Feature, FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
-  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import { notNull, Popup } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, map, mode } from "./stores";
+  import { app, map, mode, showBasemap } from "./stores";
 
   type State =
     | {
@@ -122,6 +123,19 @@
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}
+      <GeoJSON
+        data={setCellColors(JSON.parse(notNull($app).renderNeighbourhood()))}
+      >
+        <FillLayer
+          beforeId={$showBasemap ? "Building" : undefined}
+          filter={["==", ["get", "kind"], "cell"]}
+          paint={{
+            "fill-color": ["get", "color"],
+            "fill-opacity": 0.3,
+          }}
+        />
+      </GeoJSON>
+
       <GeoJSON data={state.gj.features[state.shortcutIndex]}>
         <LineLayer
           paint={{
