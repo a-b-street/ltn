@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FeatureCollection } from "geojson";
+  import type { Feature, FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { notNull, Popup } from "./common";
@@ -14,14 +14,14 @@
       }
     | {
         state: "chose-road";
-        road: number;
+        roadGj: Feature;
         gj: FeatureCollection;
-        shortcutIndex: number | null;
+        shortcutIndex: number;
       };
   let state: State = { state: "neutral" };
 
-  function choseRoad(road: number) {
-    let gj = JSON.parse($app!.getShortcutsCrossingRoad(road));
+  function choseRoad(roadGj: Feature) {
+    let gj = JSON.parse($app!.getShortcutsCrossingRoad(roadGj.properties!.id));
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");
       return;
@@ -29,9 +29,9 @@
 
     state = {
       state: "chose-road",
-      road,
+      roadGj,
       gj,
-      shortcutIndex: null,
+      shortcutIndex: 0,
     };
   }
 
@@ -44,15 +44,13 @@
 
   function onKeyDown(e: KeyboardEvent) {
     if (state.state == "chose-road") {
-      if (e.key == "ArrowLeft" && state.shortcutIndex) {
+      if (e.key == "ArrowLeft" && state.shortcutIndex > 0) {
         e.stopPropagation();
         state.shortcutIndex--;
       }
       if (e.key == "ArrowRight") {
         e.stopPropagation();
-        if (state.shortcutIndex == null) {
-          state.shortcutIndex = 0;
-        } else if (state.shortcutIndex != state.gj.features.length - 1) {
+        if (state.shortcutIndex != state.gj.features.length - 1) {
           state.shortcutIndex++;
         }
       }
@@ -69,14 +67,13 @@
 
   function prev() {
     if (state.state == "chose-road") {
-      state.shortcutIndex!--;
+      state.shortcutIndex--;
     }
   }
 
   function next() {
     if (state.state == "chose-road") {
-      state.shortcutIndex =
-        state.shortcutIndex == null ? 0 : state.shortcutIndex + 1;
+      state.shortcutIndex++;
     }
   }
 </script>
@@ -91,13 +88,15 @@
       <p>Click a road to see shortcuts</p>
     {:else if state.state == "chose-road"}
       <div>
-        <button
-          disabled={state.shortcutIndex == null || state.shortcutIndex == 0}
-          on:click={prev}
+        <button on:click={() => (state = { state: "neutral" })}
+          >Pick a different road</button
         >
+      </div>
+      <div>
+        <button disabled={state.shortcutIndex == 0} on:click={prev}>
           Prev
         </button>
-        {state.shortcutIndex} / {state.gj.features.length}
+        {state.shortcutIndex + 1} / {state.gj.features.length}
         <button
           disabled={state.shortcutIndex == state.gj.features.length - 1}
           on:click={next}
@@ -112,32 +111,33 @@
     {#if state.state == "neutral"}
       <RenderNeighbourhood
         gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
-        onClickLine={(f) => choseRoad(notNull(f.properties).id)}
+        onClickLine={choseRoad}
       >
         <div slot="line-popup">
-          <Popup openOn="hover" let:props>{props.shortcuts}</Popup>
+          <Popup openOn="hover" let:props>
+            <p>
+              {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
+            </p>
+          </Popup>
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}
-      {#if state.shortcutIndex == null}
-        <GeoJSON data={state.gj}>
-          <LineLayer
-            paint={{
-              "line-width": 5,
-              "line-color": "red",
-            }}
-          />
-        </GeoJSON>
-      {:else}
-        <GeoJSON data={state.gj.features[state.shortcutIndex]}>
-          <LineLayer
-            paint={{
-              "line-width": 5,
-              "line-color": "red",
-            }}
-          />
-        </GeoJSON>
-      {/if}
+      <GeoJSON data={state.gj.features[state.shortcutIndex]}>
+        <LineLayer
+          paint={{
+            "line-width": 5,
+            "line-color": "red",
+          }}
+        />
+      </GeoJSON>
+      <GeoJSON data={state.roadGj}>
+        <LineLayer
+          paint={{
+            "line-width": 5,
+            "line-color": "blue",
+          }}
+        />
+      </GeoJSON>
     {/if}
     <ModalFilterLayer />
   </div>
