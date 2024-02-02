@@ -1,6 +1,6 @@
 use std::collections::{HashSet, VecDeque};
 
-use geo::{BoundingRect, Coord, Densify, LineString, MultiPolygon, Rect};
+use geo::{BooleanOps, BoundingRect, Coord, Densify, LineString, MultiPolygon, Rect};
 
 use crate::{Cell, MapModel, Neighbourhood};
 
@@ -44,9 +44,7 @@ impl RenderCells {
                 if let Some(slice) =
                     slice_linestring(&road.linestring, interval.start, interval.end)
                 {
-                    // Walk along the center line. We could look at the road's thickness and fill
-                    // out points based on that, but the diffusion should take care of it.
-                    // TODO Clean up old comments like this
+                    // Walk along the center line
                     for pt in slice.densify(RESOLUTION_M / 2.0).0 {
                         let grid_idx = grid.idx(
                             ((pt.x - bounds.min().x) / RESOLUTION_M) as usize,
@@ -102,14 +100,24 @@ impl RenderCells {
         }
 
         if true {
-            finalize(grid, cell_colors, bounds)
+            finalize(
+                grid,
+                cell_colors,
+                bounds,
+                &MultiPolygon::new(vec![boundary_polygon]),
+            )
         } else {
             debug_grid(grid, cell_colors, bounds)
         }
     }
 }
 
-fn finalize(main_grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rect) -> RenderCells {
+fn finalize(
+    main_grid: Grid<Option<usize>>,
+    cell_colors: Vec<Color>,
+    bounds: Rect,
+    boundary: &MultiPolygon,
+) -> RenderCells {
     let mut result = RenderCells {
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
@@ -155,10 +163,12 @@ fn finalize(main_grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rec
         }
         assert_eq!(cell_polygons.len(), 1);
 
-        // TODO Sometimes one cell "leaks" out of the neighbourhood boundary. Not sure why. But we
-        // can just clip the result.
-
-        result.polygons_per_cell.push(cell_polygons.remove(0));
+        // Sometimes one cell "leaks" out of the neighbourhood boundary. Not sure why. But we can
+        // just clip the result.
+        let cell_polygon = cell_polygons.remove(0);
+        result
+            .polygons_per_cell
+            .push(cell_polygon.intersection(boundary));
         result.colors.push(color);
     }
 
