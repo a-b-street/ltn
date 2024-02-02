@@ -4,7 +4,7 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { Layout, layerId } from "./common";
+  import { Geocoder, Layout, layerId } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import DebugGJ from "./DebugGJ.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
@@ -17,6 +17,7 @@
     map as mapStore,
     mode,
     sidebarContents,
+    maptilerApiKey,
   } from "./stores";
   import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
@@ -30,7 +31,7 @@
 
   let showBasemap = true;
   $: mapStyle = showBasemap
-    ? "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
+    ? `https://api.maptiler.com/maps/dataviz/style.json?key=${maptilerApiKey}`
     : {
         version: 8 as const,
         sources: {},
@@ -105,6 +106,7 @@
         },
       ]}
     >
+      <Geocoder />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
         <TitleMode {wasmReady} />

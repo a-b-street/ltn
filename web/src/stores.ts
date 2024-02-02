@@ -4,6 +4,8 @@ import { LngLat, type Map } from "maplibre-gl";
 import { writable, type Writable } from "svelte/store";
 import { RouteTool } from "./common/snapper/route_tool";
 
+export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
+
 export type Mode =
   | {
       mode: "title";

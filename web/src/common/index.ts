@@ -4,6 +4,7 @@ import type {
   ExpressionSpecification,
 } from "maplibre-gl";
 
+export { default as Geocoder } from "./Geocoder.svelte";
 export { default as Layout } from "./Layout.svelte";
 export { default as Legend } from "./Legend.svelte";
 export { default as Loading } from "./Loading.svelte";

@@ -26,6 +26,7 @@
     "vite-plugin-wasm-pack": "0.1.11"
   },
   "dependencies": {
+    "@maptiler/geocoding-control": "^1.2.1",
     "@turf/nearest-point-on-line": "^6.5.0",
     "@types/geojson": "^7946.0.13",
     "route-snapper": "0.3.0",
