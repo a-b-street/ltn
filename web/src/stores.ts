@@ -34,7 +34,6 @@ export type Mode =
     };
 
 export let map: Writable<Map | null> = writable(null);
-export let showBasemap: Writable<boolean> = writable(true);
 
 export let example: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);

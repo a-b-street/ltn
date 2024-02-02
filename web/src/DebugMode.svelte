@@ -1,6 +1,6 @@
 <script lang="ts">
   import { CircleLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { notNull, PropertiesTable, Popup } from "./common";
+  import { layerId, notNull, PropertiesTable, Popup } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
@@ -30,6 +30,7 @@
       </div>
       <svelte:fragment slot="more-layers">
         <CircleLayer
+          {...layerId("debug-borders")}
           filter={["==", ["get", "kind"], "border_intersection"]}
           paint={{
             "circle-radius": 15,
@@ -41,6 +42,7 @@
           </Popup>
         </CircleLayer>
         <LineLayer
+          {...layerId("debug-crosses")}
           filter={["==", ["get", "kind"], "crosses"]}
           paint={{
             "line-width": 5,
@@ -56,6 +58,7 @@
 
     <GeoJSON data={JSON.parse(notNull($app).renderModalFilters())} generateId>
       <CircleLayer
+        {...layerId("debug-filters")}
         paint={{
           "circle-radius": 15,
           "circle-color": "black",

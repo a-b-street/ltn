@@ -3,11 +3,11 @@
   import type { Feature, FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { notNull, Popup } from "./common";
+  import { layerId, notNull, Popup } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, map, mode, showBasemap } from "./stores";
+  import { app, map, mode } from "./stores";
 
   type State =
     | {
@@ -135,7 +135,7 @@
         data={setCellColors(JSON.parse(notNull($app).renderNeighbourhood()))}
       >
         <FillLayer
-          beforeId={$showBasemap ? "Building" : undefined}
+          {...layerId("cells")}
           filter={["==", ["get", "kind"], "cell"]}
           paint={{
             "fill-color": ["get", "color"],
@@ -146,6 +146,7 @@
 
       <GeoJSON data={state.gj.features[state.shortcutIndex]}>
         <LineLayer
+          {...layerId("shortcuts")}
           paint={{
             "line-width": 5,
             "line-color": "red",
@@ -154,6 +155,7 @@
       </GeoJSON>
       <GeoJSON data={state.roadGj}>
         <LineLayer
+          {...layerId("shortcuts-focus")}
           paint={{
             "line-width": 5,
             "line-color": "blue",

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { layerId } from "./common";
   import { GeoJSON, SymbolLayer } from "svelte-maplibre";
   import { app, mutationCounter } from "./stores";
 
@@ -8,6 +9,7 @@
 
 <GeoJSON data={gj}>
   <SymbolLayer
+    {...layerId("modal-filters")}
     layout={{
       "icon-image": ["get", "filter_kind"],
       "icon-allow-overlap": true,

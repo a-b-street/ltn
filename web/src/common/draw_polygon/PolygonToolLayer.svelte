@@ -1,12 +1,12 @@
 <script lang="ts">
   import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { isLine, isPoint, isPolygon } from "../";
+  import { layerId, isLine, isPoint, isPolygon } from "../";
   import { polygonToolGj } from "./stores";
 </script>
 
 <GeoJSON data={$polygonToolGj}>
   <FillLayer
-    id="edit-polygon-fill"
+    {...layerId("edit-polygon-fill")}
     filter={isPolygon}
     paint={{
       "fill-color": "red",
@@ -19,6 +19,7 @@
     }}
   />
   <LineLayer
+    {...layerId("edit-polygon-lines")}
     filter={isLine}
     paint={{
       // TODO Dashed
@@ -28,7 +29,7 @@
     }}
   />
   <CircleLayer
-    id="edit-polygon-vertices"
+    {...layerId("edit-polygon-vertices")}
     filter={isPoint}
     paint={{
       "circle-color": "black",

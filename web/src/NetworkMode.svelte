@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { notNull, Popup } from "./common";
+  import { layerId, notNull, Popup } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -80,6 +80,7 @@
   <div slot="map">
     <GeoJSON data={gj} generateId>
       <FillLayer
+        {...layerId("neighbourhood-boundaries")}
         filter={["==", ["get", "kind"], "boundary"]}
         paint={{
           "fill-color": "red",

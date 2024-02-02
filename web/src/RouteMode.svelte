@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
-  import { constructMatchExpression, notNull } from "./common";
+  import { layerId, constructMatchExpression, notNull } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -60,6 +60,7 @@
     <ModalFilterLayer />
     <GeoJSON data={gj}>
       <LineLayer
+        {...layerId("compare-route")}
         paint={{
           "line-width": 10,
           "line-color": constructMatchExpression(

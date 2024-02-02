@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { showBasemap } from "./stores";
   import { setCellColors } from "./cells";
+  import { layerId } from "./common";
 
   export let gjInput: FeatureCollection;
   // When disabled, can't click lines or filters, no slots, no hoverCursor
@@ -17,7 +17,7 @@
 
 <GeoJSON data={gj} generateId>
   <FillLayer
-    beforeId={$showBasemap ? "Building" : undefined}
+    {...layerId("cells")}
     filter={["==", ["get", "kind"], "cell"]}
     paint={{
       "fill-color": ["get", "color"],
@@ -26,6 +26,7 @@
   />
 
   <LineLayer
+    {...layerId("interior-roads")}
     filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
       "line-width": 5,

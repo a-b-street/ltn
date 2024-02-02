@@ -8,7 +8,7 @@
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
-  import { notNull, Popup } from "../common";
+  import { layerId, notNull, Popup } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
@@ -220,6 +220,7 @@
     </RenderNeighbourhood>
     <GeoJSON data={modalFilterGj} generateId>
       <SymbolLayer
+        {...layerId("modal-filters")}
         layout={{
           "icon-image": ["get", "filter_kind"],
           "icon-allow-overlap": true,

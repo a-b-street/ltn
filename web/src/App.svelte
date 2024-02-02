@@ -4,7 +4,7 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { Layout } from "./common";
+  import { Layout, layerId } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import DebugGJ from "./DebugGJ.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
@@ -16,7 +16,6 @@
     mapContents,
     map as mapStore,
     mode,
-    showBasemap,
     sidebarContents,
   } from "./stores";
   import TitleMode from "./title/TitleMode.svelte";
@@ -29,7 +28,8 @@
     wasmReady = true;
   });
 
-  $: mapStyle = $showBasemap
+  let showBasemap = true;
+  $: mapStyle = showBasemap
     ? "https://api.maptiler.com/maps/dataviz/style.json?key=MZEJTanw3WpxRvt7qDfo"
     : {
         version: 8 as const,
@@ -72,7 +72,7 @@
     {/if}
     <div>
       <label
-        ><input type="checkbox" bind:checked={$showBasemap} />Show basemap</label
+        ><input type="checkbox" bind:checked={showBasemap} />Show basemap</label
       >
     </div>
   </div>
@@ -111,7 +111,10 @@
       {/if}
       {#if $app}
         <GeoJSON data={JSON.parse($app.getInvertedBoundary())}>
-          <FillLayer paint={{ "fill-color": "black", "fill-opacity": 0.3 }} />
+          <FillLayer
+            {...layerId("boundary")}
+            paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
+          />
         </GeoJSON>
         {#if $mode.mode == "network"}
           <NetworkMode />

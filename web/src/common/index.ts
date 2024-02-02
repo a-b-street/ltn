@@ -11,6 +11,7 @@ export { default as Modal } from "./Modal.svelte";
 export { default as OverpassSelector } from "./OverpassSelector.svelte";
 export { default as Popup } from "./Popup.svelte";
 export { default as PropertiesTable } from "./PropertiesTable.svelte";
+export { layerId } from "./zorder";
 
 export const isPolygon: ExpressionSpecification = [
   "==",

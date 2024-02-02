@@ -1,6 +1,12 @@
 <script lang="ts">
   import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { constructMatchExpression, isLine, isPoint, isPolygon } from "../";
+  import {
+    layerId,
+    constructMatchExpression,
+    isLine,
+    isPoint,
+    isPolygon,
+  } from "../";
   import { routeToolGj } from "./stores";
 
   const circleRadiusPixels = 10;
@@ -8,6 +14,7 @@
 
 <GeoJSON data={$routeToolGj}>
   <CircleLayer
+    {...layerId("route-points")}
     filter={isPoint}
     paint={{
       "circle-color": constructMatchExpression(
@@ -27,6 +34,7 @@
     }}
   />
   <LineLayer
+    {...layerId("route-lines")}
     filter={isLine}
     paint={{
       "line-color": ["case", ["get", "snapped"], "red", "blue"],
@@ -34,6 +42,7 @@
     }}
   />
   <FillLayer
+    {...layerId("route-polygons")}
     filter={isPolygon}
     paint={{
       "fill-color": "black",

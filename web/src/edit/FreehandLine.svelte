@@ -3,6 +3,7 @@
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { createEventDispatcher, onDestroy } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { layerId } from "../common";
 
   export let map: Map;
   let line: Feature<LineString> | null = null;
@@ -53,6 +54,7 @@
 {#if line}
   <GeoJSON data={line}>
     <LineLayer
+      {...layerId("freehand-line")}
       paint={{
         "line-width": 5,
         "line-color": "red",
