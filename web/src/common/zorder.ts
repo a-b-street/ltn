@@ -58,6 +58,7 @@ function getBeforeId(layerId: string): string | undefined {
 // This list covers all pages. We should maybe split it.
 const layerZorder = [
   // MapTiler basemap
+  // TODO Handle all basemaps now
   "Background",
 
   "neighbourhood-boundaries",

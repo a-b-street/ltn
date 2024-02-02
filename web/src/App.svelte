@@ -4,7 +4,7 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { Geocoder, Layout, layerId } from "./common";
+  import { Geocoder, Layout, layerId, BasemapPicker } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import DebugGJ from "./DebugGJ.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
@@ -17,7 +17,7 @@
     map as mapStore,
     mode,
     sidebarContents,
-    maptilerApiKey,
+    mapStyle,
   } from "./stores";
   import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
@@ -28,15 +28,6 @@
     await initRouteSnapper();
     wasmReady = true;
   });
-
-  let showBasemap = true;
-  $: mapStyle = showBasemap
-    ? `https://api.maptiler.com/maps/dataviz/style.json?key=${maptilerApiKey}`
-    : {
-        version: 8 as const,
-        sources: {},
-        layers: [],
-      };
 
   let map: Map;
   $: if (map) {
@@ -71,15 +62,11 @@
     {#if $app}
       <div><button on:click={zoomToFit}>Zoom to fit study area</button></div>
     {/if}
-    <div>
-      <label
-        ><input type="checkbox" bind:checked={showBasemap} />Show basemap</label
-      >
-    </div>
+    <BasemapPicker />
   </div>
   <div slot="main" style="position:relative; width: 100%; height: 100vh;">
     <MapLibre
-      style={mapStyle}
+      style={$mapStyle}
       standardControls
       hash
       bind:map

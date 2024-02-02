@@ -4,7 +4,9 @@
   import maplibregl from "maplibre-gl";
   import { map, maptilerApiKey } from "../stores";
 
-  $: mapController = $map ? createMapLibreGlMapController($map, maplibregl) : null;
+  $: mapController = $map
+    ? createMapLibreGlMapController($map, maplibregl)
+    : null;
 
   // TODO Show markers
   // TODO Set the flyTo duration

@@ -36,6 +36,9 @@ export type Mode =
     };
 
 export let map: Writable<Map | null> = writable(null);
+export let mapStyle: Writable<string> = writable(
+  `https://api.maptiler.com/maps/dataviz/style.json?key=${maptilerApiKey}`,
+);
 
 export let example: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
