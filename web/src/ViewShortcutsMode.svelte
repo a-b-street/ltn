@@ -88,6 +88,14 @@
     {#if state.state == "neutral"}
       <p>Click a road to see shortcuts</p>
     {:else if state.state == "chose-road"}
+      <p>
+        This shows all possible shortcuts crossing the blue road you've chosen.
+        A shortcut is defined as a route starting and ending outside the
+        neighbourhood, but cutting through it. It might not actually be
+        considered a "good shortcut" in practice -- this tool doesn't know any
+        real traffic patterns; it's just looking for any possible path. This
+        view lets you understand the limits of this assumption.
+      </p>
       <div>
         <button on:click={() => (state = { state: "neutral" })}
           >Pick a different road</button
