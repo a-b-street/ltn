@@ -7,7 +7,7 @@
   $: gj = $mutationCounter > 0 ? JSON.parse($app!.renderModalFilters()) : null;
 </script>
 
-<GeoJSON data={gj}>
+<GeoJSON data={gj} generateId>
   <SymbolLayer
     {...layerId("modal-filters")}
     layout={{
@@ -15,5 +15,8 @@
       "icon-allow-overlap": true,
       "icon-size": 0.1,
     }}
-  />
+    on:click
+  >
+    <slot />
+  </SymbolLayer>
 </GeoJSON>

@@ -7,14 +7,15 @@
   } from "geojson";
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
-  import { layerId, notNull, Popup } from "../common";
+  import { type LayerClickInfo } from "svelte-maplibre";
+  import { notNull, Popup } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
   import { app, map, mode, mutationCounter } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
+  import ModalFilterLayer from "../ModalFilterLayer.svelte";
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
@@ -27,7 +28,6 @@
   let boundary: Feature<Polygon> | null;
 
   let gjInput: FeatureCollection;
-  let modalFilterGj: FeatureCollection;
   $: rerender($mutationCounter);
 
   function rerender(_x: number) {
@@ -40,8 +40,6 @@
     undoLength = gjInput.undo_length;
     // @ts-ignore These foreign members exist
     redoLength = gjInput.redo_length;
-
-    modalFilterGj = JSON.parse($app!.renderModalFilters());
   }
 
   $: if (addingFilter) {
@@ -218,19 +216,9 @@
         </Popup>
       </div>
     </RenderNeighbourhood>
-    <GeoJSON data={modalFilterGj} generateId>
-      <SymbolLayer
-        {...layerId("modal-filters")}
-        layout={{
-          "icon-image": ["get", "filter_kind"],
-          "icon-allow-overlap": true,
-          "icon-size": 0.1,
-        }}
-        on:click={deleteFilter}
-      >
-        <Popup openOn="hover">Click to delete</Popup>
-      </SymbolLayer>
-    </GeoJSON>
+    <ModalFilterLayer on:click={deleteFilter}>
+      <Popup openOn="hover">Click to delete</Popup>
+    </ModalFilterLayer>
     {#if addingMultipleFilters}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
     {/if}
