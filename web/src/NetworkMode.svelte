@@ -35,7 +35,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="sidebar">
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
@@ -47,7 +47,8 @@
         <li>Define neighbourhood boundaries</li>
       </ul>
     </nav>
-
+  </div>
+  <div slot="sidebar">
     <nav>
       <ul>
         <li>

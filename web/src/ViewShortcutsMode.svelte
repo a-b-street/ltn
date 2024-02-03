@@ -82,7 +82,7 @@
 <svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
-  <div slot="sidebar">
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
@@ -102,7 +102,8 @@
         <li>Viewing shortcuts</li>
       </ul>
     </nav>
-
+  </div>
+  <div slot="sidebar">
     <button on:click={back}>Back to editing</button>
 
     {#if state.state == "neutral"}

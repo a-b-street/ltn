@@ -40,7 +40,7 @@
 <svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
-  <div slot="sidebar">
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
@@ -64,7 +64,8 @@
         <li>Routing</li>
       </ul>
     </nav>
-
+  </div>
+  <div slot="sidebar">
     <button on:click={back}>Back</button>
 
     <p>Drag markers for a route</p>

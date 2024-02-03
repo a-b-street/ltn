@@ -46,10 +46,12 @@
 </script>
 
 <SplitComponent>
+  <div slot="top">
+    <h1>Choose your study area</h1>
+  </div>
   <div slot="sidebar">
     <About />
 
-    <h1>Choose your study area</h1>
     <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
 
     {#if mapLoader}

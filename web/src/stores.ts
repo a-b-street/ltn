@@ -43,6 +43,7 @@ export let mapStyle: Writable<string> = writable(
 export let example: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
 
+export let topContents: Writable<HTMLDivElement | null> = writable(null);
 export let sidebarContents: Writable<HTMLDivElement | null> = writable(null);
 export let mapContents: Writable<HTMLDivElement | null> = writable(null);
 

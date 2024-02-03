@@ -101,7 +101,7 @@
 <svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
-  <div slot="sidebar">
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
@@ -122,7 +122,8 @@
         </li>
       </ul>
     </nav>
-
+  </div>
+  <div slot="sidebar">
     <nav>
       <ul>
         <li>

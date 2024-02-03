@@ -1,4 +1,5 @@
 <script lang="ts">
+  import logo from "../assets/logo.png?url";
   import "@picocss/pico/css/pico.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
@@ -15,6 +16,7 @@
   import {
     app,
     mapContents,
+    topContents,
     map as mapStore,
     mode,
     sidebarContents,
@@ -42,8 +44,13 @@
     );
   }
 
+  let topDiv: HTMLDivElement;
   let sidebarDiv: HTMLDivElement;
   let mapDiv: HTMLDivElement;
+  $: if (topDiv && $topContents) {
+    topDiv.innerHTML = "";
+    topDiv.appendChild($topContents);
+  }
   $: if (sidebarDiv && $sidebarContents) {
     sidebarDiv.innerHTML = "";
     sidebarDiv.appendChild($sidebarContents);
@@ -55,6 +62,14 @@
 </script>
 
 <Layout>
+  <div slot="top" style="display: flex">
+    <img
+      src={logo}
+      style="height: 8vh; margin-right: 20px;"
+      alt="A/B Street logo"
+    />
+    <span bind:this={topDiv} />
+  </div>
   <div slot="left">
     <div bind:this={sidebarDiv} />
 
@@ -67,7 +82,7 @@
     {/if}
     <BasemapPicker />
   </div>
-  <div slot="main" style="position:relative; width: 100%; height: 100vh;">
+  <div slot="main" style="position: relative; width: 100%; height: 100%;">
     <MapLibre
       style={$mapStyle}
       standardControls
