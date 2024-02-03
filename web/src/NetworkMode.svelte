@@ -57,9 +57,14 @@
       <button on:click={newBoundary}>Draw a new boundary</button>
     </div>
     {#each boundaryNames as name}
-      <div>
-        <button on:click={() => pickNeighbourhood(name)}>{name}</button>
-        <button on:click={() => deleteNeighbourhood(name)}>X</button>
+      <div style="display: flex; justify-content: space-between;">
+        <button class="outline" on:click={() => pickNeighbourhood(name)}
+          >{name}</button
+        >
+        <button
+          class="secondary outline"
+          on:click={() => deleteNeighbourhood(name)}>X</button
+        >
       </div>
     {/each}
     <div>

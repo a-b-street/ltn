@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "@picocss/pico/css/pico.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
   import initRouteSnapper from "route-snapper";
@@ -60,7 +61,11 @@
     <hr />
 
     {#if $app}
-      <div><button on:click={zoomToFit}>Zoom to fit study area</button></div>
+      <div>
+        <button class="secondary" on:click={zoomToFit}
+          >Zoom to fit study area</button
+        >
+      </div>
     {/if}
     <BasemapPicker />
   </div>
@@ -126,7 +131,7 @@
 </Layout>
 
 <style>
-  :global(body, button, input) {
-    font-size: 26px;
+  :global(button) {
+    width: auto;
   }
 </style>

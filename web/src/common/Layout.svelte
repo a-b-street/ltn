@@ -6,14 +6,6 @@
 </div>
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
-
-  :global(body) {
-    margin: 0px;
-  }
-
   div {
     float: left;
   }
@@ -21,7 +13,7 @@
   .left {
     width: 25%;
     height: 100vh;
-    overflow: scroll;
+    overflow: auto;
     padding: 8px;
   }
   .main {

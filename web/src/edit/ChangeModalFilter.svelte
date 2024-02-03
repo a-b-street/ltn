@@ -37,18 +37,17 @@
     <tr>
       <td>
         {#each choices as [name, label, _description]}
-          <div>
-            <button
-              style="width: 100%"
-              disabled={filterType == name}
-              on:click={() => (filterType = name)}
-              ><img
-                src={`${import.meta.env.BASE_URL}/filters/${name}_icon.gif`}
-                width="80"
-                alt={label}
-              /><br />{label}</button
-            >
-          </div>
+          <button
+            class="outline"
+            style="width: 100%"
+            disabled={filterType == name}
+            on:click={() => (filterType = name)}
+            ><img
+              src={`${import.meta.env.BASE_URL}/filters/${name}_icon.gif`}
+              width="80"
+              alt={label}
+            /><br />{label}</button
+          >
         {/each}
       </td>
       <td>
