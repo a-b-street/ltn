@@ -10,11 +10,9 @@
   <div slot="sidebar">
     <h1>Debug mode</h1>
 
-    <div>
-      <button on:click={() => ($mode = { mode: "neighbourhood" })}
-        >Back to editing</button
-      >
-    </div>
+    <button on:click={() => ($mode = { mode: "neighbourhood" })}
+      >Back to editing</button
+    >
   </div>
 
   <div slot="map">

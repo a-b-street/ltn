@@ -43,14 +43,15 @@
 <SplitComponent>
   <div slot="sidebar">
     <h1>Draw your neighbourhood boundary for {name}</h1>
+
+    <div style="display: flex; justify-content: space-between;">
+      <button on:click={() => notNull($route_tool).finish()}>Finish</button>
+      <button class="secondary" on:click={onFailure}>Cancel</button>
+    </div>
+
     <p>TODO: maybe move the instructions from the previous screen to here...</p>
 
     <SnapPolygonControls route_tool={notNull($route_tool)} />
-
-    <div>
-      <button on:click={() => notNull($route_tool).finish()}>Finish</button>
-      <button on:click={onFailure}>Cancel</button>
-    </div>
   </div>
 
   <div slot="map">

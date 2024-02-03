@@ -41,7 +41,31 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <div><button on:click={back}>Back</button></div>
+    <nav aria-label="breadcrumb">
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <ul>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "title" })}
+            >Change study area</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "network" })}
+            >Change neighbourhood</a
+          >
+        </li>
+        {#if prevMode == "neighbourhood"}
+          <li>
+            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}
+              >Editing modal filters</a
+            >
+          </li>
+        {/if}
+        <li>Routing</li>
+      </ul>
+    </nav>
+
+    <button on:click={back}>Back</button>
 
     <p>Drag markers for a route</p>
     <p>

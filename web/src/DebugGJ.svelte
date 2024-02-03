@@ -16,9 +16,7 @@
   <div slot="sidebar">
     <h1>Debug GJ</h1>
 
-    <div>
-      <button on:click={() => ($mode = { mode: "network" })}>Back</button>
-    </div>
+    <button on:click={() => ($mode = { mode: "network" })}>Back</button>
   </div>
 
   <div slot="map">

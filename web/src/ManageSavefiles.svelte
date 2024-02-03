@@ -50,14 +50,12 @@
 
 <details>
   <summary>Save / load project</summary>
-  <div><button on:click={saveGj}>Save to GJ</button></div>
-  <div>
-    <label>
-      Load edits from GJ
-      <input bind:this={fileInput} on:change={loadFile} type="file" />
-    </label>
-  </div>
-  <div>
+  <button on:click={saveGj}>Save to GJ</button>
+  <label>
+    Load edits from GJ
+    <input bind:this={fileInput} on:change={loadFile} type="file" />
+  </label>
+  <div style="display: flex; justify-content: space-between;">
     <button on:click={saveLocalStorage}>Save to local storage</button><button
       on:click={loadLocalStorage}>Load from local storage</button
     >

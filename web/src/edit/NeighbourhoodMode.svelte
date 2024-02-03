@@ -87,12 +87,6 @@
     $mutationCounter++;
   }
 
-  function pickNewNeighbourhood() {
-    $mode = {
-      mode: "network",
-    };
-  }
-
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
@@ -108,9 +102,61 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <h1>
-      Editing modal filters in {notNull(notNull(boundary).properties).name}
-    </h1>
+    <nav aria-label="breadcrumb">
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <ul>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "title" })}
+            >Change study area</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "network" })}
+            >Change neighbourhood</a
+          >
+        </li>
+        <li>
+          Editing modal filters in <u
+            >{notNull(notNull(boundary).properties).name}</u
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <nav>
+      <ul>
+        <li>
+          <button
+            class="outline"
+            on:click={() => ($mode = { mode: "view-shortcuts" })}
+            >View shortcuts</button
+          >
+        </li>
+        <li>
+          <button
+            class="outline"
+            on:click={() =>
+              ($mode = { mode: "route", prevMode: "neighbourhood" })}
+            >Route</button
+          >
+        </li>
+        <li>
+          <button class="outline" on:click={() => ($mode = { mode: "debug" })}
+            >Debug</button
+          >
+        </li>
+      </ul>
+    </nav>
+    <button
+      class="outline"
+      on:click={() =>
+        ($mode = {
+          mode: "set-boundary",
+          name: notNull(notNull(boundary).properties).name,
+          existing: boundary,
+        })}>Change this neighbourhood boundary</button
+    >
+
     <p>
       Now that you've defined a neighbourhood boundary, you can see the possible
       shortcuts that vehicles are currently able to take through it. You can add
@@ -118,47 +164,25 @@
       what's reachable for drivers without leaving the boundary you've drawn.
     </p>
 
-    <div>
-      <button on:click={() => ($mode = { mode: "title" })}
-        >Start over and change your study area</button
-      >
-    </div>
-    <div>
-      <button on:click={pickNewNeighbourhood}
-        >Pick a different neighbourhood boundary</button
-      >
-    </div>
-    <div>
-      <button
-        on:click={() =>
-          ($mode = {
-            mode: "set-boundary",
-            name: notNull(notNull(boundary).properties).name,
-            existing: boundary,
-          })}>Change this neighbourhood boundary</button
-      >
-    </div>
-
     <hr />
 
-    <div>
-      <button
-        on:click={() => (addingFilter = true)}
-        disabled={addingFilter || addingMultipleFilters}
-        >Add a modal filter</button
-      >
-      <button
-        on:click={() => (addingMultipleFilters = true)}
-        disabled={addingFilter || addingMultipleFilters}
-        >Add many modal filters along line</button
-      >
-      <button
-        on:click={() => (settingFilterType = true)}
-        disabled={addingFilter || addingMultipleFilters}
-        >Change modal filter type</button
-      >
-    </div>
-    <div>
+    <button
+      on:click={() => (addingFilter = true)}
+      disabled={addingFilter || addingMultipleFilters}
+      >Add a modal filter</button
+    >
+    <button
+      on:click={() => (addingMultipleFilters = true)}
+      disabled={addingFilter || addingMultipleFilters}
+      >Add many modal filters along line</button
+    >
+    <button
+      on:click={() => (settingFilterType = true)}
+      disabled={addingFilter || addingMultipleFilters}
+      >Change modal filter type</button
+    >
+
+    <div style="display: flex; justify-content: space-between;">
       <button disabled={undoLength == 0} on:click={undo}>
         {#if undoLength == 0}
           Undo
@@ -183,21 +207,6 @@
     {/if}
 
     <hr />
-
-    <div>
-      <button on:click={() => ($mode = { mode: "view-shortcuts" })}
-        >View shortcuts</button
-      >
-    </div>
-    <div>
-      <button
-        on:click={() => ($mode = { mode: "route", prevMode: "neighbourhood" })}
-        >Route</button
-      >
-    </div>
-    <div>
-      <button on:click={() => ($mode = { mode: "debug" })}>Debug</button>
-    </div>
 
     <hr />
     <ManageSavefiles />

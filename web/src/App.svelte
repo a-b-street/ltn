@@ -61,11 +61,9 @@
     <hr />
 
     {#if $app}
-      <div>
-        <button class="secondary" on:click={zoomToFit}
-          >Zoom to fit study area</button
-        >
-      </div>
+      <button class="secondary" on:click={zoomToFit}
+        >Zoom to fit study area</button
+      >
     {/if}
     <BasemapPicker />
   </div>

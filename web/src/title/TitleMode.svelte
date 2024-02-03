@@ -53,12 +53,10 @@
     <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
 
     {#if mapLoader}
-      <div>
-        <label>
-          Load a project from a file
-          <input bind:this={fileInput} on:change={loadFile} type="file" />
-        </label>
-      </div>
+      <label>
+        Load a project from a file
+        <input bind:this={fileInput} on:change={loadFile} type="file" />
+      </label>
     {/if}
 
     <hr />

@@ -123,30 +123,26 @@
 
 <Loading {msg} />
 
-<div>
-  <label>
-    Load an example:
-    <select bind:value={$example} on:change={() => loadExample($example)}>
-      <option value="">Custom file loaded</option>
-      {#each exampleAreas as [country, areas]}
-        <optgroup label={country}>
-          {#each areas as [value, label]}
-            <option {value}>{label}</option>
-          {/each}
-        </optgroup>
-      {/each}
-    </select>
-  </label>
-</div>
+<label>
+  Load an example:
+  <select bind:value={$example} on:change={() => loadExample($example)}>
+    <option value="">Custom file loaded</option>
+    {#each exampleAreas as [country, areas]}
+      <optgroup label={country}>
+        {#each areas as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </optgroup>
+    {/each}
+  </select>
+</label>
 
 <i>or...</i>
 
-<div>
-  <label>
-    Load an osm.xml or a .pbf file:
-    <input bind:this={fileInput} on:change={loadFile} type="file" />
-  </label>
-</div>
+<label>
+  Load an osm.xml or a .pbf file:
+  <input bind:this={fileInput} on:change={loadFile} type="file" />
+</label>
 
 <i>or...</i>
 

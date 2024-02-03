@@ -36,7 +36,37 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <h1>Define neighbourhood boundaries</h1>
+    <nav aria-label="breadcrumb">
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <ul>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "title" })}
+            >Change study area</a
+          >
+        </li>
+        <li>Define neighbourhood boundaries</li>
+      </ul>
+    </nav>
+
+    <nav>
+      <ul>
+        <li>
+          <button
+            class="outline"
+            on:click={() => ($mode = { mode: "route", prevMode: "network" })}
+            >Route</button
+          >
+        </li>
+        <li>
+          <button
+            class="outline"
+            on:click={() => ($mode = { mode: "debug-gj" })}
+            >Debug route snapper</button
+          >
+        </li>
+      </ul>
+    </nav>
+
     <p>
       Inside the neighbourhood you define, the goal is to eliminate (or
       deliberately permit) through-traffic. An appropriate neighbourhood
@@ -48,14 +78,7 @@
       boundary may not match the conventional definition of "neighbourhood."
     </p>
 
-    <div>
-      <button on:click={() => ($mode = { mode: "title" })}
-        >Start over and change your study area</button
-      >
-    </div>
-    <div>
-      <button on:click={newBoundary}>Draw a new boundary</button>
-    </div>
+    <button on:click={newBoundary}>Draw a new boundary</button>
     {#each boundaryNames as name}
       <div style="display: flex; justify-content: space-between;">
         <button class="outline" on:click={() => pickNeighbourhood(name)}
@@ -67,16 +90,6 @@
         >
       </div>
     {/each}
-    <div>
-      <button on:click={() => ($mode = { mode: "route", prevMode: "network" })}
-        >Route</button
-      >
-    </div>
-    <div>
-      <button on:click={() => ($mode = { mode: "debug-gj" })}
-        >Debug route snapper</button
-      >
-    </div>
 
     <hr />
     <ManageSavefiles />

@@ -83,7 +83,27 @@
 
 <SplitComponent>
   <div slot="sidebar">
-    <div><button on:click={back}>Back to editing</button></div>
+    <nav aria-label="breadcrumb">
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <ul>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "title" })}
+            >Change study area</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "network" })}
+            >Change neighbourhood</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={back}>Editing modal filters</a>
+        </li>
+        <li>Viewing shortcuts</li>
+      </ul>
+    </nav>
+
+    <button on:click={back}>Back to editing</button>
 
     {#if state.state == "neutral"}
       <p>Click a road to see shortcuts</p>
@@ -96,14 +116,12 @@
         real traffic patterns; it's just looking for any possible path. This
         view lets you understand the limits of this assumption.
       </p>
-      <div>
-        <button on:click={() => (state = { state: "neutral" })}
-          >Pick a different road</button
-        >
-      </div>
-      <div>
+      <button on:click={() => (state = { state: "neutral" })}
+        >Pick a different road</button
+      >
+      <div style="display: flex; justify-content: space-between;">
         <button disabled={state.shortcutIndex == 0} on:click={prev}>
-          Prev
+          Previous
         </button>
         {state.shortcutIndex + 1} / {state.gj.features.length}
         <button
