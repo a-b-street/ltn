@@ -6,12 +6,13 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { Geocoder, Layout, layerId, BasemapPicker } from "./common";
+  import { Geocoder, Layout, layerId } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import DebugGJ from "./DebugGJ.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
+  import Settings from "./Settings.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
   import {
     app,
@@ -44,7 +45,7 @@
     );
   }
 
-  let topDiv: HTMLDivElement;
+  let topDiv: HTMLSpanElement;
   let sidebarDiv: HTMLDivElement;
   let mapDiv: HTMLDivElement;
   $: if (topDiv && $topContents) {
@@ -68,7 +69,8 @@
       style="height: 8vh; margin-right: 20px;"
       alt="A/B Street logo"
     />
-    <span bind:this={topDiv} />
+    <Settings />
+    <span bind:this={topDiv} style="width: 100%" />
   </div>
   <div slot="left">
     <div bind:this={sidebarDiv} />
@@ -80,7 +82,6 @@
         >Zoom to fit study area</button
       >
     {/if}
-    <BasemapPicker />
   </div>
   <div slot="main" style="position: relative; width: 100%; height: 100%;">
     <MapLibre

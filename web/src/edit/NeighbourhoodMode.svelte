@@ -101,7 +101,7 @@
 <svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
-  <div slot="top">
+  <div slot="top" style="display: flex; justify-content: space-between;">
     <nav aria-label="breadcrumb">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
@@ -122,32 +122,25 @@
         </li>
       </ul>
     </nav>
+    <span style="display: flex">
+      <button
+        class="outline"
+        style="margin-right: 8px"
+        on:click={() => ($mode = { mode: "view-shortcuts" })}
+        >View shortcuts</button
+      >
+      <button
+        class="outline"
+        style="margin-right: 8px"
+        on:click={() => ($mode = { mode: "route", prevMode: "neighbourhood" })}
+        >Route</button
+      >
+      <button class="outline" on:click={() => ($mode = { mode: "debug" })}
+        >Debug</button
+      >
+    </span>
   </div>
   <div slot="sidebar">
-    <nav>
-      <ul>
-        <li>
-          <button
-            class="outline"
-            on:click={() => ($mode = { mode: "view-shortcuts" })}
-            >View shortcuts</button
-          >
-        </li>
-        <li>
-          <button
-            class="outline"
-            on:click={() =>
-              ($mode = { mode: "route", prevMode: "neighbourhood" })}
-            >Route</button
-          >
-        </li>
-        <li>
-          <button class="outline" on:click={() => ($mode = { mode: "debug" })}
-            >Debug</button
-          >
-        </li>
-      </ul>
-    </nav>
     <button
       class="outline"
       on:click={() =>

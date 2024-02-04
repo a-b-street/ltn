@@ -35,7 +35,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  <div slot="top" style="display: flex; justify-content: space-between;">
     <nav aria-label="breadcrumb">
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
@@ -47,27 +47,19 @@
         <li>Define neighbourhood boundaries</li>
       </ul>
     </nav>
+    <span style="display: flex">
+      <button
+        class="outline"
+        style="margin-right: 8px"
+        on:click={() => ($mode = { mode: "route", prevMode: "network" })}
+        >Route</button
+      >
+      <button class="outline" on:click={() => ($mode = { mode: "debug-gj" })}
+        >Debug route snapper</button
+      >
+    </span>
   </div>
   <div slot="sidebar">
-    <nav>
-      <ul>
-        <li>
-          <button
-            class="outline"
-            on:click={() => ($mode = { mode: "route", prevMode: "network" })}
-            >Route</button
-          >
-        </li>
-        <li>
-          <button
-            class="outline"
-            on:click={() => ($mode = { mode: "debug-gj" })}
-            >Debug route snapper</button
-          >
-        </li>
-      </ul>
-    </nav>
-
     <p>
       Inside the neighbourhood you define, the goal is to eliminate (or
       deliberately permit) through-traffic. An appropriate neighbourhood
