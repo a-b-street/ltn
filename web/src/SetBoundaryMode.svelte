@@ -15,10 +15,18 @@
     $route_tool!.startArea();
   }
 
+  // TODO When we click a link and nav away, clear state
+
   function onFailure() {
-    $mode = {
-      mode: "network",
-    };
+    if (existing) {
+      $mode = {
+        mode: "neighbourhood",
+      };
+    } else {
+      $mode = {
+        mode: "network",
+      };
+    }
     $route_tool!.clearEventListeners();
   }
 
@@ -41,6 +49,34 @@
 </script>
 
 <SplitComponent>
+  <div slot="top">
+    <nav aria-label="breadcrumb">
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <ul>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "title" })}
+            >Choose study area</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "network" })}
+            >Pick neighbourhood</a
+          >
+        </li>
+        {#if existing}
+          <li>
+            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}
+              >Editing modal filters</a
+            >
+          </li>
+          <li>Changing neighbourhood boundary</li>
+        {:else}
+          <li>Creating new neighbourhood boundary</li>
+        {/if}
+      </ul>
+    </nav>
+  </div>
+
   <div slot="sidebar">
     <h1>Draw your neighbourhood boundary for {name}</h1>
 

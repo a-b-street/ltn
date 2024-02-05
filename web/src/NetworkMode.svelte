@@ -41,10 +41,10 @@
       <ul>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Change study area</a
+            >Choose study area</a
           >
         </li>
-        <li>Define neighbourhood boundaries</li>
+        <li>Pick neighbourhood</li>
       </ul>
     </nav>
     <span style="display: flex">

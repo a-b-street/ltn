@@ -88,12 +88,12 @@
       <ul>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Change study area</a
+            >Choose study area</a
           >
         </li>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "network" })}
-            >Change neighbourhood</a
+            >Pick neighbourhood</a
           >
         </li>
         <li>

@@ -7,9 +7,29 @@
 </script>
 
 <SplitComponent>
-  <div slot="sidebar">
-    <h1>Debug mode</h1>
+  <div slot="top">
+    <nav aria-label="breadcrumb">
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <ul>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "title" })}
+            >Choose study area</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "network" })}
+            >Pick neighbourhood</a
+          >
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}>Editing modal filters</a>
+        </li>
+        <li>Debug mode</li>
+      </ul>
+    </nav>
+  </div>
 
+  <div slot="sidebar">
     <button on:click={() => ($mode = { mode: "neighbourhood" })}
       >Back to editing</button
     >
