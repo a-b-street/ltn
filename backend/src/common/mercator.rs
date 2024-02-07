@@ -41,9 +41,13 @@ impl Mercator {
     }
 
     pub fn pt_to_wgs84(&self, pt: Coord) -> Coord {
-        let x = self.wgs84_bounds.min().x + (pt.x / self.width * self.wgs84_bounds.width());
-        let y = self.wgs84_bounds.min().y
-            + (self.wgs84_bounds.height() * (self.height - pt.y) / self.height);
+        let x = trim_lon_lat(
+            self.wgs84_bounds.min().x + (pt.x / self.width * self.wgs84_bounds.width()),
+        );
+        let y = trim_lon_lat(
+            self.wgs84_bounds.min().y
+                + (self.wgs84_bounds.height() * (self.height - pt.y) / self.height),
+        );
         Coord { x, y }
     }
 
@@ -62,4 +66,10 @@ impl Mercator {
     pub fn to_wgs84_in_place<G: MapCoordsInPlace<f64>>(&self, geom: &mut G) {
         geom.map_coords_in_place(|pt| self.pt_to_wgs84(pt));
     }
+}
+
+// Per https://datatracker.ietf.org/doc/html/rfc7946#section-11.2, 6 decimal places (10cm) is
+// plenty of precision
+fn trim_lon_lat(x: f64) -> f64 {
+    (x * 10e6).round() / 10e6
 }
