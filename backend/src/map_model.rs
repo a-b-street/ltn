@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
 use anyhow::Result;
@@ -95,7 +95,7 @@ impl MapModel {
     pub fn add_modal_filter(
         &mut self,
         click_pt: Coord,
-        candidate_roads: &HashSet<RoadID>,
+        candidate_roads: &BTreeSet<RoadID>,
         kind: FilterKind,
     ) {
         let cmd = self.do_edit(self.add_modal_filter_cmd(click_pt, candidate_roads, kind));
@@ -107,7 +107,7 @@ impl MapModel {
     fn add_modal_filter_cmd(
         &self,
         click_pt: Coord,
-        candidate_roads: &HashSet<RoadID>,
+        candidate_roads: &BTreeSet<RoadID>,
         kind: FilterKind,
     ) -> Command {
         // TODO prune with rtree?
@@ -146,7 +146,7 @@ impl MapModel {
     pub fn add_many_modal_filters(
         &mut self,
         along_line: LineString,
-        candidate_roads: &HashSet<RoadID>,
+        candidate_roads: &BTreeSet<RoadID>,
         kind: FilterKind,
     ) {
         let mut edits = Vec::new();
@@ -272,7 +272,7 @@ impl MapModel {
 
         // Filters could be defined for multiple neighbourhoods, not just the one
         // in the savefile
-        let all_roads: HashSet<RoadID> = self.roads.iter().map(|r| r.id).collect();
+        let all_roads: BTreeSet<RoadID> = self.roads.iter().map(|r| r.id).collect();
         let mut cmds = Vec::new();
 
         for f in gj.features {

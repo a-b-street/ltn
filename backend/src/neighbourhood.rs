@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
@@ -12,9 +12,9 @@ use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
 pub struct Neighbourhood {
     // Immutable once created
-    pub interior_roads: HashSet<RoadID>,
-    crosses: HashMap<RoadID, f64>,
-    pub border_intersections: HashSet<IntersectionID>,
+    pub interior_roads: BTreeSet<RoadID>,
+    crosses: BTreeMap<RoadID, f64>,
+    pub border_intersections: BTreeSet<IntersectionID>,
     name: String,
     pub boundary_polygon: Polygon,
 
@@ -29,8 +29,8 @@ struct DerivedNeighbourhoodState {
 
 impl Neighbourhood {
     pub fn new(map: &MapModel, name: String, boundary_polygon: Polygon) -> Result<Self> {
-        let mut interior_roads = HashSet::new();
-        let mut crosses = HashMap::new();
+        let mut interior_roads = BTreeSet::new();
+        let mut crosses = BTreeMap::new();
         for r in &map.roads {
             if boundary_polygon.contains(&r.linestring) {
                 interior_roads.insert(r.id);
@@ -55,7 +55,7 @@ impl Neighbourhood {
             }
         }
 
-        let mut border_intersections = HashSet::new();
+        let mut border_intersections = BTreeSet::new();
         for i in &map.intersections {
             // Check distance to the polygon's linestring, rather than the polygon itself. Points
             // contained within a polygon and eight on the linestring both count as 0.
