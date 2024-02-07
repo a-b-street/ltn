@@ -9,6 +9,16 @@ fn test_bristol_west() {
     test_example("bristol", "bristol_west", "west");
 }
 
+#[test]
+fn test_bristol_east() {
+    test_example("bristol", "bristol_east", "east");
+}
+
+#[test]
+fn test_strasbourg() {
+    test_example("strasbourg", "strasbourg", "Schilik velorue");
+}
+
 fn test_example(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) {
     let output_path = format!("../tests/output/{savefile_name}.geojson");
     let expected = std::fs::read_to_string(&output_path).unwrap_or_else(|_| String::new());
@@ -38,5 +48,23 @@ fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) 
 
     // TODO Include modal filters, once we detect existing ones
 
-    Ok(serde_json::to_string_pretty(&neighbourhood.to_gj(&map))?)
+    Ok(serde_json::to_string(&prune_features(
+        neighbourhood.to_gj(&map),
+    ))?)
+}
+
+// Remove OSM tags, for smaller files
+fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
+    for f in &mut gj.features {
+        if matches!(
+            f.geometry.as_ref().unwrap().value,
+            geojson::Value::LineString(_)
+        ) {
+            let props = f.properties.as_mut().unwrap();
+            props.retain(|k, _| {
+                ["id", "kind", "node1", "node2", "pct", "shortcuts", "way"].contains(&k.as_str())
+            });
+        }
+    }
+    gj
 }
