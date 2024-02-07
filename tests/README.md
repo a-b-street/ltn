@@ -1,6 +1,16 @@
 # Test cases
 
-This directory has project files for areas with boundaries that've proven buggy in the past. Eventually, we can also save the neighbourhood GeoJSON dump here too and have automated regression tests. Each file can be loaded from the title screen.
+This directory has project files for areas with boundaries that've proven buggy in the past. Each file can be loaded from the title screen.
+
+The `output` directory has GeoJSON output capturing:
+
+- Roads detected as interior to the neighbourhood
+- Cell boundaries
+- Shortcuts per interior road
+
+The "unit" test in `backend/src/tests.rs` verifies this output doesn't change. When it does, we can manually load the savefile in the old and new web UI, check any differences, and manually approve them.
+
+## Notes per test case
 
 There are several stages of "working" for each of these:
 

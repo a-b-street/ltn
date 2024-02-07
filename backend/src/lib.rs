@@ -28,6 +28,8 @@ mod render_cells;
 mod route;
 mod scrape;
 mod shortcuts;
+#[cfg(test)]
+mod tests;
 
 static START: Once = Once::new();
 

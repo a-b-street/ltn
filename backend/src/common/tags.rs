@@ -58,6 +58,8 @@ impl From<HashMap<String, String>> for Tags {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn various() {
         let mut tags = Tags::empty();
