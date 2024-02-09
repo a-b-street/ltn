@@ -128,6 +128,14 @@
           Next
         </button>
       </div>
+      <p>
+        This shortcut is <b>
+          {notNull(
+            state.gj.features[state.shortcutIndex].properties,
+          ).directness.toFixed(1)}x
+        </b>
+        the length of the shortest route using all roads, not just this neighbourhood
+      </p>
     {/if}
   </div>
 

@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use fast_paths::InputGraph;
-use geo::LineString;
+use geo::{EuclideanLength, LineString};
+use geojson::{Feature, Geometry};
 
 use crate::{IntersectionID, MapModel, Neighbourhood, NodeMap, RoadID};
 
@@ -12,6 +13,7 @@ pub struct Shortcuts {
 
 pub struct Path {
     steps: Vec<(RoadID, IntersectionID, IntersectionID)>,
+    directness: f64,
 }
 
 impl Shortcuts {
@@ -44,21 +46,43 @@ impl Shortcuts {
         let mut count_per_road = HashMap::new();
         for start in &neighbourhood.border_intersections {
             for end in &neighbourhood.border_intersections {
+                if start == end {
+                    continue;
+                }
                 if let (Some(i1), Some(i2)) = (node_map.get(*start), node_map.get(*end)) {
                     if let Some(path) = path_calc.calc_path(&ch, i1, i2) {
                         let mut steps = Vec::new();
+                        let mut shortcut_length = 0.0;
                         for pair in path.get_nodes().windows(2) {
                             let i1 = node_map.translate_id(pair[0]);
                             let i2 = node_map.translate_id(pair[1]);
                             let road = map.find_edge(i1, i2);
                             steps.push((road.id, i1, i2));
                             *count_per_road.entry(road.id).or_insert(0) += 1;
+                            shortcut_length += road.length();
                         }
-                        paths.push(Path { steps });
+
+                        // How long is the shortest route through the original router, using this
+                        // neighbourhood or not?
+                        let direct_length = match map.router_original.route(
+                            map,
+                            map.get_i(*start).point.into(),
+                            map.get_i(*end).point.into(),
+                        ) {
+                            Some(linestring) => linestring.euclidean_length(),
+                            None => {
+                                warn!("Found a shortcut from {start} to {end}, but not a route using the whole map");
+                                shortcut_length
+                            }
+                        };
+                        let directness = shortcut_length / direct_length;
+                        paths.push(Path { steps, directness });
                     }
                 }
             }
         }
+
+        paths.sort_by_key(|path| (path.directness * 100.0) as usize);
 
         Self {
             paths,
@@ -75,7 +99,7 @@ impl Shortcuts {
 }
 
 impl Path {
-    pub fn geometry(&self, map: &MapModel) -> LineString {
+    pub fn to_gj(&self, map: &MapModel) -> Feature {
         let mut pts = Vec::new();
         for (r, i1, _i2) in &self.steps {
             let road = map.get_r(*r);
@@ -87,6 +111,10 @@ impl Path {
                 pts.extend(rev);
             }
         }
-        LineString::new(pts)
+        let mut f = Feature::from(Geometry::from(
+            &map.mercator.to_wgs84(&LineString::new(pts)),
+        ));
+        f.set_property("directness", self.directness);
+        f
     }
 }

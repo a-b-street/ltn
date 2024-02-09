@@ -311,11 +311,7 @@ impl LTN {
             Shortcuts::new(&self.map, self.neighbourhood.as_ref().unwrap())
                 .subset(RoadID(road))
                 .into_iter()
-                .map(|path| {
-                    Feature::from(Geometry::from(
-                        &self.map.mercator.to_wgs84(&path.geometry(&self.map)),
-                    ))
-                })
+                .map(|path| path.to_gj(&self.map))
                 .collect::<Vec<_>>(),
         ))
         .map_err(err_to_js)?)
