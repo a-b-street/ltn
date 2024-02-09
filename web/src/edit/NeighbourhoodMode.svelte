@@ -12,14 +12,13 @@
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, map, mode, mutationCounter } from "../stores";
+  import { app, map, mode, mutationCounter, filterType } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
   import ModalFilterLayer from "../ModalFilterLayer.svelte";
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
-  let filterType = "walk_cycle_only";
   let addingFilter = false;
   let addingMultipleFilters = false;
   let settingFilterType = false;
@@ -51,7 +50,7 @@
     stopAddingFilter();
   });
   function onClick(e: MapMouseEvent) {
-    $app!.addModalFilter(e.lngLat, filterType);
+    $app!.addModalFilter(e.lngLat, $filterType);
     $mutationCounter++;
     stopAddingFilter();
   }
@@ -90,7 +89,7 @@
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      $app!.addManyModalFilters(f, filterType);
+      $app!.addManyModalFilters(f, $filterType);
       $mutationCounter++;
     }
 
@@ -163,7 +162,13 @@
     <button
       on:click={() => (addingFilter = true)}
       disabled={addingFilter || addingMultipleFilters}
-      >Add a modal filter</button
+    >
+      <img
+        src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+        width="30"
+        alt="Add a modal filter"
+      />
+      Add a modal filter</button
     >
     <button
       on:click={() => (addingMultipleFilters = true)}
@@ -194,10 +199,7 @@
     </div>
 
     {#if settingFilterType}
-      <ChangeModalFilter
-        bind:filterType
-        on:close={() => (settingFilterType = false)}
-      />
+      <ChangeModalFilter on:close={() => (settingFilterType = false)} />
     {/if}
 
     <hr />

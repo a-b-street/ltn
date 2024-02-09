@@ -55,3 +55,4 @@ export let route_pt_b: Writable<LngLat> = writable(new LngLat(0, 0));
 // and they might need to rerender
 export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title" });
+export let filterType: Writable<string> = writable("walk_cycle_only");

@@ -1,9 +1,8 @@
 <script lang="ts">
+  import { filterType } from "../stores";
   import { Modal, notNull } from "../common";
 
   // TODO Use of import.meta.env.BASE_URL below is to workaround https://github.com/vitejs/vite/issues/10601
-
-  export let filterType: string;
 
   let choices = [
     [
@@ -28,7 +27,7 @@
     ],
   ];
 
-  $: currentTriple = choices.find((x) => x[0] == filterType)!;
+  $: currentTriple = choices.find((x) => x[0] == $filterType)!;
 </script>
 
 <Modal on:close let:dialog>
@@ -40,8 +39,8 @@
           <button
             class="outline"
             style="width: 100%"
-            disabled={filterType == name}
-            on:click={() => (filterType = name)}
+            disabled={$filterType == name}
+            on:click={() => ($filterType = name)}
             ><img
               src={`${import.meta.env.BASE_URL}/filters/${name}_icon.gif`}
               width="80"
@@ -52,7 +51,7 @@
       </td>
       <td>
         <img
-          src={`${import.meta.env.BASE_URL}/filters/${filterType}.gif`}
+          src={`${import.meta.env.BASE_URL}/filters/${$filterType}.gif`}
           height="300"
           alt={currentTriple[1]}
         />
