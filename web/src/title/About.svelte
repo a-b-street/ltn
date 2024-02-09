@@ -7,11 +7,15 @@
   <Modal on:close={() => ($showAbout = false)} let:dialog>
     <h1>The Low-traffic neighbourhood (LTN) tool, v2</h1>
     <p>
-      This is an <b>experimental</b> version of the
+      This is an <b>experimental</b>
+      version of the
       <a
         href="https://a-b-street.github.io/docs/software/ltn/index.html"
-        target="_blank">A/B Street LTN tool</a
-      >. Most parts of it do not work yet, and you should probably use the other
+        target="_blank"
+      >
+        A/B Street LTN tool
+      </a>
+      . Most parts of it do not work yet, and you should probably use the other
       version of the tool instead.
     </p>
     <p>To use this tool, you need to:</p>
@@ -30,15 +34,18 @@
     <p>
       This tool is created by <a
         href="https://github.com/dabreegster/"
-        target="_blank">Dustin Carlino</a
+        target="_blank"
       >
+        Dustin Carlino
+      </a>
       and relies heavily on
-      <a href="https://www.openstreetmap.org/about" target="_blank"
-        >OpenStreetMap</a
-      > data.
+      <a href="https://www.openstreetmap.org/about" target="_blank">
+        OpenStreetMap
+      </a>
+       data.
     </p>
-    <center
-      ><button on:click={() => notNull(dialog).close()}>Start!</button></center
-    >
+    <center>
+      <button on:click={() => notNull(dialog).close()}>Start!</button>
+    </center>
   </Modal>
 {/if}

@@ -5,9 +5,9 @@
   let show = false;
 </script>
 
-<button class="outline" on:click={() => (show = true)}
-  ><img src={settings} alt="Settings" /></button
->
+<button class="outline" on:click={() => (show = true)}>
+  <img src={settings} alt="Settings" />
+</button>
 
 {#if show}
   <Modal on:close={() => (show = false)}>

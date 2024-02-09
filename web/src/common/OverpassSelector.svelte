@@ -83,12 +83,13 @@
 {#if polygonTool}
   <PolygonControls {polygonTool} />
 {:else}
-  <button type="button" on:click={importCurrentView}>Import current view</button
-  >
+  <button type="button" on:click={importCurrentView}>
+    Import current view
+  </button>
 
   <i>or...</i>
 
-  <button type="button" on:click={startPolygonTool}
-    >Draw an area to import on the map</button
-  >
+  <button type="button" on:click={startPolygonTool}>
+    Draw an area to import on the map
+  </button>
 {/if}

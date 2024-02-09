@@ -54,20 +54,20 @@
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Choose study area</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+            Choose study area
+          </a>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}
-            >Pick neighbourhood</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+            Pick neighbourhood
+          </a>
         </li>
         {#if existing}
           <li>
-            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}
-              >Editing modal filters</a
-            >
+            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}>
+              Editing modal filters
+            </a>
           </li>
           <li>Changing neighbourhood boundary</li>
         {:else}

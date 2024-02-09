@@ -105,19 +105,19 @@
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Choose study area</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+            Choose study area
+          </a>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}
-            >Pick neighbourhood</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+            Pick neighbourhood
+          </a>
         </li>
         <li>
-          Editing modal filters in <u
-            >{notNull(notNull(boundary).properties).name}</u
-          >
+          Editing modal filters in <u>
+            {notNull(notNull(boundary).properties).name}
+          </u>
         </li>
       </ul>
     </nav>
@@ -126,17 +126,19 @@
         class="outline"
         style="margin-right: 8px"
         on:click={() => ($mode = { mode: "view-shortcuts" })}
-        >View shortcuts</button
       >
+        View shortcuts
+      </button>
       <button
         class="outline"
         style="margin-right: 8px"
         on:click={() => ($mode = { mode: "route", prevMode: "neighbourhood" })}
-        >Route</button
       >
-      <button class="outline" on:click={() => ($mode = { mode: "debug" })}
-        >Debug</button
-      >
+        Route
+      </button>
+      <button class="outline" on:click={() => ($mode = { mode: "debug" })}>
+        Debug
+      </button>
     </span>
   </div>
   <div slot="sidebar">
@@ -147,8 +149,10 @@
           mode: "set-boundary",
           name: notNull(notNull(boundary).properties).name,
           existing: boundary,
-        })}>Change this neighbourhood boundary</button
+        })}
     >
+      Change this neighbourhood boundary
+    </button>
 
     <p>
       Now that you've defined a neighbourhood boundary, you can see the possible
@@ -168,18 +172,20 @@
         width="30"
         alt="Add a modal filter"
       />
-      Add a modal filter</button
-    >
+      Add a modal filter
+    </button>
     <button
       on:click={() => (addingMultipleFilters = true)}
       disabled={addingFilter || addingMultipleFilters}
-      >Add many modal filters along line</button
     >
+      Add many modal filters along line
+    </button>
     <button
       on:click={() => (settingFilterType = true)}
       disabled={addingFilter || addingMultipleFilters}
-      >Change modal filter type</button
     >
+      Change modal filter type
+    </button>
 
     <div style="display: flex; justify-content: space-between;">
       <button disabled={undoLength == 0} on:click={undo}>

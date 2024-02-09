@@ -84,14 +84,14 @@
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Choose study area</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+            Choose study area
+          </a>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}
-            >Pick neighbourhood</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+            Pick neighbourhood
+          </a>
         </li>
         <li>
           <a href="#" on:click={back}>Editing modal filters</a>
@@ -114,9 +114,9 @@
         real traffic patterns; it's just looking for any possible path. This
         view lets you understand the limits of this assumption.
       </p>
-      <button on:click={() => (state = { state: "neutral" })}
-        >Pick a different road</button
-      >
+      <button on:click={() => (state = { state: "neutral" })}>
+        Pick a different road
+      </button>
       <div style="display: flex; justify-content: space-between;">
         <button disabled={state.shortcutIndex == 0} on:click={prev}>
           Previous

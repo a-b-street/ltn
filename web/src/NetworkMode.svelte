@@ -40,9 +40,9 @@
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Choose study area</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+            Choose study area
+          </a>
         </li>
         <li>Pick neighbourhood</li>
       </ul>
@@ -52,11 +52,12 @@
         class="outline"
         style="margin-right: 8px"
         on:click={() => ($mode = { mode: "route", prevMode: "network" })}
-        >Route</button
       >
-      <button class="outline" on:click={() => ($mode = { mode: "debug-gj" })}
-        >Debug route snapper</button
-      >
+        Route
+      </button>
+      <button class="outline" on:click={() => ($mode = { mode: "debug-gj" })}>
+        Debug route snapper
+      </button>
     </span>
   </div>
   <div slot="sidebar">
@@ -74,13 +75,15 @@
     <button on:click={newBoundary}>Draw a new boundary</button>
     {#each boundaryNames as name}
       <div style="display: flex; justify-content: space-between;">
-        <button class="outline" on:click={() => pickNeighbourhood(name)}
-          >{name}</button
-        >
+        <button class="outline" on:click={() => pickNeighbourhood(name)}>
+          {name}
+        </button>
         <button
           class="secondary outline"
-          on:click={() => deleteNeighbourhood(name)}>X</button
+          on:click={() => deleteNeighbourhood(name)}
         >
+          X
+        </button>
       </div>
     {/each}
 

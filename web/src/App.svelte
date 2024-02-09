@@ -78,9 +78,9 @@
     <hr />
 
     {#if $app}
-      <button class="secondary" on:click={zoomToFit}
-        >Zoom to fit study area</button
-      >
+      <button class="secondary" on:click={zoomToFit}>
+        Zoom to fit study area
+      </button>
     {/if}
   </div>
   <div slot="main" style="position: relative; width: 100%; height: 100%;">

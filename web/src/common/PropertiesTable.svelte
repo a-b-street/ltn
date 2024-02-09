@@ -5,7 +5,10 @@
 <table>
   <tbody>
     {#each Object.entries(properties) as [key, value]}
-      <tr><td>{key}</td><td>{value}</td></tr>
+      <tr>
+        <td>{key}</td>
+        <td>{value}</td>
+      </tr>
     {/each}
   </tbody>
 </table>

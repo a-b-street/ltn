@@ -29,20 +29,20 @@
       <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}
-            >Choose study area</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+            Choose study area
+          </a>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}
-            >Pick neighbourhood</a
-          >
+          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+            Pick neighbourhood
+          </a>
         </li>
         {#if prevMode == "neighbourhood"}
           <li>
-            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}
-              >Editing modal filters</a
-            >
+            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}>
+              Editing modal filters
+            </a>
           </li>
         {/if}
         <li>Routing</li>
@@ -54,7 +54,8 @@
 
     <p>Drag markers for a route</p>
     <p>
-      <span style="color: red">Route before</span>,
+      <span style="color: red">Route before</span>
+      ,
       <span style="color: blue">route after</span>
     </p>
   </div>
@@ -83,12 +84,12 @@
         }}
       />
     </GeoJSON>
-    <Marker bind:lngLat={$route_pt_a} draggable
-      ><span class="dot">A</span></Marker
-    >
-    <Marker bind:lngLat={$route_pt_b} draggable
-      ><span class="dot">B</span></Marker
-    >
+    <Marker bind:lngLat={$route_pt_a} draggable>
+      <span class="dot">A</span>
+    </Marker>
+    <Marker bind:lngLat={$route_pt_b} draggable>
+      <span class="dot">B</span>
+    </Marker>
   </div>
 </SplitComponent>
 

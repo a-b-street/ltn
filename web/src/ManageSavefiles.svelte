@@ -56,9 +56,8 @@
     <input bind:this={fileInput} on:change={loadFile} type="file" />
   </label>
   <div style="display: flex; justify-content: space-between;">
-    <button on:click={saveLocalStorage}>Save to local storage</button><button
-      on:click={loadLocalStorage}>Load from local storage</button
-    >
+    <button on:click={saveLocalStorage}>Save to local storage</button>
+    <button on:click={loadLocalStorage}>Load from local storage</button>
   </div>
 </details>
 

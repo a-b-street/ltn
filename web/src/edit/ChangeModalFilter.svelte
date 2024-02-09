@@ -41,12 +41,15 @@
             style="width: 100%"
             disabled={$filterType == name}
             on:click={() => ($filterType = name)}
-            ><img
+          >
+            <img
               src={`${import.meta.env.BASE_URL}/filters/${name}_icon.gif`}
               width="80"
               alt={label}
-            /><br />{label}</button
-          >
+            />
+            <br />
+            {label}
+          </button>
         {/each}
       </td>
       <td>
@@ -59,7 +62,7 @@
       </td>
     </tr>
   </table>
-  <center
-    ><button on:click={() => notNull(dialog).close()}>Confirm</button></center
-  >
+  <center>
+    <button on:click={() => notNull(dialog).close()}>Confirm</button>
+  </center>
 </Modal>
