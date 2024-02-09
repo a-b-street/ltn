@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineString,
-    MultiLineString, Polygon,
+    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
+    LineLocatePoint, LineString, MultiLineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
@@ -14,6 +14,7 @@ use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 pub struct Neighbourhood {
     // Immutable once created
     pub interior_roads: BTreeSet<RoadID>,
+    // Just debug, has no actual use
     crosses: BTreeMap<RoadID, f64>,
     pub border_intersections: BTreeSet<IntersectionID>,
     name: String,
@@ -166,7 +167,7 @@ enum LineInPolygon {
 
 fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon {
     if polygon.contains(linestring) {
-        return LineInPolygon::Inside;
+        return double_check_line_in_polygon(linestring, polygon);
     }
 
     if !polygon.intersects(linestring) {
@@ -179,9 +180,31 @@ fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon 
     // How much of the clipped linestring is inside the boundary? If it's nearly 1,
     // then this road is interior.
     let percent = clipped.euclidean_length() / linestring.euclidean_length();
-    if percent > 0.99 {
-        return LineInPolygon::Inside;
-    } else {
+    if percent <= 0.99 {
         return LineInPolygon::Crosses { percent };
     }
+    double_check_line_in_polygon(linestring, polygon)
+}
+
+fn double_check_line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon {
+    // It looks like the line is inside, but there are false positives right along the polygon's
+    // exterior. So find the distance between the linestring endpoints and the closest point on the
+    // exterior. If both of those distances are too small, then it's probably right on the polygon.
+    let ls_pt1 = linestring.points().next().unwrap();
+    let ls_pt2 = linestring.points().last().unwrap();
+    let polygon_pt1 = closest_point(polygon.exterior(), ls_pt1);
+    let polygon_pt2 = closest_point(polygon.exterior(), ls_pt2);
+
+    if ls_pt1.euclidean_distance(&polygon_pt1) < 0.1
+        && ls_pt2.euclidean_distance(&polygon_pt2) < 0.1
+    {
+        return LineInPolygon::Crosses { percent: 1.0 };
+    }
+
+    LineInPolygon::Inside
+}
+
+fn closest_point(exterior: &LineString, pt: Point) -> Point {
+    let fraction = exterior.line_locate_point(&pt).unwrap();
+    exterior.line_interpolate_point(fraction).unwrap()
 }
