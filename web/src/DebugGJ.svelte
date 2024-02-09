@@ -1,4 +1,5 @@
 <script lang="ts">
+  import BackButton from "./BackButton.svelte";
   import {
     hoverStateFilter,
     CircleLayer,
@@ -28,7 +29,7 @@
   </div>
 
   <div slot="sidebar">
-    <button on:click={() => ($mode = { mode: "network" })}>Back</button>
+    <BackButton on:click={() => ($mode = { mode: "network" })} />
   </div>
 
   <div slot="map">

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import BackButton from "./BackButton.svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
   import { layerId, constructMatchExpression, notNull } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, map, mode, route_pt_a, route_pt_b } from "./stores";
+  import { app, mode, route_pt_a, route_pt_b } from "./stores";
 
   export let prevMode: "network" | "neighbourhood";
 
@@ -18,26 +18,10 @@
     ),
   );
 
-  onMount(() => {
-    $map?.keyboard.disable();
-  });
-  onDestroy(() => {
-    $map?.keyboard.enable();
-  });
-
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key == "Escape") {
-      e.stopPropagation();
-      back();
-    }
-  }
-
   function back() {
     $mode = { mode: prevMode };
   }
 </script>
-
-<svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
   <div slot="top">
@@ -66,7 +50,7 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <button on:click={back}>Back</button>
+    <BackButton on:click={back} />
 
     <p>Drag markers for a route</p>
     <p>

@@ -50,7 +50,8 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>Choose study area</li>
-  </ul></nav>
+      </ul>
+    </nav>
   </div>
   <div slot="sidebar">
     <About />

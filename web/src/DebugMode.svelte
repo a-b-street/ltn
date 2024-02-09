@@ -1,4 +1,5 @@
 <script lang="ts">
+  import BackButton from "./BackButton.svelte";
   import { CircleLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import { layerId, notNull, PropertiesTable, Popup } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
@@ -22,7 +23,9 @@
           >
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}>Editing modal filters</a>
+          <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}
+            >Editing modal filters</a
+          >
         </li>
         <li>Debug mode</li>
       </ul>
@@ -30,9 +33,7 @@
   </div>
 
   <div slot="sidebar">
-    <button on:click={() => ($mode = { mode: "neighbourhood" })}
-      >Back to editing</button
-    >
+    <BackButton on:click={() => ($mode = { mode: "neighbourhood" })} />
   </div>
 
   <div slot="map">

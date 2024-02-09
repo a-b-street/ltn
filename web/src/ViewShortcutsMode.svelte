@@ -1,4 +1,5 @@
 <script lang="ts">
+  import BackButton from "./BackButton.svelte";
   import { setCellColors } from "./cells";
   import type { Feature, FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
@@ -55,10 +56,6 @@
           state.shortcutIndex++;
         }
       }
-      if (e.key == "Escape") {
-        e.stopPropagation();
-        back();
-      }
     }
   }
 
@@ -104,7 +101,7 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <button on:click={back}>Back to editing</button>
+    <BackButton on:click={back} />
 
     {#if state.state == "neutral"}
       <p>Click a road to see shortcuts</p>
