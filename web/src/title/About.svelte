@@ -15,8 +15,8 @@
       >
         A/B Street LTN tool
       </a>
-      . Most parts of it do not work yet, and you should probably use the other
-      version of the tool instead.
+      . Most parts of it do not work yet, and you should probably use the other version
+      of the tool instead.
     </p>
     <p>To use this tool, you need to:</p>
     <ol>
@@ -42,7 +42,7 @@
       <a href="https://www.openstreetmap.org/about" target="_blank">
         OpenStreetMap
       </a>
-       data.
+      data.
     </p>
     <center>
       <button on:click={() => notNull(dialog).close()}>Start!</button>

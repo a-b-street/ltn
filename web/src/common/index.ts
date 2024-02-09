@@ -8,6 +8,7 @@ export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as Geocoder } from "./Geocoder.svelte";
 export { default as Layout } from "./Layout.svelte";
 export { default as Legend } from "./Legend.svelte";
+export { default as Link } from "./Link.svelte";
 export { default as Loading } from "./Loading.svelte";
 export { default as Modal } from "./Modal.svelte";
 export { default as OverpassSelector } from "./OverpassSelector.svelte";

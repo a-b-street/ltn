@@ -37,7 +37,6 @@
 <SplitComponent>
   <div slot="top" style="display: flex; justify-content: space-between;">
     <nav aria-label="breadcrumb">
-      <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "title" })}>
@@ -47,18 +46,23 @@
         <li>Pick neighbourhood</li>
       </ul>
     </nav>
-    <span style="display: flex">
-      <button
-        class="outline"
-        style="margin-right: 8px"
-        on:click={() => ($mode = { mode: "route", prevMode: "network" })}
-      >
-        Route
-      </button>
-      <button class="outline" on:click={() => ($mode = { mode: "debug-gj" })}>
-        Debug route snapper
-      </button>
-    </span>
+    <nav>
+      <ul>
+        <li>
+          <a
+            href="#"
+            on:click={() => ($mode = { mode: "route", prevMode: "network" })}
+          >
+            Route
+          </a>
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "debug-gj" })}>
+            Debug route snapper
+          </a>
+        </li>
+      </ul>
+    </nav>
   </div>
   <div slot="sidebar">
     <p>
@@ -72,20 +76,24 @@
       boundary may not match the conventional definition of "neighbourhood."
     </p>
 
-    <button on:click={newBoundary}>Draw a new boundary</button>
-    {#each boundaryNames as name}
-      <div style="display: flex; justify-content: space-between;">
-        <button class="outline" on:click={() => pickNeighbourhood(name)}>
-          {name}
-        </button>
-        <button
-          class="secondary outline"
-          on:click={() => deleteNeighbourhood(name)}
-        >
-          X
-        </button>
-      </div>
-    {/each}
+    <a href="#" on:click={newBoundary}>Draw a new boundary</a>
+    <ul>
+      {#each boundaryNames as name}
+        <li>
+          <span style="display: flex; justify-content: space-between;">
+            <a href="#" on:click={() => pickNeighbourhood(name)}>
+              {name}
+            </a>
+            <button
+              class="secondary outline"
+              on:click={() => deleteNeighbourhood(name)}
+            >
+              X
+            </button>
+          </span>
+        </li>
+      {/each}
+    </ul>
 
     <hr />
     <ManageSavefiles />

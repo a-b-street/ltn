@@ -102,7 +102,6 @@
 <SplitComponent>
   <div slot="top" style="display: flex; justify-content: space-between;">
     <nav aria-label="breadcrumb">
-      <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "title" })}>
@@ -114,45 +113,48 @@
             Pick neighbourhood
           </a>
         </li>
+        <li>Editing modal filters</li>
+      </ul>
+    </nav>
+    <nav>
+      <ul>
         <li>
-          Editing modal filters in <u>
-            {notNull(notNull(boundary).properties).name}
-          </u>
+          <a href="#" on:click={() => ($mode = { mode: "view-shortcuts" })}>
+            View shortcuts
+          </a>
+        </li>
+        <li>
+          <a
+            href="#"
+            on:click={() =>
+              ($mode = { mode: "route", prevMode: "neighbourhood" })}
+          >
+            Route
+          </a>
+        </li>
+        <li>
+          <a
+            href="#"
+            on:click={() =>
+              ($mode = {
+                mode: "set-boundary",
+                name: notNull(notNull(boundary).properties).name,
+                existing: boundary,
+              })}
+          >
+            Change this boundary
+          </a>
+        </li>
+        <li>
+          <a href="#" on:click={() => ($mode = { mode: "debug" })}>Debug</a>
         </li>
       </ul>
     </nav>
-    <span style="display: flex">
-      <button
-        class="outline"
-        style="margin-right: 8px"
-        on:click={() => ($mode = { mode: "view-shortcuts" })}
-      >
-        View shortcuts
-      </button>
-      <button
-        class="outline"
-        style="margin-right: 8px"
-        on:click={() => ($mode = { mode: "route", prevMode: "neighbourhood" })}
-      >
-        Route
-      </button>
-      <button class="outline" on:click={() => ($mode = { mode: "debug" })}>
-        Debug
-      </button>
-    </span>
   </div>
   <div slot="sidebar">
-    <button
-      class="outline"
-      on:click={() =>
-        ($mode = {
-          mode: "set-boundary",
-          name: notNull(notNull(boundary).properties).name,
-          existing: boundary,
-        })}
-    >
-      Change this neighbourhood boundary
-    </button>
+    <p>
+      Editing neighbourhood <u>{notNull(notNull(boundary).properties).name}</u>
+    </p>
 
     <p>
       Now that you've defined a neighbourhood boundary, you can see the possible

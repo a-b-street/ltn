@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Link } from "./common";
   import { createEventDispatcher } from "svelte";
 
   let dispatch = createEventDispatcher<{
@@ -15,4 +16,4 @@
 
 <svelte:window on:keydown={onKeyDown} />
 
-<button on:click={() => dispatch("click")}>Back</button>
+<Link on:click={() => dispatch("click")}>Back</Link>

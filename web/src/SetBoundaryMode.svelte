@@ -51,7 +51,6 @@
 <SplitComponent>
   <div slot="top">
     <nav aria-label="breadcrumb">
-      <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "title" })}>
@@ -81,8 +80,8 @@
     <h1>Draw your neighbourhood boundary for {name}</h1>
 
     <div style="display: flex; justify-content: space-between;">
-      <button on:click={() => notNull($route_tool).finish()}>Finish</button>
-      <button class="secondary" on:click={onFailure}>Cancel</button>
+      <a href="#" on:click={() => notNull($route_tool).finish()}>Finish</a>
+      <a href="#" on:click={onFailure}>Cancel</a>
     </div>
 
     <p>TODO: maybe move the instructions from the previous screen to here...</p>

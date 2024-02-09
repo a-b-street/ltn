@@ -81,7 +81,6 @@
 <SplitComponent>
   <div slot="top">
     <nav aria-label="breadcrumb">
-      <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
           <a href="#" on:click={() => ($mode = { mode: "title" })}>
