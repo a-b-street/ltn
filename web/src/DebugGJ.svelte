@@ -6,7 +6,7 @@
     GeoJSON,
     LineLayer,
   } from "svelte-maplibre";
-  import { Popup, notNull, PropertiesTable } from "./common";
+  import { Popup, notNull, PropertiesTable, Link } from "./common";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
 
@@ -16,12 +16,11 @@
 <SplitComponent>
   <div slot="top">
     <nav aria-label="breadcrumb">
-      <!-- svelte-ignore a11y-invalid-attribute -->
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+          <Link on:click={() => ($mode = { mode: "title" })}>
             Choose study area
-          </a>
+          </Link>
         </li>
         <li>Debug route snapper</li>
       </ul>

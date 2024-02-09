@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { layerId, notNull, Popup } from "./common";
+  import { layerId, notNull, Popup, Link } from "./common";
   import ManageSavefiles from "./ManageSavefiles.svelte";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -39,9 +39,9 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+          <Link on:click={() => ($mode = { mode: "title" })}>
             Choose study area
-          </a>
+          </Link>
         </li>
         <li>Pick neighbourhood</li>
       </ul>
@@ -49,17 +49,16 @@
     <nav>
       <ul>
         <li>
-          <a
-            href="#"
+          <Link
             on:click={() => ($mode = { mode: "route", prevMode: "network" })}
           >
             Route
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "debug-gj" })}>
+          <Link on:click={() => ($mode = { mode: "debug-gj" })}>
             Debug route snapper
-          </a>
+          </Link>
         </li>
       </ul>
     </nav>
@@ -76,14 +75,14 @@
       boundary may not match the conventional definition of "neighbourhood."
     </p>
 
-    <a href="#" on:click={newBoundary}>Draw a new boundary</a>
+    <Link on:click={newBoundary}>Draw a new boundary</Link>
     <ul>
       {#each boundaryNames as name}
         <li>
           <span style="display: flex; justify-content: space-between;">
-            <a href="#" on:click={() => pickNeighbourhood(name)}>
+            <Link on:click={() => pickNeighbourhood(name)}>
               {name}
-            </a>
+            </Link>
             <button
               class="secondary outline"
               on:click={() => deleteNeighbourhood(name)}

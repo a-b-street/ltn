@@ -8,7 +8,7 @@
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
-  import { notNull, Popup } from "../common";
+  import { notNull, Popup, Link } from "../common";
   import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
@@ -104,14 +104,14 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+          <Link on:click={() => ($mode = { mode: "title" })}>
             Choose study area
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+          <Link on:click={() => ($mode = { mode: "network" })}>
             Pick neighbourhood
-          </a>
+          </Link>
         </li>
         <li>Editing modal filters</li>
       </ul>
@@ -119,22 +119,20 @@
     <nav>
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "view-shortcuts" })}>
+          <Link on:click={() => ($mode = { mode: "view-shortcuts" })}>
             View shortcuts
-          </a>
+          </Link>
         </li>
         <li>
-          <a
-            href="#"
+          <Link
             on:click={() =>
               ($mode = { mode: "route", prevMode: "neighbourhood" })}
           >
             Route
-          </a>
+          </Link>
         </li>
         <li>
-          <a
-            href="#"
+          <Link
             on:click={() =>
               ($mode = {
                 mode: "set-boundary",
@@ -143,10 +141,10 @@
               })}
           >
             Change this boundary
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "debug" })}>Debug</a>
+          <Link on:click={() => ($mode = { mode: "debug" })}>Debug</Link>
         </li>
       </ul>
     </nav>

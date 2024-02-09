@@ -1,7 +1,7 @@
 <script lang="ts">
   import BackButton from "./BackButton.svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
-  import { layerId, constructMatchExpression, notNull } from "./common";
+  import { layerId, constructMatchExpression, notNull, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -28,20 +28,20 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+          <Link on:click={() => ($mode = { mode: "title" })}>
             Choose study area
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+          <Link on:click={() => ($mode = { mode: "network" })}>
             Pick neighbourhood
-          </a>
+          </Link>
         </li>
         {#if prevMode == "neighbourhood"}
           <li>
-            <a href="#" on:click={() => ($mode = { mode: "neighbourhood" })}>
+            <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
               Editing modal filters
-            </a>
+            </Link>
           </li>
         {/if}
         <li>Routing</li>

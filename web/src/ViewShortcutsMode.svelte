@@ -4,7 +4,7 @@
   import type { Feature, FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { layerId, notNull, Popup } from "./common";
+  import { layerId, notNull, Popup, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
@@ -83,17 +83,17 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "title" })}>
+          <Link on:click={() => ($mode = { mode: "title" })}>
             Choose study area
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" on:click={() => ($mode = { mode: "network" })}>
+          <Link on:click={() => ($mode = { mode: "network" })}>
             Pick neighbourhood
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" on:click={back}>Editing modal filters</a>
+          <Link on:click={back}>Editing modal filters</Link>
         </li>
         <li>Viewing shortcuts</li>
       </ul>
