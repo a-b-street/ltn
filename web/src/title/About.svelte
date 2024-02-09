@@ -23,12 +23,12 @@
       <li>Choose your study area to analyze</li>
       <li>Define one or more neighbourhood boundaries</li>
       <li>
-        Optionally, to fix the basemap data on existing modal filters, turn
+        Optionally, fix the basemap data on existing modal filters, turn
         restrictions, one-ways, etc
       </li>
       <li>
-        To create one or more proposals with new modal filters, and explore
-        their effects
+        Create one or more proposals with new modal filters, and explore their
+        effects
       </li>
     </ol>
     <p>

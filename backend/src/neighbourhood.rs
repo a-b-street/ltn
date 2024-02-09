@@ -2,7 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, MultiLineString, Polygon,
+    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineString,
+    MultiLineString, Polygon,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
@@ -32,26 +33,19 @@ impl Neighbourhood {
         let mut interior_roads = BTreeSet::new();
         let mut crosses = BTreeMap::new();
         for r in &map.roads {
-            if boundary_polygon.contains(&r.linestring) {
-                interior_roads.insert(r.id);
-            } else if boundary_polygon.intersects(&r.linestring) {
-                // Clip the linestring to the polygon
-                let invert = false;
-                let clipped =
-                    boundary_polygon.clip(&MultiLineString::from(r.linestring.clone()), invert);
-                // How much of the clipped linestring is inside the boundary? If it's nearly 1,
-                // then this road is interior.
-                let pct = clipped.euclidean_length() / r.linestring.euclidean_length();
-                if pct > 0.99 {
+            match line_in_polygon(&r.linestring, &boundary_polygon) {
+                LineInPolygon::Inside => {
                     interior_roads.insert(r.id);
-                } else {
+                }
+                LineInPolygon::Crosses { percent } => {
                     // It's either something close to a perimeter road, or a weird case like
                     // https://www.openstreetmap.org/way/15778470 that's a bridge or tunnel
                     // crossing the boundary without touching it. For those cases, what do we want
                     // to do with them -- still consider them borders, yeah, because it's a way in
                     // or out.
-                    crosses.insert(r.id, pct);
+                    crosses.insert(r.id, percent);
                 }
+                LineInPolygon::Outside => {}
             }
         }
 
@@ -161,5 +155,33 @@ impl Neighbourhood {
                 .clone(),
             ),
         }
+    }
+}
+
+enum LineInPolygon {
+    Inside,
+    Crosses { percent: f64 },
+    Outside,
+}
+
+fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon {
+    if polygon.contains(linestring) {
+        return LineInPolygon::Inside;
+    }
+
+    if !polygon.intersects(linestring) {
+        return LineInPolygon::Outside;
+    }
+
+    // Clip the linestring to the polygon
+    let invert = false;
+    let clipped = polygon.clip(&MultiLineString::from(linestring.clone()), invert);
+    // How much of the clipped linestring is inside the boundary? If it's nearly 1,
+    // then this road is interior.
+    let percent = clipped.euclidean_length() / linestring.euclidean_length();
+    if percent > 0.99 {
+        return LineInPolygon::Inside;
+    } else {
+        return LineInPolygon::Crosses { percent };
     }
 }
