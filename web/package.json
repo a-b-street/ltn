@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "wasm": "wasm-pack build --release --target web ../backend",
+    "wasm": "wasm-pack build --profiling --target web ../backend",
+    "wasm-release": "wasm-pack build --release --target web ../backend",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "fmt": "npx prettier --write *.html src/**"

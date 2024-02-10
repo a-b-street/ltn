@@ -25,3 +25,7 @@ bincode = "1.3.3"
 contour = "0.12.0"
 rstar = "0.11.0"
 web-time = "1.0.0"
+
+# For local development. wasm-opt costs about 40s and appears to have no difference at runtime!
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = false
