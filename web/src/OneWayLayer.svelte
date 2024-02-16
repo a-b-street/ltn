@@ -21,6 +21,6 @@
     "icon-rotate": ["case", ["==", ["get", "direction"], "forwards"], 0, 180],
   }}
   paint={{
-    "icon-opacity": 1.0,
+    "icon-opacity": ["case", ["get", "direction_edited"], 1.0, 0.5],
   }}
 />

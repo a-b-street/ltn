@@ -9,7 +9,7 @@ use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
 
 use crate::render_cells::Color;
-use crate::{Cell, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
+use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
 pub struct Neighbourhood {
     // Immutable once created
@@ -103,7 +103,8 @@ impl Neighbourhood {
         features.push(map.boundaries.get(&self.name).cloned().unwrap());
 
         for r in &self.interior_roads {
-            let mut f = map.get_r(*r).to_gj(&map.mercator);
+            let road = map.get_r(*r);
+            let mut f = road.to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
             f.set_property(
                 "shortcuts",
@@ -115,6 +116,10 @@ impl Neighbourhood {
                     .unwrap_or(0),
             );
             f.set_property("direction", map.directions[r].to_string());
+            f.set_property(
+                "direction_edited",
+                map.directions[r] != Direction::from_osm(&road.tags),
+            );
             f.set_property("road", r.0);
             features.push(f);
         }
