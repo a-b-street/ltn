@@ -91,9 +91,6 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     mercator.to_mercator_in_place(&mut collection);
     let boundary_polygon = collection.convex_hull();
 
-    // TODO Do this latr
-    let router_original = Router::new(&roads, &intersections, &BTreeMap::new());
-
     let mut map = MapModel {
         roads,
         intersections,
@@ -101,7 +98,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         boundary_polygon,
         study_area_name,
 
-        router_original,
+        router_original: None,
         router_current: None,
 
         original_modal_filters: BTreeMap::new(),
@@ -122,6 +119,8 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     map.original_modal_filters = map.modal_filters.clone();
     map.undo_stack.clear();
     map.redo_queue.clear();
+
+    map.router_original = Some(Router::new(&map.roads, &map.intersections, &map.modal_filters));
 
     Ok(map)
 }

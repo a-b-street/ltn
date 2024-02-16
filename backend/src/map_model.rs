@@ -20,7 +20,8 @@ pub struct MapModel {
     pub boundary_polygon: Polygon,
 
     // TODO Wasteful, can share some
-    pub router_original: Router,
+    // This is guaranteed to exist, only Option during MapModel::new internals
+    pub router_original: Option<Router>,
     // Calculated lazily
     pub router_current: Option<Router>,
 
@@ -358,7 +359,7 @@ impl MapModel {
         }
 
         let mut features = Vec::new();
-        if let Some(linestring) = self.router_original.route(self, pt1, pt2) {
+        if let Some(linestring) = self.router_original.as_ref().unwrap().route(self, pt1, pt2) {
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
             f.set_property("kind", "before");
             features.push(f);
