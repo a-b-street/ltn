@@ -183,6 +183,12 @@ impl LTN {
         self.after_edit();
     }
 
+    #[wasm_bindgen(js_name = toggleDirection)]
+    pub fn toggle_direction(&mut self, road: usize) {
+        self.map.toggle_direction(RoadID(road));
+        self.after_edit();
+    }
+
     pub fn undo(&mut self) {
         self.map.undo();
         self.after_edit();

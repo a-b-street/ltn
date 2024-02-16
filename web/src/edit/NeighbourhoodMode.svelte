@@ -19,8 +19,15 @@
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
-  let addingFilter = false;
-  let addingMultipleFilters = false;
+  type Action = "neutral" | "adding-filter" | "freehand-filters" | "oneway";
+  let action: Action = "neutral";
+
+  $: if (action == "oneway") {
+    $map!.doubleClickZoom.disable();
+  } else {
+    $map!.doubleClickZoom.enable();
+  }
+
   let settingFilterType = false;
   let undoLength = 0;
   let redoLength = 0;
@@ -28,6 +35,12 @@
 
   let gjInput: FeatureCollection;
   $: rerender($mutationCounter);
+
+  $map!.on("click", onClick);
+  onDestroy(() => {
+    $map!.off("click", onClick);
+    $map!.doubleClickZoom.enable();
+  });
 
   function rerender(_x: number) {
     gjInput = JSON.parse($app!.renderNeighbourhood());
@@ -41,23 +54,19 @@
     redoLength = gjInput.redo_length;
   }
 
-  $: if (addingFilter) {
-    $map!.on("click", onClick);
-    // TODO Still doesn't last long
-    $map!.getCanvas().style.cursor = "crosshair";
-  }
-  onDestroy(() => {
-    stopAddingFilter();
-  });
   function onClick(e: MapMouseEvent) {
-    $app!.addModalFilter(e.lngLat, $filterType);
-    $mutationCounter++;
-    stopAddingFilter();
+    if (action == "adding-filter") {
+      $app!.addModalFilter(e.lngLat, $filterType);
+      $mutationCounter++;
+      action = "neutral";
+    }
   }
-  function stopAddingFilter() {
-    addingFilter = false;
-    $map!.off("click", onClick);
-    $map!.getCanvas().style.cursor = "inherit";
+
+  function onClickLine(f: Feature) {
+    if (action == "oneway") {
+      $app!.toggleDirection(f.properties!.road);
+      $mutationCounter++;
+    }
   }
 
   function deleteFilter(e: CustomEvent<LayerClickInfo>) {
@@ -67,13 +76,13 @@
   }
 
   function onKeyDown(e: KeyboardEvent) {
-    if (e.key == "a" && !addingFilter && !addingMultipleFilters) {
-      addingFilter = true;
+    if (e.key == "a" && action == "neutral") {
+      action = "adding-filter";
     }
-    if (e.key == "z" && e.ctrlKey) {
+    if (e.ctrlKey && e.key == "z") {
       undo();
     }
-    if (e.key == "y" && e.ctrlKey) {
+    if (e.ctrlKey && e.key == "y") {
       redo();
     }
   }
@@ -93,7 +102,7 @@
       $mutationCounter++;
     }
 
-    addingMultipleFilters = false;
+    action = "neutral";
   }
 </script>
 
@@ -164,8 +173,8 @@
     <hr />
 
     <button
-      on:click={() => (addingFilter = true)}
-      disabled={addingFilter || addingMultipleFilters}
+      on:click={() => (action = "adding-filter")}
+      disabled={action != "neutral"}
     >
       <img
         src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
@@ -175,16 +184,19 @@
       Add a modal filter
     </button>
     <button
-      on:click={() => (addingMultipleFilters = true)}
-      disabled={addingFilter || addingMultipleFilters}
+      on:click={() => (action = "freehand-filters")}
+      disabled={action != "neutral"}
     >
       Add many modal filters along line
     </button>
     <button
       on:click={() => (settingFilterType = true)}
-      disabled={addingFilter || addingMultipleFilters}
+      disabled={action != "neutral"}
     >
       Change modal filter type
+    </button>
+    <button on:click={() => (action = "oneway")} disabled={action != "neutral"}>
+      Reverse directions
     </button>
 
     <div style="display: flex; justify-content: space-between;">
@@ -217,20 +229,24 @@
   <div slot="map">
     <RenderNeighbourhood
       {gjInput}
-      interactive={!addingFilter && !addingMultipleFilters}
+      interactive={action == "neutral" || action == "oneway"}
+      {onClickLine}
     >
       <div slot="line-popup">
         <Popup openOn="hover" let:props>
           <p>
             {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
           </p>
+          {#if action == "oneway"}
+            <p>Click to change direction</p>
+          {/if}
         </Popup>
       </div>
     </RenderNeighbourhood>
     <ModalFilterLayer on:click={deleteFilter}>
       <Popup openOn="hover">Click to delete</Popup>
     </ModalFilterLayer>
-    {#if addingMultipleFilters}
+    {#if action == "freehand-filters"}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
     {/if}
   </div>

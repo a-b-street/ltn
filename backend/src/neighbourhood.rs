@@ -115,6 +115,7 @@ impl Neighbourhood {
                     .unwrap_or(0),
             );
             f.set_property("direction", map.directions[r].to_string());
+            f.set_property("road", r.0);
             features.push(f);
         }
         for (r, pct) in &self.crosses {

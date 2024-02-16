@@ -190,6 +190,18 @@ impl MapModel {
         self.after_edited();
     }
 
+    pub fn toggle_direction(&mut self, r: RoadID) {
+        let dir = match self.directions[&r] {
+            Direction::Forwards => Direction::Backwards,
+            Direction::Backwards => Direction::BothWays,
+            Direction::BothWays => Direction::Forwards,
+        };
+        let cmd = self.do_edit(Command::SetDirection(r, dir));
+        self.undo_stack.push(cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+    }
+
     // Returns the command to undo this one
     fn do_edit(&mut self, cmd: Command) -> Command {
         match cmd {
@@ -203,6 +215,12 @@ impl MapModel {
                     self.modal_filters.remove(&r);
                 }
                 Command::SetModalFilter(r, prev)
+            }
+            Command::SetDirection(r, dir) => {
+                info!("changed direction of {r} to {}", dir.to_string());
+                let prev = self.directions[&r];
+                self.directions.insert(r, dir);
+                Command::SetDirection(r, prev)
             }
             Command::Multiple(list) => {
                 let undo_list = list.into_iter().map(|cmd| self.do_edit(cmd)).collect();
@@ -485,6 +503,7 @@ impl Direction {
 
 pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
+    SetDirection(RoadID, Direction),
     Multiple(Vec<Command>),
 }
 
