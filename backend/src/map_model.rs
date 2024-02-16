@@ -153,6 +153,28 @@ impl MapModel {
             .map(|pair| (pair.1, pair.2))
     }
 
+    fn most_similar_linestring(&self, linestring: &LineString) -> RoadID {
+        // TODO Detect many possible cases of OSM data changing. Could at least compare the length
+        // of the candidate. Decide how to handle possible splits/merges.
+        self.roads
+            .iter()
+            .min_by_key(|r| {
+                let diff1 = Line::new(
+                    r.linestring.points().next().unwrap(),
+                    linestring.points().next().unwrap(),
+                )
+                .euclidean_length();
+                let diff2 = Line::new(
+                    r.linestring.points().last().unwrap(),
+                    linestring.points().last().unwrap(),
+                )
+                .euclidean_length();
+                ((diff1 + diff2) * 100.0) as usize
+            })
+            .unwrap()
+            .id
+    }
+
     fn after_edited(&mut self) {
         // Invalidate it
         self.router_current = None;
@@ -295,6 +317,16 @@ impl MapModel {
             gj.features.push(f);
         }
 
+        // Any direction edits
+        for r in &self.roads {
+            if self.directions[&r.id] != Direction::from_osm(&r.tags) {
+                let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&r.linestring)));
+                f.set_property("kind", "direction");
+                f.set_property("direction", self.directions[&r.id].to_string());
+                gj.features.push(f);
+            }
+        }
+
         gj.features.extend(self.boundaries.values().cloned());
 
         let mut f = Feature::from(Geometry::from(
@@ -319,6 +351,9 @@ impl MapModel {
         // Clear previous state
         self.boundaries.clear();
         self.modal_filters = self.original_modal_filters.clone();
+        for (r, dir) in &mut self.directions {
+            *dir = Direction::from_osm(&self.roads[r.0].tags);
+        }
         self.undo_stack.clear();
         self.redo_queue.clear();
 
@@ -344,6 +379,13 @@ impl MapModel {
                     // TODO Better error handling if we don't match
                     let (r, _) = self.closest_point_on_road(pt, &all_roads).unwrap();
                     cmds.push(Command::SetModalFilter(r, None));
+                }
+                "direction" => {
+                    let dir = Direction::from_string(get_str_prop(&f, "direction")?)?;
+                    let mut linestring: LineString = f.geometry.unwrap().try_into()?;
+                    self.mercator.to_mercator_in_place(&mut linestring);
+                    let r = self.most_similar_linestring(&linestring);
+                    cmds.push(Command::SetDirection(r, dir));
                 }
                 "boundary" => {
                     let name = get_str_prop(&f, "name")?;
