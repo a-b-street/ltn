@@ -204,7 +204,8 @@ impl LTN {
         .map_err(err_to_js)?)
     }
 
-    /// GJ with modal filters and named boundaries
+    /// GJ with modal filters and named boundaries. This is meant for savefiles, so existing
+    /// filters aren't included (and deletions of existing are included)
     #[wasm_bindgen(js_name = toSavefile)]
     pub fn to_savefile(&self) -> Result<String, JsValue> {
         // TODO Trim coordinates... in mercator?

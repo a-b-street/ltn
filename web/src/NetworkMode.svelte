@@ -30,7 +30,6 @@
     }
   }
 
-  // TODO Also render filters here
   // TODO Hover on button and highlight on map
 </script>
 
@@ -116,7 +115,7 @@
           <p>{props.name}</p>
         </Popup>
       </FillLayer>
-      <ModalFilterLayer />
     </GeoJSON>
+    <ModalFilterLayer />
   </div>
 </SplitComponent>

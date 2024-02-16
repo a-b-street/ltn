@@ -38,6 +38,7 @@
 
   function saveLocalStorage() {
     window.localStorage.setItem(filename, $app!.toSavefile());
+    window.alert("Saved");
   }
 
   function loadProject(gj: string) {

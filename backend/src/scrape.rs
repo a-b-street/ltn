@@ -119,7 +119,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         map.add_modal_filter(pt, &all_roads, FilterKind::NoEntry);
     }
     // The commands above populate the existing modal filters and edit history. Undo that.
-    std::mem::swap(&mut map.modal_filters, &mut map.original_modal_filters);
+    map.original_modal_filters = map.modal_filters.clone();
     map.undo_stack.clear();
     map.redo_queue.clear();
 

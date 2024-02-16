@@ -97,11 +97,11 @@ impl MapModel {
 
     pub fn add_modal_filter(
         &mut self,
-        click_pt: Coord,
+        pt: Coord,
         candidate_roads: &BTreeSet<RoadID>,
         kind: FilterKind,
     ) {
-        let cmd = self.do_edit(self.add_modal_filter_cmd(click_pt, candidate_roads, kind));
+        let cmd = self.do_edit(self.add_modal_filter_cmd(pt, candidate_roads, kind));
         self.undo_stack.push(cmd);
         self.redo_queue.clear();
         self.after_edited();
@@ -109,12 +109,27 @@ impl MapModel {
 
     fn add_modal_filter_cmd(
         &self,
-        click_pt: Coord,
+        pt: Coord,
         candidate_roads: &BTreeSet<RoadID>,
         kind: FilterKind,
     ) -> Command {
+        let (r, percent_along) = self.closest_point_on_road(pt, candidate_roads).unwrap();
+        Command::SetModalFilter(
+            r,
+            Some(ModalFilter {
+                percent_along,
+                kind,
+            }),
+        )
+    }
+
+    fn closest_point_on_road(
+        &self,
+        click_pt: Coord,
+        candidate_roads: &BTreeSet<RoadID>,
+    ) -> Option<(RoadID, f64)> {
         // TODO prune with rtree?
-        let (_, r, percent_along) = candidate_roads
+        candidate_roads
             .iter()
             .filter_map(|r| {
                 let road = self.get_r(*r);
@@ -131,14 +146,7 @@ impl MapModel {
                 }
             })
             .min_by_key(|pair| pair.0)
-            .unwrap();
-        Command::SetModalFilter(
-            r,
-            Some(ModalFilter {
-                percent_along,
-                kind,
-            }),
-        )
+            .map(|pair| (pair.1, pair.2))
     }
 
     fn after_edited(&mut self) {
@@ -241,12 +249,30 @@ impl MapModel {
     }
 
     pub fn to_savefile(&self) -> FeatureCollection {
+        // Edited filters only
         let mut gj = self.filters_to_gj();
-        // TODO When we detect existing filters, maybe need to instead compact edits
+        gj.features
+            .retain(|f| f.property("edited").unwrap().as_bool().unwrap());
         for f in &mut gj.features {
             f.set_property("kind", "modal_filter");
             f.remove_property("road");
         }
+
+        // Look for any basemap filters that were deleted entirely
+        for (r, filter) in &self.original_modal_filters {
+            if self.modal_filters.contains_key(r) {
+                continue;
+            }
+            let pt = self
+                .get_r(*r)
+                .linestring
+                .line_interpolate_point(filter.percent_along)
+                .unwrap();
+            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
+            f.set_property("kind", "deleted_existing_modal_filter");
+            gj.features.push(f);
+        }
+
         gj.features.extend(self.boundaries.values().cloned());
 
         let mut f = Feature::from(Geometry::from(
@@ -290,6 +316,13 @@ impl MapModel {
                         kind,
                     ));
                 }
+                "deleted_existing_modal_filter" => {
+                    let gj_pt: Point = f.geometry.unwrap().try_into()?;
+                    let pt = self.mercator.pt_to_mercator(gj_pt.into());
+                    // TODO Better error handling if we don't match
+                    let (r, _) = self.closest_point_on_road(pt, &all_roads).unwrap();
+                    cmds.push(Command::SetModalFilter(r, None));
+                }
                 "boundary" => {
                     let name = get_str_prop(&f, "name")?;
                     if self.boundaries.contains_key(name) {
@@ -300,7 +333,7 @@ impl MapModel {
                 "study_area_boundary" => {
                     // TODO Detect if it's close enough to boundary_polygon? Overwrite?
                 }
-                x => bail!("Unknown kind in savefile {x}"),
+                x => bail!("Unknown kind in savefile: {x}"),
             }
         }
 

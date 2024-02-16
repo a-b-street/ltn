@@ -65,7 +65,7 @@
       try {
         $app.loadSavefile(JSON.parse(gj));
       } catch (err) {
-        console.log(`Didn't restore from local storage ${filename}: ${err}`);
+        window.alert(`Didn't restore from local storage ${filename}: ${err}`);
       }
     }
 
