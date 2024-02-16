@@ -1,10 +1,12 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
 use geo::{ConvexHull, Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
 
-use crate::{Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router, Tags};
+use crate::{
+    FilterKind, Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router, Tags,
+};
 
 struct Way {
     id: WayID,
@@ -15,10 +17,20 @@ struct Way {
 pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result<MapModel> {
     let mut node_mapping = HashMap::new();
     let mut highways = Vec::new();
+    let mut all_barriers: BTreeSet<NodeID> = BTreeSet::new();
     osm_reader::parse(input_bytes, |elem| match elem {
-        Element::Node { id, lon, lat, .. } => {
+        Element::Node { id, lon, lat, tags } => {
             let pt = Coord { x: lon, y: lat };
             node_mapping.insert(id, pt);
+
+            // Tuning these by hand for a few known areas.
+            // https://wiki.openstreetmap.org/wiki/Key:barrier is proper reference.
+            if let Some(kind) = tags.get("barrier") {
+                // Bristol has many gates that don't seem as relevant
+                if kind != "gate" {
+                    all_barriers.insert(id);
+                }
+            }
         }
         Element::Way {
             id,
@@ -41,6 +53,17 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         Element::Relation { .. } => {}
     })?;
 
+    // There'll be many barrier nodes on non-driveable paths we don't consider roads. Filter for
+    // just those on things we consider roads.
+    let mut barrier_pts = Vec::new();
+    for way in &highways {
+        for node in &way.node_ids {
+            if all_barriers.contains(node) {
+                barrier_pts.push(node_mapping[node]);
+            }
+        }
+    }
+
     let (mut roads, mut intersections) = split_edges(&node_mapping, highways);
 
     // TODO expensive
@@ -61,14 +84,18 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     for i in &mut intersections {
         mercator.to_mercator_in_place(&mut i.point);
     }
+    for coord in &mut barrier_pts {
+        *coord = mercator.pt_to_mercator(*coord);
+    }
 
     mercator.to_mercator_in_place(&mut collection);
     let boundary_polygon = collection.convex_hull();
 
     let modal_filters = BTreeMap::new();
+    // TODO Do this latr
     let router_original = Router::new(&roads, &intersections, &modal_filters);
 
-    Ok(MapModel {
+    let mut map = MapModel {
         roads,
         intersections,
         mercator,
@@ -82,7 +109,16 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
-    })
+    };
+
+    // Apply barriers (only those that're exactly on one of the roads)
+    let all_roads: BTreeSet<RoadID> = map.roads.iter().map(|r| r.id).collect();
+    for pt in barrier_pts {
+        // TODO What kind?
+        map.add_modal_filter(pt, &all_roads, FilterKind::NoEntry);
+    }
+
+    Ok(map)
 }
 
 fn split_edges(
