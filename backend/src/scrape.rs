@@ -91,9 +91,8 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     mercator.to_mercator_in_place(&mut collection);
     let boundary_polygon = collection.convex_hull();
 
-    let modal_filters = BTreeMap::new();
     // TODO Do this latr
-    let router_original = Router::new(&roads, &intersections, &modal_filters);
+    let router_original = Router::new(&roads, &intersections, &BTreeMap::new());
 
     let mut map = MapModel {
         roads,
@@ -105,7 +104,9 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         router_original,
         router_current: None,
 
-        modal_filters,
+        original_modal_filters: BTreeMap::new(),
+        modal_filters: BTreeMap::new(),
+
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
@@ -117,6 +118,10 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         // TODO What kind?
         map.add_modal_filter(pt, &all_roads, FilterKind::NoEntry);
     }
+    // The commands above populate the existing modal filters and edit history. Undo that.
+    std::mem::swap(&mut map.modal_filters, &mut map.original_modal_filters);
+    map.undo_stack.clear();
+    map.redo_queue.clear();
 
     Ok(map)
 }

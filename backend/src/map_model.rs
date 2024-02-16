@@ -24,8 +24,11 @@ pub struct MapModel {
     // Calculated lazily
     pub router_current: Option<Router>,
 
-    // TODO Keep edits / state here or not?
+    // Just from the basemap, existing filters
+    pub original_modal_filters: BTreeMap<RoadID, ModalFilter>,
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
+
+    // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
     pub redo_queue: Vec<Command>,
     // Stores boundary polygons in WGS84, with ALL of their GeoJSON props.
@@ -266,7 +269,7 @@ impl MapModel {
     pub fn load_savefile(&mut self, gj: FeatureCollection) -> Result<()> {
         // Clear previous state
         self.boundaries.clear();
-        self.modal_filters.clear();
+        self.modal_filters = self.original_modal_filters.clone();
         self.undo_stack.clear();
         self.redo_queue.clear();
 
