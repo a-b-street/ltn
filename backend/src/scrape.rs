@@ -120,7 +120,11 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     map.undo_stack.clear();
     map.redo_queue.clear();
 
-    map.router_original = Some(Router::new(&map.roads, &map.intersections, &map.modal_filters));
+    map.router_original = Some(Router::new(
+        &map.roads,
+        &map.intersections,
+        &map.modal_filters,
+    ));
 
     Ok(map)
 }

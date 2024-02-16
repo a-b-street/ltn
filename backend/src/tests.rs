@@ -46,11 +46,17 @@ fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) 
     map.mercator.to_mercator_in_place(&mut boundary_geo);
     let neighbourhood = Neighbourhood::new(&map, neighbourhood_name.to_string(), boundary_geo)?;
 
-    // TODO Include modal filters, once we detect existing ones
+    let mut gj = prune_features(neighbourhood.to_gj(&map));
 
-    Ok(serde_json::to_string(&prune_features(
-        neighbourhood.to_gj(&map),
-    ))?)
+    // Include all existing modal filters anywhere in the map
+    for mut f in map.filters_to_gj().features {
+        f.set_property("kind", "existing_modal_filter");
+        f.remove_property("road");
+        f.remove_property("edited");
+        gj.features.push(f);
+    }
+
+    Ok(serde_json::to_string(&gj)?)
 }
 
 // Remove OSM tags, for smaller files
