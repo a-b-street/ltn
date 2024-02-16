@@ -15,6 +15,9 @@
       "icon-allow-overlap": true,
       "icon-size": 0.1,
     }}
+    paint={{
+      "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
+    }}
     on:click
   >
     <slot />

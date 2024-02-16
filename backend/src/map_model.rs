@@ -230,6 +230,7 @@ impl MapModel {
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
             f.set_property("filter_kind", filter.kind.to_string());
             f.set_property("road", r.0);
+            f.set_property("edited", Some(filter) != self.original_modal_filters.get(r));
             features.push(f);
         }
         FeatureCollection {
@@ -371,13 +372,13 @@ impl Road {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ModalFilter {
     pub kind: FilterKind,
     pub percent_along: f64,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum FilterKind {
     WalkCycleOnly,
     NoEntry,
