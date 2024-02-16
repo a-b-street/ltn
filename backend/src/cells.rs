@@ -29,10 +29,6 @@ impl Cell {
             }
             let start = *start;
             let road = map.get_r(start);
-            // Just skip entirely; they're invisible for the purpose of dividing into cells
-            if !is_driveable(road) {
-                continue;
-            }
             // There are non-private roads connected only to private roads, like
             // https://www.openstreetmap.org/way/725759378 and
             // https://www.openstreetmap.org/way/27890699. Also skip these, to avoid creating a
@@ -102,7 +98,6 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
 
     // The caller should handle this case
     assert!(!map.modal_filters.contains_key(&start));
-    assert!(is_driveable(map.get_r(start)));
 
     while !queue.is_empty() {
         let current = map.get_r(queue.pop().unwrap());
@@ -165,9 +160,6 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
                     continue;
                 }
 
-                if !is_driveable(next_road) {
-                    continue;
-                }
                 // TODO This happens near weird geometry. This is OK, but should root-cause it.
                 if !neighbourhood.interior_roads.contains(next) {
                     error!("A cell leaked out to {next} from {i}");
@@ -185,10 +177,6 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
     }
 }
 
-// TODO
-fn is_driveable(road: &Road) -> bool {
-    true
-}
 fn is_private(road: &Road) -> bool {
     false
 }

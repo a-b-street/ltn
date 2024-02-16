@@ -65,7 +65,7 @@
         {#if existing}
           <li>
             <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-              Editing modal filters
+              Editing
             </Link>
           </li>
           <li>Changing neighbourhood boundary</li>

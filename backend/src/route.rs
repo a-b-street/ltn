@@ -5,7 +5,9 @@ use geo::{Coord, LineString};
 use rstar::primitives::GeomWithData;
 use rstar::RTree;
 
-use crate::{Intersection, IntersectionID, MapModel, ModalFilter, NodeMap, Road, RoadID};
+use crate::{
+    Direction, Intersection, IntersectionID, MapModel, ModalFilter, NodeMap, Road, RoadID,
+};
 
 #[derive(Clone)]
 pub struct Router {
@@ -22,6 +24,7 @@ impl Router {
         roads: &Vec<Road>,
         intersections: &Vec<Intersection>,
         modal_filters: &BTreeMap<RoadID, ModalFilter>,
+        directions: &BTreeMap<RoadID, Direction>,
     ) -> Self {
         let mut input_graph = InputGraph::new();
         let mut node_map = NodeMap::new();
@@ -38,9 +41,18 @@ impl Router {
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
             let cost = (road.length() * 100.0) as usize;
-            // TODO Look at one-way for driving
-            input_graph.add_edge(i1, i2, cost);
-            input_graph.add_edge(i2, i1, cost);
+            match directions[&road.id] {
+                Direction::Forwards => {
+                    input_graph.add_edge(i1, i2, cost);
+                }
+                Direction::Backwards => {
+                    input_graph.add_edge(i2, i1, cost);
+                }
+                Direction::BothWays => {
+                    input_graph.add_edge(i1, i2, cost);
+                    input_graph.add_edge(i2, i1, cost);
+                }
+            }
         }
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);

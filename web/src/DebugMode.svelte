@@ -23,7 +23,7 @@
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-            Editing modal filters
+            Editing
           </Link>
         </li>
         <li>Debug mode</li>

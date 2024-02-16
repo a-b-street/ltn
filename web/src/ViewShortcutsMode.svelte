@@ -93,7 +93,7 @@
           </Link>
         </li>
         <li>
-          <Link on:click={back}>Editing modal filters</Link>
+          <Link on:click={back}>Editing</Link>
         </li>
         <li>Viewing shortcuts</li>
       </ul>

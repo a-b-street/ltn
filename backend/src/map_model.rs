@@ -376,6 +376,7 @@ impl MapModel {
                 &self.roads,
                 &self.intersections,
                 &self.modal_filters,
+                &self.directions,
             ));
         }
 

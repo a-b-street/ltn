@@ -4,7 +4,7 @@ use fast_paths::InputGraph;
 use geo::{EuclideanLength, LineString};
 use geojson::{Feature, Geometry};
 
-use crate::{IntersectionID, MapModel, Neighbourhood, NodeMap, RoadID};
+use crate::{Direction, IntersectionID, MapModel, Neighbourhood, NodeMap, RoadID};
 
 pub struct Shortcuts {
     pub paths: Vec<Path>,
@@ -34,9 +34,18 @@ impl Shortcuts {
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
             let cost = (road.length() * 100.0) as usize;
-            // TODO Look at one-way for driving
-            input_graph.add_edge(i1, i2, cost);
-            input_graph.add_edge(i2, i1, cost);
+            match map.directions[r] {
+                Direction::Forwards => {
+                    input_graph.add_edge(i1, i2, cost);
+                }
+                Direction::Backwards => {
+                    input_graph.add_edge(i2, i1, cost);
+                }
+                Direction::BothWays => {
+                    input_graph.add_edge(i1, i2, cost);
+                    input_graph.add_edge(i2, i1, cost);
+                }
+            }
         }
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);

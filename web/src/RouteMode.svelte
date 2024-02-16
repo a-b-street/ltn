@@ -40,7 +40,7 @@
         {#if prevMode == "neighbourhood"}
           <li>
             <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-              Editing modal filters
+              Editing
             </Link>
           </li>
         {/if}

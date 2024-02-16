@@ -132,6 +132,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         &map.roads,
         &map.intersections,
         &map.modal_filters,
+        &map.directions,
     ));
 
     Ok(map)

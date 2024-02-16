@@ -122,7 +122,7 @@
             Pick neighbourhood
           </Link>
         </li>
-        <li>Editing modal filters</li>
+        <li>Editing</li>
       </ul>
     </nav>
     <nav>
@@ -172,6 +172,12 @@
 
     <hr />
 
+    <button
+      on:click={() => (action = "neutral")}
+      disabled={action == "neutral"}
+    >
+      Stop editing
+    </button>
     <button
       on:click={() => (action = "adding-filter")}
       disabled={action != "neutral"}
