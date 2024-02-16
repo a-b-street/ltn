@@ -1,4 +1,5 @@
 <script lang="ts">
+  import OneWayLayer from "./OneWayLayer.svelte";
   import type { Feature, FeatureCollection } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import { setCellColors } from "./cells";
@@ -49,5 +50,8 @@
       <slot name="line-popup" />
     {/if}
   </LineLayer>
+
+  <OneWayLayer />
+
   <slot name="more-layers" />
 </GeoJSON>

@@ -5,7 +5,8 @@ use geo::{ConvexHull, Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
 
 use crate::{
-    FilterKind, Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router, Tags,
+    Direction, FilterKind, Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router,
+    Tags,
 };
 
 struct Way {
@@ -66,6 +67,11 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
 
     let (mut roads, mut intersections) = split_edges(&node_mapping, highways);
 
+    let mut directions = BTreeMap::new();
+    for r in &roads {
+        directions.insert(r.id, Direction::from_osm(&r.tags));
+    }
+
     // TODO expensive
     let mut collection: GeometryCollection = roads
         .iter()
@@ -103,6 +109,8 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
 
         original_modal_filters: BTreeMap::new(),
         modal_filters: BTreeMap::new(),
+
+        directions,
 
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),

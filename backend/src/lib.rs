@@ -13,7 +13,7 @@ use wasm_bindgen::prelude::*;
 use self::cells::Cell;
 use self::common::*;
 use self::map_model::{
-    FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID,
+    Direction, FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID,
 };
 use self::neighbourhood::Neighbourhood;
 use self::render_cells::RenderCells;

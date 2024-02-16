@@ -29,6 +29,9 @@ pub struct MapModel {
     pub original_modal_filters: BTreeMap<RoadID, ModalFilter>,
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
 
+    // Every road is filled out
+    pub directions: BTreeMap<RoadID, Direction>,
+
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
     pub redo_queue: Vec<Command>,
@@ -424,20 +427,58 @@ pub enum FilterKind {
 impl FilterKind {
     pub fn to_string(self) -> &'static str {
         match self {
-            FilterKind::WalkCycleOnly => "walk_cycle_only",
-            FilterKind::NoEntry => "no_entry",
-            FilterKind::BusGate => "bus_gate",
-            FilterKind::SchoolStreet => "school_street",
+            Self::WalkCycleOnly => "walk_cycle_only",
+            Self::NoEntry => "no_entry",
+            Self::BusGate => "bus_gate",
+            Self::SchoolStreet => "school_street",
         }
     }
 
     pub fn from_string(x: &str) -> Result<Self> {
         match x {
-            "walk_cycle_only" => Ok(FilterKind::WalkCycleOnly),
-            "no_entry" => Ok(FilterKind::NoEntry),
-            "bus_gate" => Ok(FilterKind::BusGate),
-            "school_street" => Ok(FilterKind::SchoolStreet),
+            "walk_cycle_only" => Ok(Self::WalkCycleOnly),
+            "no_entry" => Ok(Self::NoEntry),
+            "bus_gate" => Ok(Self::BusGate),
+            "school_street" => Ok(Self::SchoolStreet),
             _ => bail!("Invalid FilterKind: {x}"),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum Direction {
+    Forwards,
+    Backwards,
+    BothWays,
+}
+
+impl Direction {
+    pub fn from_osm(tags: &Tags) -> Self {
+        // TODO Improve this
+        if tags.is("oneway", "yes") {
+            Self::Forwards
+        } else if tags.is("oneway", "-1") {
+            Self::Backwards
+        } else {
+            Self::BothWays
+        }
+    }
+
+    // TODO strum?
+    pub fn to_string(self) -> &'static str {
+        match self {
+            Self::Forwards => "forwards",
+            Self::Backwards => "backwards",
+            Self::BothWays => "both",
+        }
+    }
+
+    pub fn from_string(x: &str) -> Result<Self> {
+        match x {
+            "forwards" => Ok(Self::Forwards),
+            "backwards" => Ok(Self::Backwards),
+            "both" => Ok(Self::BothWays),
+            _ => bail!("Invalid Direction: {x}"),
         }
     }
 }

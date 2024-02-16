@@ -114,6 +114,7 @@ impl Neighbourhood {
                     .cloned()
                     .unwrap_or(0),
             );
+            f.set_property("direction", map.directions[r].to_string());
             features.push(f);
         }
         for (r, pct) in &self.crosses {
