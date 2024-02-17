@@ -1,5 +1,5 @@
 <script lang="ts">
-  import logo from "../assets/logo.png?url";
+  import logo from "../assets/logo.svg?url";
   import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
