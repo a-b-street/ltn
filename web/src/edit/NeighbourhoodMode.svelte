@@ -19,8 +19,8 @@
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
-  type Action = "neutral" | "adding-filter" | "freehand-filters" | "oneway";
-  let action: Action = "neutral";
+  type Action = "filter" | "freehand-filters" | "oneway";
+  let action: Action = "filter";
 
   $: if (action == "oneway") {
     $map!.doubleClickZoom.disable();
@@ -55,10 +55,9 @@
   }
 
   function onClick(e: MapMouseEvent) {
-    if (action == "adding-filter") {
+    if (action == "filter") {
       $app!.addModalFilter(e.lngLat, $filterType);
       $mutationCounter++;
-      action = "neutral";
     }
   }
 
@@ -76,14 +75,24 @@
   }
 
   function onKeyDown(e: KeyboardEvent) {
-    if (e.key == "a" && action == "neutral") {
-      action = "adding-filter";
+    // Ignore keypresses if we're not focused on the map
+    if ((e.target as HTMLElement).tagName == "INPUT") {
+      return;
     }
     if (e.ctrlKey && e.key == "z") {
       undo();
     }
     if (e.ctrlKey && e.key == "y") {
       redo();
+    }
+    if (e.key == "1") {
+      action = "filter";
+    }
+    if (e.key == "2") {
+      action = "freehand-filters";
+    }
+    if (e.key == "3") {
+      action = "oneway";
     }
   }
   function undo() {
@@ -102,7 +111,7 @@
       $mutationCounter++;
     }
 
-    action = "neutral";
+    action = "filter";
   }
 </script>
 
@@ -172,37 +181,34 @@
 
     <hr />
 
-    <button
-      on:click={() => (action = "neutral")}
-      disabled={action == "neutral"}
-    >
-      Stop editing
-    </button>
-    <button
-      on:click={() => (action = "adding-filter")}
-      disabled={action != "neutral"}
-    >
-      <img
-        src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
-        width="30"
-        alt="Add a modal filter"
-      />
-      Add a modal filter
-    </button>
-    <button
-      on:click={() => (action = "freehand-filters")}
-      disabled={action != "neutral"}
-    >
-      Add many modal filters along line
-    </button>
-    <button
-      on:click={() => (settingFilterType = true)}
-      disabled={action != "neutral"}
-    >
+    <div style="display: flex; justify-content: space-between;">
+      <button
+        on:click={() => (action = "filter")}
+        disabled={action == "filter"}
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+          width="30"
+          alt="Add a modal filter"
+        />
+        Add a modal filter
+      </button>
+      <button
+        on:click={() => (action = "freehand-filters")}
+        disabled={action == "freehand-filters"}
+      >
+        Add many modal filters along line
+      </button>
+      <button
+        on:click={() => (action = "oneway")}
+        disabled={action == "oneway"}
+      >
+        Reverse directions
+      </button>
+    </div>
+
+    <button on:click={() => (settingFilterType = true)}>
       Change modal filter type
-    </button>
-    <button on:click={() => (action = "oneway")} disabled={action != "neutral"}>
-      Reverse directions
     </button>
 
     <div style="display: flex; justify-content: space-between;">
@@ -235,7 +241,7 @@
   <div slot="map">
     <RenderNeighbourhood
       {gjInput}
-      interactive={action == "neutral" || action == "oneway"}
+      interactive={action == "oneway"}
       {onClickLine}
     >
       <div slot="line-popup">
