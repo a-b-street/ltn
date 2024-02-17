@@ -3,6 +3,12 @@
   import settings from "../assets/settings.svg?url";
 
   let show = false;
+
+  let light = !window.matchMedia("(prefers-color-scheme: dark)").matches;
+  $: document.documentElement.setAttribute(
+    "data-theme",
+    light ? "light" : "dark",
+  );
 </script>
 
 <button class="outline" on:click={() => (show = true)}>
@@ -13,6 +19,10 @@
   <Modal on:close={() => (show = false)}>
     <h1>Settings</h1>
     <BasemapPicker />
+    <label>
+      <input type="checkbox" role="switch" bind:checked={light} />
+      Light mode
+    </label>
     <center><button on:click={() => (show = false)}>Confirm</button></center>
   </Modal>
 {/if}
