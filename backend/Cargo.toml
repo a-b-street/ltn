@@ -26,12 +26,7 @@ contour = "0.12.0"
 rstar = "0.11.0"
 web-time = "1.0.0"
 
-# For local development. wasm-opt costs about 40s and appears to have no difference at runtime!
-[package.metadata.wasm-pack.profile.profiling]
-wasm-opt = false
-
-# Even faster local development. Compile dependencies optimized once, but
-# incrementally rebuild this crate super quickly. Runtime performance is still
-# usable for the current tests, but noticeably slower.
+# For local development, build dependencies in release mode once, but otherwise
+# use dev profile and avoid wasm-opt.
 [profile.dev.package."*"]
 opt-level = 3
