@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@maptiler/geocoding-control": "^1.2.1",
-    "@picocss/pico": "^1.5.11",
+    "@picocss/pico": "^2.0.3",
     "@turf/nearest-point-on-line": "^6.5.0",
     "@types/geojson": "^7946.0.13",
     "route-snapper": "0.3.0",

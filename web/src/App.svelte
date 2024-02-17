@@ -1,6 +1,6 @@
 <script lang="ts">
   import logo from "../assets/logo.png?url";
-  import "@picocss/pico/css/pico.min.css";
+  import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
   import initRouteSnapper from "route-snapper";
@@ -143,9 +143,3 @@
     </MapLibre>
   </div>
 </Layout>
-
-<style>
-  :global(button) {
-    width: auto;
-  }
-</style>
