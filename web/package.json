@@ -16,22 +16,22 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.1.1",
     "@sveltejs/vite-plugin-svelte": "^2.5.3",
     "@tsconfig/svelte": "^5.0.2",
-    "@types/node": "^20.11.19",
+    "@types/geojson": "^7946.0.14",
+    "@types/node": "^20.11.22",
     "prettier": "^3.2.5",
-    "prettier-plugin-svelte": "^3.2.1",
-    "svelte": "^4.2.11",
-    "svelte-check": "^3.6.4",
+    "prettier-plugin-svelte": "^3.2.2",
+    "svelte": "^4.2.12",
+    "svelte-check": "^3.6.6",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
     "vite": "^4.5.2",
     "vite-plugin-wasm-pack": "0.1.11"
   },
   "dependencies": {
-    "@maptiler/geocoding-control": "^1.2.1",
+    "@maptiler/geocoding-control": "^1.2.2",
     "@picocss/pico": "^2.0.3",
     "@turf/nearest-point-on-line": "^6.5.0",
-    "@types/geojson": "^7946.0.14",
     "route-snapper": "0.3.0",
-    "svelte-maplibre": "^0.7.7"
+    "svelte-maplibre": "^0.8.1"
   }
 }
