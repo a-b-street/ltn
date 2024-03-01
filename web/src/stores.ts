@@ -46,8 +46,8 @@ export let lightMode: Writable<boolean> = writable(
 );
 
 export let useLocalVite: Writable<boolean> = writable(false);
+// The exact key in local storage
 export let projectName: Writable<string> = writable("");
-export let example: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
 
 export let topContents: Writable<HTMLDivElement | null> = writable(null);

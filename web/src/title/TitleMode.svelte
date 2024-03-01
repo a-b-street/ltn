@@ -1,16 +1,29 @@
 <script lang="ts">
+  import { LngLat } from "maplibre-gl";
+  import { LTN } from "backend";
   import type { Feature } from "geojson";
   import { Link, overpassQueryForPolygon } from "../common";
+  import { RouteTool } from "../common/snapper/route_tool";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, example, map, route_tool, showAbout, mode } from "../stores";
+  import {
+    app,
+    projectName,
+    map,
+    showAbout,
+    mode,
+    useLocalVite,
+    route_tool,
+    route_pt_a,
+    route_pt_b,
+  } from "../stores";
   import About from "./About.svelte";
-  import MapLoader from "./MapLoader.svelte";
 
   export let wasmReady: boolean;
 
   // When other modes reset here, they can't clear state without a race condition
   $app = null;
   $route_tool = null;
+  $projectName = "";
 
   let projectList = getProjectList();
 
@@ -26,35 +39,77 @@
     return list;
   }
 
-  let mapLoader: MapLoader | undefined;
-
   let fileInput: HTMLInputElement;
   async function loadFile(e: Event) {
-    try {
-      let gj = JSON.parse(await fileInput.files![0].text());
+    // TODO Be careful with overwriting stuff, leading ltn_, etc
+    let key = "ltn_" + fileInput.files![0].name;
+    window.localStorage.setItem(key, await fileInput.files![0].text());
+    projectList = getProjectList();
+    await loadFromLocalStorage(key);
+  }
 
-      if (gj.study_area_name) {
-        $example = gj.study_area_name;
-        // TODO HACK! MapLoader will restore from local storage, so just set that
-        window.localStorage.setItem(
-          `ltn_${gj.study_area_name}.geojson`,
-          JSON.stringify(gj),
-        );
-        await mapLoader!.loadExample(gj.study_area_name);
-      } else {
-        $example = "";
-        let study_area_boundary = gj.features.find(
-          (f: Feature) => f.properties!.kind == "study_area_boundary",
-        )!;
-        let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
-        let bytes = await resp.arrayBuffer();
-        // TODO HACK! MapLoader will restore from local storage, so just set that
-        window.localStorage.setItem("ltn_custom.geojson", JSON.stringify(gj));
-        mapLoader!.loadMap(bytes);
-      }
+  async function loadFromLocalStorage(key: string) {
+    $projectName = key;
+    try {
+      let gj = JSON.parse(window.localStorage.getItem($projectName)!);
+
+      let buffer = await getOsmInput(gj);
+      //msg = "Building map model from OSM input";
+      console.time("load");
+      $app = new LTN(
+        new Uint8Array(buffer),
+        gj.study_area_boundary || undefined,
+      );
+      // TODO rename as project?
+      // TODO or actually, combo this with the constructor.
+      $app.loadSavefile(gj);
+      console.timeEnd("load");
+
+      afterProjectLoaded();
     } catch (err) {
-      window.alert(`Couldn't open this file: ${err}`);
+      window.alert(`Couldn't open project: ${err}`);
+      $projectName = "";
     }
+  }
+
+  // Either from a pre-hosted pbf file or from Overpass
+  async function getOsmInput(gj: any): Promise<ArrayBuffer> {
+    if (gj.study_area_name) {
+      let url = $useLocalVite
+        ? `/osm/${gj.study_area_name}.pbf`
+        : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
+      //msg = `Downloading ${url}`;
+      let resp = await fetch(url);
+      let bytes = await resp.arrayBuffer();
+      return bytes;
+    } else {
+      let study_area_boundary = gj.features.find(
+        (f: Feature) => f.properties!.kind == "study_area_boundary",
+      )!;
+      let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
+      let bytes = await resp.arrayBuffer();
+      return bytes;
+    }
+  }
+
+  function afterProjectLoaded() {
+    $mode = {
+      mode: "network",
+    };
+    $route_tool = new RouteTool($map!, $app!.toRouteSnapper());
+    $map!.fitBounds(
+      Array.from($app!.getBounds()) as [number, number, number, number],
+      { animate: false },
+    );
+    $route_pt_a = randomPoint();
+    $route_pt_b = randomPoint();
+  }
+
+  function randomPoint(): LngLat {
+    let bounds = $app!.getBounds();
+    let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
+    let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
+    return new LngLat(lng, lat);
   }
 </script>
 
@@ -70,11 +125,21 @@
     <About />
     <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
 
-    {#if mapLoader}
+    {#if $map && wasmReady}
+      <div>
+        <Link on:click={() => ($mode = { mode: "new-project" })}>
+          New project
+        </Link>
+      </div>
+
       <p>Load a saved project:</p>
       <ul>
         {#each projectList as project}
-          <li>{project}</li>
+          <li>
+            <Link on:click={() => loadFromLocalStorage(project)}>
+              {project}
+            </Link>
+          </li>
         {/each}
       </ul>
 
@@ -82,16 +147,6 @@
         Load a project from a file
         <input bind:this={fileInput} on:change={loadFile} type="file" />
       </label>
-
-      <Link on:click={() => ($mode = { mode: "new-project" })}>
-        New project
-      </Link>
-    {/if}
-
-    <hr />
-
-    {#if $map && wasmReady}
-      <MapLoader bind:this={mapLoader} />
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
