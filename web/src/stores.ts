@@ -38,6 +38,10 @@ export type Mode =
 export let map: Writable<Map | null> = writable(null);
 export let maptilerBasemap: Writable<string> = writable("dataviz");
 
+export let lightMode: Writable<boolean> = writable(
+  !window.matchMedia("(prefers-color-scheme: dark)").matches,
+);
+
 export let example: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
 

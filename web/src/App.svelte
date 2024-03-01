@@ -1,6 +1,7 @@
 <script lang="ts">
   import onewayArrowUrl from "../assets/arrow.png?url";
-  import logo from "../assets/logo.svg?url";
+  import logoLight from "../assets/logo_light.svg?url";
+  import logoDark from "../assets/logo_dark.svg?url";
   import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
@@ -20,6 +21,7 @@
     mapContents,
     topContents,
     map as mapStore,
+    lightMode,
     mode,
     sidebarContents,
     maptilerBasemap,
@@ -67,7 +69,7 @@
 <Layout>
   <div slot="top" style="display: flex">
     <img
-      src={logo}
+      src={$lightMode ? logoLight : logoDark}
       style="height: 8vh; margin-right: 20px;"
       alt="A/B Street logo"
     />
