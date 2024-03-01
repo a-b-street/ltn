@@ -1,18 +1,12 @@
 <script lang="ts">
-  import { maptilerApiKey, mapStyle } from "../stores";
-
-  let choice = "dataviz";
-
-  $: mapStyle.set(
-    `https://api.maptiler.com/maps/${choice}/style.json?key=${maptilerApiKey}`,
-  );
+  import { maptilerBasemap } from "../stores";
 
   // TODO Z-ordering won't work when we change, because layerId() doesn't get recalculated
 </script>
 
 <label>
   Basemap:
-  <select bind:value={choice}>
+  <select bind:value={$maptilerBasemap}>
     <option value="dataviz">MapTiler Dataviz</option>
     <option value="streets">MapTiler Streets</option>
     <option value="hybrid">MapTiler Satellite</option>

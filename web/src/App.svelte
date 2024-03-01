@@ -22,7 +22,8 @@
     map as mapStore,
     mode,
     sidebarContents,
-    mapStyle,
+    maptilerBasemap,
+    maptilerApiKey,
   } from "./stores";
   import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
@@ -86,7 +87,7 @@
   </div>
   <div slot="main" style="position: relative; width: 100%; height: 100%;">
     <MapLibre
-      style={$mapStyle}
+      style={`https://api.maptiler.com/maps/${$maptilerBasemap}/style.json?key=${maptilerApiKey}`}
       standardControls
       hash
       bind:map
