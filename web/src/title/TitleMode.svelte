@@ -6,6 +6,7 @@
   import { app, example, map, route_tool, showAbout } from "../stores";
   import About from "./About.svelte";
   import MapLoader from "./MapLoader.svelte";
+  import ManageProjects from "./ManageProjects.svelte";
 
   export let wasmReady: boolean;
 
@@ -49,13 +50,12 @@
   <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
-        <li>Choose study area</li>
+        <li>Choose project</li>
       </ul>
     </nav>
   </div>
   <div slot="sidebar">
     <About />
-
     <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
 
     {#if mapLoader}
@@ -64,6 +64,7 @@
         <input bind:this={fileInput} on:change={loadFile} type="file" />
       </label>
     {/if}
+    <ManageProjects />
 
     <hr />
 
