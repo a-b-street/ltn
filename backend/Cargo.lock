@@ -672,7 +672,7 @@ checksum = "cbf4a6aa5f6d6888f39e980649f3ad6b666acdce1d78e95b8a2cb076e687ae30"
 [[package]]
 name = "route-snapper-graph"
 version = "0.1.0"
-source = "git+https://github.com/dabreegster/route_snapper?branch=no_osm2streets#250055d36fbbdc3391c3ff4d8f93a5b36654292d"
+source = "git+https://github.com/dabreegster/route_snapper#aeb83caee46a2dc46984faad3fe55def3b984cf7"
 dependencies = [
  "geo 0.27.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",

@@ -18,9 +18,12 @@ impl MapModel {
                 node1: NodeID(r.src_i.0 as u32),
                 node2: NodeID(r.dst_i.0 as u32),
                 geometry: self.mercator.to_wgs84(&r.linestring),
+                name: r.tags.get("name").cloned(),
+
                 // Isn't serialized, doesn't matter
                 length_meters: 0.0,
-                name: r.tags.get("name").cloned(),
+                forward_cost: None,
+                backward_cost: None,
             });
         }
 
@@ -89,9 +92,12 @@ impl MapModel {
                     node1: pt_to_node_id[&hashify_point(split_ls.0[0])],
                     node2: pt_to_node_id[&hashify_point(*split_ls.0.last().unwrap())],
                     geometry: self.mercator.to_wgs84(&split_ls),
+                    name: self.get_r(r).tags.get("name").cloned(),
+
                     // Isn't serialized, doesn't matter
                     length_meters: 0.0,
-                    name: self.get_r(r).tags.get("name").cloned(),
+                    forward_cost: None,
+                    backward_cost: None,
                 });
             }
 
@@ -105,7 +111,12 @@ impl MapModel {
             edges.remove(r.0);
         }
 
-        RouteSnapperMap { nodes, edges }
+        RouteSnapperMap {
+            nodes,
+            edges,
+            override_forward_costs: Vec::new(),
+            override_backward_costs: Vec::new(),
+        }
     }
 }
 
