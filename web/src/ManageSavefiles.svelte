@@ -1,8 +1,8 @@
 <script lang="ts">
   import { downloadGeneratedFile, Loading } from "./common";
-  import { app, example, mode } from "./stores";
+  import { app, projectName, mode } from "./stores";
 
-  $: filename = `ltn_${$example || "custom"}.geojson`;
+  $: filename = `ltn_${$projectName}.geojson`;
 
   let msg: string | null = null;
 
