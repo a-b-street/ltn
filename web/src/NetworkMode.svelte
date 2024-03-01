@@ -39,7 +39,7 @@
       <ul>
         <li>
           <Link on:click={() => ($mode = { mode: "title" })}>
-            Choose study area
+            Choose project
           </Link>
         </li>
         <li>Pick neighbourhood</li>

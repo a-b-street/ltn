@@ -32,22 +32,8 @@
         );
         exampleAreas = await resp.json();
       }
-
-      // For quicker dev
-      //$example = "bristol";
     } catch (err) {}
   });
-
-  let fileInput: HTMLInputElement;
-  async function loadFile(e: Event) {
-    try {
-      loadMap(await fileInput.files![0].arrayBuffer());
-      $example = "";
-    } catch (err) {
-      window.alert(`Couldn't open this file: ${err}`);
-    }
-    msg = null;
-  }
 
   export function loadMap(buffer: ArrayBuffer) {
     msg = "Building map model from OSM input";
@@ -135,13 +121,6 @@
       </optgroup>
     {/each}
   </select>
-</label>
-
-<i>or...</i>
-
-<label>
-  Load an osm.xml or a .pbf file:
-  <input bind:this={fileInput} on:change={loadFile} type="file" />
 </label>
 
 <i>or...</i>
