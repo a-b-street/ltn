@@ -12,27 +12,19 @@
     route_tool,
     route_pt_a,
     route_pt_b,
+    useLocalVite,
   } from "../stores";
 
   let msg: string | null = null;
-  let useLocalVite = false;
   let exampleAreas: [string, [string, string][]][] = [];
 
   onMount(async () => {
-    // When running locally if a vite public/ directory is set up, load from that for speed
-    try {
-      let resp = await fetch("/osm/areas.json");
-      if (resp.ok) {
-        useLocalVite = true;
-        console.log("Using local cache, not od2net.org");
-        exampleAreas = await resp.json();
-      } else {
-        let resp = await fetch(
-          `https://assets.od2net.org/severance_pbfs/areas.json`,
-        );
-        exampleAreas = await resp.json();
-      }
-    } catch (err) {}
+    let resp = await fetch(
+      $useLocalVite
+        ? "/osm/areas.json"
+        : "https://assets.od2net.org/severance_pbfs/areas.json",
+    );
+    exampleAreas = await resp.json();
   });
 
   export function loadMap(buffer: ArrayBuffer) {
@@ -80,7 +72,7 @@
 
   export async function loadExample(ex: string) {
     if (ex != "") {
-      if (useLocalVite) {
+      if ($useLocalVite) {
         await loadFromUrl(`/osm/${ex}.pbf`);
       } else {
         await loadFromUrl(`https://assets.od2net.org/severance_pbfs/${ex}.pbf`);

@@ -1,18 +1,30 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import { overpassQueryForPolygon } from "../common";
-  import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
+  import { Link, overpassQueryForPolygon } from "../common";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, example, map, route_tool, showAbout } from "../stores";
+  import { app, example, map, route_tool, showAbout, mode } from "../stores";
   import About from "./About.svelte";
   import MapLoader from "./MapLoader.svelte";
-  import ManageProjects from "./ManageProjects.svelte";
 
   export let wasmReady: boolean;
 
   // When other modes reset here, they can't clear state without a race condition
   $app = null;
   $route_tool = null;
+
+  let projectList = getProjectList();
+
+  function getProjectList(): string[] {
+    let list = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      let key = window.localStorage.key(i)!;
+      if (key.startsWith("ltn_")) {
+        list.push(key);
+      }
+    }
+    list.sort();
+    return list;
+  }
 
   let mapLoader: MapLoader | undefined;
 
@@ -59,12 +71,22 @@
     <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
 
     {#if mapLoader}
+      <p>Load a saved project:</p>
+      <ul>
+        {#each projectList as project}
+          <li>{project}</li>
+        {/each}
+      </ul>
+
       <label>
         Load a project from a file
         <input bind:this={fileInput} on:change={loadFile} type="file" />
       </label>
+
+      <Link on:click={() => ($mode = { mode: "new-project" })}>
+        New project
+      </Link>
     {/if}
-    <ManageProjects />
 
     <hr />
 
@@ -73,9 +95,5 @@
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
-  </div>
-
-  <div slot="map">
-    <PolygonToolLayer />
   </div>
 </SplitComponent>

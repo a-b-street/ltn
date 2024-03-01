@@ -26,8 +26,10 @@
     sidebarContents,
     maptilerBasemap,
     maptilerApiKey,
+    useLocalVite,
   } from "./stores";
   import TitleMode from "./title/TitleMode.svelte";
+  import NewProjectMode from "./title/NewProjectMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
   let wasmReady = false;
@@ -35,6 +37,15 @@
     await initLtn();
     await initRouteSnapper();
     wasmReady = true;
+
+    // When running locally if a vite public/ directory is set up, load from that for speed
+    try {
+      let resp = await fetch("/osm/areas.json");
+      if (resp.ok) {
+        $useLocalVite = true;
+        console.log("Using local cache, not od2net.org");
+      }
+    } catch (err) {}
   });
 
   let map: Map;
@@ -124,6 +135,8 @@
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
         <TitleMode {wasmReady} />
+      {:else if $mode.mode == "new-project"}
+        <NewProjectMode />
       {/if}
       {#if $app}
         <GeoJSON data={JSON.parse($app.getInvertedBoundary())}>
