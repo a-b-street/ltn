@@ -4,8 +4,10 @@
   import { Link, Loading, OverpassSelector } from "../common";
   import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, map, useLocalVite, projectName, mode } from "../stores";
+  import { projectName, app, map, useLocalVite, mode } from "../stores";
+  import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
 
+  let newProjectName = "";
   let example = "";
   let exampleAreas: [string, [string, string][]][] = [];
   let msg: string | null = null;
@@ -24,7 +26,9 @@
       // TODO Can we avoid turning into bytes?
       $app = new LTN(new TextEncoder().encode(e.detail), undefined);
       // No savefile to load
-      // TODO call afterProjectLoaded
+      // TODO Nothing will get created in local storage yet...
+      $projectName = `ltn_${newProjectName}`;
+      afterProjectLoaded();
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
@@ -36,13 +40,16 @@
       return;
     }
 
+    let key = `ltn_${newProjectName}`;
     window.localStorage.setItem(
-      $projectName,
+      key,
       JSON.stringify({
-        study_area_boundary: example,
+        type: "FeatureCollection",
+        features: [],
+        study_area_name: example,
       }),
     );
-    // TODO Trigger actual loading
+    loadFromLocalStorage(key);
   }
 </script>
 
@@ -64,17 +71,17 @@
     <div>
       <label>
         Project name:
-        <input type="text" bind:value={$projectName} />
+        <input type="text" bind:value={newProjectName} />
       </label>
     </div>
 
-    {#if $projectName}
+    {#if newProjectName}
       <Loading {msg} />
 
       <label>
-        Load an example:
+        Load a built-in area:
         <select bind:value={example} on:change={() => loadExample()}>
-          <option value="">Custom file loaded</option>
+          <option value=""></option>
           {#each exampleAreas as [country, areas]}
             <optgroup label={country}>
               {#each areas as [value, label]}
