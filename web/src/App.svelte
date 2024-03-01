@@ -1,4 +1,5 @@
 <script lang="ts">
+  import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
   import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
@@ -109,6 +110,10 @@
         {
           id: "school_street",
           url: `${import.meta.env.BASE_URL}/filters/school_street_icon.gif`,
+        },
+        {
+          id: "oneway-arrow",
+          url: onewayArrowUrl,
         },
       ]}
     >

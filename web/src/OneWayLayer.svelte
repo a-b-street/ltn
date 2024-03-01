@@ -1,8 +1,6 @@
 <script lang="ts">
   import { layerId } from "./common";
   import { SymbolLayer } from "svelte-maplibre";
-
-  // TODO Using the icon from maptiler basemap, so it won't work on some basemaps
 </script>
 
 <SymbolLayer
@@ -13,7 +11,7 @@
     ["!=", ["get", "direction"], "both"],
   ]}
   layout={{
-    "icon-image": "oneway",
+    "icon-image": "oneway-arrow",
     "icon-size": 1.0,
     "symbol-placement": "line",
     "symbol-spacing": 50,
