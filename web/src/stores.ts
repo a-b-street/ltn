@@ -11,6 +11,9 @@ export type Mode =
       mode: "title";
     }
   | {
+      mode: "new-project";
+    }
+  | {
       mode: "network";
     }
   | {
@@ -42,6 +45,8 @@ export let lightMode: Writable<boolean> = writable(
   !window.matchMedia("(prefers-color-scheme: dark)").matches,
 );
 
+export let useLocalVite: Writable<boolean> = writable(false);
+export let projectName: Writable<string> = writable("");
 export let example: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
 
