@@ -4,7 +4,7 @@
   import RouteSnapperLayer from "./common/snapper/RouteSnapperLayer.svelte";
   import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode, route_tool } from "./stores";
+  import { autosave, app, mode, route_tool } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon> | null;
@@ -33,6 +33,7 @@
   $route_tool!.addEventListenerSuccess((feature) => {
     try {
       $app!.setNeighbourhoodBoundary(name, feature);
+      autosave();
       $app!.setCurrentNeighbourhood(name);
       $mode = {
         mode: "neighbourhood",

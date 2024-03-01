@@ -1,7 +1,7 @@
 import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
 import { LngLat, type Map } from "maplibre-gl";
-import { writable, type Writable } from "svelte/store";
+import { get, writable, type Writable } from "svelte/store";
 import { RouteTool } from "./common/snapper/route_tool";
 
 export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
@@ -63,3 +63,11 @@ export let route_pt_b: Writable<LngLat> = writable(new LngLat(0, 0));
 export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title" });
 export let filterType: Writable<string> = writable("walk_cycle_only");
+
+export function autosave() {
+  let key = get(projectName);
+  if (!key) {
+    window.alert("Autosave failed; no projectName set?!");
+  }
+  window.localStorage.setItem(key, get(app)!.toSavefile());
+}

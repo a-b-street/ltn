@@ -9,10 +9,16 @@
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
   import { notNull, Popup, Link } from "../common";
-  import ManageSavefiles from "../ManageSavefiles.svelte";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, map, mode, mutationCounter, filterType } from "../stores";
+  import {
+    app,
+    map,
+    mode,
+    mutationCounter,
+    filterType,
+    autosave,
+  } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
   import ModalFilterLayer from "../ModalFilterLayer.svelte";
@@ -52,6 +58,8 @@
     undoLength = gjInput.undo_length;
     // @ts-ignore These foreign members exist
     redoLength = gjInput.redo_length;
+
+    autosave();
   }
 
   function onClick(e: MapMouseEvent) {
@@ -231,11 +239,6 @@
     {#if settingFilterType}
       <ChangeModalFilter on:close={() => (settingFilterType = false)} />
     {/if}
-
-    <hr />
-
-    <hr />
-    <ManageSavefiles />
   </div>
 
   <div slot="map">

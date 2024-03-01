@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { downloadGeneratedFile } from "./common";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { layerId, notNull, Popup, Link } from "./common";
-  import ManageSavefiles from "./ManageSavefiles.svelte";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode } from "./stores";
+  import { app, autosave, mode, projectName } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
   $: gj = JSON.parse($app!.toSavefile());
@@ -20,6 +20,8 @@
 
   function deleteNeighbourhood(name: string) {
     $app!.deleteNeighbourhoodBoundary(name);
+    autosave();
+    // TODO Improve perf, don't call this twice
     gj = JSON.parse($app!.toSavefile());
   }
 
@@ -28,6 +30,10 @@
     if (name) {
       $mode = { mode: "set-boundary", name, existing: null };
     }
+  }
+
+  function exportGJ() {
+    downloadGeneratedFile($projectName + ".geojson", $app!.toSavefile());
   }
 
   // TODO Hover on button and highlight on map
@@ -93,8 +99,7 @@
       {/each}
     </ul>
 
-    <hr />
-    <ManageSavefiles />
+    <button on:click={exportGJ}>Export project to GeoJSON</button>
   </div>
 
   <div slot="map">
