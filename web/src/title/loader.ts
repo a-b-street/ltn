@@ -26,8 +26,7 @@ export async function loadFromLocalStorage(key: string) {
     app.set(
       new LTN(new Uint8Array(buffer), gj.study_area_boundary || undefined),
     );
-    // TODO rename as project?
-    // TODO or actually, combo this with the constructor.
+    // TODO Rename savefile -> project? Or combine this call with the constructor?
     get(app)!.loadSavefile(gj);
     console.timeEnd("load");
 
