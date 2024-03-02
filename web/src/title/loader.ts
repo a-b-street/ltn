@@ -21,7 +21,6 @@ export async function loadFromLocalStorage(key: string) {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
     let buffer = await getOsmInput(gj);
-    //msg = "Building map model from OSM input";
     console.time("load");
     app.set(
       new LTN(new Uint8Array(buffer), gj.study_area_boundary || undefined),
@@ -43,7 +42,6 @@ async function getOsmInput(gj: any): Promise<ArrayBuffer> {
     let url = get(useLocalVite)
       ? `/osm/${gj.study_area_name}.pbf`
       : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
-    //msg = `Downloading ${url}`;
     let resp = await fetch(url);
     let bytes = await resp.arrayBuffer();
     return bytes;

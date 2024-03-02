@@ -3,7 +3,7 @@
   import deleteDark from "../../assets/delete_dark.svg?url";
   import editLight from "../../assets/edit_light.svg?url";
   import editDark from "../../assets/edit_dark.svg?url";
-  import { Link } from "../common";
+  import { Loading, Link } from "../common";
   import SplitComponent from "../SplitComponent.svelte";
   import {
     lightMode,
@@ -16,6 +16,7 @@
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
+  let msg: string | null = null;
 
   // When other modes reset here, they can't clear state without a race condition
   $app = null;
@@ -40,9 +41,11 @@
   async function loadFile(e: Event) {
     // TODO Be careful with overwriting stuff, leading ltn_, etc
     let key = "ltn_" + fileInput.files![0].name;
+    msg = `Loading from file ${key}`;
     window.localStorage.setItem(key, await fileInput.files![0].text());
     projectList = getProjectList();
     await loadFromLocalStorage(key);
+    msg = null;
   }
 
   function deleteProject(key: string) {
@@ -66,7 +69,15 @@
       projectList = getProjectList();
     }
   }
+
+  async function loadProject(key: string) {
+    msg = `Loading project ${key}`;
+    await loadFromLocalStorage(key);
+    msg = null;
+  }
 </script>
+
+<Loading {msg} />
 
 <SplitComponent>
   <div slot="top">
@@ -87,22 +98,24 @@
       <p>Load a saved project:</p>
       <ul>
         {#each projectList as project}
-          <li style="display: flex; justify-content: space-between;">
-            <Link on:click={() => loadFromLocalStorage(project)}>
-              {project}
-            </Link>
-            <button class="secondary" on:click={() => renameProject(project)}>
-              <img
-                src={$lightMode ? editLight : editDark}
-                alt="Rename project"
-              />
-            </button>
-            <button class="secondary" on:click={() => deleteProject(project)}>
-              <img
-                src={$lightMode ? deleteLight : deleteDark}
-                alt="Delete project"
-              />
-            </button>
+          <li>
+            <span style="display: flex; justify-content: space-between;">
+              <Link on:click={() => loadProject(project)}>
+                {project}
+              </Link>
+              <button class="secondary" on:click={() => renameProject(project)}>
+                <img
+                  src={$lightMode ? editLight : editDark}
+                  alt="Rename project"
+                />
+              </button>
+              <button class="secondary" on:click={() => deleteProject(project)}>
+                <img
+                  src={$lightMode ? deleteLight : deleteDark}
+                  alt="Delete project"
+                />
+              </button>
+            </span>
           </li>
         {/each}
       </ul>
