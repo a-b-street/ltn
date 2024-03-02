@@ -88,16 +88,19 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <p>
-      Inside the neighbourhood you define, the goal is to eliminate (or
-      deliberately permit) through-traffic. An appropriate neighbourhood
-      boundary depends on many factors. The simplest approach is to find the
-      area bounded on all sides by "main" roads, which are designed for higher
-      traffic volumes. There are many other considerations, though -- maybe
-      severances like rivers or rail should be part of a boundary. Bridges and
-      tunnels near a boundary may be confusing as well. And note that your
-      boundary may not match the conventional definition of "neighbourhood."
-    </p>
+    <details>
+      <summary>Help</summary>
+      <p>
+        Inside the neighbourhood you define, the goal is to eliminate (or
+        deliberately permit) through-traffic. An appropriate neighbourhood
+        boundary depends on many factors. The simplest approach is to find the
+        area bounded on all sides by "main" roads, which are designed for higher
+        traffic volumes. There are many other considerations, though -- maybe
+        severances like rivers or rail should be part of a boundary. Bridges and
+        tunnels near a boundary may be confusing as well. And note that your
+        boundary may not match the conventional definition of "neighbourhood."
+      </p>
+    </details>
 
     <Link on:click={newBoundary}>Draw a new boundary</Link>
     <ul>

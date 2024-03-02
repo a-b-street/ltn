@@ -180,19 +180,22 @@
       Editing neighbourhood <u>{notNull(notNull(boundary).properties).name}</u>
     </p>
 
-    <p>
-      Now that you've defined a neighbourhood boundary, you can see the possible
-      shortcuts that vehicles are currently able to take through it. You can add
-      a new modal filter to try and solve this. The colored "cell" areas show
-      what's reachable for drivers without leaving the boundary you've drawn.
-    </p>
-
-    <hr />
+    <details>
+      <summary>Help</summary>
+      <p>
+        Now that you've defined a neighbourhood boundary, you can see the
+        possible shortcuts that vehicles are currently able to take through it.
+        You can add a new modal filter to try and solve this. The colored "cell"
+        areas show what's reachable for drivers without leaving the boundary
+        you've drawn.
+      </p>
+    </details>
 
     <div style="display: flex; justify-content: space-between;">
       <button
         on:click={() => (action = "filter")}
         disabled={action == "filter"}
+        data-tooltip="hotkey 1"
       >
         <img
           src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
@@ -204,12 +207,14 @@
       <button
         on:click={() => (action = "freehand-filters")}
         disabled={action == "freehand-filters"}
+        data-tooltip="hotkey 2"
       >
         Add many modal filters along line
       </button>
       <button
         on:click={() => (action = "oneway")}
         disabled={action == "oneway"}
+        data-tooltip="hotkey 3"
       >
         Reverse directions
       </button>
@@ -220,14 +225,14 @@
     </button>
 
     <div style="display: flex; justify-content: space-between;">
-      <button disabled={undoLength == 0} on:click={undo}>
+      <button disabled={undoLength == 0} on:click={undo} data-tooltip="Ctrl+Z">
         {#if undoLength == 0}
           Undo
         {:else}
           Undo ({undoLength})
         {/if}
       </button>
-      <button disabled={redoLength == 0} on:click={redo}>
+      <button disabled={redoLength == 0} on:click={redo} data-tooltip="Ctrl+Y">
         {#if redoLength == 0}
           Redo
         {:else}

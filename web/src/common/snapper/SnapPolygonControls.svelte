@@ -5,7 +5,11 @@
   export let route_tool: RouteTool;
 </script>
 
-<button disabled={$undoLength == 0} on:click={() => route_tool.undo()}>
+<button
+  disabled={$undoLength == 0}
+  on:click={() => route_tool.undo()}
+  data-tooltip="Ctrl+Z"
+>
   {#if $undoLength == 0}
     Undo
   {:else}

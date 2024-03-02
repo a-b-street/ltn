@@ -117,13 +117,18 @@
         Pick a different road
       </button>
       <div style="display: flex; justify-content: space-between;">
-        <button disabled={state.shortcutIndex == 0} on:click={prev}>
+        <button
+          disabled={state.shortcutIndex == 0}
+          on:click={prev}
+          data-tooltip="Left"
+        >
           Previous
         </button>
         {state.shortcutIndex + 1} / {state.gj.features.length}
         <button
           disabled={state.shortcutIndex == state.gj.features.length - 1}
           on:click={next}
+          data-tooltip="Right"
         >
           Next
         </button>
