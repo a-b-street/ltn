@@ -1,7 +1,18 @@
 <script lang="ts">
+  import deleteLight from "../../assets/delete_light.svg?url";
+  import deleteDark from "../../assets/delete_dark.svg?url";
+  import editLight from "../../assets/edit_light.svg?url";
+  import editDark from "../../assets/edit_dark.svg?url";
   import { Link } from "../common";
   import SplitComponent from "../SplitComponent.svelte";
-  import { app, projectName, map, mode, route_tool } from "../stores";
+  import {
+    lightMode,
+    app,
+    projectName,
+    map,
+    mode,
+    route_tool,
+  } from "../stores";
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
@@ -33,6 +44,28 @@
     projectList = getProjectList();
     await loadFromLocalStorage(key);
   }
+
+  function deleteProject(key: string) {
+    if (window.confirm(`Really delete project ${key}? You can't undo this.`)) {
+      window.localStorage.removeItem(key);
+      projectList = getProjectList();
+    }
+  }
+
+  function renameProject(key: string) {
+    let newName = window.prompt(`Rename project ${key} to what?`, key);
+    if (newName) {
+      // TODO Again, hide leading ltn_?
+      if (!newName.startsWith("ltn_")) {
+        newName = `ltn_${newName}`;
+      }
+
+      let gj = window.localStorage.getItem(key);
+      window.localStorage.setItem(newName, gj);
+      window.localStorage.removeItem(key);
+      projectList = getProjectList();
+    }
+  }
 </script>
 
 <SplitComponent>
@@ -54,10 +87,22 @@
       <p>Load a saved project:</p>
       <ul>
         {#each projectList as project}
-          <li>
+          <li style="display: flex; justify-content: space-between;">
             <Link on:click={() => loadFromLocalStorage(project)}>
               {project}
             </Link>
+            <button class="secondary" on:click={() => renameProject(project)}>
+              <img
+                src={$lightMode ? editLight : editDark}
+                alt="Rename project"
+              />
+            </button>
+            <button class="secondary" on:click={() => deleteProject(project)}>
+              <img
+                src={$lightMode ? deleteLight : deleteDark}
+                alt="Delete project"
+              />
+            </button>
           </li>
         {/each}
       </ul>
