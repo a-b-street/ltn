@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Modal, notNull } from "../common";
-  import { showAbout } from "../stores";
+  import { Modal, notNull } from "./common";
+  import { showAbout } from "./stores";
 </script>
 
 {#if $showAbout}

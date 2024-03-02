@@ -1,4 +1,5 @@
 <script lang="ts">
+  import About from "./About.svelte";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logoLight from "../assets/logo_light.svg?url";
   import logoDark from "../assets/logo_dark.svg?url";
@@ -21,6 +22,7 @@
     mapContents,
     topContents,
     map as mapStore,
+    showAbout,
     lightMode,
     mode,
     sidebarContents,
@@ -77,13 +79,16 @@
   }
 </script>
 
+<About />
 <Layout>
   <div slot="top" style="display: flex">
-    <img
-      src={$lightMode ? logoLight : logoDark}
-      style="height: 8vh; margin-right: 20px;"
-      alt="A/B Street logo"
-    />
+    <button class="outline" on:click={() => ($showAbout = true)}>
+      <img
+        src={$lightMode ? logoLight : logoDark}
+        style="height: 6vh;"
+        alt="A/B Street logo"
+      />
+    </button>
     <Settings />
     <span bind:this={topDiv} style="width: 100%" />
   </div>

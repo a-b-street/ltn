@@ -1,15 +1,7 @@
 <script lang="ts">
   import { Link } from "../common";
   import SplitComponent from "../SplitComponent.svelte";
-  import {
-    app,
-    projectName,
-    map,
-    showAbout,
-    mode,
-    route_tool,
-  } from "../stores";
-  import About from "./About.svelte";
+  import { app, projectName, map, mode, route_tool } from "../stores";
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
@@ -52,9 +44,6 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <About />
-    <button on:click={() => ($showAbout = true)}>About the LTN tool</button>
-
     {#if $map && wasmReady}
       <div>
         <Link on:click={() => ($mode = { mode: "new-project" })}>
