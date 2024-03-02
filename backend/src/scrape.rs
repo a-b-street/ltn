@@ -16,6 +16,7 @@ struct Way {
 }
 
 pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result<MapModel> {
+    info!("Parsing {} bytes of OSM data", input_bytes.len());
     let mut node_mapping = HashMap::new();
     let mut highways = Vec::new();
     let mut all_barriers: BTreeSet<NodeID> = BTreeSet::new();
@@ -65,7 +66,9 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         }
     }
 
+    info!("Splitting {} ways into edges", highways.len());
     let (mut roads, mut intersections) = split_edges(&node_mapping, highways);
+    info!("Finalizing the map model");
 
     let mut directions = BTreeMap::new();
     for r in &roads {

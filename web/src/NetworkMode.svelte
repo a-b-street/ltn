@@ -130,6 +130,8 @@
       {/each}
     </ul>
 
+    <hr />
+    <p>Current project: {$projectName}</p>
     <button on:click={exportGJ}>Export project to GeoJSON</button>
   </div>
 

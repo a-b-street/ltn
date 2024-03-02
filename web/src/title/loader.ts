@@ -20,11 +20,11 @@ export async function loadFromLocalStorage(key: string) {
   try {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
+    console.time("get OSM input");
     let buffer = await getOsmInput(gj);
+    console.timeEnd("get OSM input");
     console.time("load");
-    app.set(
-      new LTN(new Uint8Array(buffer), gj.study_area_boundary || undefined),
-    );
+    app.set(new LTN(new Uint8Array(buffer), gj.study_area_name || undefined));
     // TODO Rename savefile -> project? Or combine this call with the constructor?
     get(app)!.loadSavefile(gj);
     console.timeEnd("load");
@@ -42,10 +42,12 @@ async function getOsmInput(gj: any): Promise<ArrayBuffer> {
     let url = get(useLocalVite)
       ? `/osm/${gj.study_area_name}.pbf`
       : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
+    console.log(`Grabbing ${url}`);
     let resp = await fetch(url);
     let bytes = await resp.arrayBuffer();
     return bytes;
   } else {
+    console.log(`Grabbing from Overpass`);
     let study_area_boundary = gj.features.find(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
     )!;
