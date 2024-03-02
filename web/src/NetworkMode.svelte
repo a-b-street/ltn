@@ -102,22 +102,30 @@
     <Link on:click={newBoundary}>Draw a new boundary</Link>
     <ul>
       {#each boundaryNames as name}
-        <li style="display: flex; justify-content: space-between;">
-          <Link on:click={() => pickNeighbourhood(name)}>
-            {name}
-          </Link>
-          <button class="secondary" on:click={() => renameNeighbourhood(name)}>
-            <img
-              src={$lightMode ? editLight : editDark}
-              alt="Rename neighbourhood"
-            />
-          </button>
-          <button class="secondary" on:click={() => deleteNeighbourhood(name)}>
-            <img
-              src={$lightMode ? deleteLight : deleteDark}
-              alt="Delete neighbourhood"
-            />
-          </button>
+        <li>
+          <span style="display: flex; justify-content: space-between;">
+            <Link on:click={() => pickNeighbourhood(name)}>
+              {name}
+            </Link>
+            <button
+              class="secondary"
+              on:click={() => renameNeighbourhood(name)}
+            >
+              <img
+                src={$lightMode ? editLight : editDark}
+                alt="Rename neighbourhood"
+              />
+            </button>
+            <button
+              class="secondary"
+              on:click={() => deleteNeighbourhood(name)}
+            >
+              <img
+                src={$lightMode ? deleteLight : deleteDark}
+                alt="Delete neighbourhood"
+              />
+            </button>
+          </span>
         </li>
       {/each}
     </ul>

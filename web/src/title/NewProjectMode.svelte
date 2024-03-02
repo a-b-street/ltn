@@ -55,7 +55,9 @@
         study_area_name: example,
       }),
     );
-    loadFromLocalStorage(key);
+    msg = `Loading pre-clipped OSM area ${example}`;
+    await loadFromLocalStorage(key);
+    msg = null;
   }
 </script>
 
