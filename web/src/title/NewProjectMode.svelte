@@ -4,7 +4,14 @@
   import { Link, Loading, OverpassSelector } from "../common";
   import PolygonToolLayer from "../common/draw_polygon/PolygonToolLayer.svelte";
   import SplitComponent from "../SplitComponent.svelte";
-  import { projectName, app, map, useLocalVite, mode } from "../stores";
+  import {
+    autosave,
+    projectName,
+    app,
+    map,
+    useLocalVite,
+    mode,
+  } from "../stores";
   import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
 
   let newProjectName = "";
@@ -23,12 +30,11 @@
 
   function gotXml(e: CustomEvent<string>) {
     try {
-      // TODO Can we avoid turning into bytes?
       $app = new LTN(new TextEncoder().encode(e.detail), undefined);
-      // No savefile to load
-      // TODO Nothing will get created in local storage yet...
       $projectName = `ltn_${newProjectName}`;
       afterProjectLoaded();
+      // No savefile to load. Create it immediately with just the boundary
+      autosave();
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
