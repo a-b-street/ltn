@@ -134,6 +134,13 @@ impl LTN {
         self.map.boundaries.remove(&name);
     }
 
+    #[wasm_bindgen(js_name = renameNeighbourhoodBoundary)]
+    pub fn rename_neighbourhood_boundary(&mut self, old_name: String, new_name: String) {
+        let mut boundary_gj = self.map.boundaries.remove(&old_name).unwrap();
+        boundary_gj.set_property("name", new_name.clone());
+        self.map.boundaries.insert(new_name, boundary_gj);
+    }
+
     #[wasm_bindgen(js_name = setCurrentNeighbourhood)]
     pub fn set_current_neighbourhood(&mut self, name: String) -> Result<(), JsValue> {
         let boundary_gj = self.map.boundaries.get(&name).cloned().unwrap();

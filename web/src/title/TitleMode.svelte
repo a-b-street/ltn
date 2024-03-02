@@ -60,7 +60,7 @@
         newName = `ltn_${newName}`;
       }
 
-      let gj = window.localStorage.getItem(key);
+      let gj = window.localStorage.getItem(key)!;
       window.localStorage.setItem(newName, gj);
       window.localStorage.removeItem(key);
       projectList = getProjectList();

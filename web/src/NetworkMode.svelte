@@ -1,11 +1,15 @@
 <script lang="ts">
+  import deleteLight from "../assets/delete_light.svg?url";
+  import deleteDark from "../assets/delete_dark.svg?url";
+  import editLight from "../assets/edit_light.svg?url";
+  import editDark from "../assets/edit_dark.svg?url";
   import { downloadGeneratedFile } from "./common";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { layerId, notNull, Popup, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, autosave, mode, projectName } from "./stores";
+  import { lightMode, app, autosave, mode, projectName } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
   $: gj = JSON.parse($app!.toSavefile());
@@ -19,10 +23,25 @@
   }
 
   function deleteNeighbourhood(name: string) {
-    $app!.deleteNeighbourhoodBoundary(name);
-    autosave();
-    // TODO Improve perf, don't call this twice
-    gj = JSON.parse($app!.toSavefile());
+    if (
+      window.confirm(
+        `Really delete neighbourhood ${name}? You can't undo this.`,
+      )
+    ) {
+      $app!.deleteNeighbourhoodBoundary(name);
+      autosave();
+      // TODO Improve perf, don't call this twice
+      gj = JSON.parse($app!.toSavefile());
+    }
+  }
+
+  function renameNeighbourhood(name: string) {
+    let newName = window.prompt(`Rename neighbourhood ${name} to what?`, name);
+    if (newName) {
+      $app!.renameNeighbourhoodBoundary(name, newName);
+      autosave();
+      gj = JSON.parse($app!.toSavefile());
+    }
   }
 
   function newBoundary() {
@@ -83,18 +102,22 @@
     <Link on:click={newBoundary}>Draw a new boundary</Link>
     <ul>
       {#each boundaryNames as name}
-        <li>
-          <span style="display: flex; justify-content: space-between;">
-            <Link on:click={() => pickNeighbourhood(name)}>
-              {name}
-            </Link>
-            <button
-              class="secondary outline"
-              on:click={() => deleteNeighbourhood(name)}
-            >
-              X
-            </button>
-          </span>
+        <li style="display: flex; justify-content: space-between;">
+          <Link on:click={() => pickNeighbourhood(name)}>
+            {name}
+          </Link>
+          <button class="secondary" on:click={() => renameNeighbourhood(name)}>
+            <img
+              src={$lightMode ? editLight : editDark}
+              alt="Rename neighbourhood"
+            />
+          </button>
+          <button class="secondary" on:click={() => deleteNeighbourhood(name)}>
+            <img
+              src={$lightMode ? deleteLight : deleteDark}
+              alt="Delete neighbourhood"
+            />
+          </button>
         </li>
       {/each}
     </ul>
