@@ -109,6 +109,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
 
         router_original: None,
         router_current: None,
+        router_original_with_penalty: None,
 
         original_modal_filters: BTreeMap::new(),
         modal_filters: BTreeMap::new(),
@@ -131,11 +132,13 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     map.undo_stack.clear();
     map.redo_queue.clear();
 
+    let main_road_penalty = 1.0;
     map.router_original = Some(Router::new(
         &map.roads,
         &map.intersections,
         &map.modal_filters,
         &map.directions,
+        main_road_penalty,
     ));
 
     Ok(map)

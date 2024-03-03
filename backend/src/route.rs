@@ -9,11 +9,13 @@ use crate::{
     Direction, Intersection, IntersectionID, MapModel, ModalFilter, NodeMap, Road, RoadID,
 };
 
+// For vehicles only
 #[derive(Clone)]
 pub struct Router {
     ch: FastGraph,
     node_map: NodeMap<IntersectionID>,
     closest_intersection: RTree<IntersectionLocation>,
+    pub main_road_penalty: f64,
 }
 
 // fast_paths ID representing the IntersectionID as the data
@@ -25,6 +27,7 @@ impl Router {
         intersections: &Vec<Intersection>,
         modal_filters: &BTreeMap<RoadID, ModalFilter>,
         directions: &BTreeMap<RoadID, Direction>,
+        main_road_penalty: f64,
     ) -> Self {
         let mut input_graph = InputGraph::new();
         let mut node_map = NodeMap::new();
@@ -40,7 +43,26 @@ impl Router {
 
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
-            let cost = (road.length() * 100.0) as usize;
+            let penalty = if road.tags.is_any(
+                "highway",
+                vec![
+                    "motorway",
+                    "motorway_link",
+                    "trunk",
+                    "trunk_link",
+                    "primary",
+                    "primary_link",
+                    "secondary",
+                    "secondary_link",
+                    "tertiary",
+                    "tertiary_link",
+                ],
+            ) {
+                main_road_penalty
+            } else {
+                1.0
+            };
+            let cost = (penalty * road.length() * 100.0) as usize;
             match directions[&road.id] {
                 Direction::Forwards => {
                     input_graph.add_edge(i1, i2, cost);
@@ -69,6 +91,7 @@ impl Router {
             ch,
             node_map,
             closest_intersection,
+            main_road_penalty,
         }
     }
 

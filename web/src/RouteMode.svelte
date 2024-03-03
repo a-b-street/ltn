@@ -5,7 +5,7 @@
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
-  import { app, mode, route_pt_a, route_pt_b } from "./stores";
+  import { app, mode, route_pt_a, route_pt_b, mainRoadPenalty } from "./stores";
 
   export let prevMode: "network" | "neighbourhood";
 
@@ -15,6 +15,7 @@
       $route_pt_a.lat,
       $route_pt_b.lng,
       $route_pt_b.lat,
+      $mainRoadPenalty,
     ),
   );
 
@@ -57,6 +58,21 @@
       ,
       <span style="color: blue">route after</span>
     </p>
+
+    <label>
+      Slow-down factor for main roads: {$mainRoadPenalty}
+      <input
+        type="range"
+        bind:value={$mainRoadPenalty}
+        min="1.0"
+        max="5.0"
+        step="0.1"
+      />
+    </label>
+    <i>
+      Increase to see how drivers may detour in heavy traffic. 1 means
+      free-flow.
+    </i>
   </div>
 
   <div slot="map">

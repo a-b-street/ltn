@@ -235,10 +235,20 @@ impl LTN {
 
     /// Returns GJ with two LineStrings, before and after
     #[wasm_bindgen(js_name = compareRoute)]
-    pub fn compare_route(&mut self, x1: f64, y1: f64, x2: f64, y2: f64) -> Result<String, JsValue> {
+    pub fn compare_route(
+        &mut self,
+        x1: f64,
+        y1: f64,
+        x2: f64,
+        y2: f64,
+        main_road_penalty: f64,
+    ) -> Result<String, JsValue> {
         let pt1 = self.map.mercator.pt_to_mercator(Coord { x: x1, y: y1 });
         let pt2 = self.map.mercator.pt_to_mercator(Coord { x: x2, y: y2 });
-        Ok(serde_json::to_string(&self.map.compare_route(pt1, pt2)).map_err(err_to_js)?)
+        Ok(
+            serde_json::to_string(&self.map.compare_route(pt1, pt2, main_road_penalty))
+                .map_err(err_to_js)?,
+        )
     }
 
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to

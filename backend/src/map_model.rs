@@ -22,8 +22,10 @@ pub struct MapModel {
     // TODO Wasteful, can share some
     // This is guaranteed to exist, only Option during MapModel::new internals
     pub router_original: Option<Router>,
-    // Calculated lazily
+    // Calculated lazily. Changes with edits and main_road_penalty.
     pub router_current: Option<Router>,
+    // Calculated lazily. No edits, just main_road_penalty.
+    pub router_original_with_penalty: Option<Router>,
 
     // Just from the basemap, existing filters
     pub original_modal_filters: BTreeMap<RoadID, ModalFilter>,
@@ -412,18 +414,43 @@ impl MapModel {
     }
 
     // Lazily builds the router if needed.
-    pub fn compare_route(&mut self, pt1: Coord, pt2: Coord) -> GeoJson {
-        if self.router_current.is_none() {
+    pub fn compare_route(&mut self, pt1: Coord, pt2: Coord, main_road_penalty: f64) -> GeoJson {
+        if self
+            .router_current
+            .as_ref()
+            .map(|r| r.main_road_penalty != main_road_penalty)
+            .unwrap_or(true)
+        {
             self.router_current = Some(Router::new(
                 &self.roads,
                 &self.intersections,
                 &self.modal_filters,
                 &self.directions,
+                main_road_penalty,
+            ));
+        }
+        if self
+            .router_original_with_penalty
+            .as_ref()
+            .map(|r| r.main_road_penalty != main_road_penalty)
+            .unwrap_or(true)
+        {
+            self.router_original_with_penalty = Some(Router::new(
+                &self.roads,
+                &self.intersections,
+                &self.original_modal_filters,
+                &self.original_directions(),
+                main_road_penalty,
             ));
         }
 
         let mut features = Vec::new();
-        if let Some(linestring) = self.router_original.as_ref().unwrap().route(self, pt1, pt2) {
+        if let Some(linestring) = self
+            .router_original_with_penalty
+            .as_ref()
+            .unwrap()
+            .route(self, pt1, pt2)
+        {
             let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
             f.set_property("kind", "before");
             features.push(f);
@@ -449,6 +476,14 @@ impl MapModel {
             ]),
             vec![boundary],
         )
+    }
+
+    fn original_directions(&self) -> BTreeMap<RoadID, Direction> {
+        let mut directions = BTreeMap::new();
+        for r in &self.roads {
+            directions.insert(r.id, Direction::from_osm(&r.tags));
+        }
+        directions
     }
 }
 
