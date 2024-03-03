@@ -9,7 +9,14 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { Geocoder, Layout, layerId } from "./common";
+  import {
+    DisableInteractiveLayers,
+    Geocoder,
+    Layout,
+    layerId,
+    StreetView,
+    notNull,
+  } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import DebugGJ from "./DebugGJ.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
@@ -101,6 +108,7 @@
       <button class="secondary" on:click={zoomToFit}>
         Zoom to fit study area
       </button>
+      <StreetView map={notNull($mapStore)} maptilerBasemap={$maptilerBasemap} />
     {/if}
   </div>
   <div slot="main" style="position: relative; width: 100%; height: 100%;">
@@ -166,6 +174,7 @@
           <DebugGJ />
         {/if}
       {/if}
+      <DisableInteractiveLayers />
     </MapLibre>
   </div>
 </Layout>
