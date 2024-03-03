@@ -42,6 +42,11 @@
   let gjInput: FeatureCollection;
   $: rerender($mutationCounter);
 
+  $: numDisconnectedCells = gjInput.features.filter(
+    (f) =>
+      f.properties!.kind == "cell" && f.properties!.cell_color == "disconnected",
+  ).length;
+
   $map!.on("click", onClick);
   onDestroy(() => {
     $map!.off("click", onClick);
@@ -190,6 +195,13 @@
         you've drawn.
       </p>
     </details>
+
+    {#if numDisconnectedCells > 0}
+      <mark>
+        Some parts of the neighbourhood aren't reachable by drivers, shown in
+        red
+      </mark>
+    {/if}
 
     <div style="display: flex; justify-content: space-between;">
       <button
