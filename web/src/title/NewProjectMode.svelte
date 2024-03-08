@@ -102,12 +102,14 @@
 
       <i>or...</i>
 
-      <OverpassSelector
-        map={$map}
-        on:gotXml={gotXml}
-        on:loading={(e) => (msg = e.detail)}
-        on:error={(e) => window.alert(e.detail)}
-      />
+      <div>
+        <OverpassSelector
+          map={$map}
+          on:gotXml={gotXml}
+          on:loading={(e) => (msg = e.detail)}
+          on:error={(e) => window.alert(e.detail)}
+        />
+      </div>
     {/if}
   </div>
 

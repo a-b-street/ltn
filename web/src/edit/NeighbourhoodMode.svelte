@@ -44,7 +44,8 @@
 
   $: numDisconnectedCells = gjInput.features.filter(
     (f) =>
-      f.properties!.kind == "cell" && f.properties!.cell_color == "disconnected",
+      f.properties!.kind == "cell" &&
+      f.properties!.cell_color == "disconnected",
   ).length;
 
   $map!.on("click", onClick);

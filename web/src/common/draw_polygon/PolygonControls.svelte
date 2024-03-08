@@ -1,17 +1,22 @@
 <script lang="ts">
+  import { Link } from "../";
   import { PolygonTool } from "./polygon_tool";
   import { undoLength } from "./stores";
 
   export let polygonTool: PolygonTool;
 </script>
 
-<button disabled={$undoLength == 0} on:click={() => polygonTool.undo()}>
-  {#if $undoLength == 0}
-    Undo
-  {:else}
-    Undo ({$undoLength})
-  {/if}
-</button>
+<div style="display: flex; justify-content: space-between;">
+  <Link on:click={() => polygonTool.finish()}>Finish</Link>
+  <Link on:click={() => polygonTool.cancel()}>Cancel</Link>
+  <button disabled={$undoLength == 0} on:click={() => polygonTool.undo()}>
+    {#if $undoLength == 0}
+      Undo
+    {:else}
+      Undo ({$undoLength})
+    {/if}
+  </button>
+</div>
 
 <ul>
   <li>
