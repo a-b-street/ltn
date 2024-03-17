@@ -30,7 +30,7 @@
   "dependencies": {
     "@maptiler/geocoding-control": "^1.2.2",
     "@picocss/pico": "^2.0.3",
-    "@turf/nearest-point-on-line": "^6.5.0",
+    "maplibre-draw-polygon": "github:dabreegster/maplibre-draw-polygon",
     "route-snapper": "^0.4.0",
     "svelte-maplibre": "^0.8.2"
   }

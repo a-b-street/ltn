@@ -3,8 +3,7 @@
   import type { LngLat, Map } from "maplibre-gl";
   import { createEventDispatcher } from "svelte";
   import { overpassQueryForPolygon } from "./";
-  import { PolygonTool } from "./draw_polygon/polygon_tool";
-  import PolygonControls from "./draw_polygon/PolygonControls.svelte";
+  import { PolygonTool, PolygonControls } from "maplibre-draw-polygon";
 
   export let map: Map | null;
 
