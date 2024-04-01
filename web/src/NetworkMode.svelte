@@ -55,6 +55,13 @@
     downloadGeneratedFile($projectName + ".geojson", $app!.toSavefile());
   }
 
+  function debugRouteSnapper() {
+    downloadGeneratedFile(
+      "debug_route_snapper.geojson",
+      $app!.toRouteSnapperGj(),
+    );
+  }
+
   // TODO Hover on button and highlight on map
 </script>
 
@@ -77,11 +84,6 @@
             on:click={() => ($mode = { mode: "route", prevMode: "network" })}
           >
             Route
-          </Link>
-        </li>
-        <li>
-          <Link on:click={() => ($mode = { mode: "debug-gj" })}>
-            Debug route snapper
           </Link>
         </li>
       </ul>
@@ -136,6 +138,9 @@
     <hr />
     <p>Current project: {$projectName}</p>
     <button on:click={exportGJ}>Export project to GeoJSON</button>
+    <button class="secondary" on:click={debugRouteSnapper}>
+      Debug route-snapper
+    </button>
   </div>
 
   <div slot="map">

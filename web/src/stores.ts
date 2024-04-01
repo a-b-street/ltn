@@ -33,9 +33,6 @@ export type Mode =
     }
   | {
       mode: "debug";
-    }
-  | {
-      mode: "debug-gj";
     };
 
 export let map: Writable<Map | null> = writable(null);
