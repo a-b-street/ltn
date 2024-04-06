@@ -32,6 +32,6 @@
     "@picocss/pico": "^2.0.3",
     "maplibre-draw-polygon": "github:dabreegster/maplibre-draw-polygon",
     "route-snapper": "^0.4.0",
-    "svelte-maplibre": "^0.8.2"
+    "svelte-maplibre": "^0.8.3"
   }
 }
