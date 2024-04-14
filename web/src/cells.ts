@@ -1,7 +1,9 @@
-import type { FeatureCollection } from "geojson";
+import type { RenderNeighbourhoodOutput } from "./wasm";
 
 // Sets a 'color' property on any cell polygons. Idempotent.
-export function setCellColors(gj: FeatureCollection): FeatureCollection {
+export function setCellColors(
+  gj: RenderNeighbourhoodOutput,
+): RenderNeighbourhoodOutput {
   // A qualitative palette from colorbrewer2.org, skipping the red hue (used
   // for levels of shortcutting) and grey (too close to the basemap)
   let cell_colors = [
@@ -18,10 +20,12 @@ export function setCellColors(gj: FeatureCollection): FeatureCollection {
   ];
 
   for (let f of gj.features) {
-    f.properties ??= {};
+    if (f.properties.kind != "cell") {
+      continue;
+    }
     if (f.properties.cell_color == "disconnected") {
       f.properties.color = "red";
-    } else if (Object.hasOwn(f.properties, "cell_color")) {
+    } else {
       f.properties.color =
         cell_colors[f.properties.cell_color % cell_colors.length];
     }

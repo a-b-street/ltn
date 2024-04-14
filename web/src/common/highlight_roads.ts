@@ -37,7 +37,7 @@ export function getRoadLayerNames(map: Map, maptilerStyle: string): string[] {
     return (
       map
         .getStyle()
-        // @ts-ignore It does exist
+        // @ts-expect-error It does exist
         .layers.filter((layer) => layer["source-layer"] == "roads")
         .map((layer) => layer.id)
     );

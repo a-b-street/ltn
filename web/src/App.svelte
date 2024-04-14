@@ -117,7 +117,7 @@
       hash
       bind:map
       on:error={(e) => {
-        // @ts-ignore ErrorEvent isn't exported
+        // @ts-expect-error ErrorEvent isn't exported
         console.log(e.detail.error);
       }}
       images={[

@@ -1,10 +1,6 @@
 <script lang="ts">
-  import type {
-    Feature,
-    FeatureCollection,
-    LineString,
-    Polygon,
-  } from "geojson";
+  import type { RenderNeighbourhoodOutput } from "../wasm";
+  import type { Feature, LineString, Polygon } from "geojson";
   import type { MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
@@ -37,15 +33,14 @@
   let settingFilterType = false;
   let undoLength = 0;
   let redoLength = 0;
-  let boundary: Feature<Polygon> | null;
+  let boundary: Feature<Polygon, { name: string }> | null;
 
-  let gjInput: FeatureCollection;
+  let gjInput: RenderNeighbourhoodOutput;
   $: rerender($mutationCounter);
 
   $: numDisconnectedCells = gjInput.features.filter(
     (f) =>
-      f.properties!.kind == "cell" &&
-      f.properties!.cell_color == "disconnected",
+      f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
   ).length;
 
   $map!.on("click", onClick);
@@ -56,13 +51,10 @@
 
   function rerender(_x: number) {
     gjInput = JSON.parse($app!.renderNeighbourhood());
-    boundary = gjInput.features.find(
-      (f) => f.properties!.kind == "boundary",
-    )! as Feature<Polygon>;
+    // @ts-expect-error TS can't figure out that we're narrowing the case here
+    boundary = gjInput.features.find((f) => f.properties.kind == "boundary")!;
 
-    // @ts-ignore These foreign members exist
     undoLength = gjInput.undo_length;
-    // @ts-ignore These foreign members exist
     redoLength = gjInput.redo_length;
 
     autosave();
@@ -168,7 +160,7 @@
             on:click={() =>
               ($mode = {
                 mode: "set-boundary",
-                name: notNull(notNull(boundary).properties).name,
+                name: notNull(boundary).properties.name,
                 existing: boundary,
               })}
           >
@@ -183,7 +175,7 @@
   </div>
   <div slot="sidebar">
     <p>
-      Editing neighbourhood <u>{notNull(notNull(boundary).properties).name}</u>
+      Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
     </p>
 
     <details>

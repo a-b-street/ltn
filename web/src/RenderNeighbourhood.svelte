@@ -1,18 +1,21 @@
 <script lang="ts">
+  import type { RenderNeighbourhoodOutput } from "./wasm";
   import OneWayLayer from "./OneWayLayer.svelte";
-  import type { Feature, FeatureCollection } from "geojson";
+  import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import { setCellColors } from "./cells";
   import { layerId } from "./common";
 
-  export let gjInput: FeatureCollection;
+  export let gjInput: RenderNeighbourhoodOutput;
   // When disabled, can't click lines or filters, no slots, no hoverCursor
   export let interactive = true;
   export let onClickLine = (f: Feature) => {};
 
   $: gj = setCellColors(gjInput);
   $: maxShortcuts = Math.max(
-    ...gjInput.features.map((f) => f.properties!.shortcuts ?? 0),
+    ...gjInput.features.map((f) =>
+      f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
+    ),
   );
 </script>
 
