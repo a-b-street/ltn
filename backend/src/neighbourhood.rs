@@ -2,12 +2,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    BooleanOps, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
-    LineLocatePoint, LineString, MultiLineString, Point, Polygon,
+    Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
+    LineLocatePoint, LineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
 
+use crate::geo_helpers::clip_linestring_to_polygon;
 use crate::render_cells::Color;
 use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
@@ -173,6 +174,7 @@ enum LineInPolygon {
 }
 
 fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon {
+    // TODO Reconsider rewriting all of this logic based on clip_linestring_to_polygon
     if polygon.contains(linestring) {
         return double_check_line_in_polygon(linestring, polygon);
     }
@@ -182,13 +184,15 @@ fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon 
     }
 
     // Clip the linestring to the polygon
-    let invert = false;
-    let clipped = polygon.clip(&MultiLineString::from(linestring.clone()), invert);
-    // How much of the clipped linestring is inside the boundary? If it's nearly 1,
-    // then this road is interior.
-    // Round to make diffs less noisy.
-    let percent =
-        (clipped.euclidean_length() / linestring.euclidean_length() * 10e3).round() / 10e3;
+    // Multiple segments generally don't happen, but might right on a boundary
+    let mut sum = 0.0;
+    for clipped in clip_linestring_to_polygon(linestring, polygon) {
+        sum += clipped.euclidean_length();
+    }
+
+    // How much of the clipped linestring is inside the boundary? If it's nearly 1, then this
+    // road is interior. Round to make diffs less noisy.
+    let percent = (sum / linestring.euclidean_length() * 10e3).round() / 10e3;
     if percent <= 0.99 {
         return LineInPolygon::Crosses { percent };
     }

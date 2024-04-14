@@ -22,6 +22,7 @@ use self::shortcuts::Shortcuts;
 
 mod cells;
 mod common;
+mod geo_helpers;
 mod map_model;
 mod neighbourhood;
 mod render_cells;

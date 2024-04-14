@@ -3,12 +3,13 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    Closest, ClosestPoint, Coord, EuclideanLength, Intersects, Line, LineInterpolatePoint,
-    LineIntersection, LineLocatePoint, LineString, Point, Polygon,
+    Closest, ClosestPoint, Coord, EuclideanLength, Line, LineInterpolatePoint, LineLocatePoint,
+    LineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Serialize;
 
+use crate::geo_helpers::linestring_intersection;
 use crate::{Mercator, Router, Tags};
 
 pub struct MapModel {
@@ -583,27 +584,6 @@ pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
     SetDirection(RoadID, Direction),
     Multiple(Vec<Command>),
-}
-
-// Looks for the first place ls2 crosses ls1. Returns the percent_along ls1 of that point.
-fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64> {
-    if !ls1.intersects(ls2) {
-        return None;
-    }
-    // TODO Urgh very brute force
-    // TODO Could use https://docs.rs/geo/latest/geo/algorithm/sweep/struct.Intersections.html, but
-    // not sure about the order, so we'd do line_locate_point for everything and take the min
-    for line1 in ls1.lines() {
-        for line2 in ls2.lines() {
-            if let Some(LineIntersection::SinglePoint { intersection, .. }) =
-                geo::algorithm::line_intersection::line_intersection(line1, line2)
-            {
-                return ls1.line_locate_point(&intersection.into());
-            }
-        }
-    }
-    // TODO Didn't find it...
-    None
 }
 
 fn get_str_prop<'a>(f: &'a Feature, key: &str) -> Result<&'a str> {

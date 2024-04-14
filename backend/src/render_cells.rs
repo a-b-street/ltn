@@ -351,6 +351,7 @@ impl<T: Copy> Grid<T> {
 }
 
 // TODO Bring in that geo PR
+// TODO use it here
 fn slice_linestring(linestring: &LineString, start: f64, end: f64) -> Option<LineString> {
     Some(linestring.clone())
 }
