@@ -17,6 +17,12 @@
   }
 </script>
 
-<Popup {openOn} let:features>
+<Popup {openOn} let:features popupClass="popup">
   <slot props={getProperties(features)} />
 </Popup>
+
+<style>
+  :global(.popup .maplibregl-popup-content) {
+    background-color: var(--pico-background-color);
+  }
+</style>

@@ -2,7 +2,12 @@
   import type { RenderNeighbourhoodOutput } from "./wasm";
   import OneWayLayer from "./OneWayLayer.svelte";
   import type { Feature } from "geojson";
-  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import {
+    hoverStateFilter,
+    FillLayer,
+    GeoJSON,
+    LineLayer,
+  } from "svelte-maplibre";
   import { setCellColors } from "./cells";
   import { layerId } from "./common";
 
@@ -33,20 +38,25 @@
     {...layerId("interior-roads")}
     filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
-      "line-width": 5,
-      "line-color": [
-        "interpolate-hcl",
-        ["linear"],
-        ["get", "shortcuts"],
-        0,
-        "white",
-        1,
-        "#F19A93",
-        maxShortcuts,
-        "#A32015",
-      ],
+      "line-width": 10,
+      "line-color": hoverStateFilter(
+        [
+          "interpolate-hcl",
+          ["linear"],
+          ["get", "shortcuts"],
+          0,
+          "white",
+          1,
+          "#F19A93",
+          maxShortcuts,
+          "#A32015",
+        ],
+        "blue",
+      ),
+      "line-opacity": hoverStateFilter(1.0, 0.5),
     }}
     on:click={(e) => interactive && onClickLine(e.detail.features[0])}
+    manageHoverState={interactive}
     hoverCursor={interactive ? "pointer" : undefined}
   >
     {#if interactive}
