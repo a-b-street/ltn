@@ -257,7 +257,14 @@
             {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
           </p>
           {#if action == "filter"}
-            <p>Click to add modal filter</p>
+            <div>
+              <img
+                src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+                width="20"
+                alt="Add modal filter"
+              />
+              Click to add modal filter
+            </div>
           {:else}
             <p>Click to change direction</p>
           {/if}
