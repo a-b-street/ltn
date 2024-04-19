@@ -186,7 +186,9 @@ fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon 
     let clipped = polygon.clip(&MultiLineString::from(linestring.clone()), invert);
     // How much of the clipped linestring is inside the boundary? If it's nearly 1,
     // then this road is interior.
-    let percent = clipped.euclidean_length() / linestring.euclidean_length();
+    // Round to make diffs less noisy.
+    let percent =
+        (clipped.euclidean_length() / linestring.euclidean_length() * 10e3).round() / 10e3;
     if percent <= 0.99 {
         return LineInPolygon::Crosses { percent };
     }
