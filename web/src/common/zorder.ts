@@ -94,6 +94,7 @@ const layerZorder = [
   "modal-filters",
 
   "boundary",
+  "neighbourhood-boundary",
 
   "freehand-line",
 
