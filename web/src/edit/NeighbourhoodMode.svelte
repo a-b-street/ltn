@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { RenderNeighbourhoodOutput } from "../wasm";
   import type { Feature, LineString, Polygon } from "geojson";
-  import type { MapMouseEvent } from "maplibre-gl";
+  import type { LngLat } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
   import { notNull, Popup, Link } from "../common";
@@ -43,9 +43,7 @@
       f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
   ).length;
 
-  $map!.on("click", onClick);
   onDestroy(() => {
-    $map!.off("click", onClick);
     $map!.doubleClickZoom.enable();
   });
 
@@ -60,15 +58,11 @@
     autosave();
   }
 
-  function onClick(e: MapMouseEvent) {
+  function onClickLine(f: Feature, pt: LngLat) {
     if (action == "filter") {
-      $app!.addModalFilter(e.lngLat, $filterType);
+      $app!.addModalFilter(pt, $filterType);
       $mutationCounter++;
-    }
-  }
-
-  function onClickLine(f: Feature) {
-    if (action == "oneway") {
+    } else if (action == "oneway") {
       $app!.toggleDirection(f.properties!.road);
       $mutationCounter++;
     }
@@ -254,7 +248,7 @@
   <div slot="map">
     <RenderNeighbourhood
       {gjInput}
-      interactive={action == "oneway"}
+      interactive={action == "filter" || action == "oneway"}
       {onClickLine}
     >
       <div slot="line-popup">
@@ -262,7 +256,9 @@
           <p>
             {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
           </p>
-          {#if action == "oneway"}
+          {#if action == "filter"}
+            <p>Click to add modal filter</p>
+          {:else}
             <p>Click to change direction</p>
           {/if}
         </Popup>

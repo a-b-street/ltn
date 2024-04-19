@@ -4,6 +4,7 @@
   import type { Feature, FeatureCollection } from "geojson";
   import { onDestroy, onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import type { LngLat } from "maplibre-gl";
   import { layerId, notNull, Popup, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
@@ -22,7 +23,7 @@
       };
   let state: State = { state: "neutral" };
 
-  function choseRoad(roadGj: Feature) {
+  function choseRoad(roadGj: Feature, _: LngLat) {
     let gj = JSON.parse($app!.getShortcutsCrossingRoad(roadGj.properties!.id));
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");

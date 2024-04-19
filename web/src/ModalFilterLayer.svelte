@@ -5,6 +5,8 @@
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj = $mutationCounter > 0 ? JSON.parse($app!.renderModalFilters()) : null;
+
+  // TODO Maybe need eventsIfTopMost to delete, when cursor is also on line
 </script>
 
 <GeoJSON data={gj} generateId>

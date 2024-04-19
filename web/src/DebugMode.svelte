@@ -39,7 +39,7 @@
     <RenderNeighbourhood
       gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
       interactive
-      onClickLine={(f) => window.open(notNull(f.properties).way, "_blank")}
+      onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
     >
       <div slot="line-popup">
         <Popup openOn="hover" let:props>
