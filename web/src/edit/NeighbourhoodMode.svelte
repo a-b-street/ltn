@@ -18,6 +18,7 @@
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
   import ModalFilterLayer from "../ModalFilterLayer.svelte";
+  import AnimatePaths from "../AnimatePaths.svelte";
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
@@ -36,6 +37,7 @@
   let boundary: Feature<Polygon, { name: string }> | null;
 
   let gjInput: RenderNeighbourhoodOutput;
+  let allShortcuts = JSON.parse($app!.getAllShortcuts());
   $: rerender($mutationCounter);
 
   $: numDisconnectedCells = gjInput.features.filter(
@@ -54,6 +56,8 @@
 
     undoLength = gjInput.undo_length;
     redoLength = gjInput.redo_length;
+
+    allShortcuts = JSON.parse($app!.getAllShortcuts());
 
     autosave();
   }
@@ -271,6 +275,7 @@
         </Popup>
       </div>
     </RenderNeighbourhood>
+    <AnimatePaths paths={allShortcuts} />
     <ModalFilterLayer on:click={deleteFilter}>
       <Popup openOn="hover">Click to delete</Popup>
     </ModalFilterLayer>
