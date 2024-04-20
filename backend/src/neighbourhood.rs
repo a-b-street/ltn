@@ -158,12 +158,28 @@ impl Neighbourhood {
                 serde_json::json!({
                     "undo_length": map.undo_stack.len(),
                     "redo_length": map.redo_queue.len(),
+                    // TODO why not max shortcuts here?
                 })
                 .as_object()
                 .unwrap()
                 .clone(),
             ),
         }
+    }
+
+    pub fn get_shortcut_list(&self) -> Vec<usize> {
+        let derived = self.derived.as_ref().unwrap();
+        self.interior_roads
+            .iter()
+            .map(|r| {
+                derived
+                    .shortcuts
+                    .count_per_road
+                    .get(r)
+                    .cloned()
+                    .unwrap_or(0)
+            })
+            .collect()
     }
 }
 

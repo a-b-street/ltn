@@ -116,6 +116,11 @@ impl LTN {
         )
     }
 
+    #[wasm_bindgen(js_name = getShortcutList)]
+    pub fn get_shortcut_list(&self) -> Vec<usize> {
+        self.neighbourhood.as_ref().unwrap().get_shortcut_list()
+    }
+
     /// Takes a name and boundary GJ polygon
     #[wasm_bindgen(js_name = setNeighbourhoodBoundary)]
     pub fn set_neighbourhood_boundary(

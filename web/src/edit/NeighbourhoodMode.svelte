@@ -55,6 +55,23 @@
     undoLength = gjInput.undo_length;
     redoLength = gjInput.redo_length;
 
+    if ($map.getSource("render-nhood")) {
+      console.log("changing feature state");
+      let shortcuts = $app!.getShortcutList();
+      for (let [idx, value] of shortcuts.entries()) {
+        //console.log(`confirming ${idx} is ${value}... ${gjInput.features[idx + 1].properties.shortcuts}`);
+        $map.setFeatureState(
+          {
+            id: idx + 1,
+            source: "render-nhood",
+          },
+          { cuts: value },
+        );
+      }
+    } else {
+      console.log("source not there yet, hang on");
+    }
+
     autosave();
   }
 

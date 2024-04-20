@@ -29,7 +29,7 @@
     [
       "interpolate-hcl",
       ["linear"],
-      ["get", "shortcuts"],
+      ["feature-state", "cuts"],
       0,
       "white",
       1,
@@ -67,7 +67,7 @@
   }
 </script>
 
-<GeoJSON data={gj} generateId>
+<GeoJSON data={gj} generateId id="render-nhood">
   <GeoJSON data={invertBoundary(gj)}>
     <FillLayer
       {...layerId("neighbourhood-boundary")}
@@ -90,6 +90,9 @@
     paint={{
       "line-width": 10,
       "line-color": lineColor,
+      "line-color-transition": {
+        delay: 600,
+      },
       "line-opacity": hoverStateFilter(1.0, 0.5),
     }}
     on:click={(e) =>
