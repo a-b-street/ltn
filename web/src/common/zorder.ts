@@ -91,6 +91,8 @@ const layerZorder = [
   // MapTiler basemap
   "Road labels",
 
+  "animate-shortcuts",
+
   "modal-filters",
 
   "boundary",

@@ -218,6 +218,18 @@ impl LTN {
         .map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = getAllShortcuts)]
+    pub fn get_all_shortcuts(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&GeoJson::from(
+            Shortcuts::new(&self.map, self.neighbourhood.as_ref().unwrap())
+                .paths
+                .into_iter()
+                .map(|path| path.to_gj(&self.map))
+                .collect::<Vec<_>>(),
+        ))
+        .map_err(err_to_js)?)
+    }
+
     /// GJ with modal filters and named boundaries. This is meant for savefiles, so existing
     /// filters aren't included (and deletions of existing are included)
     #[wasm_bindgen(js_name = toSavefile)]
