@@ -120,10 +120,12 @@ impl Path {
                 pts.extend(rev);
             }
         }
-        let mut f = Feature::from(Geometry::from(
-            &map.mercator.to_wgs84(&LineString::new(pts)),
-        ));
+        let linestring = LineString::new(pts);
+
+        let length = linestring.euclidean_length();
+        let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&linestring)));
         f.set_property("directness", self.directness);
+        f.set_property("length_meters", length);
         f
     }
 }
