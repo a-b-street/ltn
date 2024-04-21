@@ -1,12 +1,15 @@
 <script lang="ts">
-  import turfLength from "@turf/length";
   import along from "@turf/along";
   import { layerId } from "./common";
   import type { FeatureCollection, LineString } from "geojson";
   import { GeoJSON, CircleLayer } from "svelte-maplibre";
   import { onDestroy } from "svelte";
 
-  export let paths: FeatureCollection<LineString, { directness: number }>;
+  export let paths: FeatureCollection<
+    LineString,
+    { directness: number; length_meters: number }
+  >;
+
   let totalDirectness = sumWeights();
 
   let numDots = 50;
@@ -15,7 +18,6 @@
 
   interface Dot {
     idx: number;
-    length: number;
     distance: number;
   }
 
@@ -53,7 +55,6 @@
       if (rand < cumulativeWeight) {
         return {
           idx,
-          length: turfLength(path, { units: "kilometers" }),
           distance: 0,
         };
       }
@@ -75,7 +76,10 @@
   function animate() {
     for (let [idx, dot] of dots.entries()) {
       dot.distance += stepKm;
-      if (dot.distance >= dot.length) {
+      if (
+        dot.distance >=
+        paths.features[dot.idx].properties.length_meters / 1000
+      ) {
         dots[idx] = startDot();
       }
     }

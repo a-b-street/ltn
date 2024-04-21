@@ -31,7 +31,6 @@
     "@maptiler/geocoding-control": "^1.2.2",
     "@picocss/pico": "^2.0.3",
     "@turf/along": "^6.5.0",
-    "@turf/length": "^6.5.0",
     "maplibre-draw-polygon": "github:dabreegster/maplibre-draw-polygon",
     "route-snapper": "^0.4.0",
     "svelte-maplibre": "^0.8.3"
