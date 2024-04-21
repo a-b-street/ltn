@@ -6,9 +6,9 @@
   import { GeoJSON, CircleLayer } from "svelte-maplibre";
   import { onDestroy } from "svelte";
 
-  export let paths: FeatureCollection<LineString>;
+  export let paths: FeatureCollection<LineString, { directness: number }>;
+  let totalDirectness = sumWeights();
 
-  // TODO Decrease based on number of paths with high directness
   let numDots = 50;
   let redrawMs = 100;
   let stepKm = 0.01;
@@ -23,11 +23,19 @@
   let gj = redraw();
 
   $: if (paths) {
+    totalDirectness = sumWeights();
     dots = makeDots();
   }
 
   let intervalId = setInterval(animate, redrawMs);
   onDestroy(() => clearInterval(intervalId));
+
+  function sumWeights(): number {
+    // Small directness is better, so invert
+    return paths.features
+      .map((f) => 1 / f.properties.directness)
+      .reduce((t, n) => t + n, 0);
+  }
 
   function makeDots(): Dot[] {
     if (paths.features.length == 0) {
@@ -37,12 +45,20 @@
   }
 
   function startDot(): Dot {
-    let idx = Math.floor(Math.random() * paths.features.length);
-    return {
-      idx,
-      length: turfLength(paths.features[idx], { units: "kilometers" }),
-      distance: 0,
-    };
+    // Weighted random sample
+    let rand = Math.random() * totalDirectness;
+    let cumulativeWeight = 0;
+    for (let [idx, path] of paths.features.entries()) {
+      cumulativeWeight += 1 / path.properties.directness;
+      if (rand < cumulativeWeight) {
+        return {
+          idx,
+          length: turfLength(path, { units: "kilometers" }),
+          distance: 0,
+        };
+      }
+    }
+    throw new Error(`didnt pick dot, totalDirectness is ${totalDirectness}`);
   }
 
   function redraw(): FeatureCollection {
