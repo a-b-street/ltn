@@ -14,6 +14,7 @@
     mutationCounter,
     filterType,
     autosave,
+    animateShortcuts,
   } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
@@ -227,6 +228,11 @@
       Change modal filter type
     </button>
 
+    <label>
+      <input type="checkbox" bind:checked={$animateShortcuts} />
+      Animate shortcuts
+    </label>
+
     <div style="display: flex; justify-content: space-between;">
       <button disabled={undoLength == 0} on:click={undo} data-tooltip="Ctrl+Z">
         {#if undoLength == 0}
@@ -275,7 +281,9 @@
         </Popup>
       </div>
     </RenderNeighbourhood>
-    <AnimatePaths paths={allShortcuts} />
+    {#if $animateShortcuts}
+      <AnimatePaths paths={allShortcuts} />
+    {/if}
     <ModalFilterLayer on:click={deleteFilter}>
       <Popup openOn="hover">Click to delete</Popup>
     </ModalFilterLayer>
