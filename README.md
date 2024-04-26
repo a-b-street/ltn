@@ -1,2 +1,3 @@
-# ltn
-Explore what the LTN tool would look like on top of MapLibre
+# Low-traffic neighbourhood tool v2
+
+This is a WIP next iteration of <ltn.abstreet.org>
