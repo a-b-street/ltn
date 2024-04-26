@@ -37,9 +37,9 @@ checksum = "0942ffc6dcaadf03badf6e6a2d0228460359d5e34b57ccdc720b7382dfbd5ec5"
 
 [[package]]
 name = "anyhow"
-version = "1.0.75"
+version = "1.0.82"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
+checksum = "f538837af36e6f6a9be0faa67f9a314f8119e4e4b5867c6ab40ed60360142519"
 
 [[package]]
 name = "approx"
@@ -238,7 +238,7 @@ dependencies = [
 [[package]]
 name = "fast_paths"
 version = "0.3.0-SNAPSHOT"
-source = "git+https://github.com/easbar/fast_paths#4e663e5044afa1cd465bb6f571c7b0035a927f3d"
+source = "git+https://github.com/easbar/fast_paths#df54f4950880157d22ae8e5a58fe83dab80193bb"
 dependencies = [
  "log",
  "priority-queue",
@@ -543,7 +543,7 @@ checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 [[package]]
 name = "osm-reader"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/osm-reader#d6db3cd499eb238150ce2ed06aa7e88ce2447e13"
+source = "git+https://github.com/a-b-street/osm-reader#e857c5e899219b4430e612595ee5cdfe6b59054d"
 dependencies = [
  "anyhow",
  "osmpbf",
@@ -927,10 +927,12 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#53d5655d9958cd4cb834d2f4dfed6e2ef50f841e"
+source = "git+https://github.com/a-b-street/utils#b7bf631f1bc07db41fee351f56799b71feeb3d36"
 dependencies = [
+ "anyhow",
  "fast_paths",
  "geo 0.28.0",
+ "osm-reader",
 ]
 
 [[package]]
