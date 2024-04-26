@@ -11,7 +11,6 @@ use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
-use self::common::*;
 use self::map_model::{
     Direction, FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID,
 };
@@ -21,7 +20,6 @@ use self::route::Router;
 use self::shortcuts::Shortcuts;
 
 mod cells;
-mod common;
 mod geo_helpers;
 mod map_model;
 mod neighbourhood;

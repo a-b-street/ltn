@@ -4,10 +4,9 @@ use fast_paths::{FastGraph, InputGraph};
 use geo::{Coord, LineString};
 use rstar::primitives::GeomWithData;
 use rstar::RTree;
+use utils::NodeMap;
 
-use crate::{
-    Direction, Intersection, IntersectionID, MapModel, ModalFilter, NodeMap, Road, RoadID,
-};
+use crate::{Direction, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID};
 
 // For vehicles only
 #[derive(Clone)]

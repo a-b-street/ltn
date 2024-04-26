@@ -8,9 +8,10 @@ use geo::{
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Serialize;
+use utils::{Mercator, Tags};
 
 use crate::geo_helpers::linestring_intersection;
-use crate::{Mercator, Router, Tags};
+use crate::Router;
 
 pub struct MapModel {
     pub roads: Vec<Road>,

@@ -3,11 +3,9 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use anyhow::Result;
 use geo::{ConvexHull, Coord, Geometry, GeometryCollection, LineString, Point};
 use osm_reader::{Element, NodeID, WayID};
+use utils::{Mercator, Tags};
 
-use crate::{
-    Direction, FilterKind, Intersection, IntersectionID, MapModel, Mercator, Road, RoadID, Router,
-    Tags,
-};
+use crate::{Direction, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID, Router};
 
 struct Way {
     id: WayID,

@@ -3,8 +3,9 @@ use std::collections::HashMap;
 use fast_paths::InputGraph;
 use geo::{EuclideanLength, LineString};
 use geojson::{Feature, Geometry};
+use utils::NodeMap;
 
-use crate::{Direction, IntersectionID, MapModel, Neighbourhood, NodeMap, RoadID};
+use crate::{Direction, IntersectionID, MapModel, Neighbourhood, RoadID};
 
 pub struct Shortcuts {
     pub paths: Vec<Path>,
