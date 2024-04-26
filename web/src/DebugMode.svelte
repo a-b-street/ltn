@@ -1,7 +1,8 @@
 <script lang="ts">
   import BackButton from "./BackButton.svelte";
   import { CircleLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { Link, layerId, notNull, PropertiesTable, Popup } from "./common";
+  import { Link, layerId, notNull, Popup } from "./common";
+  import { PropertiesTable } from "svelte-utils";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { app, mode } from "./stores";
