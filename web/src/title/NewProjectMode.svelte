@@ -1,7 +1,8 @@
 <script lang="ts">
   import { LTN } from "backend";
   import { onMount } from "svelte";
-  import { Link, Loading, OverpassSelector } from "../common";
+  import { Loading } from "svelte-utils";
+  import { Link, OverpassSelector } from "../common";
   import { PolygonToolLayer } from "maplibre-draw-polygon";
   import SplitComponent from "../SplitComponent.svelte";
   import {
@@ -17,7 +18,7 @@
   let newProjectName = "";
   let example = "";
   let exampleAreas: [string, [string, string][]][] = [];
-  let msg: string | null = null;
+  let loading = "";
 
   onMount(async () => {
     let resp = await fetch(
@@ -29,6 +30,7 @@
   });
 
   function gotXml(e: CustomEvent<string>) {
+    loading = "Loading OSM";
     try {
       $app = new LTN(new TextEncoder().encode(e.detail), undefined);
       $projectName = `ltn_${newProjectName}`;
@@ -38,7 +40,7 @@
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
-    msg = null;
+    loading = "";
   }
 
   export async function loadExample() {
@@ -55,9 +57,9 @@
         study_area_name: example,
       }),
     );
-    msg = `Loading pre-clipped OSM area ${example}`;
+    loading = `Loading pre-clipped OSM area ${example}`;
     await loadFromLocalStorage(key);
-    msg = null;
+    loading = "";
   }
 </script>
 
@@ -84,7 +86,7 @@
     </div>
 
     {#if newProjectName}
-      <Loading {msg} />
+      <Loading {loading} />
 
       <label>
         Load a built-in area:
@@ -106,7 +108,7 @@
         <OverpassSelector
           map={$map}
           on:gotXml={gotXml}
-          on:loading={(e) => (msg = e.detail)}
+          on:loading={(e) => (loading = e.detail)}
           on:error={(e) => window.alert(e.detail)}
         />
       </div>

@@ -3,7 +3,7 @@
   import deleteDark from "../../assets/delete_dark.svg?url";
   import editLight from "../../assets/edit_light.svg?url";
   import editDark from "../../assets/edit_dark.svg?url";
-  import { Loading, Link } from "../common";
+  import { Link } from "../common";
   import SplitComponent from "../SplitComponent.svelte";
   import {
     lightMode,
@@ -14,9 +14,11 @@
     route_tool,
   } from "../stores";
   import { loadFromLocalStorage } from "./loader";
+  import { Loading } from "svelte-utils";
 
   export let wasmReady: boolean;
-  let msg: string | null = null;
+
+  let loading = "";
 
   // When other modes reset here, they can't clear state without a race condition
   $app = null;
@@ -41,11 +43,11 @@
   async function loadFile(e: Event) {
     // TODO Be careful with overwriting stuff, leading ltn_, etc
     let key = "ltn_" + fileInput.files![0].name;
-    msg = `Loading from file ${key}`;
+    loading = `Loading from file ${key}`;
     window.localStorage.setItem(key, await fileInput.files![0].text());
     projectList = getProjectList();
     await loadFromLocalStorage(key);
-    msg = null;
+    loading = "";
   }
 
   function deleteProject(key: string) {
@@ -71,13 +73,13 @@
   }
 
   async function loadProject(key: string) {
-    msg = `Loading project ${key}`;
+    loading = `Loading project ${key}`;
     await loadFromLocalStorage(key);
-    msg = null;
+    loading = "";
   }
 </script>
 
-<Loading {msg} />
+<Loading {loading} />
 
 <SplitComponent>
   <div slot="top">
