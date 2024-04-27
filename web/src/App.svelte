@@ -9,9 +9,9 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
+  import { Geocoder } from "svelte-utils";
   import {
     DisableInteractiveLayers,
-    Geocoder,
     Layout,
     layerId,
     StreetView,
@@ -143,7 +143,7 @@
         },
       ]}
     >
-      <Geocoder />
+      <Geocoder {map} apiKey={maptilerApiKey} />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
         <TitleMode {wasmReady} />
