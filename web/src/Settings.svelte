@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { BasemapPicker, Modal } from "./common";
+  import { BasemapPicker } from "./common";
+  import { Modal } from "svelte-utils";
   import { lightMode } from "./stores";
   import settingsLight from "../assets/settings_light.svg?url";
   import settingsDark from "../assets/settings_dark.svg?url";

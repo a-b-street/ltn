@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { Modal } from "svelte-utils";
   import { filterType } from "../stores";
-  import { Modal, notNull } from "../common";
+  import { notNull } from "../common";
 
   // TODO Use of import.meta.env.BASE_URL below is to workaround https://github.com/vitejs/vite/issues/10601
 
