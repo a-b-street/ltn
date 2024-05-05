@@ -1,4 +1,4 @@
-import type { Feature, Point, Polygon, Position } from "geojson";
+import type { Feature, Point, Position } from "geojson";
 import type {
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
@@ -8,7 +8,6 @@ export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as DisableInteractiveLayers } from "./DisableInteractiveLayers.svelte";
 export { default as Layout } from "./Layout.svelte";
 export { default as Link } from "./Link.svelte";
-export { default as OverpassSelector } from "./OverpassSelector.svelte";
 export { default as Popup } from "./Popup.svelte";
 export { default as StreetView } from "./StreetView.svelte";
 export { layerId } from "./zorder";
@@ -65,7 +64,7 @@ export function downloadGeneratedFile(filename: string, textInput: string) {
   let element = document.createElement("a");
   element.setAttribute(
     "href",
-    "data:text/plain;charset=utf-8, " + encodeURIComponent(textInput),
+    "data:text/plain;charset=utf-8," + encodeURIComponent(textInput),
   );
   element.setAttribute("download", filename);
   document.body.appendChild(element);
@@ -98,16 +97,4 @@ export function pointFeature(pt: Position): Feature<Point> {
 // places (10cm) is plenty of precision
 export function setPrecision(pt: Position): Position {
   return [Math.round(pt[0] * 10e6) / 10e6, Math.round(pt[1] * 10e6) / 10e6];
-}
-
-// Construct a query to extract all XML data in the polygon clip. See
-// https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL
-export function overpassQueryForPolygon(feature: Feature<Polygon>): string {
-  let filter = 'poly:"';
-  for (let [lng, lat] of feature.geometry.coordinates[0]) {
-    filter += `${lat} ${lng} `;
-  }
-  filter = filter.slice(0, -1) + '"';
-  let query = `(nwr(${filter}); node(w)->.x; <;); out meta;`;
-  return `https://overpass-api.de/api/interpreter?data=${query}`;
 }

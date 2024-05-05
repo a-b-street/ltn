@@ -2,7 +2,7 @@ import { get } from "svelte/store";
 import { LngLat } from "maplibre-gl";
 import { LTN } from "backend";
 import type { Feature } from "geojson";
-import { overpassQueryForPolygon } from "../common";
+import { overpassQueryForPolygon } from "svelte-utils";
 import { RouteTool } from "../common/snapper/route_tool";
 import {
   app,
