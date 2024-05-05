@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
-  import { Link, notNull } from "./common";
+  import { Link } from "./common";
+  import { notNull } from "svelte-utils";
   import RouteSnapperLayer from "./common/snapper/RouteSnapperLayer.svelte";
   import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
   import SplitComponent from "./SplitComponent.svelte";

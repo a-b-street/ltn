@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import { Loading } from "svelte-utils";
   import { Link } from "../common";
-        import { OverpassSelector } from "svelte-utils";
+  import { OverpassSelector } from "svelte-utils";
   import { PolygonToolLayer } from "maplibre-draw-polygon";
   import SplitComponent from "../SplitComponent.svelte";
   import {

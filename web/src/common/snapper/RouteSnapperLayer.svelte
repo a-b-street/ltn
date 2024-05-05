@@ -1,12 +1,12 @@
 <script lang="ts">
   import { CircleLayer, FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { layerId } from "../";
   import {
-    layerId,
     constructMatchExpression,
     isLine,
     isPoint,
     isPolygon,
-  } from "../";
+  } from "svelte-utils";
   import { routeToolGj } from "./stores";
 
   const circleRadiusPixels = 10;

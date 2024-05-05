@@ -9,13 +9,12 @@
   import initRouteSnapper from "route-snapper";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { Geocoder } from "svelte-utils";
+  import { notNull, Geocoder } from "svelte-utils";
   import {
     DisableInteractiveLayers,
     Layout,
     layerId,
     StreetView,
-    notNull,
   } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";

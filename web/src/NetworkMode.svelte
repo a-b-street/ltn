@@ -3,10 +3,10 @@
   import deleteDark from "../assets/delete_dark.svg?url";
   import editLight from "../assets/edit_light.svg?url";
   import editDark from "../assets/edit_dark.svg?url";
-  import { downloadGeneratedFile } from "./common";
+  import { downloadGeneratedFile, notNull } from "svelte-utils";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { layerId, notNull, Popup, Link } from "./common";
+  import { layerId, Popup, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { lightMode, app, autosave, mode, projectName } from "./stores";
