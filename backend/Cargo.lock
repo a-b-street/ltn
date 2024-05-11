@@ -244,7 +244,8 @@ dependencies = [
 [[package]]
 name = "fast_paths"
 version = "1.0.0"
-source = "git+https://github.com/easbar/fast_paths#fee17adb34dc346102e8dc819052e2144a331243"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c81c255f345762d8303062464a32cc862c2e1eb1b55fa9f90df74b59eea9c8da"
 dependencies = [
  "log",
  "priority-queue",
@@ -944,7 +945,7 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#142ddd9673b00d752832a5e386a6a7f50906d2d4"
+source = "git+https://github.com/a-b-street/utils#bfb2c435944ce825616d53240e1e3adcee94f047"
 dependencies = [
  "anyhow",
  "fast_paths",
