@@ -114,8 +114,11 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     background-color: grey;
-    text-align: center;
+    font-weight: bold;
   }
 </style>

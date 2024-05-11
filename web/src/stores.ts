@@ -61,7 +61,7 @@ export let mainRoadPenalty: Writable<number> = writable(1.0);
 export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title" });
 export let filterType: Writable<string> = writable("walk_cycle_only");
-export let animateShortcuts = writable(true);
+export let animateShortcuts = writable(false);
 
 export function autosave() {
   let key = get(projectName);
