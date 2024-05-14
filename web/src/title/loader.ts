@@ -3,7 +3,8 @@ import { LngLat } from "maplibre-gl";
 import { LTN } from "backend";
 import type { Feature } from "geojson";
 import { overpassQueryForPolygon } from "svelte-utils";
-import { RouteTool } from "../common/snapper/route_tool";
+import { RouteTool } from "route-snapper-ts";
+import { routeToolGj, snapMode, undoLength } from "../common/snapper/stores";
 import {
   app,
   projectName,
@@ -61,7 +62,15 @@ export function afterProjectLoaded() {
   mode.set({
     mode: "network",
   });
-  route_tool.set(new RouteTool(get(map)!, get(app)!.toRouteSnapper()));
+  route_tool.set(
+    new RouteTool(
+      get(map)!,
+      get(app)!.toRouteSnapper(),
+      routeToolGj,
+      snapMode,
+      undoLength,
+    ),
+  );
   get(map)!.fitBounds(
     Array.from(get(app)!.getBounds()) as [number, number, number, number],
     { animate: false },

@@ -21,6 +21,7 @@
   import FreehandLine from "./FreehandLine.svelte";
   import ModalFilterLayer from "../ModalFilterLayer.svelte";
   import AnimatePaths from "../AnimatePaths.svelte";
+  import type { Waypoint } from "route-snapper-ts";
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 
@@ -36,7 +37,10 @@
   let settingFilterType = false;
   let undoLength = 0;
   let redoLength = 0;
-  let boundary: Feature<Polygon, { name: string }> | null;
+  let boundary: Feature<
+    Polygon,
+    { name: string; waypoints: Waypoint[] }
+  > | null;
 
   let gjInput: RenderNeighbourhoodOutput;
   let allShortcuts = JSON.parse($app!.getAllShortcuts());

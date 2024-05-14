@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RouteTool } from "./route_tool";
+  import { RouteTool } from "route-snapper-ts";
   import { undoLength } from "./stores";
 
   export let route_tool: RouteTool;

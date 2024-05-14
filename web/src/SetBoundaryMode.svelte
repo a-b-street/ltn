@@ -6,9 +6,10 @@
   import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
   import SplitComponent from "./SplitComponent.svelte";
   import { autosave, app, mode, route_tool } from "./stores";
+  import type { Props } from "route-snapper-ts";
 
   export let name: string;
-  export let existing: Feature<Polygon> | null;
+  export let existing: Feature<Polygon, Props> | null;
 
   if (existing) {
     $route_tool!.editExistingArea(existing);
