@@ -6,7 +6,7 @@
   import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
-  import initRouteSnapper from "route-snapper";
+  import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
   import { notNull, Geocoder } from "svelte-utils";
