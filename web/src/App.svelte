@@ -9,7 +9,8 @@
   import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
-  import { notNull, Geocoder } from "svelte-utils";
+  import { notNull } from "svelte-utils";
+  import { Geocoder } from "svelte-utils/map";
   import {
     DisableInteractiveLayers,
     Layout,

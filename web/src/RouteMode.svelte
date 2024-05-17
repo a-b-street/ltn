@@ -1,7 +1,8 @@
 <script lang="ts">
   import BackButton from "./BackButton.svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
-  import { constructMatchExpression, notNull } from "svelte-utils";
+  import { notNull } from "svelte-utils";
+  import { constructMatchExpression } from "svelte-utils/map";
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";

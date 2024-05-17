@@ -6,7 +6,7 @@
     isLine,
     isPoint,
     isPolygon,
-  } from "svelte-utils";
+  } from "svelte-utils/map";
   import { routeToolGj } from "./stores";
 
   const circleRadiusPixels = 10;
