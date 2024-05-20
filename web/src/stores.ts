@@ -2,7 +2,7 @@ import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
 import { LngLat, type Map } from "maplibre-gl";
 import { get, writable, type Writable } from "svelte/store";
-import { RouteTool, type Props } from "route-snapper-ts";
+import { RouteTool, type AreaProps } from "route-snapper-ts";
 
 export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
 
@@ -19,7 +19,7 @@ export type Mode =
   | {
       mode: "set-boundary";
       name: string;
-      existing: Feature<Polygon, Props> | null;
+      existing: Feature<Polygon, AreaProps> | null;
     }
   | {
       mode: "neighbourhood";
