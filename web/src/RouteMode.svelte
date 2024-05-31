@@ -6,7 +6,7 @@
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, route_pt_a, route_pt_b, mainRoadPenalty } from "./stores";
 
   export let prevMode: "network" | "neighbourhood";

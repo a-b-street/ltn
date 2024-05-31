@@ -4,7 +4,7 @@
   import { Link, layerId, Popup } from "./common";
   import { PropertiesTable, notNull } from "svelte-utils";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode } from "./stores";
 </script>
 

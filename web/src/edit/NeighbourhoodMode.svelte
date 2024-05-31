@@ -7,7 +7,7 @@
   import { type LayerClickInfo } from "svelte-maplibre";
   import { Popup, Link } from "../common";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
-  import SplitComponent from "../SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {
     app,
     map,

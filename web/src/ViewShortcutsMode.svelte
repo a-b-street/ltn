@@ -9,7 +9,7 @@
   import { notNull } from "svelte-utils";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, map, mode } from "./stores";
 
   type State =

@@ -4,7 +4,7 @@
   import { notNull } from "svelte-utils";
   import RouteSnapperLayer from "./common/snapper/RouteSnapperLayer.svelte";
   import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { autosave, app, mode, route_tool } from "./stores";
   import type { AreaProps } from "route-snapper-ts";
 

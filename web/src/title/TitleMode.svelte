@@ -4,7 +4,7 @@
   import editLight from "../../assets/edit_light.svg?url";
   import editDark from "../../assets/edit_dark.svg?url";
   import { Link } from "../common";
-  import SplitComponent from "../SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {
     lightMode,
     app,

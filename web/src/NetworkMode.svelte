@@ -8,7 +8,7 @@
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { layerId, Popup, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
-  import SplitComponent from "./SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { lightMode, app, autosave, mode, projectName } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff

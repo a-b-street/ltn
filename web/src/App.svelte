@@ -12,11 +12,12 @@
   import { notNull } from "svelte-utils";
   import { Geocoder } from "svelte-utils/map";
   import {
-    DisableInteractiveLayers,
+    mapContents,
+    topContents,
+    sidebarContents,
     Layout,
-    layerId,
-    StreetView,
-  } from "./common";
+  } from "svelte-utils/top_bar_layout";
+  import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
@@ -25,13 +26,10 @@
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
   import {
     app,
-    mapContents,
-    topContents,
     map as mapStore,
     showAbout,
     lightMode,
     mode,
-    sidebarContents,
     maptilerBasemap,
     maptilerApiKey,
     useLocalVite,

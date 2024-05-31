@@ -5,7 +5,7 @@
   import { Link } from "../common";
   import { OverpassSelector } from "svelte-utils/overpass";
   import { PolygonToolLayer } from "maplibre-draw-polygon";
-  import SplitComponent from "../SplitComponent.svelte";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {
     autosave,
     projectName,

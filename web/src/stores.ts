@@ -47,10 +47,6 @@ export let useLocalVite: Writable<boolean> = writable(false);
 export let projectName: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
 
-export let topContents: Writable<HTMLDivElement | null> = writable(null);
-export let sidebarContents: Writable<HTMLDivElement | null> = writable(null);
-export let mapContents: Writable<HTMLDivElement | null> = writable(null);
-
 export let app: Writable<LTN | null> = writable(null);
 export let route_tool: Writable<RouteTool | null> = writable(null);
 export let route_pt_a: Writable<LngLat> = writable(new LngLat(0, 0));
