@@ -1,11 +1,22 @@
 import type { Map } from "maplibre-gl";
 
-// Each MapTiler basemap style uses different layer IDs for roads and paths
-export function getRoadLayerNames(map: Map, maptilerStyle: string): string[] {
-  if (maptilerStyle == "dataviz") {
-    return ["Road network", "Path"];
+// Each basemap style uses different layer IDs for roads and paths
+export function getRoadLayerNames(map: Map, mapStyle: string): string[] {
+  // The styles may change over time. Guarantee we only return valid line layers.
+  let availableLayers = new Set(
+    map
+      .getStyle()
+      .layers.filter((l) => l.type == "line")
+      .map((l) => l.id),
+  );
+
+  if (mapStyle == "dataviz") {
+    return ["Road network", "Path"].filter((l) => availableLayers.has(l));
   }
-  if (maptilerStyle == "streets") {
+  if (mapStyle == "hybrid") {
+    return ["Path", "Road", "Tunnel"].filter((l) => availableLayers.has(l));
+  }
+  if (mapStyle == "streets") {
     let layers = [];
     for (let outer of ["road", "bridge", "tunnel"]) {
       for (let inner of [
@@ -28,19 +39,17 @@ export function getRoadLayerNames(map: Map, maptilerStyle: string): string[] {
         layers.push(`${outer}_${inner}`);
       }
     }
-    return layers;
+    return layers.filter((l) => availableLayers.has(l));
   }
-  if (maptilerStyle == "hybrid") {
-    return ["Path", "Road", "Tunnel"];
+  if (mapStyle == "uk-openzoomstack-light") {
+    return map
+      .getStyle()
+      .layers.filter(
+        // @ts-expect-error source-layer is present
+        (layer) => layer["source-layer"] == "roads" && layer.type == "line",
+      )
+      .map((layer) => layer.id);
   }
-  if (maptilerStyle == "uk-openzoomstack-light") {
-    return (
-      map
-        .getStyle()
-        // @ts-expect-error It does exist
-        .layers.filter((layer) => layer["source-layer"] == "roads")
-        .map((layer) => layer.id)
-    );
-  }
-  throw new Error(`Unknown style ${maptilerStyle}`);
+
+  return [];
 }
