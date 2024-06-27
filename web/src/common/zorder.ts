@@ -82,6 +82,7 @@ const layerZorder = [
   // MapTiler basemap
   "Building",
 
+  "route-debug-nodes",
   "route-points",
   "route-lines",
   "route-polygons",

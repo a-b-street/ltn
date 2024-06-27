@@ -9,3 +9,8 @@ export const routeToolGj: Writable<GeoJSON> = writable({
 });
 export const snapMode: Writable<boolean> = writable(true);
 export const undoLength: Writable<number> = writable(0);
+export const showAllNodes: Writable<boolean> = writable(false);
+export const showAllNodesGj: Writable<GeoJSON> = writable({
+  type: "FeatureCollection",
+  features: [],
+});

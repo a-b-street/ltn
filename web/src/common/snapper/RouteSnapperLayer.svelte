@@ -7,7 +7,7 @@
     isPoint,
     isPolygon,
   } from "svelte-utils/map";
-  import { routeToolGj } from "./stores";
+  import { routeToolGj, showAllNodes, showAllNodesGj } from "./stores";
 
   const circleRadiusPixels = 10;
 </script>
@@ -48,5 +48,21 @@
       "fill-color": "black",
       "fill-opacity": 0.5,
     }}
+  />
+</GeoJSON>
+
+<GeoJSON data={$showAllNodesGj}>
+  <CircleLayer
+    {...layerId("route-debug-nodes")}
+    paint={{
+      "circle-opacity": 0,
+      "circle-radius": 5,
+      "circle-stroke-color": "black",
+      "circle-stroke-width": 1,
+    }}
+    layout={{
+      visibility: $showAllNodes ? "visible" : "none",
+    }}
+    minzoom={14}
   />
 </GeoJSON>

@@ -4,7 +4,13 @@ import { LTN } from "backend";
 import type { Feature } from "geojson";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
 import { RouteTool } from "route-snapper-ts";
-import { routeToolGj, snapMode, undoLength } from "../common/snapper/stores";
+import {
+  routeToolGj,
+  snapMode,
+  undoLength,
+  showAllNodes,
+  showAllNodesGj,
+} from "../common/snapper/stores";
 import {
   app,
   projectName,
@@ -71,6 +77,8 @@ export function afterProjectLoaded() {
       undoLength,
     ),
   );
+  showAllNodes.set(false);
+  showAllNodesGj.set({ type: "FeatureCollection", features: [] });
   get(map)!.fitBounds(
     Array.from(get(app)!.getBounds()) as [number, number, number, number],
     { animate: false },
