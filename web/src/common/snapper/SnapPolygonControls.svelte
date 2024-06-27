@@ -1,15 +1,13 @@
 <script lang="ts">
-  import type { FeatureCollection } from "geojson";
   import { RouteTool } from "route-snapper-ts";
   import { undoLength, showAllNodes, showAllNodesGj } from "./stores";
 
   export let route_tool: RouteTool;
 
   function loadNodes(show: boolean) {
-    // TODO Different API for just the nodes
-    let gj: FeatureCollection = JSON.parse(route_tool.inner.debugRenderGraph());
-    gj.features = gj.features.filter((f) => f.geometry.type == "Point");
-    $showAllNodesGj = gj;
+    if (show && $showAllNodesGj.features.length == 0) {
+      $showAllNodesGj = JSON.parse(route_tool.inner.debugSnappableNodes());
+    }
   }
   $: loadNodes($showAllNodes);
 </script>
