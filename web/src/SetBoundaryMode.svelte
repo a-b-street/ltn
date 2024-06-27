@@ -7,6 +7,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { autosave, app, mode, route_tool } from "./stores";
   import type { AreaProps } from "route-snapper-ts";
+  import { onDestroy } from "svelte";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;
@@ -17,7 +18,13 @@
     $route_tool!.startArea();
   }
 
-  // TODO When we click a link and nav away, clear state
+  // The user can change the mode in many ways, like clicking a link.
+  // When this component gets destroyed, always clean up state.
+  onDestroy(() => {
+    // If the user is choosing a new area, the tool will get unset
+    $route_tool?.clearEventListeners();
+    $route_tool?.stop();
+  });
 
   function onFailure() {
     if (existing) {
@@ -29,7 +36,6 @@
         mode: "network",
       };
     }
-    $route_tool!.clearEventListeners();
   }
 
   $route_tool!.addEventListenerSuccess((feature) => {
@@ -40,7 +46,6 @@
       $mode = {
         mode: "neighbourhood",
       };
-      $route_tool!.clearEventListeners();
     } catch (err) {
       window.alert(
         "Known georust bug hit, sorry. You may need to just refresh the page now.",
