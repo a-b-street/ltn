@@ -23,7 +23,7 @@ jobs:
       - name: Cache WASM build
         uses: actions/cache@v3
         with:
-          path: target
+          path: backend/target
           key: doesnt-matter-share-everything
 
       - name: Build web app
