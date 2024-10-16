@@ -5,7 +5,7 @@
 
 {#if $showAbout}
   <Modal on:close={() => ($showAbout = false)} let:dialog>
-    <h1>The Low-traffic neighbourhood (LTN) tool, v2</h1>
+    <h1>The low-traffic neighbourhood (LTN) tool, v2</h1>
     <p>
       This is an <b>experimental</b>
       version of the
