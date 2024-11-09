@@ -180,6 +180,7 @@
   <div slot="sidebar">
     <p>
       Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
+      , with an area of {gjInput.area_km2.toFixed(1)} km²
     </p>
 
     <details>

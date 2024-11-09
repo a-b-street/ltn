@@ -44,4 +44,5 @@ export interface RenderNeighbourhoodOutput {
   )[];
   undo_length: number;
   redo_length: number;
+  area_km2: number;
 }

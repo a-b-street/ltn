@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
+    Area, Contains, EuclideanDistance, EuclideanLength, Intersects, LineInterpolatePoint,
     LineLocatePoint, LineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
@@ -19,7 +19,9 @@ pub struct Neighbourhood {
     crosses: BTreeMap<RoadID, f64>,
     pub border_intersections: BTreeSet<IntersectionID>,
     name: String,
+    // Mercator
     pub boundary_polygon: Polygon,
+    boundary_area_km2: f64,
 
     // Updated after mutations
     derived: Option<DerivedNeighbourhoodState>,
@@ -66,12 +68,16 @@ impl Neighbourhood {
             bail!("No roads inside the boundary");
         }
 
+        // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
+        let boundary_area_km2 = boundary_polygon.unsigned_area() / 1_000_000.0;
+
         let mut n = Self {
             interior_roads,
             crosses,
             border_intersections,
             name,
             boundary_polygon,
+            boundary_area_km2,
             derived: None,
         };
         n.after_edit(map);
@@ -158,6 +164,7 @@ impl Neighbourhood {
                 serde_json::json!({
                     "undo_length": map.undo_stack.len(),
                     "redo_length": map.redo_queue.len(),
+                    "area_km2": self.boundary_area_km2,
                 })
                 .as_object()
                 .unwrap()
