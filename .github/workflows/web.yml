@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: backend/target
-          key: doesnt-matter-share-everything
+          key: cargo-wasm-${{ hashFiles('backend/Cargo.lock') }}
 
       - name: Build web app
         run: |

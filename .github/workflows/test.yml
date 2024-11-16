@@ -16,7 +16,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: backend/target
-          key: cargo-${{ hashFiles('backend/Cargo.lock') }}
+          key: cargo-test-${{ hashFiles('backend/Cargo.lock') }}
 
       - name: Run tests
         run: |
