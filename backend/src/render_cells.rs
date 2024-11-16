@@ -307,6 +307,6 @@ fn color_cells(num_cells: usize, adjacencies: HashSet<(usize, usize)>) -> Vec<Co
 
 // TODO Bring in that geo PR
 // TODO use it here
-fn slice_linestring(linestring: &LineString, start: f64, end: f64) -> Option<LineString> {
+fn slice_linestring(linestring: &LineString, _start: f64, _end: f64) -> Option<LineString> {
     Some(linestring.clone())
 }

@@ -177,6 +177,6 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
     }
 }
 
-fn is_private(road: &Road) -> bool {
+fn is_private(_road: &Road) -> bool {
     false
 }

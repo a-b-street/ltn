@@ -73,6 +73,7 @@ pub struct Road {
 
 pub struct Intersection {
     pub id: IntersectionID,
+    #[allow(unused)]
     pub node: osm_reader::NodeID,
     pub point: Point,
     pub roads: Vec<RoadID>,
