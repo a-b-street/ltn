@@ -18,6 +18,14 @@ jobs:
           path: backend/target
           key: cargo-test-${{ hashFiles('backend/Cargo.lock') }}
 
+      - name: Download test inputs
+        run: |
+          cd web/public
+          mkdir osm
+          cd osm
+          wget https://assets.od2net.org/severance_pbfs/bristol.pbf
+          wget https://assets.od2net.org/severance_pbfs/strasbourg.pbf
+
       - name: Run tests
         run: |
           cd backend
