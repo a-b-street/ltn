@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 
-use geo::{Coord, LineIntersection, LineLocatePoint, LineSplit, Point};
+use geo::{Coord, LineIntersection, LineLocatePoint, Point};
 use route_snapper_graph::{Edge, NodeID, RouteSnapperMap};
+use utils::LineSplit;
 
 use crate::{MapModel, RoadID};
 

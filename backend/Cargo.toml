@@ -13,16 +13,16 @@ console_error_panic_hook = "0.1.6"
 console_log = "1.0.0"
 contour = "0.12.0"
 fast_paths = "1.0.0"
-geo = { git = "https://github.com/dabreegster/geo", branch = "boolops_and_linesplit" }
+geo = "0.29.1"
 geojson = { git = "https://github.com/georust/geojson", features = ["geo-types"] }
 log = "0.4.20"
 osm-reader = { git = "https://github.com/a-b-street/osm-reader" }
 route-snapper-graph = { git = "https://github.com/dabreegster/route_snapper" }
+rstar = "0.12.0"
 serde = "1.0.188"
 serde_json = "1.0.105"
 serde-wasm-bindgen = "0.6.0"
-rstar = "0.12.0"
-utils = { git = "https://github.com/a-b-street/utils" }
+utils = { git = "https://github.com/a-b-street/utils", features = ["serde"] }
 wasm-bindgen = "0.2.87"
 web-sys = { version = "0.3.64", features = ["console"] }
 web-time = "1.0.0"

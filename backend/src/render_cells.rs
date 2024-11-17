@@ -1,6 +1,6 @@
 use std::collections::{HashSet, VecDeque};
 
-use geo::{BooleanOps, BoundingRect, Coord, Densify, LineString, MultiPolygon, Rect};
+use geo::{BooleanOps, BoundingRect, Coord, Densify, Euclidean, LineString, MultiPolygon, Rect};
 use utils::Grid;
 
 use crate::{Cell, MapModel, Neighbourhood};
@@ -46,7 +46,7 @@ impl RenderCells {
                     slice_linestring(&road.linestring, interval.start, interval.end)
                 {
                     // Walk along the center line
-                    for pt in slice.densify(RESOLUTION_M / 2.0).0 {
+                    for pt in slice.densify::<Euclidean>(RESOLUTION_M / 2.0).0 {
                         let grid_idx = grid.idx(
                             ((pt.x - bounds.min().x) / RESOLUTION_M) as usize,
                             ((pt.y - bounds.min().y) / RESOLUTION_M) as usize,
@@ -80,7 +80,11 @@ impl RenderCells {
         // the area. The grid covers the rectangular bounds of the polygon. Rather than make an
         // enum with 3 cases, just assign a new index to mean "boundary."
         let boundary_marker = cells.len();
-        for pt in boundary_polygon.exterior().densify(RESOLUTION_M / 2.0).0 {
+        for pt in boundary_polygon
+            .exterior()
+            .densify::<Euclidean>(RESOLUTION_M / 2.0)
+            .0
+        {
             // TODO Refactor helpers to transform between map-space and the grid tiles. Possibly
             // Grid should know about this.
             let grid_idx = grid.idx(
@@ -305,8 +309,7 @@ fn color_cells(num_cells: usize, adjacencies: HashSet<(usize, usize)>) -> Vec<Co
         .collect()
 }
 
-// TODO Bring in that geo PR
-// TODO use it here
+// TODO Use linesplit
 fn slice_linestring(linestring: &LineString, _start: f64, _end: f64) -> Option<LineString> {
     Some(linestring.clone())
 }

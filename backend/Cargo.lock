@@ -51,15 +51,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "atomic-polyfill"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3ff7eb3f316534d83a8a2c3d1674ace8a5a71198eba31e2e2b597833f699b28"
-dependencies = [
- "critical-section",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -75,12 +66,12 @@ dependencies = [
  "console_log",
  "contour",
  "fast_paths",
- "geo 0.27.0 (git+https://github.com/dabreegster/geo?branch=boolops_and_linesplit)",
+ "geo",
  "geojson",
  "log",
  "osm-reader",
  "route-snapper-graph",
- "rstar 0.12.0",
+ "rstar",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
@@ -169,12 +160,6 @@ checksum = "b540bd8bc810d3885c6ea91e2018302f68baba2129ab3e88f32389ee9370880d"
 dependencies = [
  "cfg-if",
 ]
-
-[[package]]
-name = "critical-section"
-version = "1.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7059fff8937831a9ae6f0fe4d658ffabf58f2ca96aa9dec1c889f936f705f216"
 
 [[package]]
 name = "crossbeam-deque"
@@ -276,51 +261,19 @@ checksum = "8bf7cc16383c4b8d58b9905a8509f02926ce3058053c056376248d958c9df1e8"
 
 [[package]]
 name = "geo"
-version = "0.27.0"
+version = "0.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4841b40fdbccd4b7042bd6195e4de91da54af34c50632e371bcbfcdfb558b873"
+checksum = "8798f09c0fb3625cf216569408e151a1884c3a028a0b533b7c223ae8f695c89a"
 dependencies = [
  "earcutr",
  "float_next_after",
  "geo-types",
  "geographiclib-rs",
+ "i_overlay",
  "log",
  "num-traits",
  "robust",
- "rstar 0.11.0",
- "spade",
-]
-
-[[package]]
-name = "geo"
-version = "0.27.0"
-source = "git+https://github.com/dabreegster/geo?branch=boolops_and_linesplit#74b7c687ec8a7f9d47db3b02a729a1de76d5758b"
-dependencies = [
- "earcutr",
- "float_next_after",
- "geo-types",
- "geographiclib-rs",
- "log",
- "num-traits",
- "robust",
- "rstar 0.11.0",
- "spade",
-]
-
-[[package]]
-name = "geo"
-version = "0.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f811f663912a69249fa620dcd2a005db7254529da2d8a0b23942e81f47084501"
-dependencies = [
- "earcutr",
- "float_next_after",
- "geo-types",
- "geographiclib-rs",
- "log",
- "num-traits",
- "robust",
- "rstar 0.12.0",
+ "rstar",
  "spade",
 ]
 
@@ -332,8 +285,7 @@ checksum = "9ff16065e5720f376fbced200a5ae0f47ace85fd70b7e54269790281353b6d61"
 dependencies = [
  "approx",
  "num-traits",
- "rstar 0.11.0",
- "rstar 0.12.0",
+ "rstar",
  "serde",
 ]
 
@@ -356,15 +308,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
-]
-
-[[package]]
-name = "hash32"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0c35f58762feb77d74ebe43bdbc3210f09be9fe6742234d573bacc26ed92b67"
-dependencies = [
- "byteorder",
 ]
 
 [[package]]
@@ -394,24 +337,11 @@ dependencies = [
 
 [[package]]
 name = "heapless"
-version = "0.7.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db04bc24a18b9ea980628ecf00e6c0264f3c1426dac36c00cb49b6fbad8b0743"
-dependencies = [
- "atomic-polyfill",
- "hash32 0.2.1",
- "rustc_version",
- "spin",
- "stable_deref_trait",
-]
-
-[[package]]
-name = "heapless"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bfb9eb618601c89945a70e254898da93b13be0388091d42117462b265bb3fad"
 dependencies = [
- "hash32 0.3.1",
+ "hash32",
  "stable_deref_trait",
 ]
 
@@ -423,6 +353,50 @@ checksum = "5444c27eef6923071f7ebcc33e3444508466a76f7a2b93da00ed6e19f30c1ddb"
 dependencies = [
  "windows-sys 0.48.0",
 ]
+
+[[package]]
+name = "i_float"
+version = "1.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5fe043aae28ce70bd2f78b2f5f82a3654d63607c82594da4dabb8b6cb81f2b2"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "i_key_sort"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "347c253b4748a1a28baf94c9ce133b6b166f08573157e05afe718812bc599fcd"
+
+[[package]]
+name = "i_overlay"
+version = "1.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1d5024b4346ff4699e2db65674bbcb3a7cb8c5a820e9745ec777a7cb2bb5f42"
+dependencies = [
+ "i_float",
+ "i_key_sort",
+ "i_shape",
+ "i_tree",
+ "rayon",
+]
+
+[[package]]
+name = "i_shape"
+version = "1.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b44852d57a991c7dedaf76c55bc44f677f547ff899a430d29e13efd6133d7d8"
+dependencies = [
+ "i_float",
+ "serde",
+]
+
+[[package]]
+name = "i_tree"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "155181bc97d770181cf9477da51218a19ee92a8e5be642e796661aee2b601139"
 
 [[package]]
 name = "indexmap"
@@ -491,16 +465,6 @@ name = "linux-raw-sys"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4cd1a83af159aa67994778be9070f0ae1bd732942279cabb14f86f986a21456"
-
-[[package]]
-name = "lock_api"
-version = "0.4.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c168f8615b12bc01f9c17e2eb0cc07dcae1940121185446edc3744920e8ef45"
-dependencies = [
- "autocfg",
- "scopeguard",
-]
 
 [[package]]
 name = "log"
@@ -728,9 +692,9 @@ checksum = "cbf4a6aa5f6d6888f39e980649f3ad6b666acdce1d78e95b8a2cb076e687ae30"
 [[package]]
 name = "route-snapper-graph"
 version = "0.1.0"
-source = "git+https://github.com/dabreegster/route_snapper#aeb83caee46a2dc46984faad3fe55def3b984cf7"
+source = "git+https://github.com/dabreegster/route_snapper#0834519b09152168ee4908dcd630d54605aa759b"
 dependencies = [
- "geo 0.27.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "geo",
  "serde",
 ]
 
@@ -742,22 +706,11 @@ checksum = "3cd14fd5e3b777a7422cca79358c57a8f6e3a703d9ac187448d0daf220c2407f"
 
 [[package]]
 name = "rstar"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73111312eb7a2287d229f06c00ff35b51ddee180f017ab6dec1f69d62ac098d6"
-dependencies = [
- "heapless 0.7.16",
- "num-traits",
- "smallvec",
-]
-
-[[package]]
-name = "rstar"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "133315eb94c7b1e8d0cb097e5a710d850263372fd028fff18969de708afc7008"
 dependencies = [
- "heapless 0.8.0",
+ "heapless",
  "num-traits",
  "smallvec",
 ]
@@ -767,15 +720,6 @@ name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
-
-[[package]]
-name = "rustc_version"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
-dependencies = [
- "semver",
-]
 
 [[package]]
 name = "rustix"
@@ -801,12 +745,6 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
-
-[[package]]
-name = "semver"
-version = "1.0.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "836fa6a3e1e547f9a2c4040802ec865b5d85f4014efe00555d7090a3dcaa1090"
 
 [[package]]
 name = "serde"
@@ -861,29 +799,20 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.11.2"
+version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4dccd0940a2dcdf68d092b8cbab7dc0ad8fa938bf95787e1b916b0e3d0e8e970"
+checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
 name = "spade"
-version = "2.4.0"
+version = "2.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3d3bf265ec2d5dd1ddf87863252123447c550491adba2c70c574173a95cd8ba"
+checksum = "93f5ef1f863aca7d1d7dda7ccfc36a0a4279bd6d3c375176e5e0712e25cb4889"
 dependencies = [
  "hashbrown 0.14.3",
  "num-traits",
  "robust",
  "smallvec",
-]
-
-[[package]]
-name = "spin"
-version = "0.9.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
-dependencies = [
- "lock_api",
 ]
 
 [[package]]
@@ -945,12 +874,15 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#bfb2c435944ce825616d53240e1e3adcee94f047"
+source = "git+https://github.com/a-b-street/utils#b4addd630b398009381b1e9da8f04faa06d300c3"
 dependencies = [
  "anyhow",
  "fast_paths",
- "geo 0.28.0",
+ "geo",
+ "geo-types",
+ "log",
  "osm-reader",
+ "serde",
 ]
 
 [[package]]

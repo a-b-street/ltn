@@ -3,7 +3,7 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    Closest, ClosestPoint, Coord, EuclideanLength, Line, LineInterpolatePoint, LineLocatePoint,
+    Closest, ClosestPoint, Coord, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint,
     LineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
@@ -147,7 +147,7 @@ impl MapModel {
                     Closest::SinglePoint(pt) => Some(pt),
                     Closest::Indeterminate => None,
                 } {
-                    let score = Line::new(click_pt, hit_pt.into()).euclidean_length();
+                    let score = Line::new(click_pt, hit_pt.into()).length::<Euclidean>();
                     let percent_along = road.linestring.line_locate_point(&hit_pt).unwrap();
                     Some(((score * 100.0) as usize, road.id, percent_along))
                 } else {
@@ -168,12 +168,12 @@ impl MapModel {
                     r.linestring.points().next().unwrap(),
                     linestring.points().next().unwrap(),
                 )
-                .euclidean_length();
+                .length::<Euclidean>();
                 let diff2 = Line::new(
                     r.linestring.points().last().unwrap(),
                     linestring.points().last().unwrap(),
                 )
-                .euclidean_length();
+                .length::<Euclidean>();
                 ((diff1 + diff2) * 100.0) as usize
             })
             .unwrap()
@@ -492,7 +492,7 @@ impl MapModel {
 
 impl Road {
     pub fn length(&self) -> f64 {
-        self.linestring.euclidean_length()
+        self.linestring.length::<Euclidean>()
     }
 
     pub fn to_gj(&self, mercator: &Mercator) -> Feature {

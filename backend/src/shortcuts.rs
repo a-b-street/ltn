@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use fast_paths::InputGraph;
-use geo::{EuclideanLength, LineString};
+use geo::{Euclidean, Length, LineString};
 use geojson::{Feature, Geometry};
 use utils::NodeMap;
 
@@ -79,7 +79,7 @@ impl Shortcuts {
                             map.get_i(*start).point.into(),
                             map.get_i(*end).point.into(),
                         ) {
-                            Some(linestring) => linestring.euclidean_length(),
+                            Some(linestring) => linestring.length::<Euclidean>(),
                             None => {
                                 warn!("Found a shortcut from {start} to {end}, but not a route using the whole map");
                                 shortcut_length
@@ -123,7 +123,7 @@ impl Path {
         }
         let linestring = LineString::new(pts);
 
-        let length = linestring.euclidean_length();
+        let length = linestring.length::<Euclidean>();
         let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&linestring)));
         f.set_property("directness", self.directness);
         f.set_property("length_meters", length);

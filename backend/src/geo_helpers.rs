@@ -1,7 +1,8 @@
 use geo::{
-    Contains, Intersects, LineInterpolatePoint, LineIntersection, LineLocatePoint, LineSplit,
-    LineString, Polygon,
+    Contains, Intersects, LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString,
+    Polygon,
 };
+use utils::LineSplit;
 
 /// Looks for the first place ls2 crosses ls1. Returns the percent_along ls1 of that point.
 pub fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64> {
