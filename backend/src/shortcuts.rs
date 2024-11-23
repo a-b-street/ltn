@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use fast_paths::InputGraph;
 use geo::{Euclidean, Length, LineString};
-use geojson::{Feature, Geometry};
+use geojson::Feature;
 use utils::NodeMap;
 
 use crate::{Direction, IntersectionID, MapModel, Neighbourhood, RoadID};
@@ -124,7 +124,7 @@ impl Path {
         let linestring = LineString::new(pts);
 
         let length = linestring.length::<Euclidean>();
-        let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&linestring)));
+        let mut f = map.mercator.to_wgs84_gj(&linestring);
         f.set_property("directness", self.directness);
         f.set_property("length_meters", length);
         f

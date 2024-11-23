@@ -5,7 +5,7 @@ use geo::{
     Area, Contains, Distance, Euclidean, Intersects, Length, LineInterpolatePoint, LineLocatePoint,
     LineString, Point, Polygon,
 };
-use geojson::{Feature, FeatureCollection, Geometry};
+use geojson::FeatureCollection;
 use web_time::Instant;
 
 use crate::geo_helpers::clip_linestring_to_polygon;
@@ -137,7 +137,7 @@ impl Neighbourhood {
             features.push(f);
         }
         for i in &self.border_intersections {
-            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(&map.get_i(*i).point)));
+            let mut f = map.mercator.to_wgs84_gj(&map.get_i(*i).point);
             f.set_property("kind", "border_intersection");
             features.push(f);
         }
@@ -148,7 +148,7 @@ impl Neighbourhood {
             .iter()
             .zip(derived.render_cells.colors.iter())
         {
-            let mut f = Feature::from(Geometry::from(&map.mercator.to_wgs84(polygons)));
+            let mut f = map.mercator.to_wgs84_gj(polygons);
             f.set_property("kind", "cell");
             match color {
                 Color::Disconnected => f.set_property("cell_color", "disconnected"),

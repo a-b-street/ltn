@@ -6,7 +6,7 @@ use geo::{
     Closest, ClosestPoint, Coord, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint,
     LineString, Point, Polygon,
 };
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
+use geojson::{Feature, FeatureCollection, GeoJson};
 use serde::Serialize;
 use utils::{Mercator, Tags};
 
@@ -284,7 +284,7 @@ impl MapModel {
                 .linestring
                 .line_interpolate_point(filter.percent_along)
                 .unwrap();
-            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
+            let mut f = self.mercator.to_wgs84_gj(&pt);
             f.set_property("filter_kind", filter.kind.to_string());
             f.set_property("road", r.0);
             f.set_property("edited", Some(filter) != self.original_modal_filters.get(r));
@@ -317,7 +317,7 @@ impl MapModel {
                 .linestring
                 .line_interpolate_point(filter.percent_along)
                 .unwrap();
-            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&pt)));
+            let mut f = self.mercator.to_wgs84_gj(&pt);
             f.set_property("kind", "deleted_existing_modal_filter");
             gj.features.push(f);
         }
@@ -325,7 +325,7 @@ impl MapModel {
         // Any direction edits
         for r in &self.roads {
             if self.directions[&r.id] != Direction::from_osm(&r.tags) {
-                let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&r.linestring)));
+                let mut f = self.mercator.to_wgs84_gj(&r.linestring);
                 f.set_property("kind", "direction");
                 f.set_property("direction", self.directions[&r.id].to_string());
                 gj.features.push(f);
@@ -334,9 +334,7 @@ impl MapModel {
 
         gj.features.extend(self.boundaries.values().cloned());
 
-        let mut f = Feature::from(Geometry::from(
-            &self.mercator.to_wgs84(&self.boundary_polygon),
-        ));
+        let mut f = self.mercator.to_wgs84_gj(&self.boundary_polygon);
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
 
@@ -454,12 +452,12 @@ impl MapModel {
             .unwrap()
             .route(self, pt1, pt2)
         {
-            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
+            let mut f = self.mercator.to_wgs84_gj(&linestring);
             f.set_property("kind", "before");
             features.push(f);
         }
         if let Some(linestring) = self.router_current.as_ref().unwrap().route(self, pt1, pt2) {
-            let mut f = Feature::from(Geometry::from(&self.mercator.to_wgs84(&linestring)));
+            let mut f = self.mercator.to_wgs84_gj(&linestring);
             f.set_property("kind", "after");
             features.push(f);
         }
@@ -496,7 +494,7 @@ impl Road {
     }
 
     pub fn to_gj(&self, mercator: &Mercator) -> Feature {
-        let mut f = Feature::from(Geometry::from(&mercator.to_wgs84(&self.linestring)));
+        let mut f = mercator.to_wgs84_gj(&self.linestring);
         f.set_property("id", self.id.0);
         f.set_property("way", self.way.to_string());
         f.set_property("node1", self.node1.to_string());
