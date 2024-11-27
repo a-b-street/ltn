@@ -9,7 +9,11 @@ The `output` directory has GeoJSON output capturing:
 - Shortcuts per interior road
 - Existing modal filters
 
-The "unit" test in `backend/src/tests.rs` verifies this output doesn't change. When it does, we can manually load the savefile in the old and new web UI, check any differences, and manually approve them.
+The "unit" test in `backend/src/tests.rs` verifies this output doesn't change. When it does, we can manually check the diffs and commit the updated file to approve it. There are a few methods for manually diffing:
+
+1.  Load the test input file in the [current version of the tool](https://a-b-street.github.io/ltn) and locally.
+2.  Load the old and new test output files in [GeoDiffr](https://dabreegster.github.io/geodiffr).
+3.  Use a JSON diff tool like [meld](https://en.wikipedia.org/wiki/Meld_(software)). It's difficult to understand reordered features or slightly changed coordinates, though.
 
 ## Notes per test case
 

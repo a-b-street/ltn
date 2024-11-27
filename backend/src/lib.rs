@@ -160,7 +160,7 @@ impl LTN {
                 x: pos.lng,
                 y: pos.lat,
             }),
-            &self.neighbourhood.as_ref().unwrap().interior_roads,
+            Some(&self.neighbourhood.as_ref().unwrap().interior_roads),
             FilterKind::from_string(&kind).unwrap(),
         );
         self.after_edit();

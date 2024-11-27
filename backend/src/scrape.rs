@@ -3,6 +3,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use anyhow::Result;
 use geo::Coord;
 use osm_reader::{Element, NodeID};
+use rstar::{primitives::GeomWithData, RTree};
 use utils::Tags;
 
 use crate::{Direction, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID, Router};
@@ -95,6 +96,15 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     for coord in &mut barrier_pts {
         *coord = graph.mercator.pt_to_mercator(*coord);
     }
+
+    info!("Building RTree");
+    let closest_road = RTree::bulk_load(
+        roads
+            .iter()
+            .map(|r| GeomWithData::new(r.linestring.clone(), r.id))
+            .collect(),
+    );
+
     info!("Finalizing the map model");
 
     let mut directions = BTreeMap::new();
@@ -108,6 +118,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         mercator: graph.mercator,
         boundary_polygon: graph.boundary_polygon,
         study_area_name,
+        closest_road,
 
         router_original: None,
         router_current: None,
@@ -124,10 +135,9 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     };
 
     // Apply barriers (only those that're exactly on one of the roads)
-    let all_roads: BTreeSet<RoadID> = map.roads.iter().map(|r| r.id).collect();
     for pt in barrier_pts {
         // TODO What kind?
-        map.add_modal_filter(pt, &all_roads, FilterKind::NoEntry);
+        map.add_modal_filter(pt, None, FilterKind::NoEntry);
     }
     // The commands above populate the existing modal filters and edit history. Undo that.
     map.original_modal_filters = map.modal_filters.clone();

@@ -7,6 +7,7 @@ use geo::{
     LineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson};
+use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::Serialize;
 use utils::{Mercator, Tags};
 
@@ -20,6 +21,7 @@ pub struct MapModel {
     pub mercator: Mercator,
     pub study_area_name: Option<String>,
     pub boundary_polygon: Polygon,
+    pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
 
     // TODO Wasteful, can share some
     // This is guaranteed to exist, only Option during MapModel::new internals
@@ -107,7 +109,7 @@ impl MapModel {
     pub fn add_modal_filter(
         &mut self,
         pt: Coord,
-        candidate_roads: &BTreeSet<RoadID>,
+        candidate_roads: Option<&BTreeSet<RoadID>>,
         kind: FilterKind,
     ) {
         let cmd = self.do_edit(self.add_modal_filter_cmd(pt, candidate_roads, kind));
@@ -119,7 +121,7 @@ impl MapModel {
     fn add_modal_filter_cmd(
         &self,
         pt: Coord,
-        candidate_roads: &BTreeSet<RoadID>,
+        candidate_roads: Option<&BTreeSet<RoadID>>,
         kind: FilterKind,
     ) -> Command {
         let (r, percent_along) = self.closest_point_on_road(pt, candidate_roads).unwrap();
@@ -135,13 +137,28 @@ impl MapModel {
     fn closest_point_on_road(
         &self,
         click_pt: Coord,
-        candidate_roads: &BTreeSet<RoadID>,
+        candidate_roads: Option<&BTreeSet<RoadID>>,
     ) -> Option<(RoadID, f64)> {
-        // TODO prune with rtree?
-        candidate_roads
-            .iter()
+        // If candidate_roads is not specified, search around the point with a generous buffer
+        let roads: Vec<RoadID> = if let Some(set) = candidate_roads {
+            set.iter().cloned().collect()
+        } else {
+            // 50m each direction should be enough
+            let buffer = 50.0;
+            let bbox = AABB::from_corners(
+                Point::new(click_pt.x - buffer, click_pt.y - buffer),
+                Point::new(click_pt.x + buffer, click_pt.y + buffer),
+            );
+            self.closest_road
+                .locate_in_envelope_intersecting(&bbox)
+                .map(|r| r.data)
+                .collect()
+        };
+
+        roads
+            .into_iter()
             .filter_map(|r| {
-                let road = self.get_r(*r);
+                let road = self.get_r(r);
                 if let Some(hit_pt) = match road.linestring.closest_point(&click_pt.into()) {
                     Closest::Intersection(pt) => Some(pt),
                     Closest::SinglePoint(pt) => Some(pt),
@@ -362,7 +379,6 @@ impl MapModel {
 
         // Filters could be defined for multiple neighbourhoods, not just the one
         // in the savefile
-        let all_roads: BTreeSet<RoadID> = self.roads.iter().map(|r| r.id).collect();
         let mut cmds = Vec::new();
 
         for f in gj.features {
@@ -372,7 +388,7 @@ impl MapModel {
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
                     cmds.push(self.add_modal_filter_cmd(
                         self.mercator.pt_to_mercator(gj_pt.into()),
-                        &all_roads,
+                        None,
                         kind,
                     ));
                 }
@@ -380,7 +396,7 @@ impl MapModel {
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
                     let pt = self.mercator.pt_to_mercator(gj_pt.into());
                     // TODO Better error handling if we don't match
-                    let (r, _) = self.closest_point_on_road(pt, &all_roads).unwrap();
+                    let (r, _) = self.closest_point_on_road(pt, None).unwrap();
                     cmds.push(Command::SetModalFilter(r, None));
                 }
                 "direction" => {
