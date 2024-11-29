@@ -86,11 +86,6 @@
             Route
           </Link>
         </li>
-        <li>
-          <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
-            Auto boundaries
-          </Link>
-        </li>
       </ul>
     </nav>
   </div>
@@ -109,7 +104,13 @@
       </p>
     </details>
 
-    <Link on:click={newBoundary}>Draw a new boundary</Link>
+    <div><Link on:click={newBoundary}>Draw a new boundary</Link></div>
+    <div>
+      <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
+        Use an auto-generated boundary
+      </Link>
+    </div>
+
     <ul>
       {#each boundaryNames as name}
         <li>
