@@ -19,6 +19,7 @@ use self::render_cells::RenderCells;
 use self::route::Router;
 use self::shortcuts::Shortcuts;
 
+mod auto_boundaries;
 mod cells;
 mod geo_helpers;
 mod map_model;
@@ -112,6 +113,11 @@ impl LTN {
             serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
                 .map_err(err_to_js)?,
         )
+    }
+
+    #[wasm_bindgen(js_name = renderAutoBoundaries)]
+    pub fn render_auto_boundaries(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&self.map.render_auto_boundaries()).map_err(err_to_js)?)
     }
 
     /// Takes a name and boundary GJ polygon

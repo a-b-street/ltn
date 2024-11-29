@@ -99,6 +99,9 @@ const layerZorder = [
   "boundary",
   "neighbourhood-boundary",
 
+  "auto-boundaries-areas",
+  "auto-boundaries-severances",
+
   "freehand-line",
 
   "edit-polygon-fill",

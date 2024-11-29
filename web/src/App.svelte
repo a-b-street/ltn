@@ -24,6 +24,7 @@
   import RouteMode from "./RouteMode.svelte";
   import Settings from "./Settings.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
+  import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
   import {
     app,
     map as mapStore,
@@ -159,6 +160,8 @@
           <NetworkMode />
         {:else if $mode.mode == "set-boundary"}
           <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
+        {:else if $mode.mode == "auto-boundaries"}
+          <AutoBoundariesMode />
         {:else if $mode.mode == "neighbourhood"}
           <NeighbourhoodMode />
         {:else if $mode.mode == "view-shortcuts"}

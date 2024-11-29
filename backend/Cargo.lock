@@ -68,6 +68,8 @@ dependencies = [
  "fast_paths",
  "geo",
  "geojson",
+ "i_float",
+ "i_overlay",
  "log",
  "osm-reader",
  "route-snapper-graph",
