@@ -21,10 +21,17 @@ jobs:
       - name: Download test inputs
         run: |
           cd web/public
+
           mkdir osm
           cd osm
           wget https://assets.od2net.org/severance_pbfs/bristol.pbf
           wget https://assets.od2net.org/severance_pbfs/strasbourg.pbf
+
+          cd ..
+          mkdir boundaries
+          cd boundaries
+          wget https://assets.od2net.org/boundaries/bristol.geojson
+          wget https://assets.od2net.org/boundaries/strasbourg.geojson
 
       - name: Run tests
         run: |
