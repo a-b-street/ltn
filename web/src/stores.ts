@@ -22,6 +22,9 @@ export type Mode =
       existing: Feature<Polygon, AreaProps> | null;
     }
   | {
+      mode: "auto-boundaries";
+    }
+  | {
       mode: "neighbourhood";
     }
   | {
