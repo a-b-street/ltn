@@ -42,8 +42,8 @@
         {...layerId("auto-boundaries-areas")}
         manageHoverState
         paint={{
-          "fill-color": "cyan",
-          "fill-opacity": hoverStateFilter(0.3, 0.5),
+          "fill-color": hoverStateFilter("cyan", "red"),
+          "fill-opacity": 0.3,
         }}
       />
 

@@ -23,6 +23,9 @@ pub struct MapModel {
     pub boundary_polygon: Polygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
 
+    // Only those acting as severances; above or belowground don't count
+    pub railways: Vec<LineString>,
+
     // TODO Wasteful, can share some
     // This is guaranteed to exist, only Option during MapModel::new internals
     pub router_original: Option<Router>,

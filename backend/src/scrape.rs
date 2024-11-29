@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
-use geo::Coord;
+use geo::{Coord, LineString};
 use osm_reader::{Element, NodeID};
 use rstar::{primitives::GeomWithData, RTree};
 use utils::Tags;
@@ -13,6 +13,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     // This doesn't use osm2graph's helper, because it needs to scrape more things from OSM
     let mut node_mapping = HashMap::new();
     let mut highways = Vec::new();
+    let mut railways = Vec::new();
     let mut all_barriers: BTreeSet<NodeID> = BTreeSet::new();
     osm_reader::parse(input_bytes, |elem| match elem {
         Element::Node {
@@ -46,6 +47,14 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
                 }
                 if node_ids.len() >= 2 {
                     highways.push(utils::osm2graph::Way { id, node_ids, tags });
+                }
+            } else if tags.has("railway") {
+                // TODO Filter out below/above grade
+                node_ids.retain(|n| node_mapping.contains_key(n));
+                if node_ids.len() >= 2 {
+                    railways.push(LineString(
+                        node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
+                    ));
                 }
             }
         }
@@ -97,6 +106,10 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         *coord = graph.mercator.pt_to_mercator(*coord);
     }
 
+    for ls in &mut railways {
+        graph.mercator.to_mercator_in_place(ls);
+    }
+
     info!("Building RTree");
     let closest_road = RTree::bulk_load(
         roads
@@ -119,6 +132,8 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         boundary_polygon: graph.boundary_polygon,
         study_area_name,
         closest_road,
+
+        railways,
 
         router_original: None,
         router_current: None,
