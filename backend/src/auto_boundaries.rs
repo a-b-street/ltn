@@ -43,6 +43,14 @@ impl MapModel {
             severances.push(linestring.clone());
         }
 
+        for linestring in &self.waterways {
+            let mut f = self.mercator.to_wgs84_gj(linestring);
+            f.set_property("kind", "waterway severance");
+            features.push(f);
+
+            severances.push(linestring.clone());
+        }
+
         // TODO The boundary is imprecise, messing this process up
         for polygon in split_polygon(self.boundary_polygon.clone(), severances) {
             let mut f = self.mercator.to_wgs84_gj(&polygon);

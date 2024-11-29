@@ -25,6 +25,7 @@ pub struct MapModel {
 
     // Only those acting as severances; above or belowground don't count
     pub railways: Vec<LineString>,
+    pub waterways: Vec<LineString>,
 
     // TODO Wasteful, can share some
     // This is guaranteed to exist, only Option during MapModel::new internals

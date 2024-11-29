@@ -14,6 +14,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     let mut node_mapping = HashMap::new();
     let mut highways = Vec::new();
     let mut railways = Vec::new();
+    let mut waterways = Vec::new();
     let mut all_barriers: BTreeSet<NodeID> = BTreeSet::new();
     osm_reader::parse(input_bytes, |elem| match elem {
         Element::Node {
@@ -53,6 +54,15 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
                 node_ids.retain(|n| node_mapping.contains_key(n));
                 if node_ids.len() >= 2 {
                     railways.push(LineString(
+                        node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
+                    ));
+                }
+            } else if tags.is("natural", "water") {
+                // If the entire area is inside the study area, the LineString will be closed. If
+                // it intersects the study area, then it might not be.
+                node_ids.retain(|n| node_mapping.contains_key(n));
+                if node_ids.len() >= 2 {
+                    waterways.push(LineString(
                         node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
                     ));
                 }
@@ -109,6 +119,9 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
     for ls in &mut railways {
         graph.mercator.to_mercator_in_place(ls);
     }
+    for ls in &mut waterways {
+        graph.mercator.to_mercator_in_place(ls);
+    }
 
     info!("Building RTree");
     let closest_road = RTree::bulk_load(
@@ -134,6 +147,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         closest_road,
 
         railways,
+        waterways,
 
         router_original: None,
         router_current: None,
