@@ -45,14 +45,21 @@ pub struct LTN {
 impl LTN {
     /// Call with bytes of an osm.pbf or osm.xml string
     #[wasm_bindgen(constructor)]
-    pub fn new(input_bytes: &[u8], study_area_name: Option<String>) -> Result<LTN, JsValue> {
+    pub fn new(
+        input_bytes: &[u8],
+        boundary_input: JsValue,
+        study_area_name: Option<String>,
+    ) -> Result<LTN, JsValue> {
         // Panics shouldn't happen, but if they do, console.log them.
         console_error_panic_hook::set_once();
         START.call_once(|| {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
 
-        let map = MapModel::new(input_bytes, study_area_name).map_err(err_to_js)?;
+        let boundary: Feature = serde_wasm_bindgen::from_value(boundary_input)?;
+        let polygon = boundary.try_into().map_err(err_to_js)?;
+
+        let map = MapModel::new(input_bytes, polygon, study_area_name).map_err(err_to_js)?;
         Ok(LTN {
             map,
             neighbourhood: None,

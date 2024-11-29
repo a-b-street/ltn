@@ -51,8 +51,7 @@ impl MapModel {
             severances.push(linestring.clone());
         }
 
-        // TODO The boundary is imprecise, messing this process up
-        for polygon in split_polygon(self.boundary_polygon.clone(), severances) {
+        for polygon in split_polygon(self.mercator.to_mercator(&self.boundary_wgs84), severances) {
             let mut f = self.mercator.to_wgs84_gj(&polygon);
             f.set_property("kind", "area");
             features.push(f);

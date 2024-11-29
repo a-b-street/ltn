@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import { LngLat } from "maplibre-gl";
 import { LTN } from "backend";
-import type { Feature } from "geojson";
+import type { Feature, Polygon } from "geojson";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
 import { RouteTool } from "route-snapper-ts";
 import {
@@ -28,10 +28,16 @@ export async function loadFromLocalStorage(key: string) {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
     console.time("get OSM input");
-    let buffer = await getOsmInput(gj);
+    let [buffer, boundary] = await getOsmInput(gj);
     console.timeEnd("get OSM input");
     console.time("load");
-    app.set(new LTN(new Uint8Array(buffer), gj.study_area_name || undefined));
+    app.set(
+      new LTN(
+        new Uint8Array(buffer),
+        boundary,
+        gj.study_area_name || undefined,
+      ),
+    );
     // TODO Rename savefile -> project? Or combine this call with the constructor?
     get(app)!.loadSavefile(gj);
     console.timeEnd("load");
@@ -43,16 +49,24 @@ export async function loadFromLocalStorage(key: string) {
   }
 }
 
-// Either from a pre-hosted pbf file or from Overpass
-async function getOsmInput(gj: any): Promise<ArrayBuffer> {
+// Returns OSM input and the boundary polygon, either from a pre-hosted pbf
+// file or from Overpass.
+async function getOsmInput(gj: any): Promise<[ArrayBuffer, Feature<Polygon>]> {
   if (gj.study_area_name) {
-    let url = get(useLocalVite)
+    let url1 = get(useLocalVite)
       ? `/osm/${gj.study_area_name}.pbf`
       : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
-    console.log(`Grabbing ${url}`);
-    let resp = await fetch(url);
-    let bytes = await resp.arrayBuffer();
-    return bytes;
+    console.log(`Grabbing ${url1}`);
+    let resp1 = await fetch(url1);
+    let bytes = await resp1.arrayBuffer();
+
+    let url2 = get(useLocalVite)
+      ? `/boundaries/${gj.study_area_name}.geojson`
+      : `https://assets.od2net.org/boundaries/${gj.study_area_name}.geojson`;
+    let resp2 = await fetch(url2);
+    let boundary = await resp2.json();
+
+    return [bytes, boundary];
   } else {
     console.log(`Grabbing from Overpass`);
     let study_area_boundary = gj.features.find(
@@ -60,7 +74,7 @@ async function getOsmInput(gj: any): Promise<ArrayBuffer> {
     )!;
     let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
     let bytes = await resp.arrayBuffer();
-    return bytes;
+    return [bytes, study_area_boundary];
   }
 }
 

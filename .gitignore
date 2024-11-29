@@ -1,5 +1,6 @@
 *.swp
 target/
 node_modules/
-# Local symlink to avoid hitting od2net.org
+# Local symlinks to avoid hitting od2net.org
 web/public/osm
+web/public/boundaries

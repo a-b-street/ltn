@@ -6,7 +6,7 @@ use geo::{
     Closest, ClosestPoint, Coord, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint,
     LineString, Point, Polygon,
 };
-use geojson::{Feature, FeatureCollection, GeoJson};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::Serialize;
 use utils::{Mercator, Tags};
@@ -20,7 +20,7 @@ pub struct MapModel {
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
     pub study_area_name: Option<String>,
-    pub boundary_polygon: Polygon,
+    pub boundary_wgs84: Polygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
 
     // Only those acting as severances; above or belowground don't count
@@ -87,8 +87,12 @@ pub struct Intersection {
 
 impl MapModel {
     /// Call with bytes of an osm.pbf or osm.xml string
-    pub fn new(input_bytes: &[u8], study_area_name: Option<String>) -> Result<MapModel> {
-        crate::scrape::scrape_osm(input_bytes, study_area_name)
+    pub fn new(
+        input_bytes: &[u8],
+        boundary_wgs84: Polygon,
+        study_area_name: Option<String>,
+    ) -> Result<MapModel> {
+        crate::scrape::scrape_osm(input_bytes, boundary_wgs84, study_area_name)
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
@@ -355,7 +359,7 @@ impl MapModel {
 
         gj.features.extend(self.boundaries.values().cloned());
 
-        let mut f = self.mercator.to_wgs84_gj(&self.boundary_polygon);
+        let mut f = Feature::from(Geometry::from(&self.boundary_wgs84));
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
 
@@ -486,7 +490,6 @@ impl MapModel {
 
     /// Return a polygon covering the world, minus a hole for the boundary, in WGS84
     pub fn invert_boundary(&self) -> Polygon {
-        let (boundary, _) = self.mercator.to_wgs84(&self.boundary_polygon).into_inner();
         Polygon::new(
             LineString::from(vec![
                 (180.0, 90.0),
@@ -495,7 +498,7 @@ impl MapModel {
                 (180.0, -90.0),
                 (180.0, 90.0),
             ]),
-            vec![boundary],
+            vec![self.boundary_wgs84.exterior().clone()],
         )
     }
 

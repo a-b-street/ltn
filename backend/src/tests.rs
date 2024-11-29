@@ -1,6 +1,6 @@
 use anyhow::Result;
 use geo::Polygon;
-use geojson::FeatureCollection;
+use geojson::{Feature, FeatureCollection};
 
 use crate::{MapModel, Neighbourhood};
 
@@ -34,7 +34,13 @@ fn test_example(study_area_name: &str, savefile_name: &str, neighbourhood_name: 
 // TODO web/public/osm must be symlinked to local PBF copies
 fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) -> Result<String> {
     let input_bytes = std::fs::read(format!("../web/public/osm/{study_area_name}.pbf"))?;
-    let mut map = MapModel::new(&input_bytes, Some(study_area_name.to_string()))?;
+    let boundary: Feature = std::fs::read_to_string(format!(
+        "../web/public/boundaries/{study_area_name}.geojson"
+    ))?
+    .parse()?;
+    let polygon = boundary.try_into()?;
+
+    let mut map = MapModel::new(&input_bytes, polygon, Some(study_area_name.to_string()))?;
 
     let savefile: FeatureCollection =
         std::fs::read_to_string(format!("../tests/{savefile_name}.geojson"))?.parse()?;

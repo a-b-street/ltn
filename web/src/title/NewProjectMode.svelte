@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Feature, Polygon } from "geojson";
   import { LTN } from "backend";
   import { onMount } from "svelte";
   import { Loading } from "svelte-utils";
@@ -30,10 +31,14 @@
     exampleAreas = await resp.json();
   });
 
-  function gotXml(e: CustomEvent<string>) {
+  function gotXml(e: CustomEvent<{ xml: string; boundary: Feature<Polygon> }>) {
     loading = "Loading OSM";
     try {
-      $app = new LTN(new TextEncoder().encode(e.detail), undefined);
+      $app = new LTN(
+        new TextEncoder().encode(e.detail.xml),
+        e.detail.boundary,
+        undefined,
+      );
       $projectName = `ltn_${newProjectName}`;
       afterProjectLoaded();
       // No savefile to load. Create it immediately with just the boundary

@@ -1,14 +1,18 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
-use geo::{Coord, LineString};
+use geo::{Coord, LineString, Polygon};
 use osm_reader::{Element, NodeID};
 use rstar::{primitives::GeomWithData, RTree};
 use utils::Tags;
 
 use crate::{Direction, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID, Router};
 
-pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result<MapModel> {
+pub fn scrape_osm(
+    input_bytes: &[u8],
+    boundary_wgs84: Polygon,
+    study_area_name: Option<String>,
+) -> Result<MapModel> {
     info!("Parsing {} bytes of OSM data", input_bytes.len());
     // This doesn't use osm2graph's helper, because it needs to scrape more things from OSM
     let mut node_mapping = HashMap::new();
@@ -142,7 +146,7 @@ pub fn scrape_osm(input_bytes: &[u8], study_area_name: Option<String>) -> Result
         roads,
         intersections,
         mercator: graph.mercator,
-        boundary_polygon: graph.boundary_polygon,
+        boundary_wgs84,
         study_area_name,
         closest_road,
 
