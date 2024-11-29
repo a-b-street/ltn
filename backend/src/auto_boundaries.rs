@@ -22,14 +22,25 @@ impl MapModel {
                     "primary_link",
                     "secondary",
                     "secondary_link",
+                    "tertiary",
+                    "tertiary_link",
                 ],
             ) {
                 let mut f = self.mercator.to_wgs84_gj(&road.linestring);
+                // TODO Important to distinguish, or just debugging?
                 f.set_property("kind", "road severance");
                 features.push(f);
 
                 severances.push(road.linestring.clone());
             }
+        }
+
+        for linestring in &self.railways {
+            let mut f = self.mercator.to_wgs84_gj(linestring);
+            f.set_property("kind", "railway severance");
+            features.push(f);
+
+            severances.push(linestring.clone());
         }
 
         // TODO The boundary is imprecise, messing this process up
