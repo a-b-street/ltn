@@ -11,6 +11,7 @@
   import { isLine } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, autosave } from "./stores";
+  import { downloadGeneratedFile } from "svelte-utils";
 
   let gj = JSON.parse($app!.renderAutoBoundaries());
 
@@ -40,6 +41,13 @@
       );
     }
   }
+
+  function download() {
+    downloadGeneratedFile(
+      "auto_boundaries.geojson",
+      JSON.stringify(gj, null, "  "),
+    );
+  }
 </script>
 
 <SplitComponent>
@@ -68,6 +76,7 @@
       roads, railways, and water thatform severances. There are many bugs; this
       is experimental.
     </p>
+    <button class="secondary" on:click={download}>Export to GeoJSON</button>
   </div>
 
   <div slot="map">
