@@ -61,7 +61,9 @@ pub fn scrape_osm(
                         node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
                     ));
                 }
-            } else if tags.is_any("natural", vec!["water", "coastline"]) {
+            } else if tags.is_any("natural", vec!["water", "coastline"])
+                || tags.is("waterway", "dock")
+            {
                 // If the entire area is inside the study area, the LineString will be closed. If
                 // it intersects the study area, then it might not be.
                 node_ids.retain(|n| node_mapping.contains_key(n));

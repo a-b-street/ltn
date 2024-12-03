@@ -7,6 +7,7 @@
     hoverStateFilter,
     type LayerClickInfo,
   } from "svelte-maplibre";
+  import type { ExpressionSpecification } from "maplibre-gl";
   import { Link, Popup, layerId } from "./common";
   import { isLine, isPolygon } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
@@ -15,6 +16,7 @@
 
   let gj = JSON.parse($app!.renderAutoBoundaries());
   let minArea = 0;
+  let removeNonRoad = true;
 
   function add(e: CustomEvent<LayerClickInfo>) {
     let name = window.prompt("What do you want to name the neighbourhood?");
@@ -48,6 +50,17 @@
       "auto_boundaries.geojson",
       JSON.stringify(gj, null, "  "),
     );
+  }
+
+  function makeFilter(
+    minArea: number,
+    removeNonRoad: boolean,
+  ): ExpressionSpecification {
+    let x: ExpressionSpecification = ["all", isPolygon, [">=", ["get", "area_km2"], minArea]];
+    if (removeNonRoad) {
+      x.push(["get", "touches_big_road"]);
+    }
+    return x;
   }
 </script>
 
@@ -85,13 +98,18 @@
       Minimum area (km²)
       <input type="number" bind:value={minArea} min="0" max="1" step="0.01" />
     </label>
+
+    <label>
+      <input type="checkbox" bind:checked={removeNonRoad} />
+      Remove areas not touching a big road
+    </label>
   </div>
 
   <div slot="map">
     <GeoJSON data={gj} generateId>
       <FillLayer
         {...layerId("auto-boundaries-areas")}
-        filter={["all", isPolygon, [">=", ["get", "area_km2"], minArea]]}
+        filter={makeFilter(minArea, removeNonRoad)}
         manageHoverState
         paint={{
           "fill-color": [
@@ -115,7 +133,11 @@
         hoverCursor="pointer"
       >
         <Popup openOn="hover" let:props>
-          Area: {props.area_km2.toFixed(5)} km²
+          <p>Area: {props.area_km2.toFixed(1)} km²</p>
+          <p>
+            Borders roads = {props.touches_big_road}, railway = {props.touches_railway},
+            water = {props.touches_waterway}
+          </p>
         </Popup>
       </FillLayer>
 

@@ -1,4 +1,4 @@
-use geo::{Area, Coord, LineString, Polygon};
+use geo::{Area, Coord, Intersects, LineString, Polygon};
 use geojson::FeatureCollection;
 use i_float::f64_point::F64Point;
 use i_overlay::core::fill_rule::FillRule;
@@ -11,6 +11,7 @@ impl MapModel {
     pub fn render_auto_boundaries(&self) -> FeatureCollection {
         let mut features = Vec::new();
         let mut severances = Vec::new();
+        let mut road_severances = Vec::new();
 
         for road in &self.roads {
             if road.tags.is_any(
@@ -32,6 +33,7 @@ impl MapModel {
                 features.push(f);
 
                 severances.push(road.linestring.clone());
+                road_severances.push(road.linestring.clone());
             }
         }
 
@@ -52,8 +54,16 @@ impl MapModel {
         }
 
         for polygon in split_polygon(self.mercator.to_mercator(&self.boundary_wgs84), severances) {
+            // TODO This is expensive; could this info somehow be retained?
+            let touches_big_road = boundary_touches_any(&polygon, &road_severances);
+            let touches_railway = boundary_touches_any(&polygon, &self.railways);
+            let touches_waterway = boundary_touches_any(&polygon, &self.waterways);
+
             let mut f = self.mercator.to_wgs84_gj(&polygon);
             f.set_property("kind", "area");
+            f.set_property("touches_big_road", touches_big_road);
+            f.set_property("touches_railway", touches_railway);
+            f.set_property("touches_waterway", touches_waterway);
             // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
             f.set_property("area_km2", polygon.unsigned_area() / 1_000_000.0);
             features.push(f);
@@ -102,4 +112,11 @@ fn to_geo_linestring(pts: Vec<F64Point>) -> LineString {
             .map(|pt| Coord { x: pt.x, y: pt.y })
             .collect(),
     )
+}
+
+fn boundary_touches_any(polygon: &Polygon, linestrings: &Vec<LineString>) -> bool {
+    // TODO At least consider an rtree to prune!
+    linestrings
+        .iter()
+        .any(|ls| ls.intersects(polygon.exterior()))
 }
