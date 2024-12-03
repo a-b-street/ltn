@@ -19,6 +19,8 @@ impl MapModel {
                 vec![
                     "motorway",
                     "motorway_link",
+                    "trunk",
+                    "trunk_link",
                     "primary",
                     "primary_link",
                     "secondary",

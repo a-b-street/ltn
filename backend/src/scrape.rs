@@ -53,8 +53,7 @@ pub fn scrape_osm(
                 if node_ids.len() >= 2 {
                     highways.push(utils::osm2graph::Way { id, node_ids, tags });
                 }
-            } else if tags.has("railway") {
-                // TODO Filter out below/above grade
+            } else if tags.has("railway") && (!tags.has("layer") || tags.is("layer", "0")) {
                 node_ids.retain(|n| node_mapping.contains_key(n));
                 if node_ids.len() >= 2 {
                     railways.push(LineString(
