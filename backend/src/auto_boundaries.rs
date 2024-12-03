@@ -1,4 +1,4 @@
-use geo::{Coord, LineString, Polygon};
+use geo::{Area, Coord, LineString, Polygon};
 use geojson::FeatureCollection;
 use i_float::f64_point::F64Point;
 use i_overlay::core::fill_rule::FillRule;
@@ -54,6 +54,8 @@ impl MapModel {
         for polygon in split_polygon(self.mercator.to_mercator(&self.boundary_wgs84), severances) {
             let mut f = self.mercator.to_wgs84_gj(&polygon);
             f.set_property("kind", "area");
+            // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
+            f.set_property("area_km2", polygon.unsigned_area() / 1_000_000.0);
             features.push(f);
         }
 

@@ -61,6 +61,7 @@ const layerZorder = [
   // TODO Handle all basemaps now
   "Background",
 
+  // TODO These don't show up at low zoom, I think because Residential is hidden
   "neighbourhood-boundaries",
 
   // MapTiler basemap
