@@ -4,7 +4,7 @@
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { layerId, Popup, Link } from "./common";
+  import { layerId, Popup, Link, HelpButton } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, autosave, mode, projectName } from "./stores";
@@ -72,7 +72,22 @@
             Choose project
           </Link>
         </li>
-        <li>Pick neighbourhood</li>
+        <li>
+          Pick neighbourhood
+          <HelpButton>
+            <p>
+              Inside the neighbourhood you define, the goal is to eliminate (or
+              deliberately permit) through-traffic. An appropriate neighbourhood
+              boundary depends on many factors. The simplest approach is to find
+              the area bounded on all sides by "main" roads, which are designed
+              for higher traffic volumes. There are many other considerations,
+              though -- maybe severances like rivers or rail should be part of a
+              boundary. Bridges and tunnels near a boundary may be confusing as
+              well. And note that your boundary may not match the conventional
+              definition of "neighbourhood."
+            </p>
+          </HelpButton>
+        </li>
       </ul>
     </nav>
     <nav>
@@ -87,21 +102,8 @@
       </ul>
     </nav>
   </div>
-  <div slot="sidebar">
-    <details>
-      <summary>Help</summary>
-      <p>
-        Inside the neighbourhood you define, the goal is to eliminate (or
-        deliberately permit) through-traffic. An appropriate neighbourhood
-        boundary depends on many factors. The simplest approach is to find the
-        area bounded on all sides by "main" roads, which are designed for higher
-        traffic volumes. There are many other considerations, though -- maybe
-        severances like rivers or rail should be part of a boundary. Bridges and
-        tunnels near a boundary may be confusing as well. And note that your
-        boundary may not match the conventional definition of "neighbourhood."
-      </p>
-    </details>
 
+  <div slot="sidebar">
     <div><Link on:click={newBoundary}>Draw a new boundary</Link></div>
     <div>
       <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>

@@ -5,7 +5,7 @@
   import type { LngLat } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
-  import { Popup, Link } from "../common";
+  import { Popup, Link, HelpButton } from "../common";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {
@@ -141,7 +141,18 @@
             Pick neighbourhood
           </Link>
         </li>
-        <li>Editing</li>
+        <li>
+          Editing
+          <HelpButton>
+            <p>
+              Now that you've defined a neighbourhood boundary, you can see the
+              possible shortcuts that vehicles are currently able to take
+              through it. You can add a new modal filter to try and solve this.
+              The colored "cell" areas show what's reachable for drivers without
+              leaving the boundary you've drawn.
+            </p>
+          </HelpButton>
+        </li>
       </ul>
     </nav>
     <nav>
@@ -182,17 +193,6 @@
       Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
       , with an area of {gjInput.area_km2.toFixed(1)} km²
     </p>
-
-    <details>
-      <summary>Help</summary>
-      <p>
-        Now that you've defined a neighbourhood boundary, you can see the
-        possible shortcuts that vehicles are currently able to take through it.
-        You can add a new modal filter to try and solve this. The colored "cell"
-        areas show what's reachable for drivers without leaving the boundary
-        you've drawn.
-      </p>
-    </details>
 
     {#if numDisconnectedCells > 0}
       <mark>
