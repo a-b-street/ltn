@@ -41,10 +41,6 @@ export type Mode =
 export let map: Writable<Map | null> = writable(null);
 export let maptilerBasemap: Writable<string> = writable("dataviz");
 
-export let lightMode: Writable<boolean> = writable(
-  !window.matchMedia("(prefers-color-scheme: dark)").matches,
-);
-
 export let useLocalVite: Writable<boolean> = writable(false);
 // The exact key in local storage
 export let projectName: Writable<string> = writable("");

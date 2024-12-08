@@ -1,8 +1,7 @@
 <script lang="ts">
   import About from "./About.svelte";
   import onewayArrowUrl from "../assets/arrow.png?url";
-  import logoLight from "../assets/logo_light.svg?url";
-  import logoDark from "../assets/logo_dark.svg?url";
+  import logo from "../assets/logo.svg?url";
   import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
@@ -29,7 +28,6 @@
     app,
     map as mapStore,
     showAbout,
-    lightMode,
     mode,
     maptilerBasemap,
     maptilerApiKey,
@@ -88,11 +86,7 @@
 <Layout>
   <div slot="top" style="display: flex">
     <button class="outline" on:click={() => ($showAbout = true)}>
-      <img
-        src={$lightMode ? logoLight : logoDark}
-        style="height: 6vh;"
-        alt="A/B Street logo"
-      />
+      <img src={logo} style="height: 6vh;" alt="A/B Street logo" />
     </button>
     <Settings />
     <span bind:this={topDiv} style="width: 100%" />

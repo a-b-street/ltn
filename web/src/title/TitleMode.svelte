@@ -1,18 +1,9 @@
 <script lang="ts">
-  import deleteLight from "../../assets/delete_light.svg?url";
-  import deleteDark from "../../assets/delete_dark.svg?url";
-  import editLight from "../../assets/edit_light.svg?url";
-  import editDark from "../../assets/edit_dark.svg?url";
+  import deleteIcon from "../../assets/delete.svg?url";
+  import editIcon from "../../assets/edit.svg?url";
   import { Link } from "../common";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import {
-    lightMode,
-    app,
-    projectName,
-    map,
-    mode,
-    route_tool,
-  } from "../stores";
+  import { app, projectName, map, mode, route_tool } from "../stores";
   import { loadFromLocalStorage } from "./loader";
   import { Loading } from "svelte-utils";
 
@@ -122,19 +113,13 @@
                   class="secondary"
                   on:click={() => renameProject(project)}
                 >
-                  <img
-                    src={$lightMode ? editLight : editDark}
-                    alt="Rename project"
-                  />
+                  <img src={editIcon} alt="Rename project" />
                 </button>
                 <button
                   class="secondary"
                   on:click={() => deleteProject(project)}
                 >
-                  <img
-                    src={$lightMode ? deleteLight : deleteDark}
-                    alt="Delete project"
-                  />
+                  <img src={deleteIcon} alt="Delete project" />
                 </button>
               </span>
             </li>

@@ -1,15 +1,13 @@
 <script lang="ts">
-  import deleteLight from "../assets/delete_light.svg?url";
-  import deleteDark from "../assets/delete_dark.svg?url";
-  import editLight from "../assets/edit_light.svg?url";
-  import editDark from "../assets/edit_dark.svg?url";
+  import deleteIcon from "../assets/delete.svg?url";
+  import editIcon from "../assets/edit.svg?url";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { layerId, Popup, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { lightMode, app, autosave, mode, projectName } from "./stores";
+  import { app, autosave, mode, projectName } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
   $: gj = JSON.parse($app!.toSavefile());
@@ -122,19 +120,13 @@
               class="secondary"
               on:click={() => renameNeighbourhood(name)}
             >
-              <img
-                src={$lightMode ? editLight : editDark}
-                alt="Rename neighbourhood"
-              />
+              <img src={editIcon} alt="Rename neighbourhood" />
             </button>
             <button
               class="secondary"
               on:click={() => deleteNeighbourhood(name)}
             >
-              <img
-                src={$lightMode ? deleteLight : deleteDark}
-                alt="Delete neighbourhood"
-              />
+              <img src={deleteIcon} alt="Delete neighbourhood" />
             </button>
           </span>
         </li>
