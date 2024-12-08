@@ -80,7 +80,16 @@
     filter={["==", ["get", "kind"], "cell"]}
     paint={{
       "fill-color": ["get", "color"],
-      "fill-opacity": 0.3,
+      "fill-opacity": 0.8,
+    }}
+  />
+
+  <LineLayer
+    {...layerId("interior-roads-outlines")}
+    filter={["==", ["get", "kind"], "interior_road"]}
+    paint={{
+      "line-width": 12,
+      "line-color": "black",
     }}
   />
 

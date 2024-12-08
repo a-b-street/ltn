@@ -82,6 +82,7 @@ const layerZorder = [
   "debug-filters",
 
   "cells",
+  "interior-roads-outlines",
   "interior-roads",
 
   "compare-route",
