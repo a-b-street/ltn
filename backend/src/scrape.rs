@@ -128,11 +128,17 @@ pub fn scrape_osm(
         graph.mercator.to_mercator_in_place(ls);
     }
 
-    info!("Building RTree");
+    info!("Building RTrees");
     let closest_road = RTree::bulk_load(
         roads
             .iter()
             .map(|r| GeomWithData::new(r.linestring.clone(), r.id))
+            .collect(),
+    );
+    let closest_intersection = RTree::bulk_load(
+        intersections
+            .iter()
+            .map(|i| GeomWithData::new(i.point, i.id))
             .collect(),
     );
 
@@ -150,6 +156,7 @@ pub fn scrape_osm(
         boundary_wgs84,
         study_area_name,
         closest_road,
+        closest_intersection,
 
         railways,
         waterways,
@@ -181,7 +188,6 @@ pub fn scrape_osm(
     let main_road_penalty = 1.0;
     map.router_original = Some(Router::new(
         &map.roads,
-        &map.intersections,
         &map.modal_filters,
         &map.directions,
         main_road_penalty,

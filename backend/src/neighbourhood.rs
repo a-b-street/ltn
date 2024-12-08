@@ -8,7 +8,7 @@ use geo::{
 use geojson::FeatureCollection;
 use web_time::Instant;
 
-use crate::geo_helpers::clip_linestring_to_polygon;
+use crate::geo_helpers::{aabb, buffer_aabb, clip_linestring_to_polygon};
 use crate::render_cells::Color;
 use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
@@ -34,9 +34,14 @@ struct DerivedNeighbourhoodState {
 
 impl Neighbourhood {
     pub fn new(map: &MapModel, name: String, boundary_polygon: Polygon) -> Result<Self> {
+        info!("match roads");
+        let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
+
         let mut interior_roads = BTreeSet::new();
         let mut crosses = BTreeMap::new();
-        for r in &map.roads {
+        for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
+            let r = &map.roads[obj.data.0];
+
             match line_in_polygon(&r.linestring, &boundary_polygon) {
                 LineInPolygon::Inside => {
                     interior_roads.insert(r.id);
@@ -53,20 +58,25 @@ impl Neighbourhood {
             }
         }
 
+        info!("match intersections");
         let mut border_intersections = BTreeSet::new();
-        for i in &map.intersections {
+        for obj in map
+            .closest_intersection
+            .locate_in_envelope_intersecting(&bbox)
+        {
             // Check distance to the polygon's linestring, rather than the polygon itself. Points
             // contained within a polygon and right on the linestring both count as 0.
-            let dist = Euclidean::distance(&i.point, boundary_polygon.exterior());
+            let dist = Euclidean::distance(obj.geom(), boundary_polygon.exterior());
             // Allow a small tolerance
             if dist < 0.1 {
-                border_intersections.insert(i.id);
+                border_intersections.insert(obj.data);
             }
         }
 
         if interior_roads.is_empty() {
             bail!("No roads inside the boundary");
         }
+        info!("rest of setup");
 
         // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
         let boundary_area_km2 = boundary_polygon.unsigned_area() / 1_000_000.0;

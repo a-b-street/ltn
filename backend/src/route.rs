@@ -2,28 +2,21 @@ use std::collections::BTreeMap;
 
 use fast_paths::{FastGraph, InputGraph};
 use geo::{Coord, LineString};
-use rstar::primitives::GeomWithData;
-use rstar::RTree;
 use utils::NodeMap;
 
-use crate::{Direction, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID};
+use crate::{Direction, IntersectionID, MapModel, ModalFilter, Road, RoadID};
 
 // For vehicles only
 #[derive(Clone)]
 pub struct Router {
     ch: FastGraph,
     node_map: NodeMap<IntersectionID>,
-    closest_intersection: RTree<IntersectionLocation>,
     pub main_road_penalty: f64,
 }
-
-// fast_paths ID representing the IntersectionID as the data
-type IntersectionLocation = GeomWithData<[f64; 2], usize>;
 
 impl Router {
     pub fn new(
         roads: &Vec<Road>,
-        intersections: &Vec<Intersection>,
         modal_filters: &BTreeMap<RoadID, ModalFilter>,
         directions: &BTreeMap<RoadID, Direction>,
         main_road_penalty: f64,
@@ -78,33 +71,27 @@ impl Router {
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
 
-        let mut points = Vec::new();
-        for i in intersections {
-            if let Some(node) = node_map.get(i.id) {
-                points.push(IntersectionLocation::new(i.point.into(), node));
-            }
-        }
-        let closest_intersection = RTree::bulk_load(points);
-
         Self {
             ch,
             node_map,
-            closest_intersection,
             main_road_penalty,
         }
     }
 
     pub fn route(&self, map: &MapModel, pt1: Coord, pt2: Coord) -> Option<LineString> {
-        let start = self
-            .closest_intersection
-            .nearest_neighbor(&[pt1.x, pt1.y])
-            .unwrap()
-            .data;
-        let end = self
-            .closest_intersection
-            .nearest_neighbor(&[pt2.x, pt2.y])
-            .unwrap()
-            .data;
+        // TODO Find the closest neighbor in the node_map!
+        let start = self.node_map.get(
+            map.closest_intersection
+                .nearest_neighbor(&pt1.into())
+                .unwrap()
+                .data,
+        )?;
+        let end = self.node_map.get(
+            map.closest_intersection
+                .nearest_neighbor(&pt2.into())
+                .unwrap()
+                .data,
+        )?;
         if start == end {
             return None;
         }

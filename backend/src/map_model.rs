@@ -11,7 +11,7 @@ use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::Serialize;
 use utils::{Mercator, Tags};
 
-use crate::geo_helpers::linestring_intersection;
+use crate::geo_helpers::{buffer_aabb, linestring_intersection};
 use crate::Router;
 
 pub struct MapModel {
@@ -22,6 +22,7 @@ pub struct MapModel {
     pub study_area_name: Option<String>,
     pub boundary_wgs84: Polygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
+    pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
 
     // Only those acting as severances; above or belowground don't count
     pub railways: Vec<LineString>,
@@ -151,12 +152,7 @@ impl MapModel {
         let roads: Vec<RoadID> = if let Some(set) = candidate_roads {
             set.iter().cloned().collect()
         } else {
-            // 50m each direction should be enough
-            let buffer = 50.0;
-            let bbox = AABB::from_corners(
-                Point::new(click_pt.x - buffer, click_pt.y - buffer),
-                Point::new(click_pt.x + buffer, click_pt.y + buffer),
-            );
+            let bbox = buffer_aabb(AABB::from_point(click_pt.into()), 50.0);
             self.closest_road
                 .locate_in_envelope_intersecting(&bbox)
                 .map(|r| r.data)
@@ -448,7 +444,6 @@ impl MapModel {
         {
             self.router_current = Some(Router::new(
                 &self.roads,
-                &self.intersections,
                 &self.modal_filters,
                 &self.directions,
                 main_road_penalty,
@@ -462,7 +457,6 @@ impl MapModel {
         {
             self.router_original_with_penalty = Some(Router::new(
                 &self.roads,
-                &self.intersections,
                 &self.original_modal_filters,
                 &self.original_directions(),
                 main_road_penalty,

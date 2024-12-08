@@ -1,7 +1,8 @@
 use geo::{
-    Contains, Intersects, LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString,
-    Polygon,
+    BoundingRect, Contains, Intersects, LineInterpolatePoint, LineIntersection, LineLocatePoint,
+    LineString, Point, Polygon, Rect,
 };
+use rstar::AABB;
 use utils::LineSplit;
 
 /// Looks for the first place ls2 crosses ls1. Returns the percent_along ls1 of that point.
@@ -74,4 +75,26 @@ pub fn clip_linestring_to_polygon(linestring: &LineString, polygon: &Polygon) ->
         }
     }
     results
+}
+
+pub fn buffer_aabb(aabb: AABB<Point>, buffer_meters: f64) -> AABB<Point> {
+    AABB::from_corners(
+        Point::new(
+            aabb.lower().x() - buffer_meters,
+            aabb.lower().y() - buffer_meters,
+        ),
+        Point::new(
+            aabb.upper().x() + buffer_meters,
+            aabb.upper().y() + buffer_meters,
+        ),
+    )
+}
+
+// TODO What in the generics is going on here...
+pub fn aabb<G: BoundingRect<f64, Output = Option<Rect<f64>>>>(geom: &G) -> AABB<Point> {
+    let bbox: Rect = geom.bounding_rect().unwrap().into();
+    AABB::from_corners(
+        Point::new(bbox.min().x, bbox.min().y),
+        Point::new(bbox.max().x, bbox.max().y),
+    )
 }
