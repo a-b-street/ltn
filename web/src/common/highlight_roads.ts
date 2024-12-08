@@ -16,7 +16,8 @@ export function getRoadLayerNames(map: Map, mapStyle: string): string[] {
   if (mapStyle == "hybrid") {
     return ["Path", "Road", "Tunnel"].filter((l) => availableLayers.has(l));
   }
-  if (mapStyle == "streets") {
+  // TODO Check if this is true in the new version
+  if (mapStyle == "streets-v2") {
     let layers = [];
     for (let outer of ["road", "bridge", "tunnel"]) {
       for (let inner of [

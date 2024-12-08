@@ -52,21 +52,30 @@ function getBeforeId(layerId: string): string | undefined {
   return beforeId;
 }
 
+// Dummy functions just used for documentation below.
+let streets = (x: string) => x;
+//let satellite = (x: string) => x;
+let dataviz = (x: string) => x;
+//let zoomstack = (x: string) => x;
+
 // All layer IDs used with layerId must be defined here, with later entries
 // drawn on top.
-//
-// This list covers all pages. We should maybe split it.
-const layerZorder = [
-  // MapTiler basemap
-  // TODO Handle all basemaps now
-  "Background",
 
-  // TODO These don't show up at low zoom, I think because Residential is hidden
+// TODO The order itself needs to change when the basemap does, because dataviz
+// and zoomstack are mutually incompatible (buildings and 0 restricted road
+// ordering).
+
+// Helpful docs:
+// https://docs.maptiler.com/schema/planet/
+// https://cloud.maptiler.com/maps/streets-v2/
+const layerZorder = [
+  streets(dataviz("Background")),
+
+  // Ferry line starts at zoom 6, so these won't be visible before that -- but
+  // that's fine; a boundary is too small to see before zoom 6 anyway
   "neighbourhood-boundaries",
 
-  // MapTiler basemap
-  // TODO Need to play with what looks best, but this is good enough
-  "Residential",
+  streets("Ferry line"),
 
   "debug-borders",
   "debug-crosses",
@@ -80,8 +89,7 @@ const layerZorder = [
   "shortcuts",
   "shortcuts-focus",
 
-  // MapTiler basemap
-  "Building",
+  dataviz("Building"),
 
   "route-debug-nodes",
   "route-points",
@@ -90,8 +98,8 @@ const layerZorder = [
 
   "one-ways",
 
-  // MapTiler basemap
-  "Road labels",
+  dataviz("Road labels"),
+  streets("road_label"),
 
   "animate-shortcuts",
 

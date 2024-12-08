@@ -8,7 +8,7 @@
   Basemap:
   <select bind:value={$maptilerBasemap}>
     <option value="dataviz">MapTiler Dataviz</option>
-    <option value="streets">MapTiler Streets</option>
+    <option value="streets-v2">MapTiler Streets</option>
     <option value="hybrid">MapTiler Satellite</option>
     <option value="uk-openzoomstack-light">OS Open Zoomstack</option>
   </select>
