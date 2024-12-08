@@ -56,7 +56,11 @@
     minArea: number,
     removeNonRoad: boolean,
   ): ExpressionSpecification {
-    let x: ExpressionSpecification = ["all", isPolygon, [">=", ["get", "area_km2"], minArea]];
+    let x: ExpressionSpecification = [
+      "all",
+      isPolygon,
+      [">=", ["get", "area_km2"], minArea],
+    ];
     if (removeNonRoad) {
       x.push(["get", "touches_big_road"]);
     }

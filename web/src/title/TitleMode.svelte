@@ -27,16 +27,27 @@
 
   let projectList = getProjectList();
 
-  function getProjectList(): string[] {
-    let list = [];
+  // Returns a list, grouped by the optional study_area_name
+  function getProjectList(): Map<string, string[]> {
+    let perArea = new Map();
     for (let i = 0; i < window.localStorage.length; i++) {
       let key = window.localStorage.key(i)!;
       if (key.startsWith("ltn_")) {
-        list.push(key);
+        let study_area_name = "";
+        try {
+          let gj = JSON.parse(window.localStorage.getItem(key)!);
+          study_area_name = gj.study_area_name;
+        } catch (err) {
+          // Ignore it
+        }
+
+        if (!perArea.has(study_area_name)) {
+          perArea.set(study_area_name, []);
+        }
+        perArea.get(study_area_name)!.push(key);
       }
     }
-    list.sort();
-    return list;
+    return perArea;
   }
 
   let fileInput: HTMLInputElement;
@@ -99,26 +110,35 @@
 
       <p>Load a saved project:</p>
       <ul>
-        {#each projectList as project}
-          <li>
-            <span style="display: flex; justify-content: space-between;">
-              <Link on:click={() => loadProject(project)}>
-                {project}
-              </Link>
-              <button class="secondary" on:click={() => renameProject(project)}>
-                <img
-                  src={$lightMode ? editLight : editDark}
-                  alt="Rename project"
-                />
-              </button>
-              <button class="secondary" on:click={() => deleteProject(project)}>
-                <img
-                  src={$lightMode ? deleteLight : deleteDark}
-                  alt="Delete project"
-                />
-              </button>
-            </span>
-          </li>
+        {#each projectList.entries() as [study_area_name, projects]}
+          <u>{study_area_name ?? "custom area"}</u>
+          {#each projects as project}
+            <li>
+              <span style="display: flex; justify-content: space-between;">
+                <Link on:click={() => loadProject(project)}>
+                  {project.slice("ltn_".length)}
+                </Link>
+                <button
+                  class="secondary"
+                  on:click={() => renameProject(project)}
+                >
+                  <img
+                    src={$lightMode ? editLight : editDark}
+                    alt="Rename project"
+                  />
+                </button>
+                <button
+                  class="secondary"
+                  on:click={() => deleteProject(project)}
+                >
+                  <img
+                    src={$lightMode ? deleteLight : deleteDark}
+                    alt="Delete project"
+                  />
+                </button>
+              </span>
+            </li>
+          {/each}
         {/each}
       </ul>
 
