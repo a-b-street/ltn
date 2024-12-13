@@ -11,15 +11,23 @@
   export let existing: Feature<Polygon, AreaProps> | null;
 
   if (existing) {
-    // Transform into the correct format
-    $waypoints = existing.properties.waypoints.map((waypt) => {
-      return {
-        point: [waypt.lon, waypt.lat],
-        snapped: waypt.snapped,
-      };
-    });
-  } else {
-    $waypoints = [];
+    if (existing.properties.waypoints) {
+      // Transform into the correct format
+      $waypoints = existing.properties.waypoints.map((waypt) => {
+        return {
+          point: [waypt.lon, waypt.lat],
+          snapped: waypt.snapped,
+        };
+      });
+    } else {
+      // No stored waypoints -- this is either a boundary drawn with a very old
+      // version of this tool, or an auto-generated boundary. Just
+      // "backfill" by using the full geometry as freehand points.
+      // Editing will be very painful in practice, but it won't break.
+      $waypoints = existing.geometry.coordinates[0].slice(1).map((point) => {
+        return { point: point as [number, number], snapped: false };
+      });
+    }
   }
 
   function finish() {
