@@ -24,9 +24,9 @@
       return;
     }
     try {
-      // TODO Waypoints will be missing; editing will not work
       let feature = {
         type: "Feature",
+        // Omit waypoints and lazily fill them out.
         properties: {},
         // Trust generateId to make IDs in order
         geometry: gj.features[e.detail.features[0].id!].geometry,
