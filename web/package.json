@@ -30,7 +30,8 @@
   "dependencies": {
     "@picocss/pico": "^2.0.3",
     "@turf/along": "^7.0.0-alpha.114",
-    "route-snapper-ts": "^0.0.5",
+    "route-snapper": "^0.4.9",
+    "route-snapper-ts": "^0.0.8",
     "svelte-maplibre": "^0.9.7",
     "svelte-utils": "github:a-b-street/svelte-utils"
   }

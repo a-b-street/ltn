@@ -1,23 +1,17 @@
-import { get } from "svelte/store";
+import { get, writable } from "svelte/store";
 import { LngLat } from "maplibre-gl";
 import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
+import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
 import { RouteTool } from "route-snapper-ts";
-import {
-  routeToolGj,
-  snapMode,
-  undoLength,
-  showAllNodes,
-  showAllNodesGj,
-} from "../common/snapper/stores";
+import { routeTool } from "../common/draw_area/stores";
 import {
   app,
   projectName,
   map,
   mode,
   useLocalVite,
-  route_tool,
   route_pt_a,
   route_pt_b,
 } from "../stores";
@@ -82,17 +76,16 @@ export function afterProjectLoaded() {
   mode.set({
     mode: "network",
   });
-  route_tool.set(
+  // The stores are unused; the WASM API is used directly. This TS wrapper is unused.
+  routeTool.set(
     new RouteTool(
       get(map)!,
       get(app)!.toRouteSnapper(),
-      routeToolGj,
-      snapMode,
-      undoLength,
+      writable(emptyGeojson()),
+      writable(true),
+      writable(0),
     ),
   );
-  showAllNodes.set(false);
-  showAllNodesGj.set({ type: "FeatureCollection", features: [] });
   get(map)!.fitBounds(
     Array.from(get(app)!.getBounds()) as [number, number, number, number],
     { animate: false },
