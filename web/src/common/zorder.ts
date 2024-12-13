@@ -92,10 +92,8 @@ const layerZorder = [
 
   dataviz("Building"),
 
-  "route-debug-nodes",
-  "route-points",
-  "route-lines",
-  "route-polygons",
+  "draw-area-lines",
+  "draw-area-preview",
 
   "one-ways",
 

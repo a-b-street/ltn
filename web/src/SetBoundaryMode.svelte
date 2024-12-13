@@ -2,31 +2,46 @@
   import type { Feature, Polygon } from "geojson";
   import { Link } from "./common";
   import { notNull } from "svelte-utils";
-  import RouteSnapperLayer from "./common/snapper/RouteSnapperLayer.svelte";
-  import SnapPolygonControls from "./common/snapper/SnapPolygonControls.svelte";
-  import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { autosave, app, mode, route_tool } from "./stores";
+  import AreaControls from "./common/draw_area/AreaControls.svelte";
+  import { calculateArea, waypoints } from "./common/draw_area/stores";
+  import { autosave, app, mode, map } from "./stores";
   import type { AreaProps } from "route-snapper-ts";
-  import { onDestroy } from "svelte";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;
 
   if (existing) {
-    $route_tool!.editExistingArea(existing);
+    // Transform into the correct format
+    $waypoints = existing.properties.waypoints.map((waypt) => {
+      return {
+        point: [waypt.lon, waypt.lat],
+        snapped: waypt.snapped,
+      };
+    });
   } else {
-    $route_tool!.startArea();
+    $waypoints = [];
   }
 
-  // The user can change the mode in many ways, like clicking a link.
-  // When this component gets destroyed, always clean up state.
-  onDestroy(() => {
-    // If the user is choosing a new area, the tool will get unset
-    $route_tool?.clearEventListeners();
-    $route_tool?.stop();
-  });
+  function finish() {
+    if ($waypoints.length >= 3) {
+      try {
+        let feature = calculateArea($waypoints);
+        $app!.setNeighbourhoodBoundary(name, feature);
+        autosave();
+        $app!.setCurrentNeighbourhood(name);
+        $mode = {
+          mode: "neighbourhood",
+        };
+      } catch (err) {
+        window.alert(
+          "Known georust bug hit, sorry. You may need to just refresh the page now.",
+        );
+        cancel();
+      }
+    }
+  }
 
-  function onFailure() {
+  function cancel() {
     if (existing) {
       $mode = {
         mode: "neighbourhood",
@@ -37,27 +52,10 @@
       };
     }
   }
-
-  $route_tool!.addEventListenerSuccess((feature) => {
-    try {
-      $app!.setNeighbourhoodBoundary(name, feature);
-      autosave();
-      $app!.setCurrentNeighbourhood(name);
-      $mode = {
-        mode: "neighbourhood",
-      };
-    } catch (err) {
-      window.alert(
-        "Known georust bug hit, sorry. You may need to just refresh the page now.",
-      );
-      onFailure();
-    }
-  });
-  $route_tool!.addEventListenerFailure(onFailure);
 </script>
 
-<SplitComponent>
-  <div slot="top">
+<AreaControls map={notNull($map)} {finish} {cancel}>
+  <div slot="extra-top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -84,20 +82,7 @@
     </nav>
   </div>
 
-  <div slot="sidebar">
+  <div slot="extra-sidebar">
     <h1>Draw your neighbourhood boundary for {name}</h1>
-
-    <div style="display: flex; justify-content: space-between;">
-      <Link on:click={() => notNull($route_tool).finish()}>Finish</Link>
-      <Link on:click={onFailure}>Cancel</Link>
-    </div>
-
-    <p>TODO: maybe move the instructions from the previous screen to here...</p>
-
-    <SnapPolygonControls route_tool={notNull($route_tool)} />
   </div>
-
-  <div slot="map">
-    <RouteSnapperLayer />
-  </div>
-</SplitComponent>
+</AreaControls>

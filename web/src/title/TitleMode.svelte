@@ -3,7 +3,8 @@
   import editIcon from "../../assets/edit.svg?url";
   import { Link } from "../common";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { app, projectName, map, mode, route_tool } from "../stores";
+  import { app, projectName, map, mode } from "../stores";
+  import { routeTool } from "../common/draw_area/stores";
   import { loadFromLocalStorage } from "./loader";
   import { Loading } from "svelte-utils";
 
@@ -13,7 +14,7 @@
 
   // When other modes reset here, they can't clear state without a race condition
   $app = null;
-  $route_tool = null;
+  $routeTool = null;
   $projectName = "";
 
   let projectList = getProjectList();
