@@ -16,31 +16,15 @@ export function getRoadLayerNames(map: Map, mapStyle: string): string[] {
   if (mapStyle == "hybrid") {
     return ["Path", "Road", "Tunnel"].filter((l) => availableLayers.has(l));
   }
-  // TODO Check if this is true in the new version
   if (mapStyle == "streets-v2") {
-    let layers = [];
-    for (let outer of ["road", "bridge", "tunnel"]) {
-      for (let inner of [
-        "link",
-        "minor",
-        "minor_construction",
-        "motorway",
-        "motorway_construction",
-        "motorway_link",
-        "path_pedestrian",
-        "secondary_tertiary",
-        "secondary_tertiary_construction",
-        "service_track",
-        "service_track_construction",
-        "street",
-        "trunk_primary",
-        "trunk_primary_construction",
-        "trunk_primary_link",
-      ]) {
-        layers.push(`${outer}_${inner}`);
-      }
-    }
-    return layers.filter((l) => availableLayers.has(l));
+    return map
+      .getStyle()
+      .layers.filter(
+        (layer) =>
+          // @ts-expect-error source-layer is present
+          layer["source-layer"] == "transportation" && layer.type == "line",
+      )
+      .map((layer) => layer.id);
   }
   if (mapStyle == "uk-openzoomstack-light") {
     return map
