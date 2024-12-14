@@ -334,6 +334,10 @@
         on:dragstart={() => addNode(node)}
         on:drag={() => updateDrag(node)}
         on:dragend={finalizeDrag}
+        on:click={() => {
+          addNode(node);
+          draggingExtraNode = false;
+        }}
         zIndex={0}
       >
         <span
