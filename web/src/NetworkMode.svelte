@@ -8,6 +8,7 @@
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, autosave, mode, projectName } from "./stores";
+  import { pickNeighbourhoodName } from "./common/pick_names";
 
   // Note we do this to trigger a refresh when loading stuff
   $: gj = JSON.parse($app!.toSavefile());
@@ -34,7 +35,11 @@
   }
 
   function renameNeighbourhood(name: string) {
-    let newName = window.prompt(`Rename neighbourhood ${name} to what?`, name);
+    let newName = pickNeighbourhoodName(
+      $app!,
+      `Rename neighbourhood ${name} to what?`,
+      name,
+    );
     if (newName) {
       $app!.renameNeighbourhoodBoundary(name, newName);
       autosave();
@@ -43,7 +48,11 @@
   }
 
   function newBoundary() {
-    let name = window.prompt("What do you want to name the neighbourhood?");
+    let name = pickNeighbourhoodName(
+      $app!,
+      "What do you want to name the neighbourhood?",
+      "",
+    );
     if (name) {
       $mode = { mode: "set-boundary", name, existing: null };
     }

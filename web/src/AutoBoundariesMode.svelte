@@ -13,13 +13,18 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, autosave } from "./stores";
   import { downloadGeneratedFile } from "svelte-utils";
+  import { pickNeighbourhoodName } from "./common/pick_names";
 
   let gj = JSON.parse($app!.renderAutoBoundaries());
   let minArea = 0;
   let removeNonRoad = true;
 
   function add(e: CustomEvent<LayerClickInfo>) {
-    let name = window.prompt("What do you want to name the neighbourhood?");
+    let name = pickNeighbourhoodName(
+      $app!,
+      "What do you want to name the neighbourhood?",
+      "",
+    );
     if (!name) {
       return;
     }
