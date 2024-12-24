@@ -155,13 +155,12 @@
   <div slot="map">
     <GeoJSON data={gj} generateId>
       <FillLayer
-        {...layerId("neighbourhood-boundaries")}
+        {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
         paint={{
           "fill-color": "red",
           "fill-opacity": hoverStateFilter(0.3, 0.5),
         }}
-        eventsIfTopMost
         manageHoverState
         on:click={(e) =>
           pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
