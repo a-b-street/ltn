@@ -18,27 +18,31 @@
   export let onClickLine = (f: Feature, pt: LngLat) => {};
 
   $: gj = setCellColors(gjInput);
-  $: maxShortcuts = Math.max(
-    ...gjInput.features.map((f) =>
-      f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
-    ),
-  );
+  $: maxShortcuts =
+    Math.max(
+      ...gjInput.features.map((f) =>
+        f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
+      ),
+    ) ?? 0;
 
-  $: lineColor = hoverStateFilter(
-    // @ts-expect-error TODO Fix upstream types
-    [
-      "interpolate-hcl",
-      ["linear"],
-      ["get", "shortcuts"],
-      0,
-      "white",
-      1,
-      "#F19A93",
-      maxShortcuts,
-      "#A32015",
-    ],
-    "blue",
-  );
+  $: lineColor =
+    maxShortcuts > 2
+      ? hoverStateFilter(
+          // @ts-expect-error TODO Fix upstream types
+          [
+            "interpolate-hcl",
+            ["linear"],
+            ["get", "shortcuts"],
+            0,
+            "white",
+            1,
+            "#F19A93",
+            maxShortcuts,
+            "#A32015",
+          ],
+          "blue",
+        )
+      : hoverStateFilter("white", "blue");
 
   function invertBoundary(gj: RenderNeighbourhoodOutput): Feature<Polygon> {
     // @ts-expect-error TS can't figure out that we're narrowing the case here

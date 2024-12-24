@@ -514,6 +514,7 @@ impl Road {
 
     pub fn to_gj(&self, mercator: &Mercator) -> Feature {
         let mut f = mercator.to_wgs84_gj(&self.linestring);
+        // TODO Most of this is debug only
         f.set_property("id", self.id.0);
         f.set_property("way", self.way.to_string());
         f.set_property("node1", self.node1.to_string());
