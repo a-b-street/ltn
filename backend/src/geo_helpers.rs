@@ -1,6 +1,6 @@
 use geo::{
-    BoundingRect, Contains, Intersects, LineInterpolatePoint, LineIntersection, LineLocatePoint,
-    LineString, Point, Polygon, Rect,
+    BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, LineInterpolatePoint,
+    LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
 };
 use rstar::AABB;
 use utils::LineSplit;
@@ -97,4 +97,24 @@ pub fn aabb<G: BoundingRect<f64, Output = Option<Rect<f64>>>>(geom: &G) -> AABB<
         Point::new(bbox.min().x, bbox.min().y),
         Point::new(bbox.max().x, bbox.max().y),
     )
+}
+
+pub fn angle_of_pt_on_line(linestring: &LineString, pt: Coord) -> f64 {
+    let line = linestring
+        .lines()
+        .min_by_key(|line| (Euclidean::distance(line, pt) * 10e9) as usize)
+        .unwrap();
+    (line.dy()).atan2(line.dx()).to_degrees()
+}
+
+/// Constrain an angle between [0, 180]. Used for rotating modal filter icons visually
+pub fn limit_angle(a1: f64) -> f64 {
+    // Normalize to [0, 360]
+    let a2 = if a1 < 0.0 { a1 + 360.0 } else { a1 };
+    // Don't draw things upside down
+    if a2 > 180.0 {
+        a2 - 180.0
+    } else {
+        a2
+    }
 }

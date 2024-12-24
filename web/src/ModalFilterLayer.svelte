@@ -14,6 +14,7 @@
     {...layerId("modal-filters")}
     layout={{
       "icon-image": ["get", "filter_kind"],
+      "icon-rotate": ["get", "angle"],
       "icon-allow-overlap": true,
       "icon-size": 0.1,
     }}

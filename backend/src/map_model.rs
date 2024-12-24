@@ -11,7 +11,7 @@ use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::Serialize;
 use utils::{Mercator, Tags};
 
-use crate::geo_helpers::{buffer_aabb, linestring_intersection};
+use crate::geo_helpers::{angle_of_pt_on_line, buffer_aabb, limit_angle, linestring_intersection};
 use crate::Router;
 
 pub struct MapModel {
@@ -300,14 +300,16 @@ impl MapModel {
     pub fn filters_to_gj(&self) -> FeatureCollection {
         let mut features = Vec::new();
         for (r, filter) in &self.modal_filters {
-            let pt = self
-                .get_r(*r)
+            let road = self.get_r(*r);
+            let pt = road
                 .linestring
                 .line_interpolate_point(filter.percent_along)
                 .unwrap();
+            let angle = limit_angle(angle_of_pt_on_line(&road.linestring, pt.into()) + 90.0);
             let mut f = self.mercator.to_wgs84_gj(&pt);
             f.set_property("filter_kind", filter.kind.to_string());
             f.set_property("road", r.0);
+            f.set_property("angle", angle);
             f.set_property("edited", Some(filter) != self.original_modal_filters.get(r));
             features.push(f);
         }
