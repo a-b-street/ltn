@@ -154,14 +154,20 @@ impl LTN {
     }
 
     #[wasm_bindgen(js_name = setCurrentNeighbourhood)]
-    pub fn set_current_neighbourhood(&mut self, name: String) -> Result<(), JsValue> {
+    pub fn set_current_neighbourhood(
+        &mut self,
+        name: String,
+        edit_perimeter_roads: bool,
+    ) -> Result<(), JsValue> {
         info!("setCurrentNeighbourhood");
         let boundary_gj = self.map.boundaries.get(&name).cloned().unwrap();
         let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut boundary_geo);
 
-        self.neighbourhood =
-            Some(Neighbourhood::new(&self.map, name, boundary_geo).map_err(err_to_js)?);
+        self.neighbourhood = Some(
+            Neighbourhood::new(&self.map, name, boundary_geo, edit_perimeter_roads)
+                .map_err(err_to_js)?,
+        );
         info!("done");
         Ok(())
     }
@@ -175,7 +181,7 @@ impl LTN {
                 x: pos.lng,
                 y: pos.lat,
             }),
-            Some(&self.neighbourhood.as_ref().unwrap().interior_roads),
+            Some(self.neighbourhood.as_ref().unwrap().editable_roads()),
             FilterKind::from_string(&kind).unwrap(),
         );
         self.after_edit();

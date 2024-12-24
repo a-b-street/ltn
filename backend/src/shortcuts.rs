@@ -22,11 +22,11 @@ impl Shortcuts {
         let mut input_graph = InputGraph::new();
         let mut node_map = NodeMap::new();
 
-        for r in &neighbourhood.interior_roads {
-            if map.modal_filters.contains_key(r) {
+        for r in neighbourhood.editable_roads() {
+            if map.modal_filters.contains_key(&r) {
                 continue;
             }
-            let road = map.get_r(*r);
+            let road = map.get_r(r);
             // Loops can't be part of a shortest path
             if road.src_i == road.dst_i {
                 continue;
@@ -35,7 +35,7 @@ impl Shortcuts {
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
             let cost = (road.length() * 100.0) as usize;
-            match map.directions[r] {
+            match map.directions[&r] {
                 Direction::Forwards => {
                     input_graph.add_edge(i1, i2, cost);
                 }

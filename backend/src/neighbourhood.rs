@@ -22,6 +22,9 @@ pub struct Neighbourhood {
     // Mercator
     pub boundary_polygon: Polygon,
     boundary_area_km2: f64,
+    /// If true, shortcuts across perimeter roads will be calculated, and the user can edit these
+    /// roads.
+    pub edit_perimeter_roads: bool,
 
     // Updated after mutations
     derived: Option<DerivedNeighbourhoodState>,
@@ -33,7 +36,12 @@ struct DerivedNeighbourhoodState {
 }
 
 impl Neighbourhood {
-    pub fn new(map: &MapModel, name: String, boundary_polygon: Polygon) -> Result<Self> {
+    pub fn new(
+        map: &MapModel,
+        name: String,
+        boundary_polygon: Polygon,
+        edit_perimeter_roads: bool,
+    ) -> Result<Self> {
         info!("match roads");
         let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
 
@@ -88,6 +96,7 @@ impl Neighbourhood {
             name,
             boundary_polygon,
             boundary_area_km2,
+            edit_perimeter_roads,
             derived: None,
         };
         n.after_edit(map);
@@ -111,6 +120,18 @@ impl Neighbourhood {
         }
     }
 
+    pub fn editable_roads(&self) -> Vec<RoadID> {
+        if self.edit_perimeter_roads {
+            self.interior_roads
+                .iter()
+                .chain(self.crosses.keys())
+                .cloned()
+                .collect()
+        } else {
+            self.interior_roads.iter().cloned().collect()
+        }
+    }
+
     pub fn to_gj(&self, map: &MapModel) -> FeatureCollection {
         let mut features = Vec::new();
 
@@ -119,8 +140,8 @@ impl Neighbourhood {
         // Just one boundary
         features.push(map.boundaries.get(&self.name).cloned().unwrap());
 
-        for r in &self.interior_roads {
-            let road = map.get_r(*r);
+        for r in self.editable_roads() {
+            let road = map.get_r(r);
             let mut f = road.to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
             f.set_property(
@@ -128,18 +149,20 @@ impl Neighbourhood {
                 derived
                     .shortcuts
                     .count_per_road
-                    .get(r)
+                    .get(&r)
                     .cloned()
                     .unwrap_or(0),
             );
-            f.set_property("direction", map.directions[r].to_string());
+            f.set_property("direction", map.directions[&r].to_string());
             f.set_property(
                 "direction_edited",
-                map.directions[r] != Direction::from_osm(&road.tags),
+                map.directions[&r] != Direction::from_osm(&road.tags),
             );
             f.set_property("road", r.0);
             features.push(f);
         }
+
+        // Only for debugging
         for (r, pct) in &self.crosses {
             let mut f = map.get_r(*r).to_gj(&map.mercator);
             f.set_property("kind", "crosses");

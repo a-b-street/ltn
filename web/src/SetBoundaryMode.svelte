@@ -4,7 +4,7 @@
   import { notNull } from "svelte-utils";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
-  import { autosave, app, mode, map } from "./stores";
+  import { autosave, app, mode, map, editPerimeterRoads } from "./stores";
   import type { AreaProps } from "route-snapper-ts";
 
   export let name: string;
@@ -36,7 +36,7 @@
         let feature = calculateArea($waypoints);
         $app!.setNeighbourhoodBoundary(name, feature);
         autosave();
-        $app!.setCurrentNeighbourhood(name);
+        $app!.setCurrentNeighbourhood(name, $editPerimeterRoads);
         $mode = {
           mode: "neighbourhood",
         };

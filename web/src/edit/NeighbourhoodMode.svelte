@@ -16,6 +16,7 @@
     filterType,
     autosave,
     animateShortcuts,
+    editPerimeterRoads,
   } from "../stores";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
@@ -66,6 +67,14 @@
     allShortcuts = JSON.parse($app!.getAllShortcuts());
 
     autosave();
+  }
+
+  function recalculateNeighbourhoodDefinition() {
+    $app!.setCurrentNeighbourhood(
+      boundary!.properties.name,
+      $editPerimeterRoads,
+    );
+    $mutationCounter++;
   }
 
   function onClickLine(f: Feature, pt: LngLat) {
@@ -237,6 +246,15 @@
     <label>
       <input type="checkbox" bind:checked={$animateShortcuts} />
       Animate shortcuts
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        bind:checked={$editPerimeterRoads}
+        on:change={recalculateNeighbourhoodDefinition}
+      />
+      Include perimeter roads
     </label>
 
     <div style="display: flex; justify-content: space-between;">

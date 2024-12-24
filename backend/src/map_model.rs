@@ -118,7 +118,7 @@ impl MapModel {
     pub fn add_modal_filter(
         &mut self,
         pt: Coord,
-        candidate_roads: Option<&BTreeSet<RoadID>>,
+        candidate_roads: Option<Vec<RoadID>>,
         kind: FilterKind,
     ) {
         let cmd = self.do_edit(self.add_modal_filter_cmd(pt, candidate_roads, kind));
@@ -130,7 +130,7 @@ impl MapModel {
     fn add_modal_filter_cmd(
         &self,
         pt: Coord,
-        candidate_roads: Option<&BTreeSet<RoadID>>,
+        candidate_roads: Option<Vec<RoadID>>,
         kind: FilterKind,
     ) -> Command {
         let (r, percent_along) = self.closest_point_on_road(pt, candidate_roads).unwrap();
@@ -146,18 +146,16 @@ impl MapModel {
     fn closest_point_on_road(
         &self,
         click_pt: Coord,
-        candidate_roads: Option<&BTreeSet<RoadID>>,
+        candidate_roads: Option<Vec<RoadID>>,
     ) -> Option<(RoadID, f64)> {
         // If candidate_roads is not specified, search around the point with a generous buffer
-        let roads: Vec<RoadID> = if let Some(set) = candidate_roads {
-            set.iter().cloned().collect()
-        } else {
+        let roads = candidate_roads.unwrap_or_else(|| {
             let bbox = buffer_aabb(AABB::from_point(click_pt.into()), 50.0);
             self.closest_road
                 .locate_in_envelope_intersecting(&bbox)
                 .map(|r| r.data)
                 .collect()
-        };
+        });
 
         roads
             .into_iter()

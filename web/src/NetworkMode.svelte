@@ -7,7 +7,13 @@
   import { layerId, Popup, Link, HelpButton } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { app, autosave, mode, projectName } from "./stores";
+  import {
+    app,
+    autosave,
+    mode,
+    projectName,
+    editPerimeterRoads,
+  } from "./stores";
   import { pickNeighbourhoodName } from "./common/pick_names";
 
   // Note we do this to trigger a refresh when loading stuff
@@ -17,7 +23,7 @@
     .map((f: Feature) => f.properties!.name);
 
   function pickNeighbourhood(name: string) {
-    $app!.setCurrentNeighbourhood(name);
+    $app!.setCurrentNeighbourhood(name, $editPerimeterRoads);
     $mode = { mode: "neighbourhood" };
   }
 

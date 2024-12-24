@@ -50,7 +50,13 @@ fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) 
     let boundary_gj = map.boundaries.get(neighbourhood_name).cloned().unwrap();
     let mut boundary_geo: Polygon = boundary_gj.try_into()?;
     map.mercator.to_mercator_in_place(&mut boundary_geo);
-    let neighbourhood = Neighbourhood::new(&map, neighbourhood_name.to_string(), boundary_geo)?;
+    let edit_perimeter_roads = false;
+    let neighbourhood = Neighbourhood::new(
+        &map,
+        neighbourhood_name.to_string(),
+        boundary_geo,
+        edit_perimeter_roads,
+    )?;
 
     let mut gj = prune_features(neighbourhood.to_gj(&map));
 
@@ -59,6 +65,7 @@ fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) 
         f.set_property("kind", "existing_modal_filter");
         f.remove_property("road");
         f.remove_property("edited");
+        f.remove_property("angle");
         gj.features.push(f);
     }
 
@@ -85,6 +92,7 @@ fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
                     "way",
                 ]
                 .contains(&k.as_str())
+                    && k != "angle"
             });
         }
     }

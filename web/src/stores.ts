@@ -56,6 +56,7 @@ export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title" });
 export let filterType: Writable<string> = writable("walk_cycle_only");
 export let animateShortcuts = writable(false);
+export let editPerimeterRoads = writable(false);
 
 export function autosave() {
   let key = get(projectName);

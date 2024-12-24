@@ -11,7 +11,7 @@
   import { Link, Popup, layerId } from "./common";
   import { isLine, isPolygon } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { app, mode, autosave } from "./stores";
+  import { app, mode, autosave, editPerimeterRoads } from "./stores";
   import { downloadGeneratedFile } from "svelte-utils";
   import { pickNeighbourhoodName } from "./common/pick_names";
 
@@ -38,7 +38,7 @@
       };
       $app!.setNeighbourhoodBoundary(name, feature);
       autosave();
-      $app!.setCurrentNeighbourhood(name);
+      $app!.setCurrentNeighbourhood(name, $editPerimeterRoads);
       $mode = {
         mode: "neighbourhood",
       };
