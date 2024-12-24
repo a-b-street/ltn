@@ -98,7 +98,7 @@
     paint={{
       "line-width": [
         "interpolate",
-        ["linear", 2],
+        ["linear"],
         ["zoom"],
         5,
         0.5 + outline,
@@ -123,7 +123,7 @@
     paint={{
       "line-width": [
         "interpolate",
-        ["linear", 2],
+        ["linear"],
         ["zoom"],
         5,
         0.5,
