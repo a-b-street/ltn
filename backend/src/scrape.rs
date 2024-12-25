@@ -203,7 +203,14 @@ fn is_road(tags: &Tags) -> bool {
     if tags.is_any(
         "highway",
         vec![
-            "cycleway", "footway", "steps", "path", "track", "corridor", "proposed",
+            "cycleway",
+            "footway",
+            "steps",
+            "path",
+            "track",
+            "corridor",
+            "proposed",
+            "construction",
         ],
     ) {
         return false;
