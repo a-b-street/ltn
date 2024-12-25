@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { BasemapPicker } from "./common";
   import { Modal } from "svelte-utils";
   import icon from "../assets/settings.svg?url";
+  import { BasemapPicker } from "./common";
 
   let show = false;
 </script>

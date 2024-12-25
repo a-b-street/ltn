@@ -1,6 +1,6 @@
-import { get, writable, type Writable } from "svelte/store";
-import { RouteTool } from "route-snapper-ts";
 import type { Feature, Polygon } from "geojson";
+import { RouteTool } from "route-snapper-ts";
+import { get, writable, type Writable } from "svelte/store";
 
 export let routeTool: Writable<RouteTool | null> = writable(null);
 

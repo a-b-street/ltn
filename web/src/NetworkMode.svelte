@@ -1,21 +1,21 @@
 <script lang="ts">
-  import deleteIcon from "../assets/delete.svg?url";
-  import editIcon from "../assets/edit.svg?url";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { layerId, Link, HelpButton } from "./common";
-  import ModalFilterLayer from "./ModalFilterLayer.svelte";
+  import { downloadGeneratedFile, notNull } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import deleteIcon from "../assets/delete.svg?url";
+  import editIcon from "../assets/edit.svg?url";
+  import { HelpButton, layerId, Link } from "./common";
+  import { pickNeighbourhoodName } from "./common/pick_names";
+  import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import {
     app,
     autosave,
+    editPerimeterRoads,
     mode,
     projectName,
-    editPerimeterRoads,
   } from "./stores";
-  import { pickNeighbourhoodName } from "./common/pick_names";
 
   // Note we do this to trigger a refresh when loading stuff
   $: gj = JSON.parse($app!.toSavefile());

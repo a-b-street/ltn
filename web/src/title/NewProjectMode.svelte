@@ -1,19 +1,19 @@
 <script lang="ts">
-  import type { Feature, Polygon } from "geojson";
   import { LTN } from "backend";
+  import type { Feature, Polygon } from "geojson";
+  import { PolygonToolLayer } from "maplibre-draw-polygon";
   import { onMount } from "svelte";
   import { Loading } from "svelte-utils";
-  import { Link } from "../common";
   import { OverpassSelector } from "svelte-utils/overpass";
-  import { PolygonToolLayer } from "maplibre-draw-polygon";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import { Link } from "../common";
   import {
-    autosave,
-    projectName,
     app,
+    autosave,
     map,
-    useLocalVite,
     mode,
+    projectName,
+    useLocalVite,
   } from "../stores";
   import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
 

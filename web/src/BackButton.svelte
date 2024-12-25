@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Link } from "./common";
   import { createEventDispatcher } from "svelte";
+  import { Link } from "./common";
 
   let dispatch = createEventDispatcher<{
     click: void;

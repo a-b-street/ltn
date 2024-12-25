@@ -1,29 +1,29 @@
 <script lang="ts">
-  import type { RenderNeighbourhoodOutput } from "../wasm";
-  import { notNull } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
   import type { Feature, LineString, Polygon } from "geojson";
   import type { LngLat } from "maplibre-gl";
+  import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
-  import { Link, HelpButton } from "../common";
-  import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
+  import { notNull } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import AnimatePaths from "../AnimatePaths.svelte";
+  import { HelpButton, Link } from "../common";
+  import ModalFilterLayer from "../ModalFilterLayer.svelte";
+  import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import {
+    animateShortcuts,
     app,
+    autosave,
+    editPerimeterRoads,
+    filterType,
     map,
     mode,
     mutationCounter,
-    filterType,
-    autosave,
-    animateShortcuts,
-    editPerimeterRoads,
   } from "../stores";
+  import type { RenderNeighbourhoodOutput } from "../wasm";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
-  import ModalFilterLayer from "../ModalFilterLayer.svelte";
-  import AnimatePaths from "../AnimatePaths.svelte";
-  import type { Waypoint } from "route-snapper-ts";
 
   // Caller is responsible for doing app.setCurrentNeighbourhood
 

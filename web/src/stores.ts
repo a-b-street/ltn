@@ -1,8 +1,8 @@
 import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
 import { LngLat, type Map } from "maplibre-gl";
-import { get, writable, type Writable } from "svelte/store";
 import { type AreaProps } from "route-snapper-ts";
+import { get, writable, type Writable } from "svelte/store";
 
 export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
 

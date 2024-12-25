@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { interactiveMapLayersEnabled } from "./stores";
-  import { onDestroy } from "svelte";
   import type { Map, MapMouseEvent } from "maplibre-gl";
+  import { onDestroy } from "svelte";
   import { getRoadLayerNames } from "./highlight_roads";
+  import { interactiveMapLayersEnabled } from "./stores";
 
   // TODO Need to intercept the escape key always
   // TODO Make sure all layers respect DisableInteractiveLayers

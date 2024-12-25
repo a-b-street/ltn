@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import type { Feature, FeatureCollection } from "geojson";
-  import BackButton from "./BackButton.svelte";
-  import { setCellColors } from "./cells";
+  import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import {
-    MapEvents,
     FillLayer,
     GeoJSON,
     LineLayer,
+    MapEvents,
     Marker,
   } from "svelte-maplibre";
-  import { layerId, Link } from "./common";
   import { notNull } from "svelte-utils";
   import {
     constructMatchExpression,
     emptyGeojson,
     Popup,
   } from "svelte-utils/map";
-  import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import BackButton from "./BackButton.svelte";
+  import { setCellColors } from "./cells";
+  import { layerId, Link } from "./common";
+  import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { app, mode, one_destination, route_pt_a, route_pt_b } from "./stores";
 
   function back() {

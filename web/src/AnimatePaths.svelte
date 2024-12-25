@@ -1,9 +1,9 @@
 <script lang="ts">
   import along from "@turf/along";
-  import { layerId } from "./common";
   import type { FeatureCollection, LineString } from "geojson";
-  import { GeoJSON, CircleLayer } from "svelte-maplibre";
   import { onDestroy } from "svelte";
+  import { CircleLayer, GeoJSON } from "svelte-maplibre";
+  import { layerId } from "./common";
 
   export let paths: FeatureCollection<
     LineString,

@@ -1,16 +1,16 @@
 <script lang="ts">
-  import BackButton from "./BackButton.svelte";
-  import { setCellColors } from "./cells";
   import type { Feature, FeatureCollection } from "geojson";
+  import type { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import type { LngLat } from "maplibre-gl";
-  import { layerId, Link } from "./common";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import BackButton from "./BackButton.svelte";
+  import { setCellColors } from "./cells";
+  import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, map, mode } from "./stores";
 
   type State =

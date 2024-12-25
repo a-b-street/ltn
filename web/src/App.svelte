@@ -1,7 +1,7 @@
 <script lang="ts">
-  import About from "./About.svelte";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
+  import About from "./About.svelte";
   import "@picocss/pico/css/pico.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
@@ -11,32 +11,32 @@
   import { notNull } from "svelte-utils";
   import { Geocoder } from "svelte-utils/map";
   import {
-    mapContents,
-    topContents,
-    sidebarContents,
     Layout,
+    mapContents,
+    sidebarContents,
+    topContents,
   } from "svelte-utils/top_bar_layout";
+  import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
+  import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import RouteMode from "./RouteMode.svelte";
-  import Settings from "./Settings.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
-  import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
+  import Settings from "./Settings.svelte";
   import {
     app,
     map as mapStore,
-    showAbout,
-    mode,
-    maptilerBasemap,
     maptilerApiKey,
+    maptilerBasemap,
+    mode,
+    showAbout,
     useLocalVite,
   } from "./stores";
-  import TitleMode from "./title/TitleMode.svelte";
   import NewProjectMode from "./title/NewProjectMode.svelte";
+  import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
-  import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
 
   let wasmReady = false;
   onMount(async () => {

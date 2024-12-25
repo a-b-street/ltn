@@ -1,20 +1,20 @@
-import { get, writable } from "svelte/store";
-import { LngLat } from "maplibre-gl";
 import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
+import { LngLat } from "maplibre-gl";
+import { RouteTool } from "route-snapper-ts";
 import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
-import { RouteTool } from "route-snapper-ts";
+import { get, writable } from "svelte/store";
 import { routeTool } from "../common/draw_area/stores";
 import {
   app,
-  projectName,
   map,
   mode,
-  useLocalVite,
+  one_destination,
+  projectName,
   route_pt_a,
   route_pt_b,
-  one_destination,
+  useLocalVite,
 } from "../stores";
 
 export async function loadFromLocalStorage(key: string) {

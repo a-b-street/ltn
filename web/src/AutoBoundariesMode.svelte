@@ -1,19 +1,19 @@
 <script lang="ts">
-  import BackButton from "./BackButton.svelte";
+  import type { ExpressionSpecification } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
-    LineLayer,
     hoverStateFilter,
+    LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import type { ExpressionSpecification } from "maplibre-gl";
-  import { Link, layerId } from "./common";
+  import { downloadGeneratedFile } from "svelte-utils";
   import { isLine, isPolygon, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { app, mode, autosave, editPerimeterRoads } from "./stores";
-  import { downloadGeneratedFile } from "svelte-utils";
+  import BackButton from "./BackButton.svelte";
+  import { layerId, Link } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
+  import { app, autosave, editPerimeterRoads, mode } from "./stores";
 
   let gj = JSON.parse($app!.renderAutoBoundaries());
   let minArea = 0;

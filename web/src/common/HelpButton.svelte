@@ -1,8 +1,8 @@
 <script lang="ts">
   // This launches a modal when clicked. The user should put the modal contents
   // as a slot beneath this component.
-  import icon from "../../assets/help.svg?url";
   import { Modal } from "svelte-utils";
+  import icon from "../../assets/help.svg?url";
 
   let show = false;
 </script>

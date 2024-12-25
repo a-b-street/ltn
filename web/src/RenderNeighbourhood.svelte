@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { RenderNeighbourhoodOutput } from "./wasm";
-  import OneWayLayer from "./OneWayLayer.svelte";
   import type { Feature, Polygon } from "geojson";
+  import type { LngLat } from "maplibre-gl";
   import {
-    hoverStateFilter,
     FillLayer,
     GeoJSON,
+    hoverStateFilter,
     LineLayer,
   } from "svelte-maplibre";
   import { setCellColors } from "./cells";
-  import type { LngLat } from "maplibre-gl";
   import { layerId } from "./common";
+  import OneWayLayer from "./OneWayLayer.svelte";
+  import type { RenderNeighbourhoodOutput } from "./wasm";
 
   export let gjInput: RenderNeighbourhoodOutput;
   // When disabled, can't click lines or filters, no slots, no hoverCursor

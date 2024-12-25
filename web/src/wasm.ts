@@ -1,8 +1,8 @@
 import type {
   Feature,
-  Point,
-  MultiPolygon,
   LineString,
+  MultiPolygon,
+  Point,
   Polygon,
 } from "geojson";
 

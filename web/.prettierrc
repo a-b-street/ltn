@@ -1,4 +1,4 @@
 {
-  "plugins": ["prettier-plugin-svelte"],
+  "plugins": ["prettier-plugin-svelte", "@ianvs/prettier-plugin-sort-imports"],
   "htmlWhitespaceSensitivity": "ignore"
 }

@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { Loading } from "svelte-utils";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import deleteIcon from "../../assets/delete.svg?url";
   import editIcon from "../../assets/edit.svg?url";
   import { Link } from "../common";
-  import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { app, projectName, map, mode } from "../stores";
   import { routeTool } from "../common/draw_area/stores";
+  import { app, map, mode, projectName } from "../stores";
   import { loadFromLocalStorage } from "./loader";
-  import { Loading } from "svelte-utils";
 
   export let wasmReady: boolean;
 

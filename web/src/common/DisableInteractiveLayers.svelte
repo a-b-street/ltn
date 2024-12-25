@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { interactiveMapLayersEnabled } from "./stores";
   import { FillLayer, GeoJSON } from "svelte-maplibre";
+  import { interactiveMapLayersEnabled } from "./stores";
 
   // When StreetView is on, disable interactive layers -- no hovering or
   // clicking behavior. Achieve this by enabling an invisible layer on top of

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import BackButton from "./BackButton.svelte";
   import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { app, mode, route_pt_a, route_pt_b, mainRoadPenalty } from "./stores";
+  import { app, mainRoadPenalty, mode, route_pt_a, route_pt_b } from "./stores";
 
   export let prevMode: "network" | "neighbourhood" | "impact-one-destination";
 

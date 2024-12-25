@@ -1,11 +1,11 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
-  import { Link } from "./common";
+  import type { AreaProps } from "route-snapper-ts";
   import { notNull } from "svelte-utils";
+  import { Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
-  import { autosave, app, mode, map, editPerimeterRoads } from "./stores";
-  import type { AreaProps } from "route-snapper-ts";
+  import { app, autosave, editPerimeterRoads, map, mode } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;

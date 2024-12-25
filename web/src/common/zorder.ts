@@ -1,5 +1,5 @@
-import { map as mapStore } from "../stores";
 import { get } from "svelte/store";
+import { map as mapStore } from "../stores";
 
 interface LayerProps {
   id: string;

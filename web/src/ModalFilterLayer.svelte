@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { layerId } from "./common";
   import { GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import { layerId } from "./common";
   import { app, mutationCounter } from "./stores";
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
