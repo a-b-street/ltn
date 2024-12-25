@@ -8,8 +8,8 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import type { ExpressionSpecification } from "maplibre-gl";
-  import { Link, Popup, layerId } from "./common";
-  import { isLine, isPolygon } from "svelte-utils/map";
+  import { Link, layerId } from "./common";
+  import { isLine, isPolygon, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, autosave, editPerimeterRoads } from "./stores";
   import { downloadGeneratedFile } from "svelte-utils";

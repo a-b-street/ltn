@@ -2,9 +2,10 @@
   import deleteIcon from "../assets/delete.svg?url";
   import editIcon from "../assets/edit.svg?url";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { layerId, Popup, Link, HelpButton } from "./common";
+  import { layerId, Link, HelpButton } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {

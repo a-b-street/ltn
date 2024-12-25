@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { RenderNeighbourhoodOutput } from "../wasm";
   import { notNull } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import type { Feature, LineString, Polygon } from "geojson";
   import type { LngLat } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
-  import { Popup, Link, HelpButton } from "../common";
+  import { Link, HelpButton } from "../common";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {

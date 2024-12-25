@@ -5,8 +5,9 @@
   import { onDestroy, onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import type { LngLat } from "maplibre-gl";
-  import { layerId, Popup, Link } from "./common";
+  import { layerId, Link } from "./common";
   import { notNull } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";

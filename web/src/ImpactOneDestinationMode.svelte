@@ -10,9 +10,13 @@
     LineLayer,
     Marker,
   } from "svelte-maplibre";
-  import { layerId, Popup, Link } from "./common";
+  import { layerId, Link } from "./common";
   import { notNull } from "svelte-utils";
-  import { constructMatchExpression, emptyGeojson } from "svelte-utils/map";
+  import {
+    constructMatchExpression,
+    emptyGeojson,
+    Popup,
+  } from "svelte-utils/map";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, one_destination, route_pt_a, route_pt_b } from "./stores";
