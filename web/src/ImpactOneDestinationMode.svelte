@@ -1,11 +1,12 @@
 <script lang="ts">
   import { LngLat } from "maplibre-gl";
-  import type { Feature } from "geojson";
+  import type { Feature, FeatureCollection } from "geojson";
   import BackButton from "./BackButton.svelte";
   import { setCellColors } from "./cells";
   import { FillLayer, GeoJSON, LineLayer, Marker } from "svelte-maplibre";
   import { layerId, Popup, Link } from "./common";
   import { notNull } from "svelte-utils";
+  import { constructMatchExpression, emptyGeojson } from "svelte-utils/map";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, one_destination, route_pt_a, route_pt_b } from "./stores";
@@ -17,6 +18,25 @@
   $: perRoadGj = JSON.parse(
     $app!.impactToOneDestination($one_destination.lng, $one_destination.lat),
   );
+
+  let hovered: Feature | null = null;
+
+  $: routeGj = previewRoutes(hovered);
+
+  function previewRoutes(hovered: Feature | null): FeatureCollection {
+    if (!hovered) {
+      return emptyGeojson();
+    }
+    return JSON.parse(
+      $app!.compareRoute(
+        hovered.properties!.pt1_x,
+        hovered.properties!.pt1_y,
+        $one_destination.lng,
+        $one_destination.lat,
+        1.0,
+      ),
+    );
+  }
 
   function compareRoute(f: Feature) {
     $route_pt_a = new LngLat(f.properties!.pt1_x, f.properties!.pt1_y);
@@ -89,11 +109,29 @@
         }}
         manageHoverState
         on:click={(e) => compareRoute(e.detail.features[0])}
+        bind:hovered
       >
         <Popup openOn="hover" let:props>
           Ratio {(props.distance_after / props.distance_before).toFixed(1)}
         </Popup>
       </LineLayer>
+    </GeoJSON>
+
+    <GeoJSON data={routeGj}>
+      <LineLayer
+        {...layerId("compare-route")}
+        paint={{
+          "line-width": 10,
+          "line-color": constructMatchExpression(
+            ["get", "kind"],
+            {
+              before: "red",
+              after: "blue",
+            },
+            "red",
+          ),
+        }}
+      />
     </GeoJSON>
 
     <ModalFilterLayer />
