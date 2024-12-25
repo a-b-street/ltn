@@ -283,6 +283,19 @@ impl LTN {
         )
     }
 
+    /// Returns GJ with a LineString per interior road
+    #[wasm_bindgen(js_name = impactToOneDestination)]
+    pub fn impact_to_one_destination(&mut self, x: f64, y: f64) -> Result<String, JsValue> {
+        let pt = self.map.mercator.pt_to_mercator(Coord { x, y });
+        Ok(serde_json::to_string(
+            &self.map.impact_to_one_destination(
+                pt,
+                self.neighbourhood.as_ref().unwrap().editable_roads(),
+            ),
+        )
+        .map_err(err_to_js)?)
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {

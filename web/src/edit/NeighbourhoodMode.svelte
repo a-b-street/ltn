@@ -180,6 +180,11 @@
           </Link>
         </li>
         <li>
+          <Link on:click={() => ($mode = { mode: "impact-one-destination" })}>
+            Impact routing to one destination
+          </Link>
+        </li>
+        <li>
           <Link
             on:click={() =>
               ($mode = {

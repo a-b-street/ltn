@@ -9,7 +9,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { app, mode, route_pt_a, route_pt_b, mainRoadPenalty } from "./stores";
 
-  export let prevMode: "network" | "neighbourhood";
+  export let prevMode: "network" | "neighbourhood" | "impact-one-destination";
 
   $: gj = JSON.parse(
     $app!.compareRoute(

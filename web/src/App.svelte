@@ -36,6 +36,7 @@
   import TitleMode from "./title/TitleMode.svelte";
   import NewProjectMode from "./title/NewProjectMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
+  import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
 
   let wasmReady = false;
   onMount(async () => {
@@ -160,6 +161,8 @@
           <NeighbourhoodMode />
         {:else if $mode.mode == "view-shortcuts"}
           <ViewShortcutsMode />
+        {:else if $mode.mode == "impact-one-destination"}
+          <ImpactOneDestinationMode />
         {:else if $mode.mode == "route"}
           <RouteMode prevMode={$mode.prevMode} />
         {:else if $mode.mode == "debug"}

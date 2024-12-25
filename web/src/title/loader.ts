@@ -14,6 +14,7 @@ import {
   useLocalVite,
   route_pt_a,
   route_pt_b,
+  one_destination,
 } from "../stores";
 
 export async function loadFromLocalStorage(key: string) {
@@ -92,6 +93,7 @@ export function afterProjectLoaded() {
   );
   route_pt_a.set(randomPoint());
   route_pt_b.set(randomPoint());
+  one_destination.set(randomPoint());
 }
 
 function randomPoint(): LngLat {

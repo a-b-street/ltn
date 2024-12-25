@@ -31,8 +31,11 @@ export type Mode =
       mode: "view-shortcuts";
     }
   | {
+      mode: "impact-one-destination";
+    }
+  | {
       mode: "route";
-      prevMode: "network" | "neighbourhood";
+      prevMode: "network" | "neighbourhood" | "impact-one-destination";
     }
   | {
       mode: "debug";
@@ -49,6 +52,7 @@ export let showAbout: Writable<boolean> = writable(true);
 export let app: Writable<LTN | null> = writable(null);
 export let route_pt_a: Writable<LngLat> = writable(new LngLat(0, 0));
 export let route_pt_b: Writable<LngLat> = writable(new LngLat(0, 0));
+export let one_destination: Writable<LngLat> = writable(new LngLat(0, 0));
 export let mainRoadPenalty: Writable<number> = writable(1.0);
 // A way for different components to know when internal app state has changed
 // and they might need to rerender

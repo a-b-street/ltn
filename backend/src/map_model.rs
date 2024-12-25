@@ -435,7 +435,7 @@ impl MapModel {
     }
 
     // Lazily builds the router if needed.
-    pub fn compare_route(&mut self, pt1: Coord, pt2: Coord, main_road_penalty: f64) -> GeoJson {
+    pub fn rebuild_router(&mut self, main_road_penalty: f64) {
         if self
             .router_current
             .as_ref()
@@ -449,6 +449,7 @@ impl MapModel {
                 main_road_penalty,
             ));
         }
+
         if self
             .router_original_with_penalty
             .as_ref()
@@ -462,6 +463,10 @@ impl MapModel {
                 main_road_penalty,
             ));
         }
+    }
+
+    pub fn compare_route(&mut self, pt1: Coord, pt2: Coord, main_road_penalty: f64) -> GeoJson {
+        self.rebuild_router(main_road_penalty);
 
         let mut features = Vec::new();
         if let Some(linestring) = self
@@ -480,6 +485,58 @@ impl MapModel {
             features.push(f);
         }
         GeoJson::from(features)
+    }
+
+    pub fn impact_to_one_destination(
+        &mut self,
+        pt2: Coord,
+        from: Vec<RoadID>,
+    ) -> FeatureCollection {
+        // main_road_penalty doesn't seem relevant for this question
+        self.rebuild_router(1.0);
+
+        // From every road, calculate the time before and after to the one destination
+        let mut features = Vec::new();
+        let mut highest_ratio: f64 = 1.0;
+        for r in from {
+            let road = self.get_r(r);
+            let pt1 = road.linestring.line_interpolate_point(0.5).unwrap().into();
+
+            // TODO How to handle missing one or both routes missing?
+            if let (Some(before), Some(after)) = (
+                self.router_original_with_penalty
+                    .as_ref()
+                    .unwrap()
+                    .route(self, pt1, pt2),
+                self.router_current.as_ref().unwrap().route(self, pt1, pt2),
+            ) {
+                let from_pt = self.mercator.pt_to_wgs84(pt1);
+                let distance_before = before.length::<Euclidean>();
+                let distance_after = after.length::<Euclidean>();
+
+                let mut f = self.mercator.to_wgs84_gj(&road.linestring);
+                f.set_property("distance_before", distance_before);
+                f.set_property("distance_after", distance_after);
+                f.set_property("pt1_x", from_pt.x);
+                f.set_property("pt1_y", from_pt.y);
+                features.push(f);
+
+                highest_ratio = highest_ratio.max(distance_after / distance_before);
+            }
+        }
+
+        FeatureCollection {
+            features,
+            bbox: None,
+            foreign_members: Some(
+                serde_json::json!({
+                    "highest_ratio": highest_ratio,
+                })
+                .as_object()
+                .unwrap()
+                .clone(),
+            ),
+        }
     }
 
     /// Return a polygon covering the world, minus a hole for the boundary, in WGS84
