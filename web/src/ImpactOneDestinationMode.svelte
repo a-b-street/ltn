@@ -1,9 +1,15 @@
 <script lang="ts">
-  import { LngLat } from "maplibre-gl";
+  import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import type { Feature, FeatureCollection } from "geojson";
   import BackButton from "./BackButton.svelte";
   import { setCellColors } from "./cells";
-  import { FillLayer, GeoJSON, LineLayer, Marker } from "svelte-maplibre";
+  import {
+    MapEvents,
+    FillLayer,
+    GeoJSON,
+    LineLayer,
+    Marker,
+  } from "svelte-maplibre";
   import { layerId, Popup, Link } from "./common";
   import { notNull } from "svelte-utils";
   import { constructMatchExpression, emptyGeojson } from "svelte-utils/map";
@@ -43,7 +49,14 @@
     $route_pt_b = $one_destination;
     $mode = { mode: "route", prevMode: "impact-one-destination" };
   }
+
+  function onRightClick(e: CustomEvent<MapMouseEvent>) {
+    // Move the first marker, for convenience
+    $one_destination = e.detail.lngLat;
+  }
 </script>
+
+<MapEvents on:contextmenu={onRightClick} />
 
 <SplitComponent>
   <div slot="top">
