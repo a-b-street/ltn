@@ -54,7 +54,7 @@
     } catch (err) {}
   });
 
-  let map: Map;
+  let map: Map | null = null;
   $: if (map) {
     mapStore.set(map);
   }
