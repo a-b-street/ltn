@@ -165,7 +165,7 @@
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
         paint={{
-          "fill-color": "red",
+          "fill-color": "black",
           "fill-opacity": hoverStateFilter(0.3, 0.5),
         }}
         manageHoverState
