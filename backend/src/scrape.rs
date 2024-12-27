@@ -193,26 +193,60 @@ pub fn scrape_osm(
     let bus_roads: BTreeSet<RoadID> = map
         .roads
         .iter()
-        .filter(|r| r.tags.is("access", "no") && r.tags.is("bus", "yes"))
+        .filter(|r| {
+            (r.tags.is("access", "no") || r.tags.is("motor_vehicle", "no"))
+                && r.tags.is("bus", "yes")
+        })
         .map(|r| r.id)
         .collect();
     for (roads, filter) in [
-        (pedestrian_roads, FilterKind::WalkCycleOnly),
-        (bus_roads, FilterKind::BusGate),
+        (&pedestrian_roads, FilterKind::WalkCycleOnly),
+        (&bus_roads, FilterKind::BusGate),
     ] {
-        // TODO Disable these for now.
-        if true {
-            break;
-        }
-
-        for r in roads {
-            // TODO Should these override the barriers or not?
+        for r in roads.iter().cloned() {
+            // TODO Should road-level filters override point barriers or not?
             // https://www.openstreetmap.org/way/448813838
-            if !map.modal_filters.contains_key(&r) {
-                // TODO Form commands directly?
-                let pt = map.get_r(r).linestring.line_interpolate_point(0.5).unwrap();
-                map.add_modal_filter(pt.into(), Some(vec![r]), filter);
+            if map.modal_filters.contains_key(&r) {
+                continue;
             }
+
+            let (src_i, dst_i) = {
+                let road = map.get_r(r);
+                (road.src_i, road.dst_i)
+            };
+            // On each end of this road, is there a connecting unfiltered road?
+            let src_unfiltered = map.get_i(src_i).roads.iter().any(|x| {
+                *x != r
+                    && !pedestrian_roads.contains(x)
+                    && !bus_roads.contains(x)
+                    && !map.modal_filters.contains_key(x)
+            });
+            let dst_unfiltered = map.get_i(dst_i).roads.iter().any(|x| {
+                *x != r
+                    && !pedestrian_roads.contains(x)
+                    && !bus_roads.contains(x)
+                    && !map.modal_filters.contains_key(x)
+            });
+
+            let percent = if src_unfiltered && dst_unfiltered {
+                0.5
+            } else if src_unfiltered {
+                0.1
+            } else if dst_unfiltered {
+                0.9
+            } else {
+                // This is nestled between intersections withall filtered roads, so don't put
+                // another point filter here
+                continue;
+            };
+
+            // TODO Form commands directly?
+            let pt = map
+                .get_r(r)
+                .linestring
+                .line_interpolate_point(percent)
+                .unwrap();
+            map.add_modal_filter(pt.into(), Some(vec![r]), filter);
         }
     }
 
