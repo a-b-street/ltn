@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
-use geo::{Coord, LineString, Polygon};
+use geo::{Coord, LineInterpolatePoint, LineString, Polygon};
 use osm_reader::{Element, NodeID};
 use rstar::{primitives::GeomWithData, RTree};
 use utils::Tags;
@@ -175,11 +175,47 @@ pub fn scrape_osm(
         boundaries: BTreeMap::new(),
     };
 
+    // TODO Batch some or all of these initial edits?
+
     // Apply barriers (only those that're exactly on one of the roads)
     for pt in barrier_pts {
         // TODO What kind?
         map.add_modal_filter(pt, None, FilterKind::NoEntry);
     }
+
+    // Look for roads tagged with restrictions
+    let pedestrian_roads: BTreeSet<RoadID> = map
+        .roads
+        .iter()
+        .filter(|r| r.tags.is("highway", "pedestrian"))
+        .map(|r| r.id)
+        .collect();
+    let bus_roads: BTreeSet<RoadID> = map
+        .roads
+        .iter()
+        .filter(|r| r.tags.is("access", "no") && r.tags.is("bus", "yes"))
+        .map(|r| r.id)
+        .collect();
+    for (roads, filter) in [
+        (pedestrian_roads, FilterKind::WalkCycleOnly),
+        (bus_roads, FilterKind::BusGate),
+    ] {
+        // TODO Disable these for now.
+        if true {
+            break;
+        }
+
+        for r in roads {
+            // TODO Should these override the barriers or not?
+            // https://www.openstreetmap.org/way/448813838
+            if !map.modal_filters.contains_key(&r) {
+                // TODO Form commands directly?
+                let pt = map.get_r(r).linestring.line_interpolate_point(0.5).unwrap();
+                map.add_modal_filter(pt.into(), Some(vec![r]), filter);
+            }
+        }
+    }
+
     // The commands above populate the existing modal filters and edit history. Undo that.
     map.original_modal_filters = map.modal_filters.clone();
     map.undo_stack.clear();
