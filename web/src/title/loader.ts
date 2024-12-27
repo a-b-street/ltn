@@ -94,6 +94,11 @@ export function afterProjectLoaded() {
   route_pt_a.set(randomPoint());
   route_pt_b.set(randomPoint());
   one_destination.set(randomPoint());
+
+  // Update the URL
+  let url = new URL(window.location.href);
+  url.searchParams.set("project", get(projectName));
+  window.history.replaceState(null, "", url.toString());
 }
 
 function randomPoint(): LngLat {

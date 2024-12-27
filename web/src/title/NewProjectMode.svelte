@@ -74,7 +74,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title" })}>
+          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
             Choose project
           </Link>
         </li>

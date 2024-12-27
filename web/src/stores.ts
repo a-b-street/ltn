@@ -9,6 +9,7 @@ export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
 export type Mode =
   | {
       mode: "title";
+      firstLoad: boolean;
     }
   | {
       mode: "new-project";
@@ -57,7 +58,7 @@ export let mainRoadPenalty: Writable<number> = writable(1.0);
 // A way for different components to know when internal app state has changed
 // and they might need to rerender
 export let mutationCounter: Writable<number> = writable(1);
-export let mode: Writable<Mode> = writable({ mode: "title" });
+export let mode: Writable<Mode> = writable({ mode: "title", firstLoad: true });
 export let filterType: Writable<string> = writable("walk_cycle_only");
 export let animateShortcuts = writable(false);
 export let editPerimeterRoads = writable(false);

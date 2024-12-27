@@ -140,7 +140,7 @@
       <Geocoder {map} apiKey={maptilerApiKey} />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
-        <TitleMode {wasmReady} />
+        <TitleMode {wasmReady} firstLoad={$mode.firstLoad} />
       {:else if $mode.mode == "new-project"}
         <NewProjectMode />
       {/if}

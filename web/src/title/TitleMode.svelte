@@ -9,13 +9,29 @@
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
+  export let firstLoad: boolean;
 
   let loading = "";
 
   // When other modes reset here, they can't clear state without a race condition
-  $app = null;
-  $routeTool = null;
-  $projectName = "";
+  {
+    $app = null;
+    $routeTool = null;
+    $projectName = "";
+
+    if (firstLoad) {
+      let params = new URLSearchParams(window.location.search);
+      let loadProject = params.get("project");
+      if (loadProject) {
+        loadFromLocalStorage(loadProject);
+      }
+    } else {
+      // Update the URL
+      let url = new URL(window.location.href);
+      url.searchParams.delete("project");
+      window.history.replaceState(null, "", url.toString());
+    }
+  }
 
   let projectList = getProjectList();
 
