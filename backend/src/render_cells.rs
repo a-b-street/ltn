@@ -1,7 +1,7 @@
 use std::collections::{HashSet, VecDeque};
 
 use geo::{BooleanOps, BoundingRect, Coord, Densify, Euclidean, LineString, MultiPolygon, Rect};
-use utils::Grid;
+use utils::{Grid, LineSplit};
 
 use crate::{Cell, MapModel, Neighbourhood};
 
@@ -40,39 +40,34 @@ impl RenderCells {
         for (cell_idx, cell) in cells.iter().enumerate() {
             for (r, interval) in &cell.roads {
                 let road = map.get_r(*r);
-                // Some roads with a filter are _very_ short, and this fails. The connecting roads
-                // on either side should contribute a grid cell and wind up fine.
-                if let Some(slice) =
-                    slice_linestring(&road.linestring, interval.start, interval.end)
-                {
-                    // Walk along the center line
-                    for pt in slice.densify::<Euclidean>(RESOLUTION_M / 2.0).0 {
-                        let grid_idx = grid.idx(
-                            ((pt.x - bounds.min().x) / RESOLUTION_M) as usize,
-                            ((pt.y - bounds.min().y) / RESOLUTION_M) as usize,
-                        );
-                        // Due to tunnels/bridges, sometimes a road belongs to a neighbourhood, but
-                        // leaks outside the neighbourhood's boundary. Avoid crashing. The real fix
-                        // is to better define boundaries in the face of z-order changes.
-                        //
-                        // Example is https://www.openstreetmap.org/way/87298633
-                        if grid_idx >= grid.data.len() {
-                            if warn_leak {
-                                warn!(
-                                    "{} leaks outside its neighbourhood's boundary polygon, near {:?}",
-                                    road.id, pt
-                                );
-                                // In some neighbourhoods, there are so many warnings that logging
-                                // causes noticeable slowdown!
-                                warn_leak = false;
-                            }
-                            continue;
+                let slice = slice_linestring(&road.linestring, interval.start, interval.end);
+                // Walk along the center line
+                for pt in slice.densify::<Euclidean>(RESOLUTION_M / 2.0).0 {
+                    let grid_idx = grid.idx(
+                        ((pt.x - bounds.min().x) / RESOLUTION_M) as usize,
+                        ((pt.y - bounds.min().y) / RESOLUTION_M) as usize,
+                    );
+                    // Due to tunnels/bridges, sometimes a road belongs to a neighbourhood, but
+                    // leaks outside the neighbourhood's boundary. Avoid crashing. The real fix
+                    // is to better define boundaries in the face of z-order changes.
+                    //
+                    // Example is https://www.openstreetmap.org/way/87298633
+                    if grid_idx >= grid.data.len() {
+                        if warn_leak {
+                            warn!(
+                                "{} leaks outside its neighbourhood's boundary polygon, near {:?}",
+                                road.id, pt
+                            );
+                            // In some neighbourhoods, there are so many warnings that logging
+                            // causes noticeable slowdown!
+                            warn_leak = false;
                         }
-
-                        // If roads from two different cells are close enough to clobber
-                        // originally, oh well?
-                        grid.data[grid_idx] = Some(cell_idx);
+                        continue;
                     }
+
+                    // If roads from two different cells are close enough to clobber
+                    // originally, oh well?
+                    grid.data[grid_idx] = Some(cell_idx);
                 }
             }
         }
@@ -309,7 +304,10 @@ fn color_cells(num_cells: usize, adjacencies: HashSet<(usize, usize)>) -> Vec<Co
         .collect()
 }
 
-// TODO Use linesplit
-fn slice_linestring(linestring: &LineString, _start: f64, _end: f64) -> Option<LineString> {
-    Some(linestring.clone())
+// Return the linestring in an interval, or the whole thing if something breaks
+fn slice_linestring(linestring: &LineString, start: f64, end: f64) -> LineString {
+    linestring
+        .line_split_twice(start, end)
+        .and_then(|result| result.into_second())
+        .unwrap_or_else(|| linestring.clone())
 }
