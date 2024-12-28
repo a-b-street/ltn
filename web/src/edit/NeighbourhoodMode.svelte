@@ -13,8 +13,8 @@
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import {
     animateShortcuts,
-    app,
     autosave,
+    backend,
     editPerimeterRoads,
     filterType,
     map,
@@ -25,7 +25,7 @@
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
 
-  // Caller is responsible for doing app.setCurrentNeighbourhood
+  // Caller is responsible for doing backend.setCurrentNeighbourhood
 
   type Action = "filter" | "freehand-filters" | "oneway";
   let action: Action = "filter";
@@ -45,7 +45,7 @@
   > | null;
 
   let gjInput: RenderNeighbourhoodOutput;
-  let allShortcuts = JSON.parse($app!.getAllShortcuts());
+  let allShortcuts = $backend!.getAllShortcuts();
   $: rerender($mutationCounter);
 
   $: numDisconnectedCells = gjInput.features.filter(
@@ -58,20 +58,20 @@
   });
 
   function rerender(_x: number) {
-    gjInput = JSON.parse($app!.renderNeighbourhood());
+    gjInput = $backend!.renderNeighbourhood();
     // @ts-expect-error TS can't figure out that we're narrowing the case here
     boundary = gjInput.features.find((f) => f.properties.kind == "boundary")!;
 
     undoLength = gjInput.undo_length;
     redoLength = gjInput.redo_length;
 
-    allShortcuts = JSON.parse($app!.getAllShortcuts());
+    allShortcuts = $backend!.getAllShortcuts();
 
     autosave();
   }
 
   function recalculateNeighbourhoodDefinition() {
-    $app!.setCurrentNeighbourhood(
+    $backend!.setCurrentNeighbourhood(
       boundary!.properties.name,
       $editPerimeterRoads,
     );
@@ -80,17 +80,17 @@
 
   function onClickLine(f: Feature, pt: LngLat) {
     if (action == "filter") {
-      $app!.addModalFilter(pt, $filterType);
+      $backend!.addModalFilter(pt, $filterType);
       $mutationCounter++;
     } else if (action == "oneway") {
-      $app!.toggleDirection(f.properties!.road);
+      $backend!.toggleDirection(f.properties!.road);
       $mutationCounter++;
     }
   }
 
   function deleteFilter(e: CustomEvent<LayerClickInfo>) {
     let f = e.detail.features[0];
-    $app!.deleteModalFilter(f.properties!.road);
+    $backend!.deleteModalFilter(f.properties!.road);
     $mutationCounter++;
   }
 
@@ -116,18 +116,18 @@
     }
   }
   function undo() {
-    $app!.undo();
+    $backend!.undo();
     $mutationCounter++;
   }
   function redo() {
-    $app!.redo();
+    $backend!.redo();
     $mutationCounter++;
   }
 
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      $app!.addManyModalFilters(f, $filterType);
+      $backend!.addManyModalFilters(f, $filterType);
       $mutationCounter++;
     }
 

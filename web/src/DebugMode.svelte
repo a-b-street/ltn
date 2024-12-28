@@ -6,7 +6,7 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import { app, mode } from "./stores";
+  import { backend, mode } from "./stores";
 </script>
 
 <SplitComponent>
@@ -39,7 +39,7 @@
 
   <div slot="map">
     <RenderNeighbourhood
-      gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
+      gjInput={notNull($backend).renderNeighbourhood()}
       interactive
       onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
     >
@@ -76,7 +76,7 @@
       </svelte:fragment>
     </RenderNeighbourhood>
 
-    <GeoJSON data={JSON.parse(notNull($app).renderModalFilters())} generateId>
+    <GeoJSON data={notNull($backend).renderModalFilters()} generateId>
       <CircleLayer
         {...layerId("debug-filters")}
         paint={{

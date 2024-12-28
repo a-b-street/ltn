@@ -19,15 +19,19 @@
   import { setCellColors } from "./cells";
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
-  import { app, mode, one_destination, route_pt_a, route_pt_b } from "./stores";
+  import {
+    backend,
+    mode,
+    one_destination,
+    route_pt_a,
+    route_pt_b,
+  } from "./stores";
 
   function back() {
     $mode = { mode: "neighbourhood" };
   }
 
-  $: perRoadGj = JSON.parse(
-    $app!.impactToOneDestination($one_destination.lng, $one_destination.lat),
-  );
+  $: perRoadGj = $backend!.impactToOneDestination($one_destination);
 
   let hovered: Feature | null = null;
 
@@ -37,14 +41,10 @@
     if (!hovered) {
       return emptyGeojson();
     }
-    return JSON.parse(
-      $app!.compareRoute(
-        hovered.properties!.pt1_x,
-        hovered.properties!.pt1_y,
-        $one_destination.lng,
-        $one_destination.lat,
-        1.0,
-      ),
+    return $backend!.compareRoute(
+      new LngLat(hovered.properties!.pt1_x, hovered.properties!.pt1_y),
+      $one_destination,
+      1.0,
     );
   }
 
@@ -96,9 +96,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON
-      data={setCellColors(JSON.parse(notNull($app).renderNeighbourhood()))}
-    >
+    <GeoJSON data={setCellColors(notNull($backend).renderNeighbourhood())}>
       <FillLayer
         {...layerId("cells")}
         filter={["==", ["get", "kind"], "cell"]}

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { LTN } from "backend";
   import type { Feature, Polygon } from "geojson";
   import { PolygonToolLayer } from "maplibre-draw-polygon";
   import { onMount } from "svelte";
@@ -8,13 +7,14 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { Link } from "../common";
   import {
-    app,
     autosave,
+    backend,
     map,
     mode,
     projectName,
     useLocalVite,
   } from "../stores";
+  import { Backend } from "../wasm";
   import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
 
   let newProjectName = "";
@@ -34,7 +34,7 @@
   function gotXml(e: CustomEvent<{ xml: string; boundary: Feature<Polygon> }>) {
     loading = "Loading OSM";
     try {
-      $app = new LTN(
+      $backend = new Backend(
         new TextEncoder().encode(e.detail.xml),
         e.detail.boundary,
         undefined,

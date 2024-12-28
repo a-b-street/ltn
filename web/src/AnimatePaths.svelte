@@ -1,14 +1,12 @@
 <script lang="ts">
   import along from "@turf/along";
-  import type { FeatureCollection, LineString } from "geojson";
+  import type { FeatureCollection } from "geojson";
   import { onDestroy } from "svelte";
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
   import { layerId } from "./common";
+  import type { AllShortcuts } from "./wasm";
 
-  export let paths: FeatureCollection<
-    LineString,
-    { directness: number; length_meters: number }
-  >;
+  export let paths: AllShortcuts;
 
   let totalDirectness = sumWeights();
 

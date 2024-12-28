@@ -13,15 +13,15 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
-  import { app, autosave, editPerimeterRoads, mode } from "./stores";
+  import { autosave, backend, editPerimeterRoads, mode } from "./stores";
 
-  let gj = JSON.parse($app!.renderAutoBoundaries());
+  let gj = $backend!.renderAutoBoundaries();
   let minArea = 0;
   let removeNonRoad = true;
 
   function add(e: CustomEvent<LayerClickInfo>) {
     let name = pickNeighbourhoodName(
-      $app!,
+      $backend!,
       "What do you want to name the neighbourhood?",
       "",
     );
@@ -30,15 +30,15 @@
     }
     try {
       let feature = {
-        type: "Feature",
+        type: "Feature" as const,
         // Omit waypoints and lazily fill them out.
         properties: {},
         // Trust generateId to make IDs in order
-        geometry: gj.features[e.detail.features[0].id!].geometry,
+        geometry: gj.features[e.detail.features[0].id as number].geometry,
       };
-      $app!.setNeighbourhoodBoundary(name, feature);
+      $backend!.setNeighbourhoodBoundary(name, feature);
       autosave();
-      $app!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+      $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
       $mode = {
         mode: "neighbourhood",
       };

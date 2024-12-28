@@ -7,19 +7,17 @@
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import { app, mainRoadPenalty, mode, route_pt_a, route_pt_b } from "./stores";
+  import {
+    backend,
+    mainRoadPenalty,
+    mode,
+    route_pt_a,
+    route_pt_b,
+  } from "./stores";
 
   export let prevMode: "network" | "neighbourhood" | "impact-one-destination";
 
-  $: gj = JSON.parse(
-    $app!.compareRoute(
-      $route_pt_a.lng,
-      $route_pt_a.lat,
-      $route_pt_b.lng,
-      $route_pt_b.lat,
-      $mainRoadPenalty,
-    ),
-  );
+  $: gj = $backend!.compareRoute($route_pt_a, $route_pt_b, $mainRoadPenalty);
 
   function back() {
     $mode = { mode: prevMode };
@@ -80,7 +78,7 @@
   <div slot="map">
     {#if prevMode == "neighbourhood"}
       <RenderNeighbourhood
-        gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
+        gjInput={notNull($backend).renderNeighbourhood()}
         interactive={false}
       />
     {/if}

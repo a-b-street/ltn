@@ -11,7 +11,7 @@
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
-  import { app, map, mode } from "./stores";
+  import { backend, map, mode } from "./stores";
 
   type State =
     | {
@@ -26,7 +26,7 @@
   let state: State = { state: "neutral" };
 
   function choseRoad(roadGj: Feature, _: LngLat) {
-    let gj = JSON.parse($app!.getShortcutsCrossingRoad(roadGj.properties!.id));
+    let gj = $backend!.getShortcutsCrossingRoad(roadGj.properties!.id);
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");
       return;
@@ -150,7 +150,7 @@
   <div slot="map">
     {#if state.state == "neutral"}
       <RenderNeighbourhood
-        gjInput={JSON.parse(notNull($app).renderNeighbourhood())}
+        gjInput={notNull($backend).renderNeighbourhood()}
         onClickLine={choseRoad}
       >
         <div slot="line-popup">
@@ -162,9 +162,7 @@
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}
-      <GeoJSON
-        data={setCellColors(JSON.parse(notNull($app).renderNeighbourhood()))}
-      >
+      <GeoJSON data={setCellColors(notNull($backend).renderNeighbourhood())}>
         <FillLayer
           {...layerId("cells")}
           filter={["==", ["get", "kind"], "cell"]}

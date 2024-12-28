@@ -1,10 +1,12 @@
 <script lang="ts">
   import { GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "./common";
-  import { app, mutationCounter } from "./stores";
+  import { backend, mutationCounter } from "./stores";
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
-  $: gj = $mutationCounter > 0 ? JSON.parse($app!.renderModalFilters()) : null;
+  $: gj =
+    $mutationCounter > 0 ? $backend!.renderModalFilters() : emptyGeojson();
 </script>
 
 <GeoJSON data={gj} generateId>

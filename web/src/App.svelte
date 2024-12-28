@@ -26,7 +26,7 @@
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
   import Settings from "./Settings.svelte";
   import {
-    app,
+    backend,
     map as mapStore,
     maptilerApiKey,
     maptilerBasemap,
@@ -60,10 +60,7 @@
   }
 
   function zoomToFit() {
-    $mapStore!.fitBounds(
-      Array.from($app!.getBounds()) as [number, number, number, number],
-      { animate: false },
-    );
+    $mapStore!.fitBounds($backend!.getBounds(), { animate: false });
   }
 
   let topDiv: HTMLSpanElement;
@@ -97,7 +94,7 @@
 
     <hr />
 
-    {#if $app}
+    {#if $backend}
       <button class="secondary" on:click={zoomToFit}>
         Zoom to fit study area
       </button>
@@ -144,8 +141,8 @@
       {:else if $mode.mode == "new-project"}
         <NewProjectMode />
       {/if}
-      {#if $app}
-        <GeoJSON data={JSON.parse($app.getInvertedBoundary())}>
+      {#if $backend}
+        <GeoJSON data={$backend.getInvertedBoundary()}>
           <FillLayer
             {...layerId("boundary")}
             paint={{ "fill-color": "black", "fill-opacity": 0.3 }}

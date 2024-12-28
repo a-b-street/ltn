@@ -1,4 +1,3 @@
-import { LTN } from "backend";
 import type { Feature, Polygon } from "geojson";
 import { LngLat } from "maplibre-gl";
 import { RouteTool } from "route-snapper-ts";
@@ -7,7 +6,7 @@ import { overpassQueryForPolygon } from "svelte-utils/overpass";
 import { get, writable } from "svelte/store";
 import { routeTool } from "../common/draw_area/stores";
 import {
-  app,
+  backend,
   map,
   mode,
   one_destination,
@@ -16,6 +15,7 @@ import {
   route_pt_b,
   useLocalVite,
 } from "../stores";
+import { Backend } from "../wasm";
 
 export async function loadFromLocalStorage(key: string) {
   projectName.set(key);
@@ -26,15 +26,15 @@ export async function loadFromLocalStorage(key: string) {
     let [buffer, boundary] = await getOsmInput(gj);
     console.timeEnd("get OSM input");
     console.time("load");
-    app.set(
-      new LTN(
+    backend.set(
+      new Backend(
         new Uint8Array(buffer),
         boundary,
         gj.study_area_name || undefined,
       ),
     );
     // TODO Rename savefile -> project? Or combine this call with the constructor?
-    get(app)!.loadSavefile(gj);
+    get(backend)!.loadSavefile(gj);
     console.timeEnd("load");
 
     afterProjectLoaded();
@@ -81,16 +81,13 @@ export function afterProjectLoaded() {
   routeTool.set(
     new RouteTool(
       get(map)!,
-      get(app)!.toRouteSnapper(),
+      get(backend)!.toRouteSnapper(),
       writable(emptyGeojson()),
       writable(true),
       writable(0),
     ),
   );
-  get(map)!.fitBounds(
-    Array.from(get(app)!.getBounds()) as [number, number, number, number],
-    { animate: false },
-  );
+  get(map)!.fitBounds(get(backend)!.getBounds(), { animate: false });
   route_pt_a.set(randomPoint());
   route_pt_b.set(randomPoint());
   one_destination.set(randomPoint());
@@ -102,7 +99,7 @@ export function afterProjectLoaded() {
 }
 
 function randomPoint(): LngLat {
-  let bounds = get(app)!.getBounds();
+  let bounds = get(backend)!.getBounds();
   let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
   let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
   return new LngLat(lng, lat);

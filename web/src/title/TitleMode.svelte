@@ -5,7 +5,7 @@
   import editIcon from "../../assets/edit.svg?url";
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
-  import { app, map, mode, projectName } from "../stores";
+  import { backend, map, mode, projectName } from "../stores";
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
@@ -15,7 +15,7 @@
 
   // When other modes reset here, they can't clear state without a race condition
   {
-    $app = null;
+    $backend = null;
     $routeTool = null;
     $projectName = "";
 

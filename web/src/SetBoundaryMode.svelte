@@ -5,7 +5,7 @@
   import { Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
-  import { app, autosave, editPerimeterRoads, map, mode } from "./stores";
+  import { autosave, backend, editPerimeterRoads, map, mode } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;
@@ -34,9 +34,9 @@
     if ($waypoints.length >= 3) {
       try {
         let feature = calculateArea($waypoints);
-        $app!.setNeighbourhoodBoundary(name, feature);
+        $backend!.setNeighbourhoodBoundary(name, feature);
         autosave();
-        $app!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+        $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
         $mode = {
           mode: "neighbourhood",
         };

@@ -10,21 +10,21 @@
   import { pickNeighbourhoodName } from "./common/pick_names";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import {
-    app,
     autosave,
+    backend,
     editPerimeterRoads,
     mode,
     projectName,
   } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = JSON.parse($app!.toSavefile());
+  $: gj = $backend!.toSavefile();
   $: boundaryNames = gj.features
     .filter((f: Feature) => f.properties!.kind == "boundary")
     .map((f: Feature) => f.properties!.name);
 
   function pickNeighbourhood(name: string) {
-    $app!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+    $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
     $mode = { mode: "neighbourhood" };
   }
 
@@ -34,29 +34,29 @@
         `Really delete neighbourhood ${name}? You can't undo this.`,
       )
     ) {
-      $app!.deleteNeighbourhoodBoundary(name);
+      $backend!.deleteNeighbourhoodBoundary(name);
       autosave();
       // TODO Improve perf, don't call this twice
-      gj = JSON.parse($app!.toSavefile());
+      gj = $backend!.toSavefile();
     }
   }
 
   function renameNeighbourhood(name: string) {
     let newName = pickNeighbourhoodName(
-      $app!,
+      $backend!,
       `Rename neighbourhood ${name} to what?`,
       name,
     );
     if (newName) {
-      $app!.renameNeighbourhoodBoundary(name, newName);
+      $backend!.renameNeighbourhoodBoundary(name, newName);
       autosave();
-      gj = JSON.parse($app!.toSavefile());
+      gj = $backend!.toSavefile();
     }
   }
 
   function newBoundary() {
     let name = pickNeighbourhoodName(
-      $app!,
+      $backend!,
       "What do you want to name the neighbourhood?",
       "",
     );
@@ -66,13 +66,16 @@
   }
 
   function exportGJ() {
-    downloadGeneratedFile($projectName + ".geojson", $app!.toSavefile());
+    downloadGeneratedFile(
+      $projectName + ".geojson",
+      JSON.stringify($backend!.toSavefile()),
+    );
   }
 
   function debugRouteSnapper() {
     downloadGeneratedFile(
       "debug_route_snapper.geojson",
-      $app!.toRouteSnapperGj(),
+      $backend!.toRouteSnapperGj(),
     );
   }
 
