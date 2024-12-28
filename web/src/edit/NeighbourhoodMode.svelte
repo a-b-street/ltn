@@ -295,6 +295,9 @@
         <Popup openOn="hover" let:props>
           <p>
             {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
+            {#if props.speed_mph}
+              ({Math.round(props.speed_mph)} mph)
+            {/if}
           </p>
           {#if action == "filter"}
             <div>

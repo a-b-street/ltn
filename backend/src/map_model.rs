@@ -76,6 +76,7 @@ pub struct Road {
     pub node2: osm_reader::NodeID,
     pub linestring: LineString,
     pub tags: Tags,
+    pub speed_mph: Option<f64>,
 }
 
 pub struct Intersection {
@@ -571,6 +572,7 @@ impl Road {
         let mut f = mercator.to_wgs84_gj(&self.linestring);
         // TODO Most of this is debug only
         f.set_property("id", self.id.0);
+        f.set_property("speed_mph", self.speed_mph);
         f.set_property("way", self.way.to_string());
         f.set_property("node1", self.node1.to_string());
         f.set_property("node2", self.node2.to_string());

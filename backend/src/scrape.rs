@@ -114,6 +114,7 @@ pub fn scrape_osm(
             node1: e.osm_node1,
             node2: e.osm_node2,
             linestring: e.linestring,
+            speed_mph: parse_maxspeed_mph(&e.osm_tags),
             tags: e.osm_tags,
         })
         .collect();
@@ -286,4 +287,19 @@ fn is_road(tags: &Tags) -> bool {
         return false;
     }
     true
+}
+
+// TODO Look at muv for something more rigorous
+fn parse_maxspeed_mph(tags: &Tags) -> Option<f64> {
+    let maxspeed = tags.get("maxspeed")?;
+    if let Ok(kmph) = maxspeed.parse::<f64>() {
+        return Some(kmph * 0.621371);
+    }
+    if let Some(mph) = maxspeed
+        .strip_suffix(" mph")
+        .and_then(|x| x.parse::<f64>().ok())
+    {
+        return Some(mph);
+    }
+    None
 }
