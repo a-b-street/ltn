@@ -159,7 +159,6 @@ impl LTN {
         name: String,
         edit_perimeter_roads: bool,
     ) -> Result<(), JsValue> {
-        info!("setCurrentNeighbourhood");
         let boundary_gj = self.map.boundaries.get(&name).cloned().unwrap();
         let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
         self.map.mercator.to_mercator_in_place(&mut boundary_geo);
@@ -168,7 +167,6 @@ impl LTN {
             Neighbourhood::new(&self.map, name, boundary_geo, edit_perimeter_roads)
                 .map_err(err_to_js)?,
         );
-        info!("done");
         Ok(())
     }
 

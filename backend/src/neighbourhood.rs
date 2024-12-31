@@ -42,7 +42,7 @@ impl Neighbourhood {
         boundary_polygon: Polygon,
         edit_perimeter_roads: bool,
     ) -> Result<Self> {
-        info!("match roads");
+        let t1 = Instant::now();
         let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
 
         let mut interior_roads = BTreeSet::new();
@@ -66,7 +66,7 @@ impl Neighbourhood {
             }
         }
 
-        info!("match intersections");
+        let t2 = Instant::now();
         let mut border_intersections = BTreeSet::new();
         for obj in map
             .closest_intersection
@@ -84,10 +84,14 @@ impl Neighbourhood {
         if interior_roads.is_empty() {
             bail!("No roads inside the boundary");
         }
-        info!("rest of setup");
 
         // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
         let boundary_area_km2 = boundary_polygon.unsigned_area() / 1_000_000.0;
+        let t3 = Instant::now();
+
+        if true {
+            info!("Neighbourhood set up, total {:?}. Finding roads took {:?}, intersections took {:?}", t3 - t1, t2 - t1, t3 - t2);
+        }
 
         let mut n = Self {
             interior_roads,
@@ -115,8 +119,8 @@ impl Neighbourhood {
             render_cells,
             shortcuts,
         });
-        if false {
-            info!("Neighbourhood edited. Finding cells took {:?}, rendering cells took {:?}, finding shortcuts took {:?}", t2 - t1, t3 - t2, t4 - t3);
+        if true {
+            info!("Neighbourhood edited, total {:?}. Finding cells took {:?}, rendering cells took {:?}, finding shortcuts took {:?}", t4 - t1, t2 - t1, t3 - t2, t4 - t3);
         }
     }
 
