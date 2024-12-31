@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    Area, Contains, Distance, Euclidean, Intersects, Length, LineInterpolatePoint, LineLocatePoint,
-    LineString, Point, Polygon,
+    Area, Distance, Euclidean, Length, LineInterpolatePoint, LineLocatePoint, LineString, Point,
+    Polygon, PreparedGeometry, Relate,
 };
 use geojson::FeatureCollection;
 use web_time::Instant;
@@ -45,12 +45,14 @@ impl Neighbourhood {
         let t1 = Instant::now();
         let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
 
+        let prepared_boundary = PreparedGeometry::from(boundary_polygon.clone());
+
         let mut interior_roads = BTreeSet::new();
         let mut crosses = BTreeMap::new();
         for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
             let r = &map.roads[obj.data.0];
 
-            match line_in_polygon(&r.linestring, &boundary_polygon) {
+            match line_in_polygon(&r.linestring, &boundary_polygon, &prepared_boundary) {
                 LineInPolygon::Inside => {
                     interior_roads.insert(r.id);
                 }
@@ -217,13 +219,20 @@ enum LineInPolygon {
     Outside,
 }
 
-fn line_in_polygon(linestring: &LineString, polygon: &Polygon) -> LineInPolygon {
+fn line_in_polygon(
+    linestring: &LineString,
+    polygon: &Polygon,
+    prepared_polygon: &PreparedGeometry,
+) -> LineInPolygon {
     // TODO Reconsider rewriting all of this logic based on clip_linestring_to_polygon
-    if polygon.contains(linestring) {
+
+    let matrix = prepared_polygon.relate(linestring);
+
+    if matrix.is_within() {
         return double_check_line_in_polygon(linestring, polygon);
     }
 
-    if !polygon.intersects(linestring) {
+    if !matrix.is_intersects() {
         return LineInPolygon::Outside;
     }
 
