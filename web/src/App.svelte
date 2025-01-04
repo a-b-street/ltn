@@ -26,9 +26,9 @@
   import {
     DisableInteractiveLayers,
     layerId,
-    PrintControl,
     StreetView,
   } from "./common";
+        import { MapExportControl } from "@watergis/svelte-maplibre-export";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
@@ -146,7 +146,7 @@
     >
       <NavigationControl />
       <ScaleControl />
-      <PrintControl {map} />
+      <MapExportControl map={$mapStore} position='top-right' />
       <Geocoder {map} apiKey={maptilerApiKey} />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
