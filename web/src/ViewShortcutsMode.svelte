@@ -2,12 +2,12 @@
   import type { Feature } from "geojson";
   import type { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
-  import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
+  import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { gjPosition, layerId, Link } from "./common";
+  import { DotMarker, gjPosition, layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import { backend, map, mode } from "./stores";
@@ -188,14 +188,14 @@
         />
       </GeoJSON>
 
-      <Marker
+      <DotMarker
         lngLat={gjPosition(
           state.gj.features[state.shortcutIndex].geometry.coordinates[0],
         )}
       >
-        <span class="dot">A</span>
-      </Marker>
-      <Marker
+        A
+      </DotMarker>
+      <DotMarker
         lngLat={gjPosition(
           state.gj.features[state.shortcutIndex].geometry.coordinates[
             state.gj.features[state.shortcutIndex].geometry.coordinates.length -
@@ -203,24 +203,10 @@
           ],
         )}
       >
-        <span class="dot">B</span>
-      </Marker>
+        B
+      </DotMarker>
     {/if}
 
     <ModalFilterLayer />
   </div>
 </SplitComponent>
-
-<style>
-  .dot {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: grey;
-    font-weight: bold;
-  }
-</style>

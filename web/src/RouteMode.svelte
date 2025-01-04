@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
+  import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { DotMarker, layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import {
@@ -99,25 +99,7 @@
         }}
       />
     </GeoJSON>
-    <Marker bind:lngLat={$route_pt_a} draggable>
-      <span class="dot">A</span>
-    </Marker>
-    <Marker bind:lngLat={$route_pt_b} draggable>
-      <span class="dot">B</span>
-    </Marker>
+    <DotMarker bind:lngLat={$route_pt_a} draggable>A</DotMarker>
+    <DotMarker bind:lngLat={$route_pt_b} draggable>B</DotMarker>
   </div>
 </SplitComponent>
-
-<style>
-  .dot {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: grey;
-    font-weight: bold;
-  }
-</style>

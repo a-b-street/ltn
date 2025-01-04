@@ -1,13 +1,7 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
   import { LngLat, type MapMouseEvent } from "maplibre-gl";
-  import {
-    FillLayer,
-    GeoJSON,
-    LineLayer,
-    MapEvents,
-    Marker,
-  } from "svelte-maplibre";
+  import { FillLayer, GeoJSON, LineLayer, MapEvents } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import {
     constructMatchExpression,
@@ -16,7 +10,7 @@
   } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { DotMarker, layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import {
     backend,
@@ -150,22 +144,6 @@
 
     <ModalFilterLayer />
 
-    <Marker bind:lngLat={$one_destination} draggable>
-      <span class="dot">X</span>
-    </Marker>
+    <DotMarker bind:lngLat={$one_destination} draggable>X</DotMarker>
   </div>
 </SplitComponent>
-
-<style>
-  .dot {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: grey;
-    font-weight: bold;
-  }
-</style>
