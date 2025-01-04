@@ -23,7 +23,12 @@
     topContents,
   } from "svelte-utils/top_bar_layout";
   import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
-  import { DisableInteractiveLayers, layerId, StreetView } from "./common";
+  import {
+    DisableInteractiveLayers,
+    layerId,
+    PrintControl,
+    StreetView,
+  } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
@@ -141,6 +146,7 @@
     >
       <NavigationControl />
       <ScaleControl />
+      <PrintControl {map} />
       <Geocoder {map} apiKey={maptilerApiKey} />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}

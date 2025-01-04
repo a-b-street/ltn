@@ -3,6 +3,7 @@ export { default as DisableInteractiveLayers } from "./DisableInteractiveLayers.
 export { default as DotMarker } from "./DotMarker.svelte";
 export { default as HelpButton } from "./HelpButton.svelte";
 export { default as Link } from "./Link.svelte";
+export { default as PrintControl } from "./PrintControl.svelte";
 export { default as StreetView } from "./StreetView.svelte";
 export { layerId } from "./zorder";
 
