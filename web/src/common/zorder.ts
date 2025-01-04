@@ -89,8 +89,6 @@ const layerZorder = [
   "cells",
   "interior-roads-outlines",
   "interior-roads",
-  "border-arrow-bases",
-  "border-arrows",
 
   "compare-route",
 
@@ -113,6 +111,10 @@ const layerZorder = [
 
   "boundary",
   "neighbourhood-boundary",
+
+  // These're outside the neighbourhood-boundary, but don't fade them
+  "border-arrows",
+  "border-arrow-outlines",
 
   "auto-boundaries-areas",
   "auto-boundaries-severances",

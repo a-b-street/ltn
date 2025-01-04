@@ -1,6 +1,6 @@
 use geo::{
-    BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Line, LineInterpolatePoint,
-    LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
+    BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
+    LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
 };
 use rstar::AABB;
 use utils::LineSplit;
@@ -125,8 +125,91 @@ pub fn limit_angle(a1: f64) -> f64 {
 
 pub fn euclidean_destination(pt: Point, angle_degs: f64, dist_away_m: f64) -> Point {
     let (sin, cos) = angle_degs.to_radians().sin_cos();
-    Point::new(
-        pt.x() + dist_away_m * cos,
-        pt.y() + dist_away_m * sin,
-    )
+    Point::new(pt.x() + dist_away_m * cos, pt.y() + dist_away_m * sin)
+}
+
+fn euclidean_destination_coord(pt: Coord, angle_degs: f64, dist_away_m: f64) -> Coord {
+    euclidean_destination(pt.into(), angle_degs, dist_away_m).into()
+}
+
+// If the line is too short for the thickness, give up
+pub fn make_arrow(line: Line, thickness: f64, double_ended: bool) -> Option<Polygon> {
+    let head_size = thickness * 2.0;
+    let triangle_height = head_size / 2.0_f64.sqrt();
+    let angle = angle_of_line(line);
+    let length = line.length::<Euclidean>();
+
+    if length < triangle_height * 3.0 {
+        return None;
+    }
+
+    let mut pts = Vec::new();
+
+    let start_trimmed = euclidean_destination_coord(line.start, angle, triangle_height);
+    let end_trimmed = euclidean_destination_coord(line.start, angle, length - triangle_height);
+
+    if double_ended {
+        pts.push(line.start);
+        pts.push(euclidean_destination_coord(
+            start_trimmed,
+            angle + 90.0,
+            thickness * 1.5,
+        ));
+        pts.push(euclidean_destination_coord(
+            start_trimmed,
+            angle + 90.0,
+            thickness * 0.5,
+        ));
+    } else {
+        pts.push(euclidean_destination_coord(
+            line.start,
+            angle + 90.0,
+            thickness * 0.5,
+        ));
+    }
+    pts.push(euclidean_destination_coord(
+        end_trimmed,
+        angle + 90.0,
+        thickness * 0.5,
+    ));
+    pts.push(euclidean_destination_coord(
+        end_trimmed,
+        angle + 90.0,
+        thickness * 1.5,
+    ));
+
+    pts.push(line.end);
+
+    pts.push(euclidean_destination_coord(
+        end_trimmed,
+        angle - 90.0,
+        thickness * 1.5,
+    ));
+    pts.push(euclidean_destination_coord(
+        end_trimmed,
+        angle - 90.0,
+        thickness * 0.5,
+    ));
+    if double_ended {
+        pts.push(euclidean_destination_coord(
+            start_trimmed,
+            angle - 90.0,
+            thickness * 0.5,
+        ));
+        pts.push(euclidean_destination_coord(
+            start_trimmed,
+            angle - 90.0,
+            thickness * 1.5,
+        ));
+    } else {
+        pts.push(euclidean_destination_coord(
+            line.start,
+            angle - 90.0,
+            thickness * 0.5,
+        ));
+    }
+
+    pts.push(pts[0]);
+
+    Some(Polygon::new(LineString::new(pts), Vec::new()))
 }

@@ -2,13 +2,15 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    Line, Area, Distance, Euclidean, Length, LineInterpolatePoint, LineLocatePoint, LineString, Point,
-    Polygon, PreparedGeometry, Relate,
+    Area, Distance, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint, LineString,
+    Point, Polygon, PreparedGeometry, Relate,
 };
 use geojson::{Feature, FeatureCollection};
 use web_time::Instant;
 
-use crate::geo_helpers::{aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination};
+use crate::geo_helpers::{
+    aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination, make_arrow,
+};
 use crate::render_cells::Color;
 use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
@@ -254,11 +256,14 @@ impl Neighbourhood {
                 std::mem::swap(&mut line.start, &mut line.end);
             }
 
-            let mut f = map.mercator.to_wgs84_gj(&line);
-            // TODO Which cell?
-            f.set_property("kind", "border_arrow");
-            f.set_property("oneway", map.directions[r] != Direction::BothWays);
-            features.push(f);
+            let thickness = 6.0;
+            let double_ended = map.directions[r] == Direction::BothWays;
+            if let Some(polygon) = make_arrow(line, thickness, double_ended) {
+                let mut f = map.mercator.to_wgs84_gj(&polygon);
+                // TODO Which cell?
+                f.set_property("kind", "border_arrow");
+                features.push(f);
+            }
         }
         features
     }

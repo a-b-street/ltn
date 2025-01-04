@@ -6,7 +6,6 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
-    SymbolLayer,
   } from "svelte-maplibre";
   import { layerId } from "./common";
   import OneWayLayer from "./OneWayLayer.svelte";
@@ -95,27 +94,22 @@
     }}
   />
 
-  <!--
-  <LineLayer
-    {...layerId("border-arrow-bases")}
-    filter={["==", ["get", "kind"], "border_arrow"]}
-    paint={{
-      "line-width": 10,
-      "line-color": "cyan",
-    }}
-  />
-
-  <SymbolLayer
+  <FillLayer
     {...layerId("border-arrows")}
     filter={["==", ["get", "kind"], "border_arrow"]}
-    layout={{
-      "icon-image": "oneway-arrow",
-      "icon-size": 1.0,
-      "symbol-placement": "line",
-      "icon-allow-overlap": true,
+    paint={{
+      "fill-color": "cyan",
+      "fill-opacity": 0.5,
     }}
   />
-  -->
+  <LineLayer
+    {...layerId("border-arrow-outlines")}
+    filter={["==", ["get", "kind"], "border_arrow"]}
+    paint={{
+      "line-color": "black",
+      "line-width": 2,
+    }}
+  />
 
   <LineLayer
     {...layerId("interior-roads-outlines")}
