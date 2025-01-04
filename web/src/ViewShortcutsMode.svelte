@@ -1,16 +1,17 @@
 <script lang="ts">
-  import type { Feature, FeatureCollection } from "geojson";
+  import type { Feature } from "geojson";
   import type { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
-  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { GeoJSON, LineLayer, Marker } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { gjPosition, layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import { backend, map, mode } from "./stores";
+  import type { AllShortcuts } from "./wasm";
 
   type State =
     | {
@@ -19,7 +20,7 @@
     | {
         state: "chose-road";
         roadGj: Feature;
-        gj: FeatureCollection;
+        gj: AllShortcuts;
         shortcutIndex: number;
       };
   let state: State = { state: "neutral" };
@@ -186,8 +187,40 @@
           }}
         />
       </GeoJSON>
+
+      <Marker
+        lngLat={gjPosition(
+          state.gj.features[state.shortcutIndex].geometry.coordinates[0],
+        )}
+      >
+        <span class="dot">A</span>
+      </Marker>
+      <Marker
+        lngLat={gjPosition(
+          state.gj.features[state.shortcutIndex].geometry.coordinates[
+            state.gj.features[state.shortcutIndex].geometry.coordinates.length -
+              1
+          ],
+        )}
+      >
+        <span class="dot">B</span>
+      </Marker>
     {/if}
 
     <ModalFilterLayer />
   </div>
 </SplitComponent>
+
+<style>
+  .dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: grey;
+    font-weight: bold;
+  }
+</style>

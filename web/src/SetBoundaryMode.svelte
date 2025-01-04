@@ -2,7 +2,7 @@
   import type { Feature, Polygon } from "geojson";
   import type { AreaProps } from "route-snapper-ts";
   import { notNull } from "svelte-utils";
-  import { Link } from "./common";
+  import { gjPosition, Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
   import { autosave, backend, editPerimeterRoads, map, mode } from "./stores";
@@ -25,7 +25,7 @@
       // "backfill" by using the full geometry as freehand points.
       // Editing will be very painful in practice, but it won't break.
       $waypoints = existing.geometry.coordinates[0].slice(1).map((point) => {
-        return { point: point as [number, number], snapped: false };
+        return { point: gjPosition(point), snapped: false };
       });
     }
   }
