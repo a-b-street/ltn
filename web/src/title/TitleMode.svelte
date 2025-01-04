@@ -108,14 +108,26 @@
       </ul>
     </nav>
   </div>
+
   <div slot="sidebar">
     {#if $map && wasmReady}
-      <div>
-        <Link on:click={() => ($mode = { mode: "new-project" })}>
-          New project
-        </Link>
-      </div>
+      <Link on:click={() => ($mode = { mode: "new-project" })}>
+        New project
+      </Link>
 
+      <hr />
+
+      <label>
+        Load a project from a file
+        <input bind:this={fileInput} on:change={loadFile} type="file" />
+      </label>
+    {:else}
+      <p>Waiting for MapLibre and WASM to load...</p>
+    {/if}
+  </div>
+
+  <div slot="map" class="cover-map">
+    {#if $map && wasmReady}
       <p>Load a saved project:</p>
       <ul>
         {#each projectList.entries() as [study_area_name, projects]}
@@ -143,13 +155,26 @@
           {/each}
         {/each}
       </ul>
-
-      <label>
-        Load a project from a file
-        <input bind:this={fileInput} on:change={loadFile} type="file" />
-      </label>
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
   </div>
 </SplitComponent>
+
+<style>
+  .cover-map {
+    width: 80%;
+    height: 80%;
+    position: absolute;
+    z-index: 50;
+    top: 10%;
+    left: 10%;
+
+    overflow: scroll;
+
+    /* Undo styling from being nested under .maplibregl-map */
+    font: initial;
+
+    background: white;
+  }
+</style>
