@@ -44,11 +44,11 @@
     { name: string; waypoints: Waypoint[] }
   > | null;
 
-  let gjInput: RenderNeighbourhoodOutput;
+  let gj: RenderNeighbourhoodOutput;
   let allShortcuts = $backend!.getAllShortcuts();
   $: rerender($mutationCounter);
 
-  $: numDisconnectedCells = gjInput.features.filter(
+  $: numDisconnectedCells = gj.features.filter(
     (f) =>
       f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
   ).length;
@@ -58,12 +58,12 @@
   });
 
   function rerender(_x: number) {
-    gjInput = $backend!.renderNeighbourhood();
+    gj = $backend!.renderNeighbourhood();
     // @ts-expect-error TS can't figure out that we're narrowing the case here
-    boundary = gjInput.features.find((f) => f.properties.kind == "boundary")!;
+    boundary = gj.features.find((f) => f.properties.kind == "boundary")!;
 
-    undoLength = gjInput.undo_length;
-    redoLength = gjInput.redo_length;
+    undoLength = gj.undo_length;
+    redoLength = gj.redo_length;
 
     allShortcuts = $backend!.getAllShortcuts();
 
@@ -206,7 +206,7 @@
   <div slot="sidebar">
     <p>
       Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
-      , with an area of {gjInput.area_km2.toFixed(1)} km²
+      , with an area of {gj.area_km2.toFixed(1)} km²
     </p>
 
     {#if numDisconnectedCells > 0}
@@ -287,7 +287,7 @@
 
   <div slot="map">
     <RenderNeighbourhood
-      {gjInput}
+      {gj}
       interactive={action == "filter" || action == "oneway"}
       {onClickLine}
     >

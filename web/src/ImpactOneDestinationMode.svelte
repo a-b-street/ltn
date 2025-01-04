@@ -16,7 +16,6 @@
   } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { setCellColors } from "./cells";
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import {
@@ -96,7 +95,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={setCellColors(notNull($backend).renderNeighbourhood())}>
+    <GeoJSON data={notNull($backend).renderNeighbourhood()}>
       <FillLayer
         {...layerId("cells")}
         filter={["==", ["get", "kind"], "cell"]}

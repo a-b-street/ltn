@@ -78,7 +78,7 @@
   <div slot="map">
     {#if prevMode == "neighbourhood"}
       <RenderNeighbourhood
-        gjInput={notNull($backend).renderNeighbourhood()}
+        gj={notNull($backend).renderNeighbourhood()}
         interactive={false}
       />
     {/if}

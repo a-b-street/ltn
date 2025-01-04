@@ -39,7 +39,7 @@
 
   <div slot="map">
     <RenderNeighbourhood
-      gjInput={notNull($backend).renderNeighbourhood()}
+      gj={notNull($backend).renderNeighbourhood()}
       interactive
       onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
     >

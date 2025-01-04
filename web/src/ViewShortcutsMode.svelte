@@ -7,7 +7,6 @@
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { setCellColors } from "./cells";
   import { layerId, Link } from "./common";
   import ModalFilterLayer from "./ModalFilterLayer.svelte";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
@@ -150,7 +149,7 @@
   <div slot="map">
     {#if state.state == "neutral"}
       <RenderNeighbourhood
-        gjInput={notNull($backend).renderNeighbourhood()}
+        gj={notNull($backend).renderNeighbourhood()}
         onClickLine={choseRoad}
       >
         <div slot="line-popup">
@@ -162,7 +161,7 @@
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}
-      <GeoJSON data={setCellColors(notNull($backend).renderNeighbourhood())}>
+      <GeoJSON data={notNull($backend).renderNeighbourhood()}>
         <FillLayer
           {...layerId("cells")}
           filter={["==", ["get", "kind"], "cell"]}

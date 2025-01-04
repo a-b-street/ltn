@@ -7,20 +7,18 @@
     hoverStateFilter,
     LineLayer,
   } from "svelte-maplibre";
-  import { setCellColors } from "./cells";
   import { layerId } from "./common";
   import OneWayLayer from "./OneWayLayer.svelte";
   import type { RenderNeighbourhoodOutput } from "./wasm";
 
-  export let gjInput: RenderNeighbourhoodOutput;
+  export let gj: RenderNeighbourhoodOutput;
   // When disabled, can't click lines or filters, no slots, no hoverCursor
   export let interactive = true;
   export let onClickLine = (f: Feature, pt: LngLat) => {};
 
-  $: gj = setCellColors(gjInput);
   $: maxShortcuts =
     Math.max(
-      ...gjInput.features.map((f) =>
+      ...gj.features.map((f) =>
         f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
       ),
     ) ?? 0;
