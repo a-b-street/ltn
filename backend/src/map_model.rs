@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt;
 
 use anyhow::Result;
@@ -17,6 +17,7 @@ use crate::Router;
 pub struct MapModel {
     pub roads: Vec<Road>,
     pub intersections: Vec<Intersection>,
+    pub bus_routes_on_roads: HashMap<osm_reader::WayID, Vec<String>>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
     pub study_area_name: Option<String>,
@@ -132,9 +133,13 @@ impl MapModel {
         &self,
         pt: Coord,
         candidate_roads: Option<Vec<RoadID>>,
-        kind: FilterKind,
+        mut kind: FilterKind,
     ) -> Command {
         let (r, percent_along) = self.closest_point_on_road(pt, candidate_roads).unwrap();
+        if self.get_bus_routes_on_road(r).is_some() && kind != FilterKind::BusGate {
+            info!("Using a BusGate instead of {kind:?} for a road");
+            kind = FilterKind::BusGate;
+        }
         Command::SetModalFilter(
             r,
             Some(ModalFilter {
@@ -215,11 +220,17 @@ impl MapModel {
         for r in candidate_roads {
             let road = self.get_r(*r);
             if let Some(percent_along) = linestring_intersection(&road.linestring, &along_line) {
+                let mut use_kind = kind;
+                if self.get_bus_routes_on_road(*r).is_some() && kind != FilterKind::BusGate {
+                    info!("Using a BusGate instead of {kind:?} for a road");
+                    use_kind = FilterKind::BusGate;
+                }
+
                 edits.push(Command::SetModalFilter(
                     *r,
                     Some(ModalFilter {
                         percent_along,
-                        kind,
+                        kind: use_kind,
                     }),
                 ));
             }
@@ -554,6 +565,12 @@ impl MapModel {
         )
     }
 
+    /// What're the names of bus routes along a road?
+    pub fn get_bus_routes_on_road(&self, r: RoadID) -> Option<&Vec<String>> {
+        let way = self.get_r(r).way;
+        self.bus_routes_on_roads.get(&way)
+    }
+
     fn original_directions(&self) -> BTreeMap<RoadID, Direction> {
         let mut directions = BTreeMap::new();
         for r in &self.roads {
@@ -589,7 +606,7 @@ pub struct ModalFilter {
     pub percent_along: f64,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FilterKind {
     WalkCycleOnly,
     NoEntry,

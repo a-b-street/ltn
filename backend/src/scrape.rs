@@ -17,6 +17,7 @@ pub fn scrape_osm(
     // This doesn't use osm2graph's helper, because it needs to scrape more things from OSM
     let mut node_mapping = HashMap::new();
     let mut highways = Vec::new();
+    let mut bus_routes_on_roads = HashMap::new();
     let mut railways = Vec::new();
     let mut waterways = Vec::new();
     let mut all_barriers: BTreeSet<NodeID> = BTreeSet::new();
@@ -73,7 +74,23 @@ pub fn scrape_osm(
                 }
             }
         }
-        Element::Relation { .. } => {}
+        Element::Relation { tags, members, .. } => {
+            let tags: Tags = tags.into();
+            if tags.is("type", "route") && tags.is("route", "bus") {
+                if let Some(name) = tags.get("name") {
+                    for (role, member) in members {
+                        if let osm_reader::OsmID::Way(w) = member {
+                            if role.is_empty() {
+                                bus_routes_on_roads
+                                    .entry(w)
+                                    .or_insert_with(Vec::new)
+                                    .push(name.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
         Element::Bounds { .. } => {}
     })?;
 
@@ -153,6 +170,7 @@ pub fn scrape_osm(
     let mut map = MapModel {
         roads,
         intersections,
+        bus_routes_on_roads,
         mercator: graph.mercator,
         boundary_wgs84,
         study_area_name,
