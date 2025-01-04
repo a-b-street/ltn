@@ -2,13 +2,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use geo::{
-    Area, Distance, Euclidean, Length, LineInterpolatePoint, LineLocatePoint, LineString, Point,
+    Line, Area, Distance, Euclidean, Length, LineInterpolatePoint, LineLocatePoint, LineString, Point,
     Polygon, PreparedGeometry, Relate,
 };
-use geojson::FeatureCollection;
+use geojson::{Feature, FeatureCollection};
 use web_time::Instant;
 
-use crate::geo_helpers::{aabb, buffer_aabb, clip_linestring_to_polygon};
+use crate::geo_helpers::{aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination};
 use crate::render_cells::Color;
 use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
@@ -179,6 +179,8 @@ impl Neighbourhood {
             let mut f = map.mercator.to_wgs84_gj(&map.get_i(*i).point);
             f.set_property("kind", "border_intersection");
             features.push(f);
+
+            features.extend(self.border_arrow(*i, map));
         }
 
         for (polygons, color) in derived
@@ -210,6 +212,55 @@ impl Neighbourhood {
                 .clone(),
             ),
         }
+    }
+
+    fn border_arrow(&self, i: IntersectionID, map: &MapModel) -> Vec<Feature> {
+        let mut features = Vec::new();
+        let intersection = map.get_i(i);
+        for r in &intersection.roads {
+            // Most borders only have one road in the interior of the neighbourhood. Draw an arrow
+            // for each of those. If there happen to be multiple interior roads for one border, the
+            // arrows will overlap each other -- but that happens anyway with borders close
+            // together at certain angles.
+            if !self.interior_roads.contains(r) {
+                continue;
+            }
+
+            // Design choice: when we have a filter right at the entrance of a neighbourhood, it
+            // creates its own little cell allowing access to just the very beginning of the
+            // road. Let's not draw anything for that.
+            if map.modal_filters.contains_key(r) {
+                continue;
+            }
+
+            // Find the angle pointing into the neighbourhood
+            let road = map.get_r(*r);
+            let angle_in = if road.src_i == i {
+                angle_of_line(road.linestring.lines().next().unwrap())
+            } else {
+                angle_of_line(road.linestring.lines().last().unwrap()) + 180.0
+            };
+
+            let center = intersection.point;
+            let pt_farther = euclidean_destination(center, angle_in + 180.0, 40.0);
+            let pt_closer = euclidean_destination(center, angle_in + 180.0, 10.0);
+
+            // Point out of the neighbourhood
+            let mut line = Line::new(pt_closer, pt_farther);
+            // If the road is one-way and points in, then flip it
+            if (map.directions[r] == Direction::Forwards && road.src_i == i)
+                || (map.directions[r] == Direction::Backwards && road.dst_i == i)
+            {
+                std::mem::swap(&mut line.start, &mut line.end);
+            }
+
+            let mut f = map.mercator.to_wgs84_gj(&line);
+            // TODO Which cell?
+            f.set_property("kind", "border_arrow");
+            f.set_property("oneway", map.directions[r] != Direction::BothWays);
+            features.push(f);
+        }
+        features
     }
 }
 

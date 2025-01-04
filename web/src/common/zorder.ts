@@ -89,6 +89,8 @@ const layerZorder = [
   "cells",
   "interior-roads-outlines",
   "interior-roads",
+  "border-arrow-bases",
+  "border-arrows",
 
   "compare-route",
 

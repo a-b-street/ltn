@@ -1,5 +1,5 @@
 use geo::{
-    BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, LineInterpolatePoint,
+    BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Line, LineInterpolatePoint,
     LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
 };
 use rstar::AABB;
@@ -99,12 +99,16 @@ pub fn aabb<G: BoundingRect<f64, Output = Option<Rect<f64>>>>(geom: &G) -> AABB<
     )
 }
 
+pub fn angle_of_line(line: Line) -> f64 {
+    (line.dy()).atan2(line.dx()).to_degrees()
+}
+
 pub fn angle_of_pt_on_line(linestring: &LineString, pt: Coord) -> f64 {
     let line = linestring
         .lines()
         .min_by_key(|line| (Euclidean::distance(line, pt) * 10e9) as usize)
         .unwrap();
-    (line.dy()).atan2(line.dx()).to_degrees()
+    angle_of_line(line)
 }
 
 /// Constrain an angle between [0, 180]. Used for rotating modal filter icons visually
@@ -117,4 +121,12 @@ pub fn limit_angle(a1: f64) -> f64 {
     } else {
         a2
     }
+}
+
+pub fn euclidean_destination(pt: Point, angle_degs: f64, dist_away_m: f64) -> Point {
+    let (sin, cos) = angle_degs.to_radians().sin_cos();
+    Point::new(
+        pt.x() + dist_away_m * cos,
+        pt.y() + dist_away_m * sin,
+    )
 }
