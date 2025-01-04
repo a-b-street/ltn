@@ -165,6 +165,15 @@ export interface RenderNeighbourhoodOutput {
       >
     | Feature<Point, { kind: "border_intersection" }>
     | Feature<
+        Polygon,
+        {
+          kind: "border_arrow";
+          cell_color: "disconnected" | number;
+          // Populated by setCellColors, not in the WASM API
+          color?: string;
+        }
+      >
+    | Feature<
         MultiPolygon,
         {
           kind: "cell";
@@ -204,7 +213,7 @@ function setCellColors(
   ];
 
   for (let f of gj.features) {
-    if (f.properties.kind != "cell") {
+    if (f.properties.kind != "cell" && f.properties.kind != "border_arrow") {
       continue;
     }
     if (f.properties.cell_color == "disconnected") {

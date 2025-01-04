@@ -1,13 +1,14 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use geo::{BooleanOps, BoundingRect, Coord, Densify, Euclidean, LineString, MultiPolygon, Rect};
 use utils::{Grid, LineSplit};
 
-use crate::{Cell, MapModel, Neighbourhood};
+use crate::{Cell, IntersectionID, MapModel, Neighbourhood};
 
 const NUM_COLORS: usize = 10;
 const RESOLUTION_M: f64 = 10.0;
 
+#[derive(Clone, Copy)]
 pub enum Color {
     Disconnected,
     Cell(usize),
@@ -18,6 +19,8 @@ pub struct RenderCells {
     pub polygons_per_cell: Vec<MultiPolygon>,
     /// Colors per cell, such that adjacent cells are colored differently
     pub colors: Vec<Color>,
+    /// Each border belongs to a cell; put its color here
+    pub colors_per_border: HashMap<IntersectionID, Color>,
 }
 
 impl RenderCells {
@@ -102,18 +105,20 @@ impl RenderCells {
         if true {
             finalize(
                 grid,
+                cells,
                 cell_colors,
                 bounds,
                 &MultiPolygon::new(vec![boundary_polygon]),
             )
         } else {
-            debug_grid(grid, cell_colors, bounds)
+            debug_grid(grid, cells, cell_colors, bounds)
         }
     }
 }
 
 fn finalize(
     main_grid: Grid<Option<usize>>,
+    cells: &Vec<Cell>,
     cell_colors: Vec<Color>,
     bounds: Rect,
     boundary: &MultiPolygon,
@@ -121,6 +126,7 @@ fn finalize(
     let mut result = RenderCells {
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
+        colors_per_border: HashMap::new(),
     };
 
     for (idx, color) in cell_colors.into_iter().enumerate() {
@@ -170,15 +176,25 @@ fn finalize(
             .polygons_per_cell
             .push(cell_polygon.intersection(boundary));
         result.colors.push(color);
+
+        for i in &cells[idx].borders {
+            result.colors_per_border.insert(*i, color);
+        }
     }
 
     result
 }
 
-fn debug_grid(grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rect) -> RenderCells {
+fn debug_grid(
+    grid: Grid<Option<usize>>,
+    cells: &Vec<Cell>,
+    cell_colors: Vec<Color>,
+    bounds: Rect,
+) -> RenderCells {
     let mut result = RenderCells {
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
+        colors_per_border: HashMap::new(),
     };
 
     for (idx, color) in cell_colors.into_iter().enumerate() {
@@ -205,6 +221,10 @@ fn debug_grid(grid: Grid<Option<usize>>, cell_colors: Vec<Color>, bounds: Rect) 
 
         result.polygons_per_cell.push(MultiPolygon::new(squares));
         result.colors.push(color);
+
+        for i in &cells[idx].borders {
+            result.colors_per_border.insert(*i, color);
+        }
     }
 
     result

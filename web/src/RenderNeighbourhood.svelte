@@ -98,8 +98,7 @@
     {...layerId("border-arrows")}
     filter={["==", ["get", "kind"], "border_arrow"]}
     paint={{
-      "fill-color": "cyan",
-      "fill-opacity": 0.5,
+      "fill-color": ["get", "color"],
     }}
   />
   <LineLayer

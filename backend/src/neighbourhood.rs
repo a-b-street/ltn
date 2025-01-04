@@ -260,8 +260,17 @@ impl Neighbourhood {
             let double_ended = map.directions[r] == Direction::BothWays;
             if let Some(polygon) = make_arrow(line, thickness, double_ended) {
                 let mut f = map.mercator.to_wgs84_gj(&polygon);
-                // TODO Which cell?
                 f.set_property("kind", "border_arrow");
+                match self
+                    .derived
+                    .as_ref()
+                    .unwrap()
+                    .render_cells
+                    .colors_per_border[&i]
+                {
+                    Color::Disconnected => f.set_property("cell_color", "disconnected"),
+                    Color::Cell(idx) => f.set_property("cell_color", idx),
+                }
                 features.push(f);
             }
         }
