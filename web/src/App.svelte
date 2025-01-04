@@ -7,7 +7,13 @@
   import type { Map } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
-  import { FillLayer, GeoJSON, MapLibre } from "svelte-maplibre";
+  import {
+    FillLayer,
+    GeoJSON,
+    MapLibre,
+    NavigationControl,
+    ScaleControl,
+  } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Geocoder } from "svelte-utils/map";
   import {
@@ -104,7 +110,6 @@
   <div slot="main" style="position: relative; width: 100%; height: 100%;">
     <MapLibre
       style={`https://api.maptiler.com/maps/${$maptilerBasemap}/style.json?key=${maptilerApiKey}`}
-      standardControls
       hash
       bind:map
       on:error={(e) => {
@@ -134,6 +139,8 @@
         },
       ]}
     >
+      <NavigationControl />
+      <ScaleControl />
       <Geocoder {map} apiKey={maptilerApiKey} />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
