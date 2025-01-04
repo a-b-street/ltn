@@ -2,7 +2,7 @@
   import type { Feature, FeatureCollection } from "geojson";
   import type { LngLat } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
-  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
@@ -101,6 +101,7 @@
       </ul>
     </nav>
   </div>
+
   <div slot="sidebar">
     <BackButton on:click={back} />
 
@@ -161,26 +162,21 @@
         </div>
       </RenderNeighbourhood>
     {:else if state.state == "chose-road"}
-      <GeoJSON data={notNull($backend).renderNeighbourhood()}>
-        <FillLayer
-          {...layerId("cells")}
-          filter={["==", ["get", "kind"], "cell"]}
-          paint={{
-            "fill-color": ["get", "color"],
-            "fill-opacity": 0.3,
-          }}
-        />
-      </GeoJSON>
+      <RenderNeighbourhood
+        gj={notNull($backend).renderNeighbourhood()}
+        interactive={false}
+      />
 
       <GeoJSON data={state.gj.features[state.shortcutIndex]}>
         <LineLayer
           {...layerId("shortcuts")}
           paint={{
-            "line-width": 5,
-            "line-color": "red",
+            "line-width": 10,
+            "line-color": "cyan",
           }}
         />
       </GeoJSON>
+
       <GeoJSON data={state.roadGj}>
         <LineLayer
           {...layerId("shortcuts-focus")}
@@ -191,6 +187,7 @@
         />
       </GeoJSON>
     {/if}
+
     <ModalFilterLayer />
   </div>
 </SplitComponent>
