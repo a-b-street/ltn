@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
-  import type { LngLat } from "maplibre-gl";
+  import type { ExpressionSpecification, LngLat } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -9,6 +9,7 @@
   } from "svelte-maplibre";
   import { layerId } from "./common";
   import OneWayLayer from "./OneWayLayer.svelte";
+  import { roadStyle } from "./stores";
   import type { RenderNeighbourhoodOutput } from "./wasm";
 
   export let gj: RenderNeighbourhoodOutput;
@@ -23,24 +24,33 @@
       ),
     ) ?? 0;
 
-  $: lineColor =
-    maxShortcuts > 2
-      ? hoverStateFilter(
-          // @ts-expect-error TODO Fix upstream types
-          [
-            "interpolate-hcl",
-            ["linear"],
-            ["get", "shortcuts"],
-            0,
-            "white",
-            1,
-            "#F19A93",
-            maxShortcuts,
-            "#A32015",
-          ],
-          "blue",
-        )
-      : hoverStateFilter("white", "blue");
+  function roadLineColor(
+    style: "shortcuts" | "cells",
+    maxShortcuts: number,
+  ): ExpressionSpecification {
+    if (style == "cells") {
+      return ["get", "color"];
+    }
+    if (maxShortcuts <= 2) {
+      return hoverStateFilter("white", "blue");
+    }
+
+    return hoverStateFilter(
+      // @ts-expect-error TODO Fix upstream types
+      [
+        "interpolate-hcl",
+        ["linear"],
+        ["get", "shortcuts"],
+        0,
+        "white",
+        1,
+        "#F19A93",
+        maxShortcuts,
+        "#A32015",
+      ],
+      "blue",
+    );
+  }
 
   function invertBoundary(gj: RenderNeighbourhoodOutput): Feature<Polygon> {
     // @ts-expect-error TS can't figure out that we're narrowing the case here
@@ -88,6 +98,9 @@
   <FillLayer
     {...layerId("cells")}
     filter={["==", ["get", "kind"], "cell"]}
+    layout={{
+      visibility: $roadStyle == "cells" ? "none" : "visible",
+    }}
     paint={{
       "fill-color": ["get", "color"],
       "fill-opacity": 0.8,
@@ -156,7 +169,7 @@
         20,
         24,
       ],
-      "line-color": lineColor,
+      "line-color": roadLineColor($roadStyle, maxShortcuts),
       "line-opacity": hoverStateFilter(1.0, 0.5),
     }}
     on:click={(e) =>

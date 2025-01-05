@@ -153,6 +153,9 @@ export interface RenderNeighbourhoodOutput {
           direction: "forwards" | "backwards" | "both";
           direction_edited: boolean;
           road: number;
+          cell_color: "disconnected" | number;
+          // Populated by setCellColors, not in the WASM API
+          color?: string;
           // TODO Plus all the stuff from Road::to_gj
         }
       >
@@ -213,7 +216,11 @@ function setCellColors(
   ];
 
   for (let f of gj.features) {
-    if (f.properties.kind != "cell" && f.properties.kind != "border_arrow") {
+    if (
+      f.properties.kind != "cell" &&
+      f.properties.kind != "border_arrow" &&
+      f.properties.kind != "interior_road"
+    ) {
       continue;
     }
     if (f.properties.cell_color == "disconnected") {

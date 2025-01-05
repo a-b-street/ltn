@@ -43,7 +43,6 @@ export type Mode =
     };
 
 export let map: Writable<Map | null> = writable(null);
-export let maptilerBasemap: Writable<string> = writable("streets-v2");
 
 export let useLocalVite: Writable<boolean> = writable(false);
 // The exact key in local storage
@@ -59,9 +58,13 @@ export let mainRoadPenalty: Writable<number> = writable(1.0);
 // and they might need to rerender
 export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title", firstLoad: true });
+
+// Settings
+export let maptilerBasemap: Writable<string> = writable("streets-v2");
 export let filterType: Writable<string> = writable("walk_cycle_only");
 export let animateShortcuts = writable(false);
 export let editPerimeterRoads = writable(false);
+export let roadStyle: Writable<"shortcuts" | "cells"> = writable("shortcuts");
 
 export function autosave() {
   let key = get(projectName);

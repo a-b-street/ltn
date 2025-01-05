@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use geo::{BooleanOps, BoundingRect, Coord, Densify, Euclidean, LineString, MultiPolygon, Rect};
 use utils::{Grid, LineSplit};
 
-use crate::{Cell, IntersectionID, MapModel, Neighbourhood};
+use crate::{Cell, IntersectionID, MapModel, Neighbourhood, RoadID};
 
 const NUM_COLORS: usize = 10;
 const RESOLUTION_M: f64 = 10.0;
@@ -21,6 +21,9 @@ pub struct RenderCells {
     pub colors: Vec<Color>,
     /// Each border belongs to a cell; put its color here
     pub colors_per_border: HashMap<IntersectionID, Color>,
+    /// Each road belongs to one or more cells; arbitrarily pick one of those cells and put its
+    /// color here
+    pub colors_per_road: HashMap<RoadID, Color>,
 }
 
 impl RenderCells {
@@ -127,6 +130,7 @@ fn finalize(
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
         colors_per_border: HashMap::new(),
+        colors_per_road: HashMap::new(),
     };
 
     for (idx, color) in cell_colors.into_iter().enumerate() {
@@ -180,6 +184,10 @@ fn finalize(
         for i in &cells[idx].borders {
             result.colors_per_border.insert(*i, color);
         }
+        // For roads crossing cells, arbitrarily overwrite
+        for r in cells[idx].roads.keys() {
+            result.colors_per_road.insert(*r, color);
+        }
     }
 
     result
@@ -195,6 +203,7 @@ fn debug_grid(
         polygons_per_cell: Vec::new(),
         colors: Vec::new(),
         colors_per_border: HashMap::new(),
+        colors_per_road: HashMap::new(),
     };
 
     for (idx, color) in cell_colors.into_iter().enumerate() {
@@ -224,6 +233,10 @@ fn debug_grid(
 
         for i in &cells[idx].borders {
             result.colors_per_border.insert(*i, color);
+        }
+        // For roads crossing cells, arbitrarily overwrite
+        for r in cells[idx].roads.keys() {
+            result.colors_per_road.insert(*r, color);
         }
     }
 

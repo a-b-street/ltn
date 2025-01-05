@@ -167,6 +167,11 @@ impl Neighbourhood {
                 map.directions[&r] != Direction::from_osm(&road.tags),
             );
             f.set_property("road", r.0);
+            match derived.render_cells.colors_per_road[&r] {
+                Color::Disconnected => f.set_property("cell_color", "disconnected"),
+                Color::Cell(idx) => f.set_property("cell_color", idx),
+            }
+
             features.push(f);
         }
 
