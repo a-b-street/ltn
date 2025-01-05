@@ -14,6 +14,15 @@ pub enum Color {
     Cell(usize),
 }
 
+impl Into<geojson::JsonValue> for Color {
+    fn into(self) -> geojson::JsonValue {
+        match self {
+            Color::Disconnected => "disconnected".into(),
+            Color::Cell(idx) => idx.into(),
+        }
+    }
+}
+
 pub struct RenderCells {
     /// Rarely, this might be empty if the area is very small
     pub polygons_per_cell: Vec<MultiPolygon>,

@@ -11,7 +11,6 @@ use web_time::Instant;
 use crate::geo_helpers::{
     aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination, make_arrow,
 };
-use crate::render_cells::Color;
 use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
 pub struct Neighbourhood {
@@ -167,10 +166,7 @@ impl Neighbourhood {
                 map.directions[&r] != Direction::from_osm(&road.tags),
             );
             f.set_property("road", r.0);
-            match derived.render_cells.colors_per_road[&r] {
-                Color::Disconnected => f.set_property("cell_color", "disconnected"),
-                Color::Cell(idx) => f.set_property("cell_color", idx),
-            }
+            f.set_property("cell_color", derived.render_cells.colors_per_road[&r]);
 
             features.push(f);
         }
@@ -198,10 +194,7 @@ impl Neighbourhood {
         {
             let mut f = map.mercator.to_wgs84_gj(polygons);
             f.set_property("kind", "cell");
-            match color {
-                Color::Disconnected => f.set_property("cell_color", "disconnected"),
-                Color::Cell(idx) => f.set_property("cell_color", *idx),
-            }
+            f.set_property("cell_color", *color);
             features.push(f);
         }
 
@@ -222,6 +215,7 @@ impl Neighbourhood {
     }
 
     fn border_arrow(&self, i: IntersectionID, map: &MapModel) -> Vec<Feature> {
+        let derived = self.derived.as_ref().unwrap();
         let mut features = Vec::new();
         let intersection = map.get_i(i);
         for r in &intersection.roads {
@@ -266,16 +260,7 @@ impl Neighbourhood {
             if let Some(polygon) = make_arrow(line, thickness, double_ended) {
                 let mut f = map.mercator.to_wgs84_gj(&polygon);
                 f.set_property("kind", "border_arrow");
-                match self
-                    .derived
-                    .as_ref()
-                    .unwrap()
-                    .render_cells
-                    .colors_per_border[&i]
-                {
-                    Color::Disconnected => f.set_property("cell_color", "disconnected"),
-                    Color::Cell(idx) => f.set_property("cell_color", idx),
-                }
+                f.set_property("cell_color", derived.render_cells.colors_per_border[&i]);
                 features.push(f);
             }
         }
