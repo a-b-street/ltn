@@ -1,3 +1,5 @@
+import type { ExpressionSpecification } from "maplibre-gl";
+
 export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as DisableInteractiveLayers } from "./DisableInteractiveLayers.svelte";
 export { default as DotMarker } from "./DotMarker.svelte";
@@ -9,4 +11,26 @@ export { layerId } from "./zorder";
 // TS fix for the imprecise geojson types
 export function gjPosition(pt: number[]): [number, number] {
   return pt as [number, number];
+}
+
+// Zoom-dependant line width, adapted from from the Minor road layer (secondary
+// road class) from https://api.maptiler.com/maps/streets-v2/style.json.
+export function roadLineWidth(extraWidth: number): ExpressionSpecification {
+  return [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    5,
+    0.5 + extraWidth,
+    10,
+    1 + extraWidth,
+    12,
+    1.5 + extraWidth,
+    14,
+    4 + extraWidth,
+    16,
+    7 + extraWidth,
+    20,
+    24 + extraWidth,
+  ];
 }

@@ -7,7 +7,7 @@
     hoverStateFilter,
     LineLayer,
   } from "svelte-maplibre";
-  import { layerId } from "./common";
+  import { layerId, roadLineWidth } from "./common";
   import OneWayLayer from "./OneWayLayer.svelte";
   import { roadStyle } from "./stores";
   import type { RenderNeighbourhoodOutput } from "./wasm";
@@ -70,14 +70,6 @@
       },
     };
   }
-
-  // Add some thickness
-  let outline = 2.0;
-
-  // TODO Refactor helpers for zoom interpolation. The values below are adapted
-  // from the Minor road layer in
-  // https://api.maptiler.com/maps/streets-v2/style.json, treating all
-  // interior roads as the secondary class.
 </script>
 
 <GeoJSON data={gj} generateId>
@@ -120,23 +112,7 @@
     {...layerId("interior-roads-outlines")}
     filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
-      "line-width": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        5,
-        0.5 + outline,
-        10,
-        1 + outline,
-        12,
-        1.5 + outline,
-        14,
-        4 + outline,
-        16,
-        7 + outline,
-        20,
-        24 + outline,
-      ],
+      "line-width": roadLineWidth(2),
       "line-color": "black",
     }}
   />
@@ -145,23 +121,7 @@
     {...layerId("interior-roads")}
     filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
-      "line-width": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        5,
-        0.5,
-        10,
-        1,
-        12,
-        1.5,
-        14,
-        4,
-        16,
-        7,
-        20,
-        24,
-      ],
+      "line-width": roadLineWidth(0),
       "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
       "line-opacity": hoverStateFilter(1.0, 0.5),
     }}
