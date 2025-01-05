@@ -166,7 +166,9 @@ impl Neighbourhood {
                 map.directions[&r] != Direction::from_osm(&road.tags),
             );
             f.set_property("road", r.0);
-            f.set_property("cell_color", derived.render_cells.colors_per_road[&r]);
+            if let Some(color) = derived.render_cells.colors_per_road.get(&r) {
+                f.set_property("cell_color", *color);
+            }
 
             features.push(f);
         }
