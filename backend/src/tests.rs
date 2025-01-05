@@ -74,6 +74,10 @@ fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) 
 
 // Remove OSM tags, for smaller files
 fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
+    // Remove border_arrows
+    gj.features
+        .retain(|f| f.property("kind").unwrap().as_str().unwrap() != "border_arrow");
+
     for f in &mut gj.features {
         if matches!(
             f.geometry.as_ref().unwrap().value,
