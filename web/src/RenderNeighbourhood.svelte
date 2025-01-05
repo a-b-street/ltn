@@ -17,13 +17,6 @@
   export let interactive = true;
   export let onClickLine = (f: Feature, pt: LngLat) => {};
 
-  $: maxShortcuts =
-    Math.max(
-      ...gj.features.map((f) =>
-        f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
-      ),
-    ) ?? 0;
-
   function roadLineColor(
     style: "shortcuts" | "cells",
     maxShortcuts: number,
@@ -169,7 +162,7 @@
         20,
         24,
       ],
-      "line-color": roadLineColor($roadStyle, maxShortcuts),
+      "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
       "line-opacity": hoverStateFilter(1.0, 0.5),
     }}
     on:click={(e) =>

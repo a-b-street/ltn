@@ -55,7 +55,14 @@ export class Backend {
   // This adds a 'color' property to all cells. It's nicer to keep this on the
   // frontend, since it's about styling.
   renderNeighbourhood(): RenderNeighbourhoodOutput {
-    return setCellColors(JSON.parse(this.inner.renderNeighbourhood()));
+    let gj = setCellColors(JSON.parse(this.inner.renderNeighbourhood()));
+    gj.maxShortcuts =
+      Math.max(
+        ...gj.features.map((f) =>
+          f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
+        ),
+      ) ?? 0;
+    return gj;
   }
 
   renderAutoBoundaries(): FeatureCollection {
@@ -154,8 +161,8 @@ export interface RenderNeighbourhoodOutput {
           direction_edited: boolean;
           road: number;
           cell_color: "disconnected" | number;
-          // Populated by setCellColors, not in the WASM API
-          color?: string;
+          // Populated by setCellColors, not in the Rust backend
+          color: string;
           // TODO Plus all the stuff from Road::to_gj
         }
       >
@@ -172,8 +179,8 @@ export interface RenderNeighbourhoodOutput {
         {
           kind: "border_arrow";
           cell_color: "disconnected" | number;
-          // Populated by setCellColors, not in the WASM API
-          color?: string;
+          // Populated by setCellColors, not in the Rust backend
+          color: string;
         }
       >
     | Feature<
@@ -181,14 +188,16 @@ export interface RenderNeighbourhoodOutput {
         {
           kind: "cell";
           cell_color: "disconnected" | number;
-          // Populated by setCellColors, not in the WASM API
-          color?: string;
+          // Populated by setCellColors, not in the Rust backend
+          color: string;
         }
       >
   )[];
   undo_length: number;
   redo_length: number;
   area_km2: number;
+  // Populated by this wrapper, not in the Rust backend
+  maxShortcuts: number;
 }
 
 export type AllShortcuts = FeatureCollection<
