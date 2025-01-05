@@ -9,7 +9,7 @@
   } from "svelte-maplibre";
   import { layerId, roadLineWidth } from "./common";
   import OneWayLayer from "./OneWayLayer.svelte";
-  import { roadStyle } from "./stores";
+  import { roadStyle, thickRoadsForShortcuts } from "./stores";
   import type { RenderNeighbourhoodOutput } from "./wasm";
 
   export let gj: RenderNeighbourhoodOutput;
@@ -43,6 +43,26 @@
       ],
       "blue",
     );
+  }
+
+  function lineWidth(
+    thickRoadsForShortcuts: boolean,
+    maxShortcuts: number,
+    extraWidth: number,
+  ): ExpressionSpecification {
+    if (!thickRoadsForShortcuts || maxShortcuts <= 2) {
+      return roadLineWidth(extraWidth);
+    }
+    // TODO It'd still be nice to depend on zoom here
+    return [
+      "interpolate",
+      ["linear"],
+      ["get", "shortcuts"],
+      0,
+      5 + extraWidth,
+      maxShortcuts,
+      25 + extraWidth,
+    ];
   }
 
   function invertBoundary(gj: RenderNeighbourhoodOutput): Feature<Polygon> {
@@ -112,7 +132,7 @@
     {...layerId("interior-roads-outlines")}
     filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
-      "line-width": roadLineWidth(2),
+      "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
       "line-color": "black",
     }}
   />
@@ -121,7 +141,7 @@
     {...layerId("interior-roads")}
     filter={["==", ["get", "kind"], "interior_road"]}
     paint={{
-      "line-width": roadLineWidth(0),
+      "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
       "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
       "line-opacity": hoverStateFilter(1.0, 0.5),
     }}

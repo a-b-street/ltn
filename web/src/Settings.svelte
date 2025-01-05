@@ -2,7 +2,7 @@
   import { Modal } from "svelte-utils";
   import icon from "../assets/settings.svg?url";
   import { BasemapPicker } from "./common";
-  import { roadStyle } from "./stores";
+  import { roadStyle, thickRoadsForShortcuts } from "./stores";
 
   let show = false;
 </script>
@@ -23,6 +23,11 @@
         <option value="shortcuts">Show worst shortcuts</option>
         <option value="cells">Show the cell</option>
       </select>
+    </label>
+
+    <label>
+      <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
+      Road thickness depends on shortcuts
     </label>
 
     <center><button on:click={() => (show = false)}>Confirm</button></center>
