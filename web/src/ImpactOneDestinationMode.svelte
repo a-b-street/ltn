@@ -110,7 +110,7 @@
             ["/", ["get", "distance_after"], ["get", "distance_before"]],
             1,
             "white",
-            perRoadGj.highest_ratio,
+            Math.max(perRoadGj.highest_ratio, 1.1),
             "red",
           ],
           "line-width": 5,
