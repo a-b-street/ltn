@@ -3,7 +3,7 @@
   import type { LngLat } from "maplibre-gl";
   import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
-  import { GeoJSON, type LayerClickInfo } from "svelte-maplibre";
+  import { type LayerClickInfo } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
@@ -12,10 +12,11 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
+    InteriorRoadLayer,
     ModalFilterLayer,
     OneWayLayer,
+    RenderNeighbourhood,
   } from "../layers";
-  import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import {
     animateShortcuts,
     autosave,
@@ -291,46 +292,48 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={gj} generateId>
+    <RenderNeighbourhood input={gj}>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
-    </GeoJSON>
 
-    <RenderNeighbourhood
-      {gj}
-      interactive={action == "filter" || action == "oneway"}
-      {onClickLine}
-    >
-      <div slot="line-popup">
-        <Popup openOn="hover" let:props>
-          <p>
-            {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
-            {#if props.speed_mph}
-              ({Math.round(props.speed_mph)} mph)
+      <InteriorRoadLayer
+        interactive={action == "filter" || action == "oneway"}
+        {onClickLine}
+      >
+        <div slot="line-popup">
+          <Popup openOn="hover" let:props>
+            <p>
+              {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
+              {#if props.speed_mph}
+                ({Math.round(props.speed_mph)} mph)
+              {/if}
+            </p>
+            {#if action == "filter"}
+              <div>
+                <img
+                  src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+                  width="20"
+                  alt="Add modal filter"
+                />
+                Click to add modal filter
+              </div>
+            {:else}
+              <p>Click to change direction</p>
             {/if}
-          </p>
-          {#if action == "filter"}
-            <div>
-              <img
-                src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
-                width="20"
-                alt="Add modal filter"
-              />
-              Click to add modal filter
-            </div>
-          {:else}
-            <p>Click to change direction</p>
-          {/if}
-        </Popup>
-      </div>
+          </Popup>
+        </div>
+      </InteriorRoadLayer>
     </RenderNeighbourhood>
+
     {#if $animateShortcuts}
       <AnimatePaths paths={allShortcuts} />
     {/if}
+
     <ModalFilterLayer on:click={deleteFilter}>
       <Popup openOn="hover">Click to delete</Popup>
     </ModalFilterLayer>
+
     {#if action == "freehand-filters"}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
     {/if}

@@ -11,10 +11,11 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
+    InteriorRoadLayer,
     ModalFilterLayer,
     OneWayLayer,
+    RenderNeighbourhood,
   } from "./layers";
-  import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import { backend, map, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
@@ -154,31 +155,28 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={notNull($backend).renderNeighbourhood()} generateId>
+    <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
-    </GeoJSON>
 
-    {#if state.state == "neutral"}
-      <RenderNeighbourhood
-        gj={notNull($backend).renderNeighbourhood()}
-        onClickLine={choseRoad}
-      >
-        <div slot="line-popup">
-          <Popup openOn="hover" let:props>
-            <p>
-              {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
-            </p>
-          </Popup>
-        </div>
-      </RenderNeighbourhood>
-    {:else if state.state == "chose-road"}
-      <RenderNeighbourhood
-        gj={notNull($backend).renderNeighbourhood()}
-        interactive={false}
-      />
+      {#if state.state == "neutral"}
+        <InteriorRoadLayer onClickLine={choseRoad}>
+          <div slot="line-popup">
+            <Popup openOn="hover" let:props>
+              <p>
+                {props.shortcuts} shortcuts through {props.name ??
+                  "unnamed road"}
+              </p>
+            </Popup>
+          </div>
+        </InteriorRoadLayer>
+      {:else if state.state == "chose-road"}
+        <InteriorRoadLayer interactive={false} />
+      {/if}
+    </RenderNeighbourhood>
 
+    {#if state.state == "chose-road"}
       <GeoJSON data={state.gj.features[state.shortcutIndex]}>
         <LineLayer
           {...layerId("shortcuts")}

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { GeoJSON, LineLayer } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -8,10 +7,11 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
+    InteriorRoadLayer,
     ModalFilterLayer,
     OneWayLayer,
+    RenderNeighbourhood,
   } from "./layers";
-  import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import {
     backend,
     mainRoadPenalty,
@@ -82,17 +82,16 @@
 
   <div slot="map">
     {#if prevMode == "neighbourhood"}
-      <GeoJSON data={notNull($backend).renderNeighbourhood()} generateId>
+      <RenderNeighbourhood>
         <HighlightBoundaryLayer />
         <CellLayer />
         <OneWayLayer />
-      </GeoJSON>
-      <RenderNeighbourhood
-        gj={notNull($backend).renderNeighbourhood()}
-        interactive={false}
-      />
+        <InteriorRoadLayer interactive={false} />
+      </RenderNeighbourhood>
     {/if}
+
     <ModalFilterLayer />
+
     <GeoJSON data={gj}>
       <LineLayer
         {...layerId("compare-route")}
@@ -109,6 +108,7 @@
         }}
       />
     </GeoJSON>
+
     <DotMarker bind:lngLat={$route_pt_a} draggable>A</DotMarker>
     <DotMarker bind:lngLat={$route_pt_b} draggable>B</DotMarker>
   </div>

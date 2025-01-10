@@ -2,7 +2,6 @@
   import type { Feature, FeatureCollection } from "geojson";
   import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import { FillLayer, GeoJSON, LineLayer, MapEvents } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import {
     constructMatchExpression,
     emptyGeojson,
@@ -11,7 +10,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { DotMarker, layerId, Link } from "./common";
-  import { ModalFilterLayer } from "./layers";
+  import { ModalFilterLayer, RenderNeighbourhood } from "./layers";
   import {
     backend,
     mode,
@@ -89,7 +88,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={notNull($backend).renderNeighbourhood()}>
+    <RenderNeighbourhood>
       <FillLayer
         {...layerId("cells")}
         filter={["==", ["get", "kind"], "cell"]}
@@ -98,7 +97,7 @@
           "fill-opacity": 0.6,
         }}
       />
-    </GeoJSON>
+    </RenderNeighbourhood>
 
     <GeoJSON data={perRoadGj} generateId>
       <LineLayer

@@ -5,8 +5,13 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
-  import { CellLayer, HighlightBoundaryLayer, OneWayLayer } from "./layers";
-  import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
+  import {
+    CellLayer,
+    HighlightBoundaryLayer,
+    InteriorRoadLayer,
+    OneWayLayer,
+    RenderNeighbourhood,
+  } from "./layers";
   import { backend, mode } from "./stores";
 </script>
 
@@ -39,7 +44,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={notNull($backend).renderNeighbourhood()} generateId>
+    <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
@@ -69,18 +74,17 @@
           <PropertiesTable properties={props} />
         </Popup>
       </LineLayer>
-    </GeoJSON>
 
-    <RenderNeighbourhood
-      gj={notNull($backend).renderNeighbourhood()}
-      interactive
-      onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
-    >
-      <div slot="line-popup">
-        <Popup openOn="hover" let:props>
-          <PropertiesTable properties={props} />
-        </Popup>
-      </div>
+      <InteriorRoadLayer
+        interactive
+        onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
+      >
+        <div slot="line-popup">
+          <Popup openOn="hover" let:props>
+            <PropertiesTable properties={props} />
+          </Popup>
+        </div>
+      </InteriorRoadLayer>
     </RenderNeighbourhood>
 
     <GeoJSON data={notNull($backend).renderModalFilters()} generateId>
