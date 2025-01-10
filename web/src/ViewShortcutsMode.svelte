@@ -8,7 +8,12 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { DotMarker, gjPosition, layerId, Link } from "./common";
-  import ModalFilterLayer from "./ModalFilterLayer.svelte";
+  import {
+    CellLayer,
+    HighlightBoundaryLayer,
+    ModalFilterLayer,
+    OneWayLayer,
+  } from "./layers";
   import RenderNeighbourhood from "./RenderNeighbourhood.svelte";
   import { backend, map, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
@@ -149,6 +154,12 @@
   </div>
 
   <div slot="map">
+    <HighlightBoundaryLayer gj={notNull($backend).renderNeighbourhood()} />
+    <GeoJSON data={notNull($backend).renderNeighbourhood()} generateId>
+      <CellLayer />
+      <OneWayLayer />
+    </GeoJSON>
+
     {#if state.state == "neutral"}
       <RenderNeighbourhood
         gj={notNull($backend).renderNeighbourhood()}

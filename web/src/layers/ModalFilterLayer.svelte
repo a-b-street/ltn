@@ -1,8 +1,8 @@
 <script lang="ts">
   import { GeoJSON, SymbolLayer } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
-  import { layerId } from "./common";
-  import { backend, mutationCounter } from "./stores";
+  import { layerId } from "../common";
+  import { backend, mutationCounter } from "../stores";
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj =

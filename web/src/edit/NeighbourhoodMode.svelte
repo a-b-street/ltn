@@ -3,13 +3,18 @@
   import type { LngLat } from "maplibre-gl";
   import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
-  import { type LayerClickInfo } from "svelte-maplibre";
+  import { GeoJSON, type LayerClickInfo } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import AnimatePaths from "../AnimatePaths.svelte";
   import { HelpButton, Link } from "../common";
-  import ModalFilterLayer from "../ModalFilterLayer.svelte";
+  import {
+    CellLayer,
+    HighlightBoundaryLayer,
+    ModalFilterLayer,
+    OneWayLayer,
+  } from "../layers";
   import RenderNeighbourhood from "../RenderNeighbourhood.svelte";
   import {
     animateShortcuts,
@@ -286,6 +291,12 @@
   </div>
 
   <div slot="map">
+    <HighlightBoundaryLayer {gj} />
+    <GeoJSON data={gj} generateId>
+      <CellLayer />
+      <OneWayLayer />
+    </GeoJSON>
+
     <RenderNeighbourhood
       {gj}
       interactive={action == "filter" || action == "oneway"}

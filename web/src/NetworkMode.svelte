@@ -8,7 +8,7 @@
   import editIcon from "../assets/edit.svg?url";
   import { HelpButton, layerId, Link } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
-  import ModalFilterLayer from "./ModalFilterLayer.svelte";
+  import { ModalFilterLayer } from "./layers";
   import {
     autosave,
     backend,

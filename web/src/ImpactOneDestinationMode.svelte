@@ -11,7 +11,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { DotMarker, layerId, Link } from "./common";
-  import ModalFilterLayer from "./ModalFilterLayer.svelte";
+  import { ModalFilterLayer } from "./layers";
   import {
     backend,
     mode,

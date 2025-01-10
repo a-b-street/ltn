@@ -1,6 +1,6 @@
 <script lang="ts">
   import { SymbolLayer } from "svelte-maplibre";
-  import { layerId } from "./common";
+  import { layerId } from "../common";
 </script>
 
 <SymbolLayer

@@ -1,14 +1,8 @@
 <script lang="ts">
-  import type { Feature, Polygon } from "geojson";
+  import type { Feature } from "geojson";
   import type { ExpressionSpecification, LngLat } from "maplibre-gl";
-  import {
-    FillLayer,
-    GeoJSON,
-    hoverStateFilter,
-    LineLayer,
-  } from "svelte-maplibre";
+  import { GeoJSON, hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { layerId, roadLineWidth } from "./common";
-  import OneWayLayer from "./OneWayLayer.svelte";
   import { roadStyle, thickRoadsForShortcuts } from "./stores";
   import type { RenderNeighbourhoodOutput } from "./wasm";
 
@@ -64,70 +58,9 @@
       25 + extraWidth,
     ];
   }
-
-  function invertBoundary(gj: RenderNeighbourhoodOutput): Feature<Polygon> {
-    // @ts-expect-error TS can't figure out that we're narrowing the case here
-    let boundary: Feature<Polygon> = gj.features.find(
-      (f) => f.properties.kind == "boundary",
-    )!;
-
-    return {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: [
-          [
-            [180.0, 90.0],
-            [-180.0, 90.0],
-            [-180.0, -90.0],
-            [180.0, -90.0],
-            [180.0, 90.0],
-          ],
-          // One hole
-          boundary.geometry.coordinates[0],
-        ],
-      },
-    };
-  }
 </script>
 
 <GeoJSON data={gj} generateId>
-  <GeoJSON data={invertBoundary(gj)}>
-    <FillLayer
-      {...layerId("neighbourhood-boundary")}
-      paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
-    />
-  </GeoJSON>
-
-  <FillLayer
-    {...layerId("cells")}
-    filter={["==", ["get", "kind"], "cell"]}
-    layout={{
-      visibility: $roadStyle == "cells" ? "none" : "visible",
-    }}
-    paint={{
-      "fill-color": ["get", "color"],
-      "fill-opacity": 0.8,
-    }}
-  />
-
-  <FillLayer
-    {...layerId("border-arrows")}
-    filter={["==", ["get", "kind"], "border_arrow"]}
-    paint={{
-      "fill-color": ["get", "color"],
-    }}
-  />
-  <LineLayer
-    {...layerId("border-arrow-outlines")}
-    filter={["==", ["get", "kind"], "border_arrow"]}
-    paint={{
-      "line-color": "black",
-      "line-width": 2,
-    }}
-  />
-
   <LineLayer
     {...layerId("interior-roads-outlines")}
     filter={["==", ["get", "kind"], "interior_road"]}
@@ -154,8 +87,4 @@
       <slot name="line-popup" />
     {/if}
   </LineLayer>
-
-  <OneWayLayer />
-
-  <slot name="more-layers" />
 </GeoJSON>
