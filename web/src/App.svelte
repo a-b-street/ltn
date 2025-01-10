@@ -141,7 +141,7 @@
     >
       <NavigationControl />
       <ScaleControl />
-      <Geocoder {map} apiKey={maptilerApiKey} />
+      <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
       <div bind:this={mapDiv} />
       {#if $mode.mode == "title"}
         <TitleMode {wasmReady} firstLoad={$mode.firstLoad} />

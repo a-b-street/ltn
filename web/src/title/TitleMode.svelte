@@ -35,9 +35,11 @@
 
   let projectList = getProjectList();
 
-  // Returns a list, grouped by the optional study_area_name
-  function getProjectList(): Map<string, string[]> {
+  // Returns a list, grouped and sorted by the optional study_area_name, with
+  // custom cases at the end
+  function getProjectList(): Array<[string, string[]]> {
     let perArea = new Map();
+    let custom = [];
     for (let i = 0; i < window.localStorage.length; i++) {
       let key = window.localStorage.key(i)!;
       if (key.startsWith("ltn_")) {
@@ -48,14 +50,21 @@
         } catch (err) {
           // Ignore it
         }
-
-        if (!perArea.has(study_area_name)) {
-          perArea.set(study_area_name, []);
+        if (study_area_name && study_area_name.length > 0) {
+          if (!perArea.has(study_area_name)) {
+            perArea.set(study_area_name, []);
+          }
+          perArea.get(study_area_name)!.push(key);
+        } else {
+          custom.push(key);
         }
-        perArea.get(study_area_name)!.push(key);
       }
     }
-    return perArea;
+
+    let out = [...perArea.entries()];
+    out.sort((a, b) => a[0].localeCompare(b[0]));
+    out.push(["custom", custom]);
+    return out;
   }
 
   let fileInput: HTMLInputElement;
@@ -118,7 +127,7 @@
 
       <p>Load a saved project:</p>
       <ul>
-        {#each projectList.entries() as [study_area_name, projects]}
+        {#each projectList as [study_area_name, projects]}
           <u>{study_area_name ?? "custom area"}</u>
           {#each projects as project}
             <li>
