@@ -82,8 +82,8 @@
 
   <div slot="map">
     {#if prevMode == "neighbourhood"}
-      <HighlightBoundaryLayer gj={notNull($backend).renderNeighbourhood()} />
       <GeoJSON data={notNull($backend).renderNeighbourhood()} generateId>
+        <HighlightBoundaryLayer />
         <CellLayer />
         <OneWayLayer />
       </GeoJSON>

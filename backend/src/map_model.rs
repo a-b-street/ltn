@@ -11,7 +11,9 @@ use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::Serialize;
 use utils::{Mercator, Tags};
 
-use crate::geo_helpers::{angle_of_pt_on_line, buffer_aabb, limit_angle, linestring_intersection};
+use crate::geo_helpers::{
+    angle_of_pt_on_line, buffer_aabb, invert_polygon, limit_angle, linestring_intersection,
+};
 use crate::Router;
 
 pub struct MapModel {
@@ -48,6 +50,7 @@ pub struct MapModel {
     pub undo_stack: Vec<Command>,
     pub redo_queue: Vec<Command>,
     // Stores boundary polygons in WGS84, with ALL of their GeoJSON props.
+    // TODO Reconsider
     pub boundaries: BTreeMap<String, Feature>,
 }
 
@@ -551,18 +554,9 @@ impl MapModel {
         }
     }
 
-    /// Return a polygon covering the world, minus a hole for the boundary, in WGS84
-    pub fn invert_boundary(&self) -> Polygon {
-        Polygon::new(
-            LineString::from(vec![
-                (180.0, 90.0),
-                (-180.0, 90.0),
-                (-180.0, -90.0),
-                (180.0, -90.0),
-                (180.0, 90.0),
-            ]),
-            vec![self.boundary_wgs84.exterior().clone()],
-        )
+    /// Return a polygon covering the world, minus a hole for the study area boundary, in WGS84
+    pub fn invert_study_area_boundary(&self) -> Polygon {
+        invert_polygon(self.boundary_wgs84.clone())
     }
 
     /// What're the names of bus routes along a road?

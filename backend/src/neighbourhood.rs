@@ -5,11 +5,12 @@ use geo::{
     Area, Distance, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint, LineString,
     Point, Polygon, PreparedGeometry, Relate,
 };
-use geojson::{Feature, FeatureCollection};
+use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
 
 use crate::geo_helpers::{
-    aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination, make_arrow,
+    aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination,
+    invert_polygon, make_arrow,
 };
 use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
 
@@ -144,8 +145,13 @@ impl Neighbourhood {
 
         let derived = self.derived.as_ref().unwrap();
 
-        // Just one boundary
-        features.push(map.boundaries.get(&self.name).cloned().unwrap());
+        // Invert the boundary
+        {
+            let mut boundary_feature = map.boundaries.get(&self.name).cloned().unwrap();
+            let p: Polygon = boundary_feature.clone().try_into().unwrap();
+            boundary_feature.geometry = Some(Geometry::from(&invert_polygon(p)));
+            features.push(boundary_feature);
+        }
 
         for r in self.editable_roads() {
             let road = map.get_r(r);

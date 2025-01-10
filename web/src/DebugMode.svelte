@@ -39,9 +39,8 @@
   </div>
 
   <div slot="map">
-    <HighlightBoundaryLayer gj={notNull($backend).renderNeighbourhood()} />
-
     <GeoJSON data={notNull($backend).renderNeighbourhood()} generateId>
+      <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
 

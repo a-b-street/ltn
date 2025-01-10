@@ -68,7 +68,7 @@ impl LTN {
 
     #[wasm_bindgen(js_name = getInvertedBoundary)]
     pub fn get_inverted_boundary(&self) -> Result<String, JsValue> {
-        let f = Feature::from(Geometry::from(&self.map.invert_boundary()));
+        let f = Feature::from(Geometry::from(&self.map.invert_study_area_boundary()));
         let out = serde_json::to_string(&f).map_err(err_to_js)?;
         Ok(out)
     }

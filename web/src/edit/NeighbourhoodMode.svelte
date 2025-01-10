@@ -291,8 +291,8 @@
   </div>
 
   <div slot="map">
-    <HighlightBoundaryLayer {gj} />
     <GeoJSON data={gj} generateId>
+      <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
     </GeoJSON>

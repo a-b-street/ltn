@@ -213,3 +213,18 @@ pub fn make_arrow(line: Line, thickness: f64, double_ended: bool) -> Option<Poly
 
     Some(Polygon::new(LineString::new(pts), Vec::new()))
 }
+
+/// Create a polygon covering the world, minus a hole for the input polygon. Assumes the input is
+/// in WGS84 and has no holes itself.
+pub fn invert_polygon(wgs84_polygon: Polygon) -> Polygon {
+    Polygon::new(
+        LineString::from(vec![
+            (180.0, 90.0),
+            (-180.0, 90.0),
+            (-180.0, -90.0),
+            (180.0, -90.0),
+            (180.0, 90.0),
+        ]),
+        vec![wgs84_polygon.into_inner().0],
+    )
+}
