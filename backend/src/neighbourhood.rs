@@ -171,6 +171,11 @@ impl Neighbourhood {
                 "direction_edited",
                 map.directions[&r] != Direction::from_osm(&road.tags),
             );
+            f.set_property(
+                "edited",
+                map.directions[&r] != Direction::from_osm(&road.tags)
+                    || map.modal_filters.get(&r) != map.original_modal_filters.get(&r),
+            );
             f.set_property("road", r.0);
             if let Some(color) = derived.render_cells.colors_per_road.get(&r) {
                 f.set_property("cell_color", *color);

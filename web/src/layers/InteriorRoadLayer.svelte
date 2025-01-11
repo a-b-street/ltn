@@ -14,12 +14,16 @@
   export let onClickLine = (f: Feature, pt: LngLat) => {};
 
   function roadLineColor(
-    style: "shortcuts" | "cells",
+    style: "shortcuts" | "cells" | "edits",
     maxShortcuts: number,
   ): ExpressionSpecification {
     if (style == "cells") {
       return ["get", "color"];
     }
+    if (style == "edits") {
+      return ["case", ["get", "edited"], "grey", "white"];
+    }
+
     if (maxShortcuts <= 2) {
       return hoverStateFilter("white", "blue");
     }

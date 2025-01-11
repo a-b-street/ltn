@@ -159,6 +159,7 @@ export interface RenderNeighbourhoodOutput {
           shortcuts: number;
           direction: "forwards" | "backwards" | "both";
           direction_edited: boolean;
+          edited: boolean;
           road: number;
           cell_color: "disconnected" | number;
           // Populated by setCellColors, not in the Rust backend

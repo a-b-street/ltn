@@ -22,6 +22,9 @@
       <select bind:value={$roadStyle}>
         <option value="shortcuts">Show worst shortcuts</option>
         <option value="cells">Show the cell</option>
+        <option value="edits">
+          Show edited roads (either filter or direction)
+        </option>
       </select>
     </label>
 
