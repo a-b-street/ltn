@@ -87,7 +87,6 @@ fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
             props.retain(|k, _| {
                 [
                     "direction",
-                    "id",
                     "kind",
                     "node1",
                     "node2",
@@ -96,7 +95,6 @@ fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
                     "way",
                 ]
                 .contains(&k.as_str())
-                    && k != "angle"
             });
         }
     }
