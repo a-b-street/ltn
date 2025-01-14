@@ -47,7 +47,7 @@ impl Neighbourhood {
         let t1 = Instant::now();
         let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
 
-        let prepared_boundary = PreparedGeometry::from(boundary_polygon.clone());
+        let prepared_boundary = PreparedGeometry::from(&boundary_polygon);
 
         let mut interior_roads = BTreeSet::new();
         let mut crosses = BTreeMap::new();
