@@ -1,9 +1,7 @@
 use geo::{Area, Coord, Intersects, LineString, Polygon};
 use geojson::FeatureCollection;
-use i_float::f64_point::F64Point;
 use i_overlay::core::fill_rule::FillRule;
-use i_overlay::f64::string::F64StringOverlay;
-use i_overlay::string::rule::StringRule;
+use i_overlay::float::slice::FloatSlice;
 
 use crate::MapModel;
 
@@ -80,40 +78,33 @@ impl MapModel {
 }
 
 // TODO Revisit some of this; conversions are now in geo
-
 fn split_polygon(polygon: Polygon, linestrings: Vec<LineString>) -> Vec<Polygon> {
-    let mut overlay = F64StringOverlay::new();
-    overlay.add_shape_path(polygon.exterior().coords().map(to_pt).collect());
-    for ls in linestrings {
-        overlay.add_string_lines(
-            ls.lines()
-                .map(|l| [to_pt(&l.start), to_pt(&l.end)])
-                .collect(),
-        );
-    }
+    let mut shape = to_i_overlay_contour(polygon.exterior());
 
-    let graph = overlay.into_graph(FillRule::NonZero);
-    let shapes = graph.extract_shapes(StringRule::Slice);
+    // geo Polygon's are explicitly closed LineStrings, but i_overlay Polygon's are not.
+    shape.pop();
 
+    let splitters: Vec<_> = linestrings.iter().map(to_i_overlay_contour).collect();
+    let shapes = shape.slice_by(&splitters, FillRule::NonZero);
     shapes.into_iter().map(to_geo_polygon).collect()
 }
 
-fn to_pt(pt: &Coord) -> F64Point {
-    F64Point::new(pt.x, pt.y)
-}
-
-fn to_geo_polygon(rings: Vec<Vec<F64Point>>) -> Polygon {
+fn to_geo_polygon(rings: Vec<Vec<[f64; 2]>>) -> Polygon {
     let mut interiors: Vec<LineString> = rings.into_iter().map(to_geo_linestring).collect();
     let exterior = interiors.remove(0);
     Polygon::new(exterior, interiors)
 }
 
-fn to_geo_linestring(pts: Vec<F64Point>) -> LineString {
+fn to_geo_linestring(pts: Vec<[f64; 2]>) -> LineString {
     LineString(
         pts.into_iter()
-            .map(|pt| Coord { x: pt.x, y: pt.y })
+            .map(|pt| Coord { x: pt[0], y: pt[1] })
             .collect(),
     )
+}
+
+fn to_i_overlay_contour(line_string: &LineString) -> Vec<[f64; 2]> {
+    line_string.coords().map(|c| [c.x, c.y]).collect()
 }
 
 fn boundary_touches_any(polygon: &Polygon, linestrings: &Vec<LineString>) -> bool {
