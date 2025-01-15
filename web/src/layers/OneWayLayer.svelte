@@ -21,4 +21,6 @@
   paint={{
     "icon-opacity": ["case", ["get", "direction_edited"], 1.0, 0.5],
   }}
+  interactive={false}
+  hoverCursor="pointer"
 />
