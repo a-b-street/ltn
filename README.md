@@ -23,10 +23,6 @@ You'll need:
 - `npm run fmt` to auto-format code
 - `npm run check` to see TypeScript errors
 
-The `tests` directory has some diff-based tests. `cd backend; cargo test
---release` will run them. You'll need to follow the instructions below to
-ensure you have `bristol` and `strasbourg` areas set up.
-
 ### Faster local development
 
 The tool operates on fixed study areas, generated from clips of OSM data.
@@ -59,6 +55,48 @@ for x in $AREAS; do
   wget https://assets.od2net.org/boundaries/$x.geojson
 done
 ```
+
+### Tests
+
+(Don't spend too much time looking after these particular tests; they've been
+helpful to spot unexpected changes in calculating existing modal filters, but
+they're often just noisy when cell geometry slightly changes.)
+
+The `tests` directory has some diff-based tests. `cd backend; cargo test
+--release` will run them. You'll need to follow the instructions above to
+ensure you have `bristol` and `strasbourg` areas set up. To accept the diffs,
+just commit the changed files.
+
+There's a few ways to understand / verify the diffs.
+
+First, you can manually try the tool
+[before](https://a-b-street.github.io/ltn/) and after (running locally). You
+can load a `.geojson` file from `tests/` as a project, then click the
+neighbourhood boundary (Bristol has two tests, Strasbourg just one). Then just
+visually compare things -- cells, shortcuts, and existing filters.
+
+You can also try just diffing the output GeoJSON file as text. They're stored
+without pretty-printed newlines/indentation to save size in git, but you can do
+something like this to view, assuming you have `jq` and `meld` (or another diff
+tool):
+
+```
+function json_diff {
+  cat $1 | jq > /tmp/before.json
+  git show HEAD^:./$1 | jq > /tmp/after.json
+  meld /tmp/before.json /tmp/after.json
+}
+
+cd tests/output
+json_diff bristol_west.geojson
+```
+
+Finally, if you have the before and after output GeoJSON file (`json_diff`
+creates `/tmp/before.geojson` and `/tmp/after.geojson`), then you can try
+exploring in [GeoDiffr](https://dabreegster.github.io/geodiffr). You'll want to
+"remove unchanged features", then try to understand the remaining changes. This
+tool is not very sophisticated; it's only helpful sometimes when filters
+change, but it's less useful if big cell polygons change.
 
 ### Architecture
 
