@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use crate::geo_helpers::SliceNearestFrechetBoundary;
 use anyhow::Result;
 use geo::{Area, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
 use geojson::{Feature, FeatureCollection, Geometry};
@@ -14,7 +15,9 @@ use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shor
 pub struct Neighbourhood {
     // Immutable once created
     pub interior_roads: BTreeSet<RoadID>,
-    // Just debug, has no actual use
+    // Immutable once created
+    pub perimeter_roads: BTreeSet<RoadID>,
+    // Immutable once created
     crosses: BTreeMap<RoadID, f64>,
     pub border_intersections: BTreeSet<IntersectionID>,
     name: String,
@@ -47,13 +50,24 @@ impl Neighbourhood {
         let prepared_boundary = PreparedGeometry::from(&boundary_polygon);
 
         let mut interior_roads = BTreeSet::new();
+        let mut perimeter_roads = BTreeSet::new();
         let mut crosses = BTreeMap::new();
+        debug!("boundary_polygon: {boundary_polygon:?}",);
         for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
             let r = &map.roads[obj.data.0];
-
-            match line_in_polygon(&r.linestring, &boundary_polygon, &prepared_boundary) {
+            let result = line_in_polygon(&r.linestring, &boundary_polygon, &prepared_boundary);
+            debug!(
+                "linestring {road_id}: {linestring:?}, way: {way_id}, result: {result:?}",
+                road_id = obj.data,
+                linestring = r.linestring,
+                way_id = r.way
+            );
+            match result {
                 LineInPolygon::Inside => {
                     interior_roads.insert(r.id);
+                }
+                LineInPolygon::Perimeter => {
+                    perimeter_roads.insert(r.id);
                 }
                 LineInPolygon::Crosses { percent } => {
                     // It's either something close to a perimeter road, or a weird case like
@@ -86,6 +100,11 @@ impl Neighbourhood {
             bail!("No roads inside the boundary");
         }
 
+        if perimeter_roads.is_empty() {
+            // REVIEW: Is this actually a problem?
+            bail!("No perimeter roads");
+        }
+
         // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
         let boundary_area_km2 = boundary_polygon.unsigned_area() / 1_000_000.0;
         let t3 = Instant::now();
@@ -96,6 +115,7 @@ impl Neighbourhood {
 
         let mut n = Self {
             interior_roads,
+            perimeter_roads,
             crosses,
             border_intersections,
             name,
@@ -129,7 +149,7 @@ impl Neighbourhood {
         if self.edit_perimeter_roads {
             self.interior_roads
                 .iter()
-                .chain(self.crosses.keys())
+                .chain(self.perimeter_roads.iter())
                 .cloned()
                 .collect()
         } else {
@@ -281,6 +301,7 @@ impl Neighbourhood {
 #[derive(Debug, Clone, PartialEq)]
 enum LineInPolygon {
     Inside,
+    Perimeter,
     Crosses { percent: f64 },
     Outside,
 }
@@ -292,8 +313,16 @@ fn line_in_polygon(
 ) -> LineInPolygon {
     // TODO Reconsider rewriting all of this logic based on clip_linestring_to_polygon
 
-    let matrix = prepared_polygon.relate(linestring);
+    let perimeter_likelihood = perimeter_likelihood(&linestring, polygon);
+    // dbg!(&linestring);
+    debug!("linestring: {linestring:?}");
+    // dbg!(&perimeter_likelihood);
+    debug!("perimeter_likelihood: {perimeter_likelihood:?}");
+    if perimeter_likelihood > 1e-3 {
+        return LineInPolygon::Perimeter;
+    }
 
+    let matrix = prepared_polygon.relate(linestring);
     if matrix.is_within() {
         return LineInPolygon::Inside;
     }
@@ -304,27 +333,114 @@ fn line_in_polygon(
 
     // Clip the linestring to the polygon
     // Multiple segments generally don't happen, but might right on a boundary
-    let mut sum = 0.0;
+    let mut length_in_polygon = 0.0;
+    // TODO: update this to use i_overlay impl
     for clipped in clip_linestring_to_polygon(linestring, polygon) {
-        sum += clipped.length::<Euclidean>();
+        let length = clipped.length::<Euclidean>();
+        length_in_polygon += length
     }
-
     // How much of the clipped linestring is inside the boundary? If it's nearly 1, then this
     // road is interior. Round to make diffs less noisy.
-    let percent = (sum / linestring.length::<Euclidean>() * 10e3).round() / 10e3;
+    let percent = (length_in_polygon / linestring.length::<Euclidean>() * 10e3).round() / 10e3;
+    info!("percent: {percent}");
     if percent > 0.99 {
         LineInPolygon::Inside
+    } else if percent < 0.01 {
+        LineInPolygon::Outside
     } else {
         LineInPolygon::Crosses { percent }
     }
 }
 
+/// A high value means the line_string is "mostly close" to the boundary's exterior.
+///
+/// Essentially, we take the area between the line_string and the boundary, and divide it by the line_string's length.
+///
+/// So the more of the line_string that is "far" from the boundary, the lower this metric goes.
+fn perimeter_likelihood(line_string: &LineString, boundary: &Polygon) -> f64 {
+    let (_nearby_boundary, frechet_distance) = boundary.slice_nearest_frechet_boundary(line_string);
+    let metric = (-frechet_distance).exp();
+    debug!("perimeter_likelihood: {metric}");
+    metric
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use geo::wkt;
+
+    mod perimeter_metric {
+        use super::*;
+        use approx::assert_relative_eq;
+
+        #[test]
+        fn line_segment_on_exterior() {
+            let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
+            let line = wkt!(LINESTRING(0.0 0.2,0.0 9.8));
+            assert_relative_eq!(1.0, perimeter_likelihood(&line, &boundary));
+        }
+
+        #[test]
+        fn line_segment_close_to_exterior() {
+            let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
+
+            {
+                let line = wkt!(LINESTRING(0.1 0.2,0.1 9.8));
+                assert_relative_eq!(0.9048374180359595, perimeter_likelihood(&line, &boundary));
+            }
+
+            {
+                // Length of the line, so long as it's all the same distance from the perimeter,
+                // should not affect the metric
+                let shorter_line = wkt!(LINESTRING(0.1 5.,0.1 9.8));
+                assert_relative_eq!(
+                    0.9048374180359595,
+                    perimeter_likelihood(&shorter_line, &boundary)
+                );
+            }
+
+            {
+                let farther_line = wkt!(LINESTRING(0.2 5.,0.2 9.8));
+                assert_relative_eq!(
+                    0.7536383164437652,
+                    perimeter_likelihood(&farther_line, &boundary)
+                );
+            }
+
+            {
+                let much_farther_line = wkt!(LINESTRING(1.2 5.,1.2 9.8));
+                assert_relative_eq!(
+                    0.29624972759029666,
+                    perimeter_likelihood(&much_farther_line, &boundary)
+                );
+            }
+        }
+
+        #[test]
+        fn almost_circuit() {
+            let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
+            let line = wkt!(LINESTRING(0.1 0.2,0.1 9.8,9.9 9.8,9.9 0.2));
+            assert_relative_eq!(
+                0.7996294886770354,
+                perimeter_likelihood(&line, &boundary),
+                max_relative = 1e-14
+            );
+        }
+
+        #[test]
+        fn almost_full_circuit_wrapping_around_initial_point() {
+            let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
+            let line = wkt!(LINESTRING(9.9 9.8,9.9 0.2,0.1 0.2,0.1 9.8));
+            assert_relative_eq!(
+                0.7996294886770354,
+                perimeter_likelihood(&line, &boundary),
+                max_relative = 1e-14
+            );
+        }
+    }
+
     mod line_in_polygon {
         use super::*;
-        use geo::wkt;
 
         // A small neighbourhood in Bristol
         fn bristol_neighborhood() -> Polygon {
@@ -353,7 +469,7 @@ mod tests {
         }
 
         #[test]
-        fn inside_but_almost_touching_boundary() {
+        fn inside_and_perpendicular_to_boundary_almost_touching_boundary() {
             let line_string = wkt!(LINESTRING(1641.0286554513798 856.1354007500536,1646.2130545385496 850.8091564062511,1660.3939108652753 836.2314813879377));
 
             let boundary = bristol_neighborhood();
@@ -379,6 +495,30 @@ mod tests {
 
             // This is considered *crossing* not Inside, which is why it's not showing up as editable.
             assert_eq!(result, LineInPolygon::Inside);
+        }
+
+        #[test]
+        fn part_of_harvard() {
+            // way: https://www.openstreetmap.org/way/256916775
+            let line_string = wkt!(LINESTRING(1495.3224949514188 1205.7438525123148,1495.1276851599255 1178.667850475072));
+
+            // repros
+            // let boundary = wkt!(POLYGON ((1494.8879192632764 1156.4065954129007, 1495.030280264711 1166.3140770613454, 1495.1276851599255 1178.667850475072, 1495.3224949514188 1205.7438525123148, 1496.109226801229 1253.1574347241208, 1496.2965439078196 1305.5414370219842, 1496.5812659106891 1334.163050674363, 1496.7386122808641 1343.8815006865716, 1496.78356838602 1350.3864128804018, 1496.761090333442 1354.5117503570798, 1496.858495229721 1361.7505500795464, 1497.420446550558 1456.043978118121, 1497.6826905008495 1491.0593088835872, 1497.6377343946288 1499.8214812056735, 1497.5703002358305 1507.5384197739918, 1495.8619682196775 1624.7602733560345, 1495.8544755358398 1671.918106883475, 1495.7570706395607 1688.4083372820328, 1495.6671584281842 1719.4428841752342, 1495.794534060879 1749.8102605871381, 1497.278085549123 1769.2805191360155, 1511.9637467430978 1769.3805947078151, 1542.901040145765 1769.6029848685107, 1553.6605347755903 1769.6474629003337, 1567.90412759652 1769.725299456617, 1581.1437007235688 1769.7920165047467, 1590.4870780239487 1769.8364945373598, 1599.583196742777 1769.8809725691826, 1604.0713146277628 1769.9032115854895, 1614.561072623459 1769.958809125466, 1632.0789684763247 1770.0366456817487, 1648.48045437029 1770.1144822372416, 1657.9062511982088 1770.0255261735956, 1681.8303921124464 1769.8253750292065, 1711.096816920279 1769.2916386441689, 1719.391218420557 1769.4250727404283, 1724.0891314657758 1770.3479919060906, 1730.8999814788747 1772.6163715425002, 1739.4116708232234 1778.665383907576, 1751.4748925185404 1788.6173435886337, 1765.815890235749 1802.1275458368718, 1781.8502346003709 1817.261196256529, 1822.0110223545612 1811.034271763371, 1906.8656718541479 1798.15788147276, 1939.294009428897 1792.8761151615709, 1917.0632151631369 1766.7452713062971, 1900.661729268107 1747.0748616130306, 1883.7207701058826 1726.6038473422077, 1880.9859403422056 1723.379190015676, 1878.3934715810285 1719.365047618951, 1874.6396367547297 1711.5035554462202, 1873.463285322998 1706.0438770069486, 1873.1935486888685 1700.4730034869342, 1873.485763375576 1633.5891627270407, 1873.4333145855173 1624.6046002442586, 1873.4932560594139 1617.2657249484123, 1873.2385047940243 1553.417509878815, 1873.0661730561737 1507.2493125651663, 1873.0287096348557 1500.4330541469942, 1873.0362023186935 1492.938505739372, 1872.9687681598953 1370.9019051830478, 1872.9687681598953 1362.640110721539, 1872.9612754760572 1361.6727135240535, 1871.1630312485281 1355.8349718115203, 1869.3647870199336 1350.9535077891094, 1867.1919085781583 1345.071288044753, 1494.8879192632764 1156.4065954129007)));
+            // let boundary = wkt!(POLYGON((1494.8879192632764 1156.4065954129007, 1495.030280264711 1166.3140770613454, 1495.1276851599255 1178.667850475072, 1495.3224949514188 1205.7438525123148, 1496.109226801229 1253.1574347241208, 1496.2965439078196 1305.5414370219842, 1496.5812659106891 1334.163050674363, 1496.7386122808641 1343.8815006865716, 1496.78356838602 1350.3864128804018, 1496.761090333442 1354.5117503570798, 1496.858495229721 1361.7505500795464, 1497.420446550558 1456.043978118121, 1497.6826905008495 1491.0593088835872, 1497.6377343946288 1499.8214812056735, 1497.5703002358305 1507.5384197739918, 1495.8619682196775 1624.7602733560345, 1495.8544755358398 1671.918106883475, 1495.7570706395607 1688.4083372820328, 1495.6671584281842 1719.4428841752342, 1878.3934715810285 1719.365047618951, 1872.9612754760572 1361.6727135240535, 1560.6062531052212 1030.9451863848656, 1559.5048285161258 1032.9355783213932, 1556.425335275683 1038.8845151138794, 1518.6696991760793 1110.927807596856, 1506.2243505826789 1134.8236303393896, 1499.638281098554 1147.4442719456351, 1494.8879192632764 1156.4065954129007)));
+            // let boundary = wkt!(POLYGON ((1494.8879192632764 1156.4065954129007, 1495.030280264711 1166.3140770613454, 1495.1276851599255 1178.667850475072, 1495.3224949514188 1205.7438525123148, 1496.109226801229 1253.1574347241208, 1495.6671584281842 1719.4428841752342, 1878.3934715810285 1719.365047618951, 1872.9612754760572 1361.6727135240535, 1560.6062531052212 1030.9451863848656, 1559.5048285161258 1032.9355783213932, 1556.425335275683 1038.8845151138794, 1518.6696991760793 1110.927807596856, 1506.2243505826789 1134.8236303393896, 1499.638281098554 1147.4442719456351, 1494.8879192632764 1156.4065954129007)));
+            // let boundary = wkt!(POLYGON ((1495.030280264711 1166.3140770613454, 1495.1276851599255 1178.667850475072, 1495.3224949514188 1205.7438525123148, 1496.109226801229 1253.1574347241208, 1495.6671584281842 1719.4428841752342, 1878.3934715810285 1719.365047618951, 1872.9612754760572 1361.6727135240535, 1499.638281098554 1147.4442719456351, 1495.030280264711 1166.3140770613454)));
+
+            let boundary = wkt!(POLYGON ((1495.030280264711 1166.3140770613454, 1495.1276851599255 1178.667850475072, 1495.3224949514188 1205.7438525123148, 1495.6671584281842 1719.4428841752342, 1878.3934715810285 1719.365047618951, 1872.9612754760572 1361.6727135240535, 1495.030280264711 1166.3140770613454)));
+
+            // busted - does not reproduce
+            // let boundary = wkt!(POLYGON ((1495.0113838403076 1079.5438525123147, 1495.356047317073 1593.2428841752342, 1878.0823604699174 1593.165047618951, 1874.4444444444443 1094.4444444444443, 1495.0113838403076 1079.5438525123147)));
+            // let boundary = wkt!(POLYGON ((1497.23360606253 1163.988296956759, 1497.5782695392954 1677.6873286196785, 1880.3045826921398 1677.6094920633952, 1876.6666666666667 1178.8888888888887, 1497.23360606253 1163.988296956759)));
+
+            let prepared_polygon = PreparedGeometry::from(&boundary);
+            let result = line_in_polygon(&line_string, &boundary, &prepared_polygon);
+
+            // This is considered *crossing* not Inside, which is why it's not showing up as editable.
+            assert_eq!(result, LineInPolygon::Perimeter);
         }
     }
 }

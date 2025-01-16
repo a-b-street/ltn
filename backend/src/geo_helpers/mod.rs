@@ -1,3 +1,6 @@
+mod slice_nearest_boundary;
+pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
+
 use geo::{
     BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
     LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
