@@ -15,7 +15,7 @@
   let data = $backend!.predictImpact();
 
   let minRoadWidth = 3;
-  let maxRoadWidht = 10;
+  let maxRoadWidth = 10;
 
   function pickRoad(f: Feature) {
     $mode = { mode: "impact-detail", road: f };
@@ -72,7 +72,7 @@
             0,
             minRoadWidth,
             data.max_count,
-            maxRoadWidht,
+            maxRoadWidth,
           ],
           "line-color": [
             "let",
