@@ -58,8 +58,9 @@ impl Impact {
         for road in &map.roads {
             let before = self.counts_before.get(&road.id).cloned().unwrap_or(0);
             let after = self.counts_after.get(&road.id).cloned().unwrap_or(0);
+            // Don't show unchanged roads, but to scale the absolute counts, do look at the max
+            // count seen anywhere
             max_count = max_count.max(before.max(after));
-            // Don't show unchanged roads
             if before != after && (before > 0 || after > 0) {
                 let mut f = map.mercator.to_wgs84_gj(&road.linestring);
                 f.set_property("id", road.id.0);
