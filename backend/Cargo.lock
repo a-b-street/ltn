@@ -71,6 +71,7 @@ dependencies = [
  "i_float",
  "i_overlay",
  "log",
+ "nanorand",
  "osm-reader",
  "route-snapper-graph",
  "rstar",
@@ -505,6 +506,12 @@ checksum = "e7810e0be55b428ada41041c41f32c9f1a42817901b4ccf45fa3d4b6561e74c7"
 dependencies = [
  "adler",
 ]
+
+[[package]]
+name = "nanorand"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
 
 [[package]]
 name = "num-traits"
