@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use geo::{Contains, Coord};
-use geojson::FeatureCollection;
+use geojson::{Feature, FeatureCollection};
 
 use crate::{IntersectionID, MapModel, RoadID};
 
@@ -58,6 +58,7 @@ impl Impact {
             // Don't show unchanged roads
             if before != after && (before > 0 || after > 0) {
                 let mut f = map.mercator.to_wgs84_gj(&road.linestring);
+                f.set_property("id", road.id.0);
                 f.set_property("before", before);
                 f.set_property("after", after);
                 features.push(f);
@@ -76,6 +77,32 @@ impl Impact {
                 .clone(),
             ),
         }
+    }
+
+    pub fn get_impacts_on_road(&self, map: &MapModel, road: RoadID) -> Vec<(Feature, Feature)> {
+        let mut changed_paths = Vec::new();
+
+        let router_before = map.router_original.as_ref().unwrap();
+        let router_after = map.router_current.as_ref().unwrap();
+
+        // TODO We could remember the indices of requests that have changes
+        for (i1, i2) in &self.requests {
+            let Some(route1) = router_before.route_from_intersections(map, *i1, *i2) else {
+                continue;
+            };
+            let Some(route2) = router_after.route_from_intersections(map, *i1, *i2) else {
+                continue;
+            };
+            if route1.crosses_road(road) != route2.crosses_road(road) {
+                let mut f1 = map.mercator.to_wgs84_gj(&route1.to_linestring(map));
+                f1.set_property("kind", "before");
+                let mut f2 = map.mercator.to_wgs84_gj(&route2.to_linestring(map));
+                f2.set_property("kind", "after");
+                changed_paths.push((f1, f2));
+            }
+        }
+
+        changed_paths
     }
 }
 

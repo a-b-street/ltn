@@ -26,6 +26,7 @@
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import DebugMode from "./DebugMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
+  import ImpactDetailMode from "./ImpactDetailMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
   import PredictImpactMode from "./PredictImpactMode.svelte";
@@ -172,6 +173,8 @@
           <RouteMode prevMode={$mode.prevMode} />
         {:else if $mode.mode == "predict-impact"}
           <PredictImpactMode />
+        {:else if $mode.mode == "impact-detail"}
+          <ImpactDetailMode road={$mode.road} />
         {:else if $mode.mode == "debug"}
           <DebugMode />
         {/if}

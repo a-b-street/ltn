@@ -42,6 +42,10 @@ export type Mode =
       mode: "predict-impact";
     }
   | {
+      mode: "impact-detail";
+      road: Feature;
+    }
+  | {
       mode: "debug";
     };
 

@@ -55,9 +55,11 @@
 
   function onKeyDown(e: KeyboardEvent) {
     if (state.state == "chose-road") {
-      if (e.key == "ArrowLeft" && state.shortcutIndex > 0) {
+      if (e.key == "ArrowLeft") {
         e.stopPropagation();
-        state.shortcutIndex--;
+        if (state.shortcutIndex > 0) {
+          state.shortcutIndex--;
+        }
       }
       if (e.key == "ArrowRight") {
         e.stopPropagation();
