@@ -1,11 +1,20 @@
 <script lang="ts">
   import { GeoJSON, LineLayer } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, roadLineWidth } from "./common";
+  import { layerId, Link } from "./common";
+  import { ModalFilterLayer } from "./layers";
   import { backend, mode } from "./stores";
+
+  // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
+  // The middle color white doesn't matter; the source data will filter out unchanged roads
+  let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
+
+  let data = $backend!.predictImpact();
+
+  let minRoadWidth = 3;
+  let maxRoadWidht = 10;
 </script>
 
 <SplitComponent>
@@ -30,20 +39,54 @@
   <div slot="sidebar">
     <BackButton on:click={() => ($mode = { mode: "network" })} />
 
-    <p>This mode shows... TODO</p>
+    <p>
+      This mode estimates the impact of all your changes on traffic around the
+      entire area. It's based on many assumptions and must be interpreted very
+      carefully.
+    </p>
+    <p>
+      Red roads have increased traffic, and green roads have decreased. If
+      hovering on a road doesn't show anything, there was no change there.
+    </p>
+    <p>
+      Thicker roads have more traffic after edits, relatvie to the max count for
+      any road: {data.max_count.toLocaleString()}
+    </p>
   </div>
 
   <div slot="map">
-    <GeoJSON data={notNull($backend).predictImpact()} generateId>
+    <GeoJSON {data} generateId>
       <LineLayer
         {...layerId("predict-impact")}
         paint={{
-          "line-width": roadLineWidth(0),
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["get", "after"],
+            0,
+            minRoadWidth,
+            data.max_count,
+            maxRoadWidht,
+          ],
           "line-color": [
-            "case",
-            ["<", ["get", "after"], ["get", "before"]],
-            "green",
-            "red",
+            "let",
+            "ratio",
+            ["*", 100, ["/", ["get", "after"], ["get", "before"]]],
+            [
+              "interpolate-hcl",
+              ["linear"],
+              ["var", "ratio"],
+              0,
+              divergingScale[0],
+              50,
+              divergingScale[1],
+              100,
+              divergingScale[2],
+              150,
+              divergingScale[3],
+              200,
+              divergingScale[4],
+            ],
           ],
         }}
       >
@@ -52,8 +95,11 @@
             {props.before.toLocaleString()} before, {props.after.toLocaleString()}
             after
           </p>
+          <p>{Math.round((100 * props.after) / props.before)}%</p>
         </Popup>
       </LineLayer>
     </GeoJSON>
+
+    <ModalFilterLayer />
   </div>
 </SplitComponent>

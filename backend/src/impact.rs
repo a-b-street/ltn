@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use geo::{Contains, Coord};
-use geojson::GeoJson;
+use geojson::FeatureCollection;
 
 use crate::{IntersectionID, MapModel, RoadID};
 
@@ -28,8 +28,9 @@ impl Impact {
         self.after_edits_counts.clear();
     }
 
-    /// Returns a feature per road, with `before` and `after` counts
-    pub fn recalculate(&mut self, map: &MapModel) -> GeoJson {
+    /// Returns a feature per road, with `before` and `after` counts, and a `max_count` foreign
+    /// member
+    pub fn recalculate(&mut self, map: &MapModel) -> FeatureCollection {
         if self.baseline_counts.is_empty() {
             info!("Calculating baseline impacts first");
             self.baseline_counts = map
@@ -49,17 +50,32 @@ impl Impact {
         }
 
         let mut features = Vec::new();
+        let mut max_count = 0;
         for road in &map.roads {
             let before = self.baseline_counts.get(&road.id).cloned().unwrap_or(0);
             let after = self.after_edits_counts.get(&road.id).cloned().unwrap_or(0);
-            if before > 0 || after > 0 {
+            max_count = max_count.max(before.max(after));
+            // Don't show unchanged roads
+            if before != after && (before > 0 || after > 0) {
                 let mut f = map.mercator.to_wgs84_gj(&road.linestring);
                 f.set_property("before", before);
                 f.set_property("after", after);
                 features.push(f);
             }
         }
-        GeoJson::from(features)
+
+        FeatureCollection {
+            features,
+            bbox: None,
+            foreign_members: Some(
+                serde_json::json!({
+                    "max_count": max_count,
+                })
+                .as_object()
+                .unwrap()
+                .clone(),
+            ),
+        }
     }
 }
 
@@ -67,7 +83,7 @@ impl Impact {
 fn synthetic_od_requests(map: &MapModel) -> Vec<(Coord, Coord)> {
     // TODO Or just directly use intersections and save the step of using closest_intersection?
 
-    let step_size_meters = 50;
+    let step_size_meters = 10;
     let boundary = map.mercator.to_mercator(&map.boundary_wgs84);
 
     let mut pts = Vec::new();

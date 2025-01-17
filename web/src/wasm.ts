@@ -150,7 +150,7 @@ export class Backend {
   predictImpact(): FeatureCollection<
     LineString,
     { before: number; after: number }
-  > {
+  > & { max_count: number } {
     return JSON.parse(this.inner.predictImpact());
   }
 }
