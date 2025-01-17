@@ -1,59 +1,46 @@
 use anyhow::Result;
-use geo::Polygon;
-use geojson::{Feature, FeatureCollection};
+use geojson::FeatureCollection;
 
-use crate::{MapModel, Neighbourhood};
+use crate::test_fixtures::NeighbourhoodFixture;
+use crate::Neighbourhood;
 
 #[test]
 fn test_bristol_west() {
-    test_example("bristol", "bristol_west", "west");
+    test_example(&NeighbourhoodFixture::BRISTOL_WEST);
 }
 
 #[test]
 fn test_bristol_east() {
-    test_example("bristol", "bristol_east", "east");
+    test_example(&NeighbourhoodFixture::BRISTOL_EAST);
 }
 
 #[test]
 fn test_strasbourg() {
-    test_example("strasbourg", "strasbourg", "Schilik velorue");
+    test_example(&NeighbourhoodFixture::STRASBOURG);
 }
 
-fn test_example(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) {
-    let output_path = format!("../tests/output/{savefile_name}.geojson");
+fn test_example(neighbourhood_fixture: &NeighbourhoodFixture) {
+    let output_path = format!(
+        "../tests/output/{savefile_name}.geojson",
+        savefile_name = neighbourhood_fixture.savefile_name
+    );
     let expected = std::fs::read_to_string(&output_path).unwrap_or_else(|_| String::new());
-    let actual = get_gj(study_area_name, savefile_name, neighbourhood_name).unwrap();
+    let actual = get_gj(&neighbourhood_fixture).unwrap();
 
     if expected != actual {
         std::fs::write(output_path, actual).unwrap();
-        panic!("{savefile_name} has changed. Manually compare before/after changes with the web UI, then commit the output file to git.");
+        panic!("{savefile_name} has changed. Manually compare before/after changes with the web UI, then commit the output file to git.", savefile_name=neighbourhood_fixture.savefile_name);
     }
 }
 
 // TODO Must run from 'backend'
 // TODO web/public/osm must be symlinked to local PBF copies
-fn get_gj(study_area_name: &str, savefile_name: &str, neighbourhood_name: &str) -> Result<String> {
-    let input_bytes = std::fs::read(format!("../web/public/osm/{study_area_name}.pbf"))?;
-    let boundary: Feature = std::fs::read_to_string(format!(
-        "../web/public/boundaries/{study_area_name}.geojson"
-    ))?
-    .parse()?;
-    let polygon = boundary.try_into()?;
-
-    let mut map = MapModel::new(&input_bytes, polygon, Some(study_area_name.to_string()))?;
-
-    let savefile: FeatureCollection =
-        std::fs::read_to_string(format!("../tests/{savefile_name}.geojson"))?.parse()?;
-    map.load_savefile(savefile)?;
-
-    // set_current_neighbourhood equivalent
-    let boundary_gj = map.boundaries.get(neighbourhood_name).cloned().unwrap();
-    let mut boundary_geo: Polygon = boundary_gj.try_into()?;
-    map.mercator.to_mercator_in_place(&mut boundary_geo);
+fn get_gj(neighbourhood: &NeighbourhoodFixture) -> Result<String> {
+    let (map, boundary_geo) = neighbourhood.neighbourhood_params()?;
     let edit_perimeter_roads = false;
     let neighbourhood = Neighbourhood::new(
         &map,
-        neighbourhood_name.to_string(),
+        neighbourhood.neighbourhood_name.to_string(),
         boundary_geo,
         edit_perimeter_roads,
     )?;
