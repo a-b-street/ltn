@@ -39,6 +39,9 @@ export type Mode =
       prevMode: "network" | "neighbourhood" | "impact-one-destination";
     }
   | {
+      mode: "predict-impact";
+    }
+  | {
       mode: "debug";
     };
 

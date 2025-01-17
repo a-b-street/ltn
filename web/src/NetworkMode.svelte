@@ -118,6 +118,11 @@
             Route
           </Link>
         </li>
+        <li>
+          <Link on:click={() => ($mode = { mode: "predict-impact" })}>
+            Predict impact
+          </Link>
+        </li>
       </ul>
     </nav>
   </div>

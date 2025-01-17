@@ -14,6 +14,7 @@ use utils::{Mercator, Tags};
 use crate::geo_helpers::{
     angle_of_pt_on_line, buffer_aabb, invert_polygon, limit_angle, linestring_intersection,
 };
+use crate::impact::Impact;
 use crate::Router;
 
 pub struct MapModel {
@@ -45,6 +46,8 @@ pub struct MapModel {
 
     // Every road is filled out
     pub directions: BTreeMap<RoadID, Direction>,
+
+    pub impact: Option<Impact>,
 
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
@@ -209,8 +212,8 @@ impl MapModel {
     }
 
     fn after_edited(&mut self) {
-        // Invalidate it
         self.router_current = None;
+        self.impact.as_mut().unwrap().invalidate_after_edits();
     }
 
     pub fn add_many_modal_filters(

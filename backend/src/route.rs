@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use fast_paths::{FastGraph, InputGraph};
 use geo::{Coord, LineString};
@@ -116,5 +116,32 @@ impl Router {
         }
         pts.dedup();
         Some(LineString::new(pts))
+    }
+
+    /// Produce routes for all the requests and count how many routes cross each road
+    pub fn od_to_counts(
+        &self,
+        map: &MapModel,
+        requests: &Vec<(IntersectionID, IntersectionID)>,
+    ) -> HashMap<RoadID, usize> {
+        // TODO Reuse
+        let mut path_calc = fast_paths::create_calculator(&self.ch);
+
+        let mut results = HashMap::new();
+        for (req_i1, req_i2) in requests {
+            if let (Some(start), Some(end)) =
+                (self.node_map.get(*req_i1), self.node_map.get(*req_i2))
+            {
+                if let Some(path) = path_calc.calc_path(&self.ch, start, end) {
+                    for pair in path.get_nodes().windows(2) {
+                        let i1 = self.node_map.translate_id(pair[0]);
+                        let i2 = self.node_map.translate_id(pair[1]);
+                        let road = map.find_edge(i1, i2);
+                        *results.entry(road.id).or_insert(0) += 1;
+                    }
+                }
+            }
+        }
+        results
     }
 }

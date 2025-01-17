@@ -6,7 +6,10 @@ use osm_reader::{Element, NodeID};
 use rstar::{primitives::GeomWithData, RTree};
 use utils::Tags;
 
-use crate::{Direction, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID, Router};
+use crate::{
+    impact::Impact, Direction, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID,
+    Router,
+};
 
 pub fn scrape_osm(
     input_bytes: &[u8],
@@ -189,10 +192,13 @@ pub fn scrape_osm(
 
         directions,
 
+        impact: None,
+
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
     };
+    map.impact = Some(Impact::new(&map));
 
     // TODO Batch some or all of these initial edits?
 
