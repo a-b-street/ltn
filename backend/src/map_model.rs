@@ -34,11 +34,11 @@ pub struct MapModel {
 
     // TODO Wasteful, can share some
     // This is guaranteed to exist, only Option during MapModel::new internals
-    pub router_original: Option<Router>,
+    pub router_before: Option<Router>,
     // Calculated lazily. Changes with edits and main_road_penalty.
-    pub router_current: Option<Router>,
+    pub router_after: Option<Router>,
     // Calculated lazily. No edits, just main_road_penalty.
-    pub router_original_with_penalty: Option<Router>,
+    pub router_before_with_penalty: Option<Router>,
 
     // Just from the basemap, existing filters
     pub original_modal_filters: BTreeMap<RoadID, ModalFilter>,
@@ -212,7 +212,7 @@ impl MapModel {
     }
 
     fn after_edited(&mut self) {
-        self.router_current = None;
+        self.router_after = None;
         self.impact.as_mut().unwrap().invalidate_after_edits();
     }
 
@@ -455,12 +455,12 @@ impl MapModel {
     // Lazily builds the router if needed.
     pub fn rebuild_router(&mut self, main_road_penalty: f64) {
         if self
-            .router_current
+            .router_after
             .as_ref()
             .map(|r| r.main_road_penalty != main_road_penalty)
             .unwrap_or(true)
         {
-            self.router_current = Some(Router::new(
+            self.router_after = Some(Router::new(
                 &self.roads,
                 &self.modal_filters,
                 &self.directions,
@@ -469,12 +469,12 @@ impl MapModel {
         }
 
         if self
-            .router_original_with_penalty
+            .router_before_with_penalty
             .as_ref()
             .map(|r| r.main_road_penalty != main_road_penalty)
             .unwrap_or(true)
         {
-            self.router_original_with_penalty = Some(Router::new(
+            self.router_before_with_penalty = Some(Router::new(
                 &self.roads,
                 &self.original_modal_filters,
                 &self.original_directions(),
@@ -488,7 +488,7 @@ impl MapModel {
 
         let mut features = Vec::new();
         if let Some(route) = self
-            .router_original_with_penalty
+            .router_before_with_penalty
             .as_ref()
             .unwrap()
             .route(self, pt1, pt2)
@@ -497,7 +497,7 @@ impl MapModel {
             f.set_property("kind", "before");
             features.push(f);
         }
-        if let Some(route) = self.router_current.as_ref().unwrap().route(self, pt1, pt2) {
+        if let Some(route) = self.router_after.as_ref().unwrap().route(self, pt1, pt2) {
             let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
             f.set_property("kind", "after");
             features.push(f);
@@ -522,12 +522,12 @@ impl MapModel {
 
             // TODO How to handle missing one or both routes missing?
             if let (Some(before), Some(after)) = (
-                self.router_original_with_penalty
+                self.router_before_with_penalty
                     .as_ref()
                     .unwrap()
                     .route(self, pt1, pt2)
                     .map(|route| route.to_linestring(self)),
-                self.router_current
+                self.router_after
                     .as_ref()
                     .unwrap()
                     .route(self, pt1, pt2)
