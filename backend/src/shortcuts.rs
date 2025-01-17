@@ -74,7 +74,7 @@ impl Shortcuts {
 
                         // How long is the shortest route through the original router, using this
                         // neighbourhood or not?
-                        let direct_length = match map.router_original.as_ref().unwrap().route(
+                        let direct_length = match map.router_before.as_ref().unwrap().route(
                             map,
                             map.get_i(*start).point.into(),
                             map.get_i(*end).point.into(),

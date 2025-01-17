@@ -183,9 +183,9 @@ pub fn scrape_osm(
         railways,
         waterways,
 
-        router_original: None,
-        router_current: None,
-        router_original_with_penalty: None,
+        router_before: None,
+        router_after: None,
+        router_before_with_penalty: None,
 
         original_modal_filters: BTreeMap::new(),
         modal_filters: BTreeMap::new(),
@@ -281,7 +281,7 @@ pub fn scrape_osm(
     map.redo_queue.clear();
 
     let main_road_penalty = 1.0;
-    map.router_original = Some(Router::new(
+    map.router_before = Some(Router::new(
         &map.roads,
         &map.modal_filters,
         &map.directions,
