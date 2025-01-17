@@ -70,7 +70,7 @@
             Pick neighbourhood
           </Link>
         </li>
-        <li>Predict impact mode</li>
+        <li>Predict impact</li>
       </ul>
     </nav>
   </div>
