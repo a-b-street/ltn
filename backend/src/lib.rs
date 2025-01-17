@@ -22,6 +22,7 @@ use self::shortcuts::Shortcuts;
 mod auto_boundaries;
 mod cells;
 mod geo_helpers;
+mod impact;
 mod map_model;
 mod neighbourhood;
 mod render_cells;
@@ -292,6 +293,16 @@ impl LTN {
             ),
         )
         .map_err(err_to_js)?)
+    }
+
+    /// Returns GJ with a LineString per road, with before/after counts
+    #[wasm_bindgen(js_name = predictImpact)]
+    pub fn predict_impact(&mut self) -> Result<String, JsValue> {
+        self.map.rebuild_router(1.0);
+        let mut impact = self.map.impact.take().unwrap();
+        let out = impact.recalculate(&self.map);
+        self.map.impact = Some(impact);
+        Ok(serde_json::to_string(&out).map_err(err_to_js)?)
     }
 
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to

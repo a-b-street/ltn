@@ -146,6 +146,13 @@ export class Backend {
   ): FeatureCollection & { highest_ratio: number } {
     return JSON.parse(this.inner.impactToOneDestination(pt.lng, pt.lat));
   }
+
+  predictImpact(): FeatureCollection<
+    LineString,
+    { before: number; after: number }
+  > {
+    return JSON.parse(this.inner.predictImpact());
+  }
 }
 
 export interface RenderNeighbourhoodOutput {

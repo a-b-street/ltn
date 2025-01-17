@@ -28,6 +28,7 @@
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
   import NetworkMode from "./NetworkMode.svelte";
+  import PredictImpactMode from "./PredictImpactMode.svelte";
   import RouteMode from "./RouteMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
   import Settings from "./Settings.svelte";
@@ -169,6 +170,8 @@
           <ImpactOneDestinationMode />
         {:else if $mode.mode == "route"}
           <RouteMode prevMode={$mode.prevMode} />
+        {:else if $mode.mode == "predict-impact"}
+          <PredictImpactMode />
         {:else if $mode.mode == "debug"}
           <DebugMode />
         {/if}

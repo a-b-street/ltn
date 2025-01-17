@@ -95,6 +95,8 @@ const layerZorder = [
   "shortcuts",
   "shortcuts-focus",
 
+  "predict-impact",
+
   dataviz("Building"),
 
   "draw-area-lines",
