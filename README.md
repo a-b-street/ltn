@@ -15,7 +15,8 @@ You'll need:
 
 `cd web`, and then:
 
-- `npm i` to install dependencies
+- `npm ci` to install dependencies (`ci` to make sure the versions in
+  `package-lock.json` are used)
 - `npm run wasm` to rebuild the Rust backend
   - vite doesn't automatically rebuild when you edit things
 - `npm run dev` to run locally
