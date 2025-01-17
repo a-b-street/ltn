@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use geo::{Contains, Coord};
 use geojson::{Feature, FeatureCollection};
+use nanorand::{Rng, WyRand};
 
 use crate::{IntersectionID, MapModel, RoadID};
 
@@ -18,7 +19,7 @@ impl Impact {
     /// Calculates `requests` only
     pub fn new(map: &MapModel) -> Self {
         Self {
-            requests: make_requests(map, synthetic_od_requests(map)),
+            requests: synthetic_od_requests(map),
             baseline_counts: HashMap::new(),
             after_edits_counts: HashMap::new(),
         }
@@ -107,43 +108,15 @@ impl Impact {
 }
 
 /// Deterministically produce a bunch of OD pairs, just as a fallback when there's no real data
-fn synthetic_od_requests(map: &MapModel) -> Vec<(Coord, Coord)> {
-    // TODO Or just directly use intersections and save the step of using closest_intersection?
+fn synthetic_od_requests(map: &MapModel) -> Vec<(IntersectionID, IntersectionID)> {
+    let num_requests = 1_000;
 
-    let step_size_meters = 10;
-    let boundary = map.mercator.to_mercator(&map.boundary_wgs84);
-
-    let mut pts = Vec::new();
-    for x in (0..map.mercator.width as usize).step_by(step_size_meters) {
-        for y in (0..map.mercator.height as usize).step_by(step_size_meters) {
-            let pt = Coord {
-                x: x as f64,
-                y: y as f64,
-            };
-            if boundary.contains(&pt) {
-                pts.push(pt);
-            }
-        }
-    }
-
-    // Jumble them up without pulling in dependencies on RNGs
-    pts.sort_by_key(|pt| (((pt.x + pt.y) * 1000.0) as usize) % 100);
-
-    pts.windows(2).map(|pair| (pair[0], pair[1])).collect()
-}
-
-fn make_requests(
-    map: &MapModel,
-    pts: Vec<(Coord, Coord)>,
-) -> Vec<(IntersectionID, IntersectionID)> {
+    let mut rng = WyRand::new_seed(42);
     let mut requests = Vec::new();
-    for (pt1, pt2) in pts {
-        if let (Some(a), Some(b)) = (
-            map.closest_intersection.nearest_neighbor(&pt1.into()),
-            map.closest_intersection.nearest_neighbor(&pt2.into()),
-        ) {
-            requests.push((a.data, b.data));
-        }
+    for _ in 0..num_requests {
+        let i1 = IntersectionID(rng.generate_range(0..map.intersections.len()));
+        let i2 = IntersectionID(rng.generate_range(0..map.intersections.len()));
+        requests.push((i1, i2));
     }
     requests
 }
