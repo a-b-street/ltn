@@ -487,18 +487,18 @@ impl MapModel {
         self.rebuild_router(main_road_penalty);
 
         let mut features = Vec::new();
-        if let Some(linestring) = self
+        if let Some(route) = self
             .router_original_with_penalty
             .as_ref()
             .unwrap()
             .route(self, pt1, pt2)
         {
-            let mut f = self.mercator.to_wgs84_gj(&linestring);
+            let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
             f.set_property("kind", "before");
             features.push(f);
         }
-        if let Some(linestring) = self.router_current.as_ref().unwrap().route(self, pt1, pt2) {
-            let mut f = self.mercator.to_wgs84_gj(&linestring);
+        if let Some(route) = self.router_current.as_ref().unwrap().route(self, pt1, pt2) {
+            let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
             f.set_property("kind", "after");
             features.push(f);
         }
@@ -525,8 +525,13 @@ impl MapModel {
                 self.router_original_with_penalty
                     .as_ref()
                     .unwrap()
-                    .route(self, pt1, pt2),
-                self.router_current.as_ref().unwrap().route(self, pt1, pt2),
+                    .route(self, pt1, pt2)
+                    .map(|route| route.to_linestring(self)),
+                self.router_current
+                    .as_ref()
+                    .unwrap()
+                    .route(self, pt1, pt2)
+                    .map(|route| route.to_linestring(self)),
             ) {
                 let from_pt = self.mercator.pt_to_wgs84(pt1);
                 let distance_before = before.length::<Euclidean>();

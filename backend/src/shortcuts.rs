@@ -79,7 +79,7 @@ impl Shortcuts {
                             map.get_i(*start).point.into(),
                             map.get_i(*end).point.into(),
                         ) {
-                            Some(linestring) => linestring.length::<Euclidean>(),
+                            Some(route) => route.to_linestring(map).length::<Euclidean>(),
                             None => {
                                 warn!("Found a shortcut from {start} to {end}, but not a route using the whole map");
                                 shortcut_length

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Feature } from "geojson";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
@@ -15,6 +16,10 @@
 
   let minRoadWidth = 3;
   let maxRoadWidht = 10;
+
+  function pickRoad(f: Feature) {
+    $mode = { mode: "impact-detail", road: f };
+  }
 </script>
 
 <SplitComponent>
@@ -46,10 +51,11 @@
     </p>
     <p>
       Red roads have increased traffic, and green roads have decreased. If
-      hovering on a road doesn't show anything, there was no change there.
+      hovering on a road doesn't show anything, there was no change there. Click
+      a road to see example routes through it that've changed.
     </p>
     <p>
-      Thicker roads have more traffic after edits, relatvie to the max count for
+      Thicker roads have more traffic after edits, relative to the max count for
       any road: {data.max_count.toLocaleString()}
     </p>
   </div>
@@ -89,6 +95,9 @@
             ],
           ],
         }}
+        manageHoverState
+        hoverCursor="pointer"
+        on:click={(e) => pickRoad(e.detail.features[0])}
       >
         <Popup openOn="hover" let:props>
           <p>

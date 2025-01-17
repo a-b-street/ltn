@@ -305,6 +305,21 @@ impl LTN {
         Ok(serde_json::to_string(&out).map_err(err_to_js)?)
     }
 
+    /// Returns a JSON blob [{before, after}], with before and after being LineStrings
+    #[wasm_bindgen(js_name = getImpactsOnRoad)]
+    pub fn get_impacts_on_road(&self, road: usize) -> Result<String, JsValue> {
+        // Shouldn't need to recalculate impact
+        Ok(serde_json::to_string(
+            &self
+                .map
+                .impact
+                .as_ref()
+                .unwrap()
+                .get_impacts_on_road(&self.map, RoadID(road)),
+        )
+        .map_err(err_to_js)?)
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {

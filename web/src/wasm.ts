@@ -149,9 +149,20 @@ export class Backend {
 
   predictImpact(): FeatureCollection<
     LineString,
-    { before: number; after: number }
+    { id: number; before: number; after: number }
   > & { max_count: number } {
     return JSON.parse(this.inner.predictImpact());
+  }
+
+  getImpactsOnRoad(
+    road: number,
+  ): Array<
+    [
+      Feature<LineString, { kind: "before" }>,
+      Feature<LineString, { kind: "after" }>,
+    ]
+  > {
+    return JSON.parse(this.inner.getImpactsOnRoad(road));
   }
 }
 

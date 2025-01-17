@@ -14,6 +14,11 @@ pub struct Router {
     pub main_road_penalty: f64,
 }
 
+pub struct Route {
+    // The bool is true if we travel forwards on the road, false if backwards
+    steps: Vec<(RoadID, bool)>,
+}
+
 impl Router {
     pub fn new(
         roads: &Vec<Road>,
@@ -78,20 +83,30 @@ impl Router {
         }
     }
 
-    pub fn route(&self, map: &MapModel, pt1: Coord, pt2: Coord) -> Option<LineString> {
+    pub fn route(&self, map: &MapModel, pt1: Coord, pt2: Coord) -> Option<Route> {
         // TODO Find the closest neighbor in the node_map!
-        let start = self.node_map.get(
-            map.closest_intersection
-                .nearest_neighbor(&pt1.into())
-                .unwrap()
-                .data,
-        )?;
-        let end = self.node_map.get(
-            map.closest_intersection
-                .nearest_neighbor(&pt2.into())
-                .unwrap()
-                .data,
-        )?;
+        let start = map
+            .closest_intersection
+            .nearest_neighbor(&pt1.into())
+            .unwrap()
+            .data;
+        let end = map
+            .closest_intersection
+            .nearest_neighbor(&pt2.into())
+            .unwrap()
+            .data;
+        self.route_from_intersections(map, start, end)
+    }
+
+    pub fn route_from_intersections(
+        &self,
+        map: &MapModel,
+        start: IntersectionID,
+        end: IntersectionID,
+    ) -> Option<Route> {
+        let start = self.node_map.get(start)?;
+        let end = self.node_map.get(end)?;
+
         if start == end {
             return None;
         }
@@ -100,22 +115,15 @@ impl Router {
         let mut path_calc = fast_paths::create_calculator(&self.ch);
         let path = path_calc.calc_path(&self.ch, start, end)?;
 
-        let mut pts = Vec::new();
+        let mut steps = Vec::new();
         for pair in path.get_nodes().windows(2) {
             let i1 = self.node_map.translate_id(pair[0]);
             let i2 = self.node_map.translate_id(pair[1]);
             let road = map.find_edge(i1, i2);
-
-            if road.src_i == i1 {
-                pts.extend(road.linestring.0.clone());
-            } else {
-                let mut rev = road.linestring.0.clone();
-                rev.reverse();
-                pts.extend(rev);
-            }
+            steps.push((road.id, road.src_i == i1));
         }
-        pts.dedup();
-        Some(LineString::new(pts))
+
+        Some(Route { steps })
     }
 
     /// Produce routes for all the requests and count how many routes cross each road
@@ -124,24 +132,36 @@ impl Router {
         map: &MapModel,
         requests: &Vec<(IntersectionID, IntersectionID)>,
     ) -> HashMap<RoadID, usize> {
-        // TODO Reuse
-        let mut path_calc = fast_paths::create_calculator(&self.ch);
-
         let mut results = HashMap::new();
-        for (req_i1, req_i2) in requests {
-            if let (Some(start), Some(end)) =
-                (self.node_map.get(*req_i1), self.node_map.get(*req_i2))
-            {
-                if let Some(path) = path_calc.calc_path(&self.ch, start, end) {
-                    for pair in path.get_nodes().windows(2) {
-                        let i1 = self.node_map.translate_id(pair[0]);
-                        let i2 = self.node_map.translate_id(pair[1]);
-                        let road = map.find_edge(i1, i2);
-                        *results.entry(road.id).or_insert(0) += 1;
-                    }
+        for (i1, i2) in requests {
+            if let Some(route) = self.route_from_intersections(map, *i1, *i2) {
+                for (r, _) in route.steps {
+                    *results.entry(r).or_insert(0) += 1;
                 }
             }
         }
         results
+    }
+}
+
+impl Route {
+    pub fn to_linestring(&self, map: &MapModel) -> LineString {
+        let mut pts = Vec::new();
+        for (r, forwards) in &self.steps {
+            let road = &map.roads[r.0];
+            if *forwards {
+                pts.extend(road.linestring.0.clone());
+            } else {
+                let mut rev = road.linestring.0.clone();
+                rev.reverse();
+                pts.extend(rev);
+            }
+        }
+        pts.dedup();
+        LineString::new(pts)
+    }
+
+    pub fn crosses_road(&self, road: RoadID) -> bool {
+        self.steps.iter().any(|(r, _)| *r == road)
     }
 }
