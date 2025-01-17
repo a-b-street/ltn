@@ -34,10 +34,17 @@ web-sys = { version = "0.3.64", features = ["console"] }
 web-time = "1.0.0"
 petgraph = "0.7.1"
 
+[dev-dependencies]
+criterion = "0.5.1"
+
 # For local development, build dependencies in release mode once, but otherwise
 # use dev profile and avoid wasm-opt.
 [profile.dev.package."*"]
 opt-level = 3
+
+[[bench]]
+name = "build_neighbourhood"
+harness = false
 
 [patch.crates-io]
 # use unreleased `geo` and `geo-types` to fix crash: https://github.com/a-b-street/ltn/issues/54

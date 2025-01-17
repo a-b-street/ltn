@@ -11,10 +11,10 @@ use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
-use self::map_model::{
+pub use self::map_model::{
     Direction, FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID,
 };
-use self::neighbourhood::Neighbourhood;
+pub use self::neighbourhood::Neighbourhood;
 use self::render_cells::RenderCells;
 use self::route::Router;
 use self::shortcuts::Shortcuts;
@@ -31,6 +31,8 @@ mod render_cells;
 mod route;
 mod route_snapper;
 mod shortcuts;
+// TODO: feature flag? Used by tests and benches
+pub mod test_fixtures;
 #[cfg(test)]
 mod tests;
 
