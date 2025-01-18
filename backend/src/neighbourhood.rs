@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::geo_helpers::SliceNearestFrechetBoundary;
 use anyhow::Result;
-use geo::{Area, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
+use geo::{Area, BooleanOps, Distance, Euclidean, Length, Line, LineString, Orient, Polygon, PreparedGeometry, Relate};
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
 
@@ -47,7 +47,19 @@ impl Neighbourhood {
         let t1 = Instant::now();
         let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
 
-        let prepared_boundary = PreparedGeometry::from(&boundary_polygon);
+        // make valid
+        use geo::{Orient, orient::Direction};
+        let boundary_polygon = boundary_polygon.orient(Direction::Default);
+
+        // use geo::Validation;
+        // boundary_polygon.check_validation().expect("valid");
+
+        use geo_buffer::buffer_polygon;
+        // REVIEW: units of polygon are meters, right?
+        // buffer to account for numerical precision
+        let buffered_boundary = buffer_polygon(&boundary_polygon, 5.0);
+        assert_eq!(buffered_boundary.0.len(), 1);
+        let prepared_buffered_boundary = PreparedGeometry::from(&buffered_boundary);
 
         let mut interior_roads = BTreeSet::new();
         let mut perimeter_roads = BTreeSet::new();
@@ -55,7 +67,11 @@ impl Neighbourhood {
         debug!("boundary_polygon: {boundary_polygon:?}",);
         for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
             let r = &map.roads[obj.data.0];
-            let result = line_in_polygon(&r.linestring, &boundary_polygon, &prepared_boundary);
+            let result = line_in_polygon(
+                &r.linestring,
+                &boundary_polygon,
+                &prepared_buffered_boundary,
+            );
             debug!(
                 "linestring {road_id}: {linestring:?}, way: {way_id}, result: {result:?}",
                 road_id = obj.data,
@@ -308,21 +324,12 @@ enum LineInPolygon {
 
 fn line_in_polygon(
     linestring: &LineString,
-    polygon: &Polygon,
-    prepared_polygon: &PreparedGeometry,
+    boundary: &Polygon,
+    prepared_buffered_boundary: &PreparedGeometry,
 ) -> LineInPolygon {
     // TODO Reconsider rewriting all of this logic based on clip_linestring_to_polygon
 
-    let perimeter_likelihood = perimeter_likelihood(&linestring, polygon);
-    // dbg!(&linestring);
-    debug!("linestring: {linestring:?}");
-    // dbg!(&perimeter_likelihood);
-    debug!("perimeter_likelihood: {perimeter_likelihood:?}");
-    if perimeter_likelihood > 1e-3 {
-        return LineInPolygon::Perimeter;
-    }
-
-    let matrix = prepared_polygon.relate(linestring);
+    let matrix = prepared_buffered_boundary.relate(linestring);
     if matrix.is_within() {
         return LineInPolygon::Inside;
     }
@@ -331,11 +338,20 @@ fn line_in_polygon(
         return LineInPolygon::Outside;
     }
 
+    let perimeter_likelihood = perimeter_likelihood(&linestring, boundary);
+    // dbg!(&linestring);
+    debug!("linestring: {linestring:?}");
+    // dbg!(&perimeter_likelihood);
+    debug!("perimeter_likelihood: {perimeter_likelihood:?}");
+    if perimeter_likelihood > 1e-3 {
+        return LineInPolygon::Perimeter;
+    }
+
     // Clip the linestring to the polygon
     // Multiple segments generally don't happen, but might right on a boundary
     let mut length_in_polygon = 0.0;
     // TODO: update this to use i_overlay impl
-    for clipped in clip_linestring_to_polygon(linestring, polygon) {
+    for clipped in clip_linestring_to_polygon(linestring, boundary) {
         let length = clipped.length::<Euclidean>();
         length_in_polygon += length
     }
