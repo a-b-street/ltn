@@ -293,19 +293,35 @@ fn is_road(tags: &Tags) -> bool {
     true
 }
 
-// TODO Look at muv for something more rigorous
-fn parse_maxspeed_mph(tags: &Tags) -> Option<f64> {
-    let maxspeed = tags.get("maxspeed")?;
-    if let Ok(kmph) = maxspeed.parse::<f64>() {
-        return Some(kmph * 0.621371);
+// This uses OSM data when directly tagged, but otherwise makes some assumptions specific to
+// Scotland.
+// TODO Look at muv or https://github.com/westnordost/osm-legal-default-speeds for something more
+// rigorous
+fn parse_maxspeed_mph(tags: &Tags) -> usize {
+    if let Some(maxspeed) = tags.get("maxspeed") {
+        if let Ok(kmph) = maxspeed.parse::<f64>() {
+            return (kmph * 0.621371).round() as usize;
+        }
+        if let Some(mph) = maxspeed
+            .strip_suffix(" mph")
+            .and_then(|x| x.parse::<f64>().ok())
+        {
+            return mph.round() as usize;
+        }
     }
-    if let Some(mph) = maxspeed
-        .strip_suffix(" mph")
-        .and_then(|x| x.parse::<f64>().ok())
-    {
-        return Some(mph);
+
+    // TODO Check these against osmactive
+    match tags.get("highway").unwrap().as_str() {
+        "motorway" | "motorway_link" => 70,
+        "trunk" | "trunk_link" => 60,
+        "primary" | "primary_link" => 40,
+        "secondary" | "secondary_link" | "tertiary" | "tertiary_link" => 30,
+        "residential" | "service" | "unclassified" => 20,
+        "living_street" => 15,
+        "pedestrian" => 10,
+        // Should look into these
+        _ => 10,
     }
-    None
 }
 
 // TODO Consider upstreaming to osm2graph
