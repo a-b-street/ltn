@@ -517,9 +517,9 @@ impl MapModel {
         // main_road_penalty doesn't seem relevant for this question
         self.rebuild_router(1.0);
 
-        // From every road, calculate the time before and after to the one destination
+        // From every road, calculate the route before and after to the one destination
         let mut features = Vec::new();
-        let mut highest_ratio: f64 = 1.0;
+        let mut highest_time_ratio: f64 = 1.0;
         for r in from {
             let road = self.get_r(r);
             let pt1 = road.linestring.line_interpolate_point(0.5).unwrap().into();
@@ -529,26 +529,23 @@ impl MapModel {
                 self.router_before_with_penalty
                     .as_ref()
                     .unwrap()
-                    .route(self, pt1, pt2)
-                    .map(|route| route.to_linestring(self)),
-                self.router_after
-                    .as_ref()
-                    .unwrap()
-                    .route(self, pt1, pt2)
-                    .map(|route| route.to_linestring(self)),
+                    .route(self, pt1, pt2),
+                self.router_after.as_ref().unwrap().route(self, pt1, pt2),
             ) {
                 let from_pt = self.mercator.pt_to_wgs84(pt1);
-                let distance_before = before.length::<Euclidean>();
-                let distance_after = after.length::<Euclidean>();
+                let (distance_before, time_before) = before.get_distance_and_time(self);
+                let (distance_after, time_after) = after.get_distance_and_time(self);
 
                 let mut f = self.mercator.to_wgs84_gj(&road.linestring);
                 f.set_property("distance_before", distance_before);
                 f.set_property("distance_after", distance_after);
+                f.set_property("time_before", time_before);
+                f.set_property("time_after", time_after);
                 f.set_property("pt1_x", from_pt.x);
                 f.set_property("pt1_y", from_pt.y);
                 features.push(f);
 
-                highest_ratio = highest_ratio.max(distance_after / distance_before);
+                highest_time_ratio = highest_time_ratio.max(time_after / time_before);
             }
         }
 
@@ -557,7 +554,7 @@ impl MapModel {
             bbox: None,
             foreign_members: Some(
                 serde_json::json!({
-                    "highest_ratio": highest_ratio,
+                    "highest_time_ratio": highest_time_ratio,
                 })
                 .as_object()
                 .unwrap()

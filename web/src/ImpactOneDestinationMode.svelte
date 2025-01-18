@@ -9,7 +9,13 @@
   } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { DotMarker, layerId, Link } from "./common";
+  import {
+    DotMarker,
+    layerId,
+    Link,
+    prettyPrintDistance,
+    prettyPrintTime,
+  } from "./common";
   import { ModalFilterLayer, RenderNeighbourhood } from "./layers";
   import {
     backend,
@@ -81,10 +87,9 @@
 
     <p>
       This shows the change in driving time to one destination from everywhere
-      within the neighbourhood. Drag the pin aroun to change that destination.
+      within the neighbourhood. Drag the pin around to change that destination.
     </p>
-    <p>TODO: It's just distance right now, not time</p>
-    <p>Highest ratio is {perRoadGj.highest_ratio.toFixed(1)}</p>
+    <p>Highest ratio is {perRoadGj.highest_time_ratio.toFixed(1)}</p>
   </div>
 
   <div slot="map">
@@ -106,10 +111,10 @@
           "line-color": [
             "interpolate-hcl",
             ["linear"],
-            ["/", ["get", "distance_after"], ["get", "distance_before"]],
+            ["/", ["get", "time_after"], ["get", "time_before"]],
             1,
             "white",
-            Math.max(perRoadGj.highest_ratio, 1.1),
+            Math.max(perRoadGj.highest_time_ratio, 1.1),
             "red",
           ],
           "line-width": 5,
@@ -119,7 +124,17 @@
         bind:hovered
       >
         <Popup openOn="hover" let:props>
-          Ratio {(props.distance_after / props.distance_before).toFixed(1)}
+          <p>
+            {prettyPrintDistance(props.distance_before)}, {prettyPrintTime(
+              props.time_before,
+            )} before
+          </p>
+          <p>
+            {prettyPrintDistance(props.distance_after)}, {prettyPrintTime(
+              props.time_after,
+            )} after
+          </p>
+          <p>Time ratio: {(props.time_after / props.time_before).toFixed(1)}</p>
         </Popup>
       </LineLayer>
     </GeoJSON>
@@ -127,6 +142,7 @@
     <GeoJSON data={routeGj}>
       <LineLayer
         {...layerId("compare-route")}
+        interactive={false}
         paint={{
           "line-width": 10,
           "line-color": constructMatchExpression(
