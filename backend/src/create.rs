@@ -108,8 +108,6 @@ pub fn create_from_osm(
             src_i: IntersectionID(e.src.0),
             dst_i: IntersectionID(e.dst.0),
             way: e.osm_way,
-            node1: e.osm_node1,
-            node2: e.osm_node2,
             linestring: e.linestring,
             speed_mph: parse_maxspeed_mph(&e.osm_tags),
             tags: e.osm_tags,

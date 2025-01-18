@@ -79,8 +79,6 @@ pub struct Road {
     pub src_i: IntersectionID,
     pub dst_i: IntersectionID,
     pub way: osm_reader::WayID,
-    pub node1: osm_reader::NodeID,
-    pub node2: osm_reader::NodeID,
     pub linestring: LineString,
     pub tags: Tags,
     pub speed_mph: usize,
@@ -593,8 +591,6 @@ impl Road {
         f.set_property("id", self.id.0);
         f.set_property("speed_mph", self.speed_mph);
         f.set_property("way", self.way.to_string());
-        f.set_property("node1", self.node1.to_string());
-        f.set_property("node2", self.node2.to_string());
         for (k, v) in &self.tags.0 {
             f.set_property(k, v.to_string());
         }
