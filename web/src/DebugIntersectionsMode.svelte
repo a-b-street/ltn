@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     CircleLayer,
+    FillLayer,
     GeoJSON,
     LineLayer,
     type LayerClickInfo,
@@ -63,10 +64,18 @@
 
     <GeoJSON data={movements} generateId>
       <LineLayer
-        {...layerId("debug-movements")}
+        {...layerId("debug-movements-outline")}
         paint={{
           "line-width": 2,
-          "line-color": ["case", ["==", ["id"], idx], "cyan", "red"],
+          "line-color": "red",
+        }}
+      />
+
+      <FillLayer
+        {...layerId("debug-movements-fill")}
+        filter={["==", ["id"], idx]}
+        paint={{
+          "fill-color": "cyan",
         }}
       />
     </GeoJSON>

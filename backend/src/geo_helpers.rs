@@ -214,6 +214,20 @@ pub fn make_arrow(line: Line, thickness: f64, double_ended: bool) -> Option<Poly
     Some(Polygon::new(LineString::new(pts), Vec::new()))
 }
 
+pub fn thicken_line(line: Line, thickness: f64) -> Polygon {
+    let angle = angle_of_line(line);
+    Polygon::new(
+        LineString::new(vec![
+            euclidean_destination_coord(line.start, angle - 90.0, thickness * 0.5),
+            euclidean_destination_coord(line.end, angle - 90.0, thickness * 0.5),
+            euclidean_destination_coord(line.end, angle + 90.0, thickness * 0.5),
+            euclidean_destination_coord(line.start, angle + 90.0, thickness * 0.5),
+            euclidean_destination_coord(line.start, angle - 90.0, thickness * 0.5),
+        ]),
+        Vec::new(),
+    )
+}
+
 /// Create a polygon covering the world, minus a hole for the input polygon. Assumes the input is
 /// in WGS84 and has no holes itself.
 pub fn invert_polygon(wgs84_polygon: Polygon) -> Polygon {
