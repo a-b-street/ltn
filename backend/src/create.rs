@@ -23,7 +23,7 @@ pub fn create_from_osm(
     let mut bus_routes_on_roads = HashMap::new();
     let mut railways = Vec::new();
     let mut waterways = Vec::new();
-    let mut all_barriers: BTreeSet<NodeID> = BTreeSet::new();
+    let mut barrier_nodes: BTreeSet<NodeID> = BTreeSet::new();
     osm_reader::parse(input_bytes, |elem| match elem {
         Element::Node {
             id, lon, lat, tags, ..
@@ -36,7 +36,7 @@ pub fn create_from_osm(
             if let Some(kind) = tags.get("barrier") {
                 // Bristol has many gates that don't seem as relevant
                 if kind != "gate" {
-                    all_barriers.insert(id);
+                    barrier_nodes.insert(id);
                 }
             }
         }
@@ -97,23 +97,14 @@ pub fn create_from_osm(
         Element::Bounds { .. } => {}
     })?;
 
-    // There'll be many barrier nodes on non-driveable paths we don't consider roads. Filter for
-    // just those on things we consider roads.
-    let mut barrier_pts = Vec::new();
-    for way in &highways {
-        for node in &way.node_ids {
-            if all_barriers.contains(node) {
-                barrier_pts.push(node_mapping[node]);
-            }
-        }
-    }
-
     info!("Splitting {} ways into edges", highways.len());
-    let graph = utils::osm2graph::Graph::from_scraped_osm(node_mapping, highways);
+    let mut graph = utils::osm2graph::Graph::from_scraped_osm(node_mapping, highways);
+    graph.compact_ids();
+
     // Copy all the fields
     let intersections: Vec<Intersection> = graph
         .intersections
-        .into_iter()
+        .into_values()
         .map(|i| Intersection {
             id: IntersectionID(i.id.0),
             point: i.point,
@@ -125,7 +116,7 @@ pub fn create_from_osm(
     // Add in a bit
     let roads: Vec<Road> = graph
         .edges
-        .into_iter()
+        .into_values()
         .map(|e| Road {
             id: RoadID(e.id.0),
             src_i: IntersectionID(e.src.0),
@@ -138,9 +129,6 @@ pub fn create_from_osm(
             tags: e.osm_tags,
         })
         .collect();
-    for coord in &mut barrier_pts {
-        *coord = graph.mercator.pt_to_mercator(*coord);
-    }
 
     for ls in &mut railways {
         graph.mercator.to_mercator_in_place(ls);
@@ -202,10 +190,16 @@ pub fn create_from_osm(
 
     // TODO Batch some or all of these initial edits?
 
-    // Apply barriers (only those that're exactly on one of the roads)
-    for pt in barrier_pts {
-        // TODO What kind?
-        map.add_modal_filter(pt, None, FilterKind::NoEntry);
+    // Apply barriers on any surviving edges. RoadID and osm2graph::EdgeID are the same.
+    for node in barrier_nodes {
+        // If there's no surviving edge, then it was a barrier on something we don't consider a
+        // road or on a road that was removed
+        let Some(edge) = graph.node_to_edge.get(&node) else {
+            continue;
+        };
+        let pt = map.mercator.pt_to_mercator(graph.node_to_pt[&node]);
+        // TODO What FilterKind?
+        map.add_modal_filter(pt, Some(vec![RoadID(edge.0)]), FilterKind::NoEntry);
     }
 
     // Look for roads tagged with restrictions
