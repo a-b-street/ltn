@@ -581,15 +581,18 @@ impl MapModel {
 }
 
 impl Road {
-    pub fn length(&self) -> f64 {
-        self.linestring.length::<Euclidean>()
+    // How long does it take for a car following the speed limit to cross this road?
+    pub fn cost_seconds(&self) -> f64 {
+        let meters = self.linestring.length::<Euclidean>();
+        let meters_per_second = (self.speed_mph as f64) * 0.44704;
+        meters / meters_per_second
     }
 
     pub fn to_gj(&self, mercator: &Mercator) -> Feature {
         let mut f = mercator.to_wgs84_gj(&self.linestring);
-        // TODO Most of this is debug only
         f.set_property("id", self.id.0);
         f.set_property("speed_mph", self.speed_mph);
+        // TODO Debug only, reconsider
         f.set_property("way", self.way.to_string());
         for (k, v) in &self.tags.0 {
             f.set_property(k, v.to_string());

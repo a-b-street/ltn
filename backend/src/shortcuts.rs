@@ -34,7 +34,7 @@ impl Shortcuts {
 
             let i1 = node_map.get_or_insert(road.src_i);
             let i2 = node_map.get_or_insert(road.dst_i);
-            let cost = (road.length() * 100.0) as usize;
+            let cost = (road.cost_seconds() * 100.0) as usize;
             match map.directions[&r] {
                 Direction::Forwards => {
                     input_graph.add_edge(i1, i2, cost);
@@ -69,7 +69,7 @@ impl Shortcuts {
                             let road = map.find_edge(i1, i2);
                             steps.push((road.id, i1, i2));
                             *count_per_road.entry(road.id).or_insert(0) += 1;
-                            shortcut_length += road.length();
+                            shortcut_length += road.linestring.length::<Euclidean>();
                         }
 
                         // How long is the shortest route through the original router, using this

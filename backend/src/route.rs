@@ -59,7 +59,7 @@ impl Router {
             } else {
                 1.0
             };
-            let cost = (penalty * road.length() * 100.0) as usize;
+            let cost = (penalty * road.cost_seconds() * 100.0) as usize;
             match directions[&road.id] {
                 Direction::Forwards => {
                     input_graph.add_edge(i1, i2, cost);
