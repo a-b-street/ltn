@@ -25,6 +25,7 @@ mod create;
 mod geo_helpers;
 mod impact;
 mod map_model;
+mod movements;
 mod neighbourhood;
 mod render_cells;
 mod route;

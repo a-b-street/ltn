@@ -180,7 +180,7 @@ export class Backend {
     return JSON.parse(this.inner.getAllIntersections());
   }
 
-  getMovements(intersection: number): FeatureCollection<LineString> {
+  getMovements(intersection: number): FeatureCollection<Polygon> {
     return JSON.parse(this.inner.getMovements(intersection));
   }
 }
