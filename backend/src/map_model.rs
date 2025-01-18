@@ -491,13 +491,19 @@ impl MapModel {
             .unwrap()
             .route(self, pt1, pt2)
         {
+            let (distance, time) = route.get_distance_and_time(self);
             let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
             f.set_property("kind", "before");
+            f.set_property("distance", distance);
+            f.set_property("time", time);
             features.push(f);
         }
         if let Some(route) = self.router_after.as_ref().unwrap().route(self, pt1, pt2) {
+            let (distance, time) = route.get_distance_and_time(self);
             let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
             f.set_property("kind", "after");
+            f.set_property("distance", distance);
+            f.set_property("time", time);
             features.push(f);
         }
         GeoJson::from(features)

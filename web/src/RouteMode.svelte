@@ -3,7 +3,13 @@
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { DotMarker, layerId, Link } from "./common";
+  import {
+    DotMarker,
+    layerId,
+    Link,
+    prettyPrintDistance,
+    prettyPrintTime,
+  } from "./common";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -58,11 +64,20 @@
     <BackButton on:click={back} />
 
     <p>Drag markers for a route</p>
-    <p>
-      <span style="color: red">Route before</span>
-      ,
-      <span style="color: blue">route after</span>
-    </p>
+    {#if gj.features.length == 2}
+      <p>
+        <span style="color: red">Route before</span>
+        : {prettyPrintDistance(gj.features[0].properties.distance)}, {prettyPrintTime(
+          gj.features[0].properties.time,
+        )}
+      </p>
+      <p>
+        <span style="color: blue">Route after</span>
+        : {prettyPrintDistance(gj.features[1].properties.distance)}, {prettyPrintTime(
+          gj.features[1].properties.time,
+        )}
+      </p>
+    {/if}
 
     <label>
       Slow-down factor for main roads: {$mainRoadPenalty}
