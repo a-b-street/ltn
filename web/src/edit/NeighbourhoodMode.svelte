@@ -4,11 +4,12 @@
   import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
+  import { notNull, SequentialLegend } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import AnimatePaths from "../AnimatePaths.svelte";
   import { HelpButton, Link } from "../common";
+  import { speedColorScale, speedLimits } from "../common/colors";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -270,14 +271,20 @@
       Include perimeter roads
     </label>
 
-    <label>
-      Draw roads:
-      <select bind:value={$roadStyle}>
-        <option value="shortcuts">Worst shortcuts</option>
-        <option value="cells">Cell</option>
-        <option value="edits">Edits (either filter or direction)</option>
-      </select>
-    </label>
+    <div style="border: 1px solid black; padding: 4px">
+      <label>
+        Draw roads:
+        <select bind:value={$roadStyle}>
+          <option value="shortcuts">Worst shortcuts</option>
+          <option value="cells">Cell</option>
+          <option value="edits">Edits (either filter or direction)</option>
+          <option value="speeds">Speed limit</option>
+        </select>
+      </label>
+      {#if $roadStyle == "speeds"}
+        <SequentialLegend colorScale={speedColorScale} limits={speedLimits} />
+      {/if}
+    </div>
 
     <div style="display: flex; justify-content: space-between;">
       <button disabled={undoLength == 0} on:click={undo} data-tooltip="Ctrl+Z">
@@ -315,9 +322,7 @@
           <Popup openOn="hover" let:props>
             <p>
               {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
-              {#if props.speed_mph}
-                ({Math.round(props.speed_mph)} mph)
-              {/if}
+              ({Math.round(props.speed_mph)} mph)
             </p>
             {#if action == "filter"}
               <div>

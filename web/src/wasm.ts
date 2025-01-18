@@ -180,6 +180,7 @@ export interface RenderNeighbourhoodOutput {
           edited: boolean;
           road: number;
           cell_color: "disconnected" | number;
+          speed_mph: number;
           // Populated by setCellColors, not in the Rust backend
           color: string;
           // TODO Plus all the stuff from Road::to_gj
