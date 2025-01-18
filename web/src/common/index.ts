@@ -34,3 +34,19 @@ export function roadLineWidth(extraWidth: number): ExpressionSpecification {
     24 + extraWidth,
   ];
 }
+
+export function prettyPrintDistance(meters: number): string {
+  if (meters < 1000.0) {
+    return Math.round(meters) + "m";
+  }
+  return (meters / 1000.0).toFixed(1) + "km";
+}
+
+export function prettyPrintTime(seconds: number): string {
+  if (seconds < 60.0) {
+    return Math.round(seconds) + "s";
+  }
+  let minutes = Math.floor(seconds / 60);
+  let leftover = Math.round(seconds - minutes * 60);
+  return `${minutes}m${leftover}s`;
+}

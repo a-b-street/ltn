@@ -129,7 +129,10 @@ export class Backend {
     pt1: LngLat,
     pt2: LngLat,
     mainRoadPenalty: number,
-  ): FeatureCollection {
+  ): FeatureCollection<
+    LineString,
+    { kind: "before" | "after"; distance: number; time: number }
+  > {
     return JSON.parse(
       this.inner.compareRoute(
         pt1.lng,

@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 
 use fast_paths::{FastGraph, InputGraph};
-use geo::{Coord, LineString};
+use geo::{Coord, Euclidean, Length, LineString};
 use utils::NodeMap;
 
 use crate::{Direction, IntersectionID, MapModel, ModalFilter, Road, RoadID};
@@ -163,5 +163,17 @@ impl Route {
 
     pub fn crosses_road(&self, road: RoadID) -> bool {
         self.steps.iter().any(|(r, _)| *r == road)
+    }
+
+    /// Returns (meters, seconds)
+    pub fn get_distance_and_time(&self, map: &MapModel) -> (f64, f64) {
+        let mut distance = 0.0;
+        let mut time = 0.0;
+        for (r, _) in &self.steps {
+            let road = &map.roads[r.0];
+            distance += road.linestring.length::<Euclidean>();
+            time += road.cost_seconds();
+        }
+        (distance, time)
     }
 }
