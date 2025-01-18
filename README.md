@@ -83,8 +83,8 @@ tool):
 
 ```
 function json_diff {
-  cat $1 | jq > /tmp/before.json
-  git show HEAD^:./$1 | jq > /tmp/after.json
+  cat $1 | jq > /tmp/after.json
+  git show HEAD^:./$1 | jq > /tmp/before.json
   meld /tmp/before.json /tmp/after.json
 }
 
