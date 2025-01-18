@@ -2,11 +2,11 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
 use geo::{Coord, LineInterpolatePoint, LineString, Polygon};
-use osm_reader::{Element, NodeID};
+use osm_reader::{NodeID, OsmID, RelationID, WayID};
 use petgraph::graphmap::UnGraphMap;
 use rstar::{primitives::GeomWithData, RTree};
 use utils::{
-    osm2graph::{EdgeID, Graph},
+    osm2graph::{EdgeID, Graph, OsmReader},
     Tags,
 };
 
@@ -15,94 +15,75 @@ use crate::{
     Router,
 };
 
-pub fn create_from_osm(
-    input_bytes: &[u8],
-    boundary_wgs84: Polygon,
-    study_area_name: Option<String>,
-) -> Result<MapModel> {
-    info!("Parsing {} bytes of OSM data", input_bytes.len());
-    // This doesn't use osm2graph's helper, because it needs to scrape more things from OSM
-    let mut node_mapping = HashMap::new();
-    let mut highways = Vec::new();
-    let mut bus_routes_on_roads = HashMap::new();
-    let mut railways = Vec::new();
-    let mut waterways = Vec::new();
-    let mut barrier_nodes: BTreeSet<NodeID> = BTreeSet::new();
-    osm_reader::parse(input_bytes, |elem| match elem {
-        Element::Node {
-            id, lon, lat, tags, ..
-        } => {
-            let pt = Coord { x: lon, y: lat };
-            node_mapping.insert(id, pt);
+#[derive(Default)]
+struct Osm {
+    bus_routes_on_roads: HashMap<WayID, Vec<String>>,
+    railways: Vec<LineString>,
+    waterways: Vec<LineString>,
+    barrier_nodes: BTreeSet<NodeID>,
+}
 
-            // Tuning these by hand for a few known areas.
-            // https://wiki.openstreetmap.org/wiki/Key:barrier is proper reference.
-            if let Some(kind) = tags.get("barrier") {
-                // Bristol has many gates that don't seem as relevant
-                if kind != "gate" {
-                    barrier_nodes.insert(id);
-                }
+impl OsmReader for Osm {
+    fn node(&mut self, id: NodeID, _: Coord, tags: Tags) {
+        // Tuning these by hand for a few known areas.
+        // https://wiki.openstreetmap.org/wiki/Key:barrier is proper reference.
+        if let Some(kind) = tags.get("barrier") {
+            // Bristol has many gates that don't seem as relevant
+            if kind != "gate" {
+                self.barrier_nodes.insert(id);
             }
         }
-        Element::Way {
-            id,
-            mut node_ids,
-            tags,
-            ..
-        } => {
-            let tags = tags.into();
-            if is_road(&tags) {
-                // TODO This sometimes happens from Overpass?
-                let num = node_ids.len();
-                node_ids.retain(|n| node_mapping.contains_key(n));
-                if node_ids.len() != num {
-                    warn!("{id} refers to nodes outside the imported area");
-                }
-                if node_ids.len() >= 2 {
-                    highways.push(utils::osm2graph::Way { id, node_ids, tags });
-                }
-            } else if tags.has("railway") && (!tags.has("layer") || tags.is("layer", "0")) {
-                node_ids.retain(|n| node_mapping.contains_key(n));
-                if node_ids.len() >= 2 {
-                    railways.push(LineString(
-                        node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
-                    ));
-                }
-            } else if tags.is_any("natural", vec!["water", "coastline"])
-                || tags.is("waterway", "dock")
-            {
-                // If the entire area is inside the study area, the LineString will be closed. If
-                // it intersects the study area, then it might not be.
-                node_ids.retain(|n| node_mapping.contains_key(n));
-                if node_ids.len() >= 2 {
-                    waterways.push(LineString(
-                        node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
-                    ));
-                }
-            }
+    }
+
+    fn way(
+        &mut self,
+        _: WayID,
+        node_ids: &Vec<NodeID>,
+        node_mapping: &HashMap<NodeID, Coord>,
+        tags: &Tags,
+    ) {
+        if node_ids.len() < 2 {
+            return;
         }
-        Element::Relation { tags, members, .. } => {
-            let tags: Tags = tags.into();
-            if tags.is("type", "route") && tags.is("route", "bus") {
-                if let Some(name) = tags.get("name") {
-                    for (role, member) in members {
-                        if let osm_reader::OsmID::Way(w) = member {
-                            if role.is_empty() {
-                                bus_routes_on_roads
-                                    .entry(w)
-                                    .or_insert_with(Vec::new)
-                                    .push(name.to_string());
-                            }
+        if tags.has("railway") && (!tags.has("layer") || tags.is("layer", "0")) {
+            self.railways.push(LineString(
+                node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
+            ));
+        } else if tags.is_any("natural", vec!["water", "coastline"]) || tags.is("waterway", "dock")
+        {
+            // If the entire area is inside the study area, the LineString will be closed. If
+            // it intersects the study area, then it might not be.
+            self.waterways.push(LineString(
+                node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
+            ));
+        }
+    }
+
+    fn relation(&mut self, _: RelationID, members: &Vec<(String, OsmID)>, tags: &Tags) {
+        if tags.is("type", "route") && tags.is("route", "bus") {
+            if let Some(name) = tags.get("name") {
+                for (role, member) in members {
+                    if let OsmID::Way(w) = member {
+                        if role.is_empty() {
+                            self.bus_routes_on_roads
+                                .entry(*w)
+                                .or_insert_with(Vec::new)
+                                .push(name.to_string());
                         }
                     }
                 }
             }
         }
-        Element::Bounds { .. } => {}
-    })?;
+    }
+}
 
-    info!("Splitting {} ways into edges", highways.len());
-    let mut graph = Graph::from_scraped_osm(node_mapping, highways);
+pub fn create_from_osm(
+    input_bytes: &[u8],
+    boundary_wgs84: Polygon,
+    study_area_name: Option<String>,
+) -> Result<MapModel> {
+    let mut osm = Osm::default();
+    let mut graph = Graph::new(input_bytes, is_road, &mut osm)?;
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
 
@@ -135,10 +116,10 @@ pub fn create_from_osm(
         })
         .collect();
 
-    for ls in &mut railways {
+    for ls in &mut osm.railways {
         graph.mercator.to_mercator_in_place(ls);
     }
-    for ls in &mut waterways {
+    for ls in &mut osm.waterways {
         graph.mercator.to_mercator_in_place(ls);
     }
 
@@ -166,15 +147,15 @@ pub fn create_from_osm(
     let mut map = MapModel {
         roads,
         intersections,
-        bus_routes_on_roads,
+        bus_routes_on_roads: osm.bus_routes_on_roads,
         mercator: graph.mercator,
         boundary_wgs84,
         study_area_name,
         closest_road,
         closest_intersection,
 
-        railways,
-        waterways,
+        railways: osm.railways,
+        waterways: osm.waterways,
 
         router_before: None,
         router_after: None,
@@ -196,7 +177,7 @@ pub fn create_from_osm(
     // TODO Batch some or all of these initial edits?
 
     // Apply barriers on any surviving edges. RoadID and osm2graph::EdgeID are the same.
-    for node in barrier_nodes {
+    for node in osm.barrier_nodes {
         // If there's no surviving edge, then it was a barrier on something we don't consider a
         // road or on a road that was removed
         let Some(edge) = graph.node_to_edge.get(&node) else {
