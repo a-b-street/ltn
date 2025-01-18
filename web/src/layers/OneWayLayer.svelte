@@ -1,6 +1,9 @@
 <script lang="ts">
   import { SymbolLayer } from "svelte-maplibre";
   import { layerId } from "../common";
+
+  // TODO Figure out if hoverCursor is necessary here, or if svelte-maplibre
+  // ignores it when interactive is false
 </script>
 
 <SymbolLayer
