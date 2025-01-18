@@ -71,7 +71,7 @@ export let maptilerBasemap: Writable<string> = writable("streets-v2");
 export let filterType: Writable<string> = writable("walk_cycle_only");
 export let animateShortcuts = writable(false);
 export let editPerimeterRoads = writable(false);
-export let roadStyle: Writable<"shortcuts" | "cells" | "edits"> =
+export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
   writable("shortcuts");
 export let thickRoadsForShortcuts = writable(false);
 

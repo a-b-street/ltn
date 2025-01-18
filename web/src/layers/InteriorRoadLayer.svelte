@@ -3,7 +3,9 @@
   import type { ExpressionSpecification, LngLat } from "maplibre-gl";
   import { getContext } from "svelte";
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
+  import { makeRamp } from "svelte-utils/map";
   import { layerId, roadLineWidth } from "../common";
+  import { speedColorScale, speedLimits } from "../common/colors";
   import { roadStyle, thickRoadsForShortcuts } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
@@ -14,7 +16,7 @@
   export let onClickLine = (f: Feature, pt: LngLat) => {};
 
   function roadLineColor(
-    style: "shortcuts" | "cells" | "edits",
+    style: "shortcuts" | "cells" | "edits" | "speeds",
     maxShortcuts: number,
   ): ExpressionSpecification {
     if (style == "cells") {
@@ -22,6 +24,13 @@
     }
     if (style == "edits") {
       return ["case", ["get", "edited"], "grey", "white"];
+    }
+    if (style == "speeds") {
+      return makeRamp(
+        ["get", "speed_mph"],
+        speedLimits,
+        speedColorScale,
+      ) as ExpressionSpecification;
     }
 
     if (maxShortcuts <= 2) {
