@@ -9,13 +9,15 @@
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { layerId, Link, PrevNext } from "./common";
   import { backend, mode } from "./stores";
 
   let movements = emptyGeojson();
+  let idx = 0;
 
   function pickIntersection(e: CustomEvent<LayerClickInfo>) {
     movements = $backend!.getMovements(e.detail.features[0].id as number);
+    idx = 0;
   }
 </script>
 
@@ -40,7 +42,8 @@
       <button class="secondary" on:click={() => (movements = emptyGeojson())}>
         Pick another intersection
       </button>
-      <p>{movements.features.length} movements</p>
+
+      <PrevNext list={movements.features} bind:idx />
     {/if}
   </div>
 
@@ -63,7 +66,7 @@
         {...layerId("debug-movements")}
         paint={{
           "line-width": 2,
-          "line-color": "red",
+          "line-color": ["case", ["==", ["id"], idx], "cyan", "red"],
         }}
       />
     </GeoJSON>

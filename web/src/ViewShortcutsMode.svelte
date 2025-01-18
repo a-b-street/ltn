@@ -1,13 +1,12 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import type { LngLat } from "maplibre-gl";
-  import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { DotMarker, gjPosition, layerId, Link } from "./common";
+  import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -16,7 +15,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
-  import { backend, map, mode } from "./stores";
+  import { backend, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
   type State =
@@ -46,48 +45,10 @@
     };
   }
 
-  onMount(() => {
-    $map?.keyboard.disable();
-  });
-  onDestroy(() => {
-    $map?.keyboard.enable();
-  });
-
-  function onKeyDown(e: KeyboardEvent) {
-    if (state.state == "chose-road") {
-      if (e.key == "ArrowLeft") {
-        e.stopPropagation();
-        if (state.shortcutIndex > 0) {
-          state.shortcutIndex--;
-        }
-      }
-      if (e.key == "ArrowRight") {
-        e.stopPropagation();
-        if (state.shortcutIndex != state.gj.features.length - 1) {
-          state.shortcutIndex++;
-        }
-      }
-    }
-  }
-
   function back() {
     $mode = { mode: "neighbourhood" };
   }
-
-  function prev() {
-    if (state.state == "chose-road") {
-      state.shortcutIndex--;
-    }
-  }
-
-  function next() {
-    if (state.state == "chose-road") {
-      state.shortcutIndex++;
-    }
-  }
 </script>
-
-<svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
   <div slot="top">
@@ -125,26 +86,13 @@
         real traffic patterns; it's just looking for any possible path. This
         view lets you understand the limits of this assumption.
       </p>
+
       <button on:click={() => (state = { state: "neutral" })}>
         Pick a different road
       </button>
-      <div style="display: flex; justify-content: space-between;">
-        <button
-          disabled={state.shortcutIndex == 0}
-          on:click={prev}
-          data-tooltip="Left"
-        >
-          Previous
-        </button>
-        {state.shortcutIndex + 1} / {state.gj.features.length}
-        <button
-          disabled={state.shortcutIndex == state.gj.features.length - 1}
-          on:click={next}
-          data-tooltip="Right"
-        >
-          Next
-        </button>
-      </div>
+
+      <PrevNext list={state.gj.features} bind:idx={state.shortcutIndex} />
+
       <p>
         This shortcut is <b>
           {notNull(

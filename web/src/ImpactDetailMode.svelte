@@ -1,12 +1,11 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
-  import { onDestroy, onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { DotMarker, gjPosition, layerId, Link } from "./common";
+  import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, map, mode } from "./stores";
+  import { backend, mode } from "./stores";
 
   export let road: Feature;
 
@@ -16,36 +15,6 @@
   let routes = $backend!.getImpactsOnRoad(road.properties!.id);
   let idx = 0;
 
-  onMount(() => {
-    $map?.keyboard.disable();
-  });
-  onDestroy(() => {
-    $map?.keyboard.enable();
-  });
-
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key == "ArrowLeft") {
-      e.stopPropagation();
-      prev();
-    }
-    if (e.key == "ArrowRight") {
-      e.stopPropagation();
-      next();
-    }
-  }
-
-  function prev() {
-    if (idx != 0) {
-      idx--;
-    }
-  }
-
-  function next() {
-    if (idx != routes.length - 1) {
-      idx++;
-    }
-  }
-
   function gj(idx: number): FeatureCollection {
     return {
       type: "FeatureCollection" as const,
@@ -53,8 +22,6 @@
     };
   }
 </script>
-
-<svelte:window on:keydown={onKeyDown} />
 
 <SplitComponent>
   <div slot="top">
@@ -80,19 +47,7 @@
       Pick a different road
     </Link>
 
-    <div style="display: flex; justify-content: space-between;">
-      <button disabled={idx == 0} on:click={prev} data-tooltip="Left">
-        Previous
-      </button>
-      {idx + 1} / {routes.length}
-      <button
-        disabled={idx == routes.length - 1}
-        on:click={next}
-        data-tooltip="Right"
-      >
-        Next
-      </button>
-    </div>
+    <PrevNext list={routes} bind:idx />
 
     <p>
       <span style="color: red">Route before</span>
