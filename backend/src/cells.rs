@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use geo::{Euclidean, Length};
+
 use crate::{IntersectionID, MapModel, Neighbourhood, Road, RoadID};
 
 /// A partitioning of the interior of a neighbourhood based on driving connectivity
@@ -138,7 +140,7 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
                         if interval.start == 0.0 {
                             visited_start = true;
                         }
-                        if interval.end == next_road.length() {
+                        if interval.end == next_road.linestring.length::<Euclidean>() {
                             visited_end = true;
                         }
                     }
