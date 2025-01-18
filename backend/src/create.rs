@@ -11,7 +11,7 @@ use crate::{
     Router,
 };
 
-pub fn scrape_osm(
+pub fn create_from_osm(
     input_bytes: &[u8],
     boundary_wgs84: Polygon,
     study_area_name: Option<String>,

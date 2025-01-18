@@ -21,6 +21,7 @@ use self::shortcuts::Shortcuts;
 
 mod auto_boundaries;
 mod cells;
+mod create;
 mod geo_helpers;
 mod impact;
 mod map_model;
@@ -28,7 +29,6 @@ mod neighbourhood;
 mod render_cells;
 mod route;
 mod route_snapper;
-mod scrape;
 mod shortcuts;
 #[cfg(test)]
 mod tests;

@@ -101,7 +101,7 @@ impl MapModel {
         boundary_wgs84: Polygon,
         study_area_name: Option<String>,
     ) -> Result<MapModel> {
-        crate::scrape::scrape_osm(input_bytes, boundary_wgs84, study_area_name)
+        crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name)
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
