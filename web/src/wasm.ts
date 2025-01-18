@@ -144,9 +144,17 @@ export class Backend {
     );
   }
 
-  impactToOneDestination(
-    pt: LngLat,
-  ): FeatureCollection & { highest_ratio: number } {
+  impactToOneDestination(pt: LngLat): FeatureCollection<
+    LineString,
+    {
+      distance_before: number;
+      distance_after: number;
+      time_before: number;
+      time_after: number;
+      pt1_x: number;
+      pt1_y: number;
+    }
+  > & { highest_time_ratio: number } {
     return JSON.parse(this.inner.impactToOneDestination(pt.lng, pt.lat));
   }
 
