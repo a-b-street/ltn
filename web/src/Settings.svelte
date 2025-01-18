@@ -2,7 +2,7 @@
   import { Modal } from "svelte-utils";
   import icon from "../assets/settings.svg?url";
   import { BasemapPicker } from "./common";
-  import { roadStyle, thickRoadsForShortcuts } from "./stores";
+  import { thickRoadsForShortcuts } from "./stores";
 
   let show = false;
 </script>
@@ -16,17 +16,6 @@
     <h1>Settings</h1>
 
     <BasemapPicker />
-
-    <label>
-      Style for roads in a neighbourhood:
-      <select bind:value={$roadStyle}>
-        <option value="shortcuts">Show worst shortcuts</option>
-        <option value="cells">Show the cell</option>
-        <option value="edits">
-          Show edited roads (either filter or direction)
-        </option>
-      </select>
-    </label>
 
     <label>
       <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />

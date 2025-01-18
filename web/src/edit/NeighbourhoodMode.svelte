@@ -26,6 +26,7 @@
     map,
     mode,
     mutationCounter,
+    roadStyle,
   } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
@@ -267,6 +268,15 @@
         on:change={recalculateNeighbourhoodDefinition}
       />
       Include perimeter roads
+    </label>
+
+    <label>
+      Draw roads:
+      <select bind:value={$roadStyle}>
+        <option value="shortcuts">Worst shortcuts</option>
+        <option value="cells">Cell</option>
+        <option value="edits">Edits (either filter or direction)</option>
+      </select>
     </label>
 
     <div style="display: flex; justify-content: space-between;">
