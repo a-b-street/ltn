@@ -123,6 +123,11 @@
             Predict impact
           </Link>
         </li>
+        <li>
+          <Link on:click={() => ($mode = { mode: "debug-intersections" })}>
+            Debug intersections
+          </Link>
+        </li>
       </ul>
     </nav>
   </div>

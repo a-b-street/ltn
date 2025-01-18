@@ -46,6 +46,9 @@ export type Mode =
       road: Feature;
     }
   | {
+      mode: "debug-intersections";
+    }
+  | {
       mode: "debug";
     };
 

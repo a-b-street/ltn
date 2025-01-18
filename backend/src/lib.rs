@@ -320,6 +320,26 @@ impl LTN {
         .map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = getAllIntersections)]
+    pub fn get_all_intersections(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&GeoJson::from(
+            self.map
+                .intersections
+                .iter()
+                .map(|i| self.map.mercator.to_wgs84_gj(&i.point))
+                .collect::<Vec<_>>(),
+        ))
+        .map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = getMovements)]
+    pub fn get_movements(&self, intersection: usize) -> Result<String, JsValue> {
+        Ok(
+            serde_json::to_string(&self.map.get_movements(IntersectionID(intersection)))
+                .map_err(err_to_js)?,
+        )
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {

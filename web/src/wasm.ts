@@ -175,6 +175,14 @@ export class Backend {
   > {
     return JSON.parse(this.inner.getImpactsOnRoad(road));
   }
+
+  getAllIntersections(): FeatureCollection<Point> {
+    return JSON.parse(this.inner.getAllIntersections());
+  }
+
+  getMovements(intersection: number): FeatureCollection<LineString> {
+    return JSON.parse(this.inner.getMovements(intersection));
+  }
 }
 
 export interface RenderNeighbourhoodOutput {

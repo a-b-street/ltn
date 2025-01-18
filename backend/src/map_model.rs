@@ -581,6 +581,17 @@ impl MapModel {
         }
         directions
     }
+
+    pub fn get_movements(&self, i: IntersectionID) -> GeoJson {
+        let mut features = Vec::new();
+
+        // TODO Temporary
+        for r in &self.get_i(i).roads {
+            features.push(self.mercator.to_wgs84_gj(&self.get_r(*r).linestring));
+        }
+
+        GeoJson::from(features)
+    }
 }
 
 impl Road {

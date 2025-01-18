@@ -86,6 +86,9 @@ const layerZorder = [
   "debug-crosses",
   "debug-filters",
 
+  "debug-intersections",
+  "debug-movements",
+
   "cells",
   "interior-roads-outlines",
   "interior-roads",
