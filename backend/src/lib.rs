@@ -327,7 +327,11 @@ impl LTN {
             self.map
                 .intersections
                 .iter()
-                .map(|i| self.map.mercator.to_wgs84_gj(&i.point))
+                .map(|i| {
+                    let mut f = self.map.mercator.to_wgs84_gj(&i.point);
+                    f.set_property("has_turn_restrictions", !i.turn_restrictions.is_empty());
+                    f
+                })
                 .collect::<Vec<_>>(),
         ))
         .map_err(err_to_js)?)
