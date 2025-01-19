@@ -1,4 +1,4 @@
-use geo::{Line, LineInterpolatePoint, Polygon};
+use geo::{Euclidean, Length, Line, LineInterpolatePoint, Point, Polygon};
 use geojson::GeoJson;
 
 use crate::{
@@ -51,18 +51,30 @@ impl MapModel {
 }
 
 fn render_arrow(i: IntersectionID, road1: &Road, road2: &Road) -> Polygon {
-    let pt1 = road1
-        .linestring
-        .line_interpolate_point(if road1.src_i == i { 0.2 } else { 0.8 })
-        .unwrap();
-    let pt2 = road2
-        .linestring
-        .line_interpolate_point(if road2.src_i == i { 0.2 } else { 0.8 })
-        .unwrap();
-
+    let line = Line::new(
+        pt_near_intersection(i, road1),
+        pt_near_intersection(i, road2),
+    );
     let thickness = 2.0;
     let double_ended = false;
-    let line = Line::new(pt1, pt2);
-
     make_arrow(line, thickness, double_ended).unwrap_or_else(|| thicken_line(line, thickness))
+}
+
+fn pt_near_intersection(i: IntersectionID, road: &Road) -> Point {
+    // If the road is long enough, offset from the intersection this much
+    let distance_away = 10.0;
+    let len = road.linestring.length::<Euclidean>();
+
+    if len > distance_away {
+        let pct = if road.src_i == i {
+            distance_away / len
+        } else {
+            1.0 - (distance_away / len)
+        };
+        return road.linestring.line_interpolate_point(pct).unwrap();
+    }
+
+    // If not, just take the other endpoint
+    let pct = if road.src_i == i { 1.0 } else { 0.0 };
+    road.linestring.line_interpolate_point(pct).unwrap()
 }
