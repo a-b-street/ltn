@@ -666,6 +666,11 @@ impl Direction {
         } else if tags.is("oneway", "-1") {
             Self::Backwards
         } else {
+            // https://wiki.openstreetmap.org/wiki/Key:oneway#Implied_oneway_restriction
+            if tags.is("highway", "motorway") || tags.is("junction", "roundabout") {
+                return Self::Forwards;
+            }
+
             Self::BothWays
         }
     }
