@@ -21,6 +21,8 @@ struct Osm {
     railways: Vec<LineString>,
     waterways: Vec<LineString>,
     barrier_nodes: BTreeSet<NodeID>,
+    // Only represent one case of restricted turns (from, to) on a particular node
+    turn_restrictions: HashMap<NodeID, Vec<(WayID, WayID)>>,
 }
 
 impl OsmReader for Osm {
@@ -74,6 +76,55 @@ impl OsmReader for Osm {
                 }
             }
         }
+
+        // https://wiki.openstreetmap.org/wiki/Relation:restriction describes many cases. Only handle
+        // the simplest: a banned turn involving exactly 2 ways and 1 node.
+        if tags.is("type", "restriction")
+            && tags.is_any(
+                "restriction",
+                vec![
+                    "no_right_turn",
+                    "no_left_turn",
+                    "no_u_turn",
+                    "no_straight_on",
+                ],
+            )
+        {
+            let mut from = None;
+            let mut via = None;
+            let mut to = None;
+            for (role, member) in members {
+                match member {
+                    OsmID::Way(w) => {
+                        if role == "from" && from.is_none() {
+                            from = Some(*w);
+                        } else if role == "to" && to.is_none() {
+                            to = Some(*w);
+                        } else {
+                            // Some other case, bail out
+                            return;
+                        }
+                    }
+                    OsmID::Node(n) => {
+                        if role == "via" && via.is_none() {
+                            via = Some(*n);
+                        } else {
+                            return;
+                        }
+                    }
+                    OsmID::Relation(_) => {
+                        return;
+                    }
+                }
+            }
+
+            if let (Some(from), Some(via), Some(to)) = (from, via, to) {
+                self.turn_restrictions
+                    .entry(via)
+                    .or_insert_with(Vec::new)
+                    .push((from, to));
+            }
+        }
     }
 }
 
@@ -96,6 +147,7 @@ pub fn create_from_osm(
             point: i.point,
             node: i.osm_node,
             roads: i.edges.into_iter().map(|e| RoadID(e.0)).collect(),
+            turn_restrictions: Vec::new(),
         })
         .collect();
 
@@ -172,10 +224,40 @@ pub fn create_from_osm(
     };
     map.impact = Some(Impact::new(&map));
 
+    let graph = GraphSubset {
+        node_to_edge: graph.node_to_edge,
+        node_to_pt: graph.node_to_pt,
+    };
+
+    apply_existing_filters(&mut map, osm.barrier_nodes, &graph);
+    apply_turn_restrictions(&mut map, osm.turn_restrictions);
+
+    let main_road_penalty = 1.0;
+    map.router_before = Some(Router::new(
+        &map.roads,
+        &map.modal_filters,
+        &map.directions,
+        main_road_penalty,
+    ));
+
+    Ok(map)
+}
+
+// Handles a partial borrow of Graph
+struct GraphSubset {
+    node_to_edge: HashMap<NodeID, EdgeID>,
+    node_to_pt: HashMap<NodeID, Coord>,
+}
+
+fn apply_existing_filters(
+    map: &mut MapModel,
+    barrier_nodes: BTreeSet<NodeID>,
+    graph: &GraphSubset,
+) {
     // TODO Batch some or all of these initial edits?
 
     // Apply barriers on any surviving edges. RoadID and osm2graph::EdgeID are the same.
-    for node in osm.barrier_nodes {
+    for node in barrier_nodes {
         // If there's no surviving edge, then it was a barrier on something we don't consider a
         // road or on a road that was removed
         let Some(edge) = graph.node_to_edge.get(&node) else {
@@ -186,7 +268,7 @@ pub fn create_from_osm(
         map.add_modal_filter(pt, Some(vec![RoadID(edge.0)]), FilterKind::NoEntry);
     }
 
-    // Look for roads tagged with restrictions
+    // Look for roads tagged with access restrictions
     let pedestrian_roads: BTreeSet<RoadID> = map
         .roads
         .iter()
@@ -257,16 +339,34 @@ pub fn create_from_osm(
     map.original_modal_filters = map.modal_filters.clone();
     map.undo_stack.clear();
     map.redo_queue.clear();
+}
 
-    let main_road_penalty = 1.0;
-    map.router_before = Some(Router::new(
-        &map.roads,
-        &map.modal_filters,
-        &map.directions,
-        main_road_penalty,
-    ));
+fn apply_turn_restrictions(
+    map: &mut MapModel,
+    mut turn_restrictions: HashMap<NodeID, Vec<(WayID, WayID)>>,
+) {
+    for intersection in &mut map.intersections {
+        if let Some(list) = turn_restrictions.remove(&intersection.node) {
+            for (from_way, to_way) in list {
+                // One OSM way turns into multiple Roads. The restriction only makes sense on the
+                // Road connected to this intersection. So search only this intersection's roads.
+                let mut from = None;
+                let mut to = None;
+                for r in &intersection.roads {
+                    let way = map.roads[r.0].way;
+                    if way == from_way {
+                        from = Some(*r);
+                    } else if way == to_way {
+                        to = Some(*r);
+                    }
+                }
 
-    Ok(map)
+                if let (Some(from), Some(to)) = (from, to) {
+                    intersection.turn_restrictions.push((from, to));
+                }
+            }
+        }
+    }
 }
 
 fn is_road(tags: &Tags) -> bool {

@@ -176,7 +176,10 @@ export class Backend {
     return JSON.parse(this.inner.getImpactsOnRoad(road));
   }
 
-  getAllIntersections(): FeatureCollection<Point> {
+  getAllIntersections(): FeatureCollection<
+    Point,
+    { has_turn_restrictions: boolean }
+  > {
     return JSON.parse(this.inner.getAllIntersections());
   }
 

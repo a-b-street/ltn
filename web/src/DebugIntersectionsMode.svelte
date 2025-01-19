@@ -31,6 +31,11 @@
             Choose project
           </Link>
         </li>
+        <li>
+          <Link on:click={() => ($mode = { mode: "network" })}>
+            Pick neighbourhood
+          </Link>
+        </li>
         <li>Debug intersections</li>
       </ul>
     </nav>
@@ -38,6 +43,8 @@
 
   <div slot="sidebar">
     <BackButton on:click={() => ($mode = { mode: "network" })} />
+
+    <p>Purple intersections have some kind of turn restriction.</p>
 
     {#if movements.features.length > 0}
       <button class="secondary" on:click={() => (movements = emptyGeojson())}>
@@ -54,7 +61,12 @@
         {...layerId("debug-intersections")}
         paint={{
           "circle-radius": 15,
-          "circle-color": "black",
+          "circle-color": [
+            "case",
+            ["get", "has_turn_restrictions"],
+            "purple",
+            "black",
+          ],
         }}
         manageHoverState
         hoverCursor="pointer"
