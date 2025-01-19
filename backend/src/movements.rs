@@ -3,7 +3,7 @@ use geojson::GeoJson;
 
 use crate::{
     geo_helpers::{make_arrow, thicken_line},
-    IntersectionID, MapModel,
+    Direction, IntersectionID, MapModel,
 };
 
 impl MapModel {
@@ -18,13 +18,29 @@ impl MapModel {
                 let road1 = self.get_r(*r1);
                 let road2 = self.get_r(*r2);
 
+                // If road1 is one-way, can we go towards i?
+                let ok1 = match self.directions[r1] {
+                    Direction::BothWays => true,
+                    Direction::Forwards => road1.dst_i == i,
+                    Direction::Backwards => road1.src_i == i,
+                };
+                // If road2 is one-way, can we go away from i?
+                let ok2 = match self.directions[r2] {
+                    Direction::BothWays => true,
+                    Direction::Forwards => road2.src_i == i,
+                    Direction::Backwards => road2.dst_i == i,
+                };
+                if !ok1 || !ok2 {
+                    continue;
+                }
+
                 let pt1 = road1
                     .linestring
-                    .line_interpolate_point(if road1.src_i == i { 0.3 } else { 0.7 })
+                    .line_interpolate_point(if road1.src_i == i { 0.2 } else { 0.8 })
                     .unwrap();
                 let pt2 = road2
                     .linestring
-                    .line_interpolate_point(if road2.src_i == i { 0.3 } else { 0.7 })
+                    .line_interpolate_point(if road2.src_i == i { 0.2 } else { 0.8 })
                     .unwrap();
 
                 let thickness = 2.0;
