@@ -1,4 +1,3 @@
-use geo::orient::Direction;
 use geo::{
     Closest, ClosestPoint, Distance, Euclidean, FrechetDistance, LineString, Point, Polygon,
 };
@@ -11,7 +10,8 @@ pub trait SliceNearestFrechetBoundary {
     /// final points of the output may not appear explicitly in `self`, in which case they
     /// represent splitting the existing segments at the point nearest `closest_to`.
     fn slice_nearest_frechet_boundary(&self, closest_to: &LineString) -> (LineString, f64);
-    fn _slice_boundary_nearest_endpoint(&self, closest_to: &LineString) -> LineString;
+    fn split_boundary_nearest_endpoints(&self, closest_to: &LineString)
+        -> (LineString, LineString);
 }
 
 impl SliceNearestFrechetBoundary for Polygon {
@@ -21,26 +21,26 @@ impl SliceNearestFrechetBoundary for Polygon {
         //
         // Of the two parts, the one with the lowest frechet_distance represents the best
         // candidate for it's corresponding boundary.
-        let forwards_closest_to = closest_to;
-        let forwards = self._slice_boundary_nearest_endpoint(forwards_closest_to);
-        let forwards_frechet = forwards.frechet_distance(closest_to);
+        let (forwards_half, mut backwards_half) = self.split_boundary_nearest_endpoints(closest_to);
+
+        let forwards_frechet = forwards_half.frechet_distance(closest_to);
 
         let mut backwards_closest_to = closest_to.clone();
         backwards_closest_to.0.reverse();
-        let mut backwards = self._slice_boundary_nearest_endpoint(&backwards_closest_to);
-        let backwards_frechet = backwards.frechet_distance(&backwards_closest_to);
+        let backwards_frechet = backwards_half.frechet_distance(&backwards_closest_to);
 
         if forwards_frechet < backwards_frechet {
-            (forwards, forwards_frechet)
+            (forwards_half, forwards_frechet)
         } else {
-            backwards.0.reverse();
-            (backwards, backwards_frechet)
+            backwards_half.0.reverse();
+            (backwards_half, backwards_frechet)
         }
     }
 
-    /// Note: this is only based on the start/end points, so depending on winding you might get a
-    /// weird result.
-    fn _slice_boundary_nearest_endpoint(&self, closest_to: &LineString) -> LineString {
+    fn split_boundary_nearest_endpoints(
+        &self,
+        closest_to: &LineString,
+    ) -> (LineString, LineString) {
         use geo::{coord, HasDimensions};
 
         // Not sure if this will ever be an issue in practice
@@ -96,32 +96,46 @@ impl SliceNearestFrechetBoundary for Polygon {
             }
         }
 
-        let mut coords = match segment_idx_closest_to_first.cmp(&segment_idx_closest_to_final) {
-            Ordering::Less => {
-                let mut coords = exterior.0
-                    [segment_idx_closest_to_first + 1..=segment_idx_closest_to_final]
-                    .to_vec();
-                coords.insert(0, coord_closest_to_first);
-                coords.push(coord_closest_to_final);
-                coords
-            }
-            Ordering::Equal => {
-                vec![coord_closest_to_first, coord_closest_to_final]
-            }
-            Ordering::Greater => {
-                // This means we "wrap around" the polygon, so we have to stitch together both halves
-                let head = &exterior.0[segment_idx_closest_to_first + 1..];
-                let mut coords = head.to_vec();
-                let tail = &exterior.0[0..segment_idx_closest_to_final];
-                coords.extend_from_slice(&tail);
-                coords.insert(0, coord_closest_to_first);
-                coords.push(coord_closest_to_final);
-                coords
-            }
+        let assemble = |seg_1: usize, seg_2: usize, coord_1, coord_2| {
+            let mut coords = match seg_1.cmp(&seg_2) {
+                Ordering::Less => {
+                    let mut coords = exterior.0[seg_1 + 1..=seg_2].to_vec();
+                    coords.insert(0, coord_1);
+                    coords.push(coord_2);
+                    coords
+                }
+                Ordering::Equal => {
+                    // can we consolidate this?
+                    vec![coord_1, coord_2]
+                }
+                Ordering::Greater => {
+                    // This means we "wrap around" the polygon, so we have to stitch together both halves
+                    let head = &exterior.0[seg_1 + 1..];
+                    let mut coords = head.to_vec();
+                    let tail = &exterior.0[0..seg_2];
+                    coords.extend_from_slice(&tail);
+                    coords.insert(0, coord_1);
+                    coords.push(coord_2);
+                    coords
+                }
+            };
+            coords.dedup();
+            LineString::new(coords)
         };
-        coords.dedup();
 
-        LineString::new(coords)
+        let forward_half = assemble(
+            segment_idx_closest_to_first,
+            segment_idx_closest_to_final,
+            coord_closest_to_first,
+            coord_closest_to_final,
+        );
+        let backwards_half = assemble(
+            segment_idx_closest_to_final,
+            segment_idx_closest_to_first,
+            coord_closest_to_final,
+            coord_closest_to_first,
+        );
+        (forward_half, backwards_half)
     }
 }
 
