@@ -1,6 +1,6 @@
 use geo::orient::Direction;
 use geo::{
-    Closest, ClosestPoint, Distance, Euclidean, FrechetDistance, LineString, Orient, Point, Polygon,
+    Closest, ClosestPoint, Distance, Euclidean, FrechetDistance, LineString, Point, Polygon,
 };
 use std::cmp::Ordering;
 
@@ -21,18 +21,19 @@ impl SliceNearestFrechetBoundary for Polygon {
         //
         // Of the two parts, the one with the lowest frechet_distance represents the best
         // candidate for it's corresponding boundary.
-
-        let forwards_polygon = self.orient(Direction::Default);
-        let forwards = forwards_polygon._slice_boundary_nearest_endpoint(closest_to);
+        let forwards_closest_to = closest_to;
+        let forwards = self._slice_boundary_nearest_endpoint(forwards_closest_to);
         let forwards_frechet = forwards.frechet_distance(closest_to);
 
-        let backwards_polygon = self.orient(Direction::Reversed);
-        let backwards = backwards_polygon._slice_boundary_nearest_endpoint(closest_to);
-        let backwards_frechet = backwards.frechet_distance(closest_to);
+        let mut backwards_closest_to = closest_to.clone();
+        backwards_closest_to.0.reverse();
+        let mut backwards = self._slice_boundary_nearest_endpoint(&backwards_closest_to);
+        let backwards_frechet = backwards.frechet_distance(&backwards_closest_to);
 
         if forwards_frechet < backwards_frechet {
             (forwards, forwards_frechet)
         } else {
+            backwards.0.reverse();
             (backwards, backwards_frechet)
         }
     }
