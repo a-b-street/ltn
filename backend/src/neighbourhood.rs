@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use crate::geo_helpers::SliceNearestFrechetBoundary;
 use anyhow::Result;
@@ -20,8 +20,6 @@ pub struct Neighbourhood {
     pub interior_roads: BTreeSet<RoadID>,
     // Immutable once created
     pub perimeter_roads: BTreeSet<RoadID>,
-    // Immutable once created
-    crosses: BTreeMap<RoadID, f64>,
     pub border_intersections: BTreeSet<IntersectionID>,
     name: String,
     // Mercator
@@ -63,7 +61,6 @@ impl Neighbourhood {
 
         let mut interior_roads = BTreeSet::new();
         let mut perimeter_roads = BTreeSet::new();
-        let mut crosses = BTreeMap::new();
         debug!("boundary_polygon: {boundary_polygon:?}",);
         for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
             let r = &map.roads[obj.data.0];
@@ -80,14 +77,6 @@ impl Neighbourhood {
                 }
                 LineInPolygon::Perimeter => {
                     perimeter_roads.insert(r.id);
-                }
-                LineInPolygon::Crosses { percent } => {
-                    // It's either something close to a perimeter road, or a weird case like
-                    // https://www.openstreetmap.org/way/15778470 that's a bridge or tunnel
-                    // crossing the boundary without touching it. For those cases, what do we want
-                    // to do with them -- still consider them borders, yeah, because it's a way in
-                    // or out.
-                    crosses.insert(r.id, percent);
                 }
                 LineInPolygon::Outside => {}
             }
@@ -128,7 +117,6 @@ impl Neighbourhood {
         let mut n = Self {
             interior_roads,
             perimeter_roads,
-            crosses,
             border_intersections,
             name,
             boundary_polygon,
@@ -213,13 +201,6 @@ impl Neighbourhood {
             features.push(f);
         }
 
-        // Only for debugging
-        for (r, pct) in &self.crosses {
-            let mut f = map.get_r(*r).to_gj(&map.mercator);
-            f.set_property("kind", "crosses");
-            f.set_property("pct", *pct);
-            features.push(f);
-        }
         for i in &self.border_intersections {
             let mut f = map.mercator.to_wgs84_gj(&map.get_i(*i).point);
             f.set_property("kind", "border_intersection");
@@ -314,7 +295,6 @@ impl Neighbourhood {
 enum LineInPolygon {
     Inside,
     Perimeter,
-    Crosses { percent: f64 },
     Outside,
 }
 
@@ -324,13 +304,9 @@ fn line_in_polygon(
     polygon: &Polygon,
     prepared_polygon: &PreparedGeometry,
 ) -> LineInPolygon {
-    // TODO Reconsider rewriting all of this logic based on clip_linestring_to_polygon
-
     let perimeter_likelihood = perimeter_likelihood(&linestring, polygon);
-    // dbg!(&linestring);
-    debug!("linestring: {linestring:?}");
-    // dbg!(&perimeter_likelihood);
-    debug!("perimeter_likelihood: {perimeter_likelihood:?}");
+    // This is an arbitrary threshold - we could tune it if we're getting false positives/negatives
+    // but need more test cases to evaluate.
     if perimeter_likelihood > 1e-3 {
         return LineInPolygon::Perimeter;
     }
@@ -340,6 +316,9 @@ fn line_in_polygon(
         return LineInPolygon::Inside;
     }
 
+    // We do this check *after* checking for perimeter likelihood.
+    // Due to floating point rounding, it's possible for a perimeter portion to be completely
+    // (but just barely) outside the polygon.
     if !matrix.is_intersects() {
         return LineInPolygon::Outside;
     }
@@ -353,23 +332,23 @@ fn line_in_polygon(
         length_in_polygon += length
     }
     // How much of the clipped linestring is inside the boundary? If it's nearly 1, then this
-    // road is interior. Round to make diffs less noisy.
-    let percent = (length_in_polygon / linestring.length::<Euclidean>() * 10e3).round() / 10e3;
-    info!("percent: {percent}");
-    if percent > 0.99 {
+    // road is interior.
+    let ratio_inside = length_in_polygon / linestring.length::<Euclidean>();
+    if ratio_inside > 0.99 {
         LineInPolygon::Inside
-    } else if percent < 0.01 {
+    } else if ratio_inside < 0.01 {
         LineInPolygon::Outside
     } else {
-        LineInPolygon::Crosses { percent }
+        // There's a lot of leeway here - many segments are half-in/half-out. I think a better solution
+        // would be to pre-process all roads to be trimmed to the boundary, but that could create
+        // new disparate segments when a linestring leaves and re-enters the boundary.
+        //
+        // To do that we'd need to re-number our RoadIDs, so for now we just have this crude metric.
+        LineInPolygon::Perimeter
     }
 }
 
-/// A high value means the line_string is "mostly close" to the boundary's exterior.
-///
-/// Essentially, we take the area between the line_string and the boundary, and divide it by the line_string's length.
-///
-/// So the more of the line_string that is "far" from the boundary, the lower this metric goes.
+/// A high value means the entire line_string is close to some portion of the boundary's exterior.
 fn perimeter_likelihood(line_string: &LineString, boundary: &Polygon) -> f64 {
     let (_nearby_boundary, frechet_distance) = boundary.slice_nearest_frechet_boundary(line_string);
     let metric = (-frechet_distance).exp();
@@ -549,6 +528,17 @@ mod tests {
                 // With a valid boundary polygon, we get the result we expect
                 assert_eq!(result, LineInPolygon::Perimeter);
             }
+        }
+
+        #[test]
+        fn missing_segment_protruding_past_boundary_in_columbus() {
+            // https://www.openstreetmap.org/way/850023685, result: Crosses { percent: 0.6833 }
+            let line_string = wkt!(LINESTRING(555.3645758729823 964.2392577530547,553.7280922707979 953.1197497301224,544.3268349086155 889.2937736760415));
+            let boundary = wkt!(POLYGON((555.3645758729823 964.2614967693613,556.7283122085399 973.6018835090985,558.1772820648426 983.6094407301326,562.524191633751 1013.7433074731879,563.8026944485632 1022.4165237316282,566.1039995147408 1037.4278595631795,569.5985738737743 1060.8900214924752,575.6501538624323 1101.9210060985572,577.0138901979898 1111.4837829982,578.4628600542925 1121.2689500593285,588.0090144007727 1185.984486754612,597.6404022704206 1251.478389012725,599.7712402938965 1265.8225543621893,625.3412965816635 1262.153116715056,663.0145128467466 1256.593362703195,698.6421246078877 1251.3671939319825,700.9434296740653 1251.1448037720768,712.705655565978 1249.4768775680443,738.6166459379372 1246.0298300808167,750.1231712676139 1244.4730989575273,752.5097098545369 1260.9299708324152,754.8962484414598 1276.6084771452634,762.0558642022282 1323.3104108431594,770.6644498192995 1380.6870722441763,772.1134196756022 1390.472239304515,773.3919224904147 1399.5902358835565,764.9538039148338 1416.9366683996468,763.3343670170407 1420.161325726969,756.5156853404642 1426.4994453000797,748.2480338063738 1429.7241026266115,743.6454236752297 1430.168882948003,748.2480338063738 1429.7241026266115,756.5156853404642 1426.4994453000797,763.3343670170407 1420.161325726969,764.9538039148338 1416.9366683996468,773.3919224904147 1399.5902358835565,772.1134196756022 1390.472239304515,770.6644498192995 1380.6870722441763,762.0558642022282 1323.3104108431594,754.8962484414598 1276.6084771452634,752.5097098545369 1260.9299708324152,750.1231712676139 1244.4730989575273,761.0330619508629 1242.805172754285,824.1058674622226 1232.686420453298,887.5196070565631 1223.0124484729122,898.0885636556199 1221.4557173496228,907.890418565547 1220.010181306286,971.6450922440796 1210.558599486596,960.0533333936577 1131.054117119667,964.4854764833111 1130.38694663837,995.1695440291161 1125.8279483484544,993.7205741728133 1115.8203911274202,987.9246947476023 1075.1229917619867,987.9246947476023 1070.452798392118,988.0951617890927 1069.5632377501256,989.7145986880973 1064.5594591396084,990.0555327710782 1060.1116559304355,990.2259998137799 1057.887754325849,989.5441316453954 1053.99592651802,1006.5908358380477 1051.4384396719952,1019.6315645447726 1049.5481233080573,1025.5979110126852 1044.6555397782831,1033.2689278991365 1043.321198814899,1031.9904250843242 1034.425592396553,1026.5354797433054 997.953606080387,1073.0729821876955 990.7259258644933,1113.8146052056632 984.3878062913824,1120.1218857577683 983.387050569437,1126.173465745215 982.4974899274443,1127.5372020807724 982.2750997667487,1134.6115843207958 981.1631489648506,1213.7935252929763 968.820495058487,1207.060077137145 923.6752924838806,1200.1561619386123 877.0845538659374,1198.7924256042659 867.7441671262003,1206.122508406525 866.5210212443492,1240.5568508748104 859.5157311891513,1239.278348059998 850.5089296900626,1230.073127796499 787.9060995186228,1227.1751880838933 768.224570317203,1224.106781328586 747.0975050732366,1278.6562347436195 738.7578740554447,1277.633432492254 731.4189987603884,1276.354929677442 721.8562218599554,1287.4352874021813 719.521125175416,1324.1709349366442 710.0695433557262,1366.4467613328713 699.6172058133006,1377.1009514526734 696.8373288073701,1383.2377649620767 695.2805976840807,1391.9315840998931 692.7231108388457,1447.6743068077826 679.7132864519751,1471.6249261977562 673.59755703877,1503.8431971206094 665.369121101721,1507.7639390857912 664.3683653797757,1514.92355484656 662.4780490150474,1609.7884636746237 638.1263264445492,1603.9925842494129 614.7753595952063,1601.3503451002541 606.9917039787586,1597.6000701777737 599.4304385230064,1592.0598913147985 591.9803681472074,1582.5989704890635 584.1967125307594,1577.3997257102803 580.6384699635792,1549.5283643563355 561.1793309228551,1498.558718821081 527.820806852478,1486.455558844976 546.0568000105611,1481.1710805454475 554.6188211890485,1478.3583743535871 559.956185040214,1468.215585359468 575.7458864330149,1402.6710077416515 572.1876438658346,1396.8751283152294 571.8540586251861,1383.7491660877592 570.7421078224979,1382.129729189966 597.6513172390214,1380.595525812918 626.3396479395299,1379.1465559566152 653.3600524360058,1371.0493714652266 654.5831983186472,1326.216539439375 661.0325129725009,1317.096552696621 662.3668539350947,1268.5986792702454 669.4833390702456,1267.8315775811159 664.5907555396811,1161.0339758184377 680.4916520132251,1122.6788913861815 686.1626011050391,1108.530126906135 688.2753076296726,1104.9503190263563 688.8312830310169,1056.1967450365337 696.0589632461204,1038.63863971941 698.6164500913553,961.1613691657683 710.0695433557262,948.9729756689181 711.8486646389213,941.7281263874044 712.9606154416097,934.0571095009532 714.0725662435077,894.0825881696925 720.0771005767601,883.2579310084 721.6338317000498,866.0407597742574 724.191318545285,848.3974209351773 726.7488053905199,834.5895905393228 728.8615119151534,825.2139032343331 730.1958528777473,820.1851254970405 696.3925484867689,809.4457018564932 697.9492796100585,746.3728963463449 707.2896663497957,741.8555197347349 707.9568368310925,683.1296237934947 716.6300530895328,672.2197331102458 718.2979792927752,661.7360100319344 719.8547104160646,652.1898556842428 721.1890513786586,660.6279742598238 785.4598077533406,662.3326446783622 795.9121452957662,646.5644433005223 798.2472419803054,618.2669143428515 802.4726550295727,619.8863512406448 813.2585778118565,621.3353210969475 823.0437448729851,616.8179444853374 823.7109153542821,619.7158841991543 843.281249474959,622.1024227848659 859.7381213498469,624.3184943302982 877.3069440266331,591.5035887610173 882.1995275571974,569.7690409152648 885.5353799636821,558.7739167112705 887.0921110869716,544.2842181482429 889.3160126915581,553.7451389751891 953.141988745639,555.3645758729823 964.2614967693613)));
+            let prepared_boundary = PreparedGeometry::from(&boundary);
+            let result = line_in_polygon(&line_string, &boundary, &prepared_boundary);
+
+            assert_eq!(result, LineInPolygon::Perimeter);
         }
     }
 }
