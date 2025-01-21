@@ -15,7 +15,6 @@ contour = "0.12.0"
 fast_paths = "1.0.0"
 geo = "0.29.1"
 geojson = { git = "https://github.com/georust/geojson", features = ["geo-types"] }
-geo-buffer = { path = "../../geo-buffer" }
 # Note: i_overlay doesn't follow semver, and only guarantees non-breaking across patch versions.
 # https://github.com/iShape-Rust/iOverlay?tab=readme-ov-file#versioning-policy
 # So we pin to a minor version.
