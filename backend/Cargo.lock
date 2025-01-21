@@ -81,6 +81,7 @@ dependencies = [
  "criterion",
  "fast_paths",
  "geo",
+ "geo-buffer",
  "geojson",
  "i_float",
  "i_overlay",
@@ -397,6 +398,14 @@ dependencies = [
  "robust",
  "rstar",
  "spade",
+]
+
+[[package]]
+name = "geo-buffer"
+version = "0.2.0"
+dependencies = [
+ "geo",
+ "geo-types",
 ]
 
 [[package]]
