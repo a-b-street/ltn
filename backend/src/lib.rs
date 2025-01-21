@@ -31,7 +31,7 @@ mod render_cells;
 mod route;
 mod route_snapper;
 mod shortcuts;
-// TODO: feature flag? Used by tests and benches
+// REVIEW: feature flag? Used by both tests and benches
 pub mod test_fixtures;
 #[cfg(test)]
 mod tests;
