@@ -29,7 +29,7 @@ impl SliceNearestFrechetBoundary for Polygon {
         // `closest_to.first` and `closest_to.last`.
         //
         // Of the two parts, the one with the lowest frechet_distance represents the best
-        // candidate for it's corresponding boundary.
+        // candidate for its corresponding boundary.
         let (forwards_half, backwards_half) = self.split_boundary_nearest_endpoints(closest_to);
         let forwards_frechet = forwards_half.frechet_distance(closest_to);
 
