@@ -4,14 +4,22 @@ use geo::{
 use std::cmp::Ordering;
 
 pub trait SliceNearestFrechetBoundary {
-    /// Returns the subset of self closest to `closest_to`.
+    /// Splits `self.exterior` at the two points nearest to `closest_to.start` and `closest_to.end`
+    ///
+    /// In the likely event that the closest points on the exterior are not pre-existing vertices,
+    /// new coords will be interpolated into the existing segments.
+    fn split_boundary_nearest_endpoints(&self, closest_to: &LineString)
+        -> (LineString, LineString);
+
+    /// Returns the subset of self.exterior() closest to `closest_to` and its frechet distance.
+    ///
+    /// i.e. returns one of the LineStrings from `split_boundary_nearest_endpoints`, whichever
+    /// one has the smallest frechet distance.
     ///
     /// All points in the output will be *topologically* within `self`, however the first and
     /// final points of the output may not appear explicitly in `self`, in which case they
     /// represent splitting the existing segments at the point nearest `closest_to`.
     fn slice_nearest_frechet_boundary(&self, closest_to: &LineString) -> (LineString, f64);
-    fn split_boundary_nearest_endpoints(&self, closest_to: &LineString)
-        -> (LineString, LineString);
 }
 
 impl SliceNearestFrechetBoundary for Polygon {
@@ -21,10 +29,11 @@ impl SliceNearestFrechetBoundary for Polygon {
         //
         // Of the two parts, the one with the lowest frechet_distance represents the best
         // candidate for it's corresponding boundary.
-        let (forwards_half, mut backwards_half) = self.split_boundary_nearest_endpoints(closest_to);
-
+        let (forwards_half, backwards_half) = self.split_boundary_nearest_endpoints(closest_to);
         let forwards_frechet = forwards_half.frechet_distance(closest_to);
 
+        // The second half of the polygon begins where the first half ends, so we
+        // need to reverse `closest_to` to get an accurate (minimal) distance measure
         let mut backwards_closest_to = closest_to.clone();
         backwards_closest_to.0.reverse();
         let backwards_frechet = backwards_half.frechet_distance(&backwards_closest_to);
@@ -32,7 +41,6 @@ impl SliceNearestFrechetBoundary for Polygon {
         if forwards_frechet < backwards_frechet {
             (forwards_half, forwards_frechet)
         } else {
-            backwards_half.0.reverse();
             (backwards_half, backwards_frechet)
         }
     }
@@ -123,19 +131,19 @@ impl SliceNearestFrechetBoundary for Polygon {
             LineString::new(coords)
         };
 
-        let forward_half = assemble(
+        let front_half = assemble(
             segment_idx_closest_to_first,
             segment_idx_closest_to_final,
             coord_closest_to_first,
             coord_closest_to_final,
         );
-        let backwards_half = assemble(
+        let back_half = assemble(
             segment_idx_closest_to_final,
             segment_idx_closest_to_first,
             coord_closest_to_final,
             coord_closest_to_first,
         );
-        (forward_half, backwards_half)
+        (front_half, back_half)
     }
 }
 
@@ -150,7 +158,7 @@ mod tests {
         let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
         let (closest, _) =
             boundary.slice_nearest_frechet_boundary(&wkt!(LINESTRING(0.1 0.2,0.1 9.8)));
-        assert_relative_eq!(wkt!(LINESTRING(0. 0.2,0. 9.8)), closest);
+        assert_relative_eq!(wkt!(LINESTRING(0.0 9.8,0.0 0.2)), closest);
     }
 
     #[test]
@@ -158,7 +166,7 @@ mod tests {
         let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
         let (closest, _) =
             boundary.slice_nearest_frechet_boundary(&wkt!(LINESTRING(0.1 9.8,0.1 0.2)));
-        assert_relative_eq!(wkt!(LINESTRING(0. 9.8,0. 0.2)), closest);
+        assert_relative_eq!(wkt!(LINESTRING(0. 0.2,0. 9.8)), closest);
     }
 
     #[test]
@@ -167,7 +175,7 @@ mod tests {
         let (closest, _) =
             boundary.slice_nearest_frechet_boundary(&wkt!(LINESTRING(0.1 0.2,0.1 9.8)));
         assert_relative_eq!(
-            wkt!(LINESTRING(0. 0.2,0. 9.8)),
+            wkt!(LINESTRING(0. 9.8, 0. 0.2)),
             closest,
             max_relative = 1e-14
         );
@@ -179,7 +187,7 @@ mod tests {
         let (closest, _) =
             boundary.slice_nearest_frechet_boundary(&wkt!(LINESTRING(0.1 9.8,0.1 0.2)));
         assert_relative_eq!(
-            wkt!(LINESTRING(0. 9.8,0. 0.2)),
+            wkt!(LINESTRING(0. 0.2, 0. 9.8)),
             closest,
             max_relative = 1e-14
         );
@@ -235,10 +243,8 @@ mod tests {
         let line_string = wkt!(LINESTRING(1495.3224949514188 1205.7438525123148,1495.1276851599255 1178.667850475072));
         let (closest, _) = boundary.slice_nearest_frechet_boundary(&line_string);
 
-        // dbg!(line_string.length::<Euclidean>());
-        // dbg!(closest.length::<Euclidean>());
         assert_relative_eq!(
-            wkt!(LINESTRING(1495.3224949514188 1205.7438525123148,1495.1276851599255 1178.667850475072)),
+            wkt!(LINESTRING(1495.1276851599255 1178.667850475072,1495.3224949514188 1205.7438525123148)),
             closest,
             max_relative = 1e-14
         );
