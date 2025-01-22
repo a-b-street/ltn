@@ -83,7 +83,6 @@ const layerZorder = [
   streets("Ferry line"),
 
   "debug-borders",
-  "debug-crosses",
   "debug-filters",
 
   "debug-intersections",

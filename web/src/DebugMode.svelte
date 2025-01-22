@@ -62,19 +62,6 @@
         </Popup>
       </CircleLayer>
 
-      <LineLayer
-        {...layerId("debug-crosses")}
-        filter={["==", ["get", "kind"], "crosses"]}
-        paint={{
-          "line-width": 5,
-          "line-color": "blue",
-        }}
-      >
-        <Popup openOn="hover" let:props>
-          <PropertiesTable properties={props} />
-        </Popup>
-      </LineLayer>
-
       <InteriorRoadLayer
         interactive
         onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
