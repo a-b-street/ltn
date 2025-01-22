@@ -154,6 +154,9 @@ mod tests {
 
     #[test]
     fn simple_segment_in_rect() {
+        // You can use JTSTestBuilder or another app to inspect and analyze WKT geometries.
+        // JTSTestBuilder.jar is available to download with every JTS release: https://github.com/locationtech/jts/releases
+        // WKT is also the output Debug format for geo-types geometries (as of 0.7.16+).
         let boundary = wkt!(POLYGON((0. 0.,0. 10.,10. 10.,10. 0.,0. 0.)));
         let (closest, _) =
             boundary.slice_nearest_frechet_boundary(&wkt!(LINESTRING(0.1 0.2,0.1 9.8)));
