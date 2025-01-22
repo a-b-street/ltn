@@ -96,7 +96,9 @@ impl Neighbourhood {
         }
 
         if perimeter_roads.is_empty() {
-            // REVIEW: Is this actually a problem?
+            // App breaks without perimeter roads: without perimeter roads, there's only one cell,
+            // so it counts as disconnected (because it doesn't touch a border intersection), and
+            // thus we can't calculate shortcuts through it without those intersections.
             bail!("No perimeter roads");
         }
 
