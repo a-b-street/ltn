@@ -31,7 +31,7 @@ mod render_cells;
 mod route;
 mod route_snapper;
 mod shortcuts;
-// REVIEW: feature flag? Used by both tests and benches
+// TODO: We could hide this behind a feature flag - it's used by both tests and benches
 pub mod test_fixtures;
 #[cfg(test)]
 mod tests;
