@@ -1,5 +1,6 @@
 use geo::{
-    Closest, ClosestPoint, Distance, Euclidean, FrechetDistance, LineString, Point, Polygon,
+    coord, Closest, ClosestPoint, Distance, Euclidean, FrechetDistance, HasDimensions, LineString,
+    Point, Polygon,
 };
 use std::cmp::Ordering;
 
@@ -49,8 +50,6 @@ impl SliceNearestFrechetBoundary for Polygon {
         &self,
         closest_to: &LineString,
     ) -> (LineString, LineString) {
-        use geo::{coord, HasDimensions};
-
         // Not sure if this will ever be an issue in practice
         assert!(!closest_to.is_empty(), "we don't yet handle empty input");
         assert!(
@@ -104,26 +103,26 @@ impl SliceNearestFrechetBoundary for Polygon {
             }
         }
 
-        let assemble = |seg_1: usize, seg_2: usize, coord_1, coord_2| {
-            let mut coords = match seg_1.cmp(&seg_2) {
+        let assemble = |starting_segment_idx: usize, ending_segment_idx: usize, starting_coord, ending_coord| {
+            let mut coords = match starting_segment_idx.cmp(&ending_segment_idx) {
                 Ordering::Less => {
-                    let mut coords = exterior.0[seg_1 + 1..=seg_2].to_vec();
-                    coords.insert(0, coord_1);
-                    coords.push(coord_2);
+                    let mut coords = exterior.0[starting_segment_idx..=ending_segment_idx].to_vec();
+                    coords[0] = starting_coord;
+                    coords.push(ending_coord);
                     coords
                 }
                 Ordering::Equal => {
                     // can we consolidate this?
-                    vec![coord_1, coord_2]
+                    vec![starting_coord, ending_coord]
                 }
                 Ordering::Greater => {
                     // This means we "wrap around" the polygon, so we have to stitch together both halves
-                    let head = &exterior.0[seg_1 + 1..];
+                    let head = &exterior.0[starting_segment_idx..];
+                    let tail = &exterior.0[0..ending_segment_idx];
                     let mut coords = head.to_vec();
-                    let tail = &exterior.0[0..seg_2];
+                    coords[0] = starting_coord;
                     coords.extend_from_slice(&tail);
-                    coords.insert(0, coord_1);
-                    coords.push(coord_2);
+                    coords.push(ending_coord);
                     coords
                 }
             };
