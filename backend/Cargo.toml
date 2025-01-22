@@ -50,6 +50,5 @@ harness = false
 [patch.crates-io]
 # use unreleased `geo` and `geo-types` to fix crash: https://github.com/a-b-street/ltn/issues/54
 # (awaiting release of https://github.com/georust/geo/pull/1279)
-#geo = {  version = "0.29.1", git = "https://github.com/georust/geo", branch = "release/geo-types-v0.7.15" }
-geo = {  path = "../../../georust/geo/geo" }
-geo-types = {  path = "../../../georust/geo/geo-types" }
+geo = {  git = "https://github.com/georust/geo" }
+geo-types = {  git = "https://github.com/georust/geo" }
