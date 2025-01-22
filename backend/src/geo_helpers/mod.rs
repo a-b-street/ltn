@@ -1,10 +1,7 @@
 mod slice_nearest_boundary;
 pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 
-use geo::{
-    BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
-    LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
-};
+use geo::{BooleanOps, BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line, LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect, Validation};
 use rstar::AABB;
 use utils::LineSplit;
 
@@ -133,6 +130,24 @@ pub fn euclidean_destination(pt: Point, angle_degs: f64, dist_away_m: f64) -> Po
 
 fn euclidean_destination_coord(pt: Coord, angle_degs: f64, dist_away_m: f64) -> Coord {
     euclidean_destination(pt.into(), angle_degs, dist_away_m).into()
+}
+
+/// Attempts to make the input polygon valid by union-ing it with itself.
+///
+/// It hasn't been thoroughly tested.
+pub fn make_polygon_valid(polygon: &Polygon) -> Polygon {
+    let mut valid_multipolygon = polygon.union(polygon);
+
+    // I don't think we should get more than one piece back for any sane input, but we'll see...
+    debug_assert!(valid_multipolygon.0.len() == 1, "MultiPolygon not handle yet");
+
+    let Some(valid_polygon) = valid_multipolygon.0.pop() else {
+        debug_assert!(false, "empty valid polygon not handled yet");
+        return polygon.clone()
+    };
+
+    debug_assert!(valid_polygon.is_valid());
+    valid_polygon
 }
 
 // If the line is too short for the thickness, give up

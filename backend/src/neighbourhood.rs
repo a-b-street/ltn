@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
-use crate::geo_helpers::SliceNearestFrechetBoundary;
+use crate::geo_helpers::{make_polygon_valid, SliceNearestFrechetBoundary};
 use anyhow::Result;
 use geo::{
-    Area, BooleanOps, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry,
-    Relate, Validation,
+    Area, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry,
+    Relate,
 };
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
@@ -45,14 +45,8 @@ impl Neighbourhood {
         boundary_polygon: Polygon,
         edit_perimeter_roads: bool,
     ) -> Result<Self> {
-        // make boundary_polygon valid - later topology checks require it, notably the "is perimeter" check.
-        let boundary_polygon = {
-            let mut valid = boundary_polygon.union(&boundary_polygon);
-            // I don't think this should happen with any sane input, but we'll see...
-            debug_assert!(valid.0.len() == 1, "multipolygons not handle yet");
-            valid.0.pop().expect("empty valid polygon not handled yet")
-        };
-        debug_assert!(boundary_polygon.is_valid());
+        // Later topology checks require a valid boundary - notably the "is perimeter" check.
+        let boundary_polygon = make_polygon_valid(&boundary_polygon);
 
         let t1 = Instant::now();
         let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
