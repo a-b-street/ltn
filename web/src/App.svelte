@@ -2,7 +2,7 @@
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
   import About from "./About.svelte";
-  import "@picocss/pico/css/pico.jade.min.css";
+  import "@picocss/pico/css/pico.conditional.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
@@ -89,16 +89,18 @@
   }
 </script>
 
-<About />
+<div class="pico">
+    <About class="pico" />
+</div>
 <Layout>
-  <div slot="top" style="display: flex">
+  <div slot="top" class="pico" style="display: flex">
     <button class="outline" on:click={() => ($showAbout = true)}>
       <img src={logo} style="height: 6vh;" alt="A/B Street logo" />
     </button>
     <Settings />
     <span bind:this={topDiv} style="width: 100%" />
   </div>
-  <div slot="left">
+  <div class="pico" slot="left">
     <div bind:this={sidebarDiv} />
 
     <hr />
