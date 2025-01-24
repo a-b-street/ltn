@@ -18,7 +18,7 @@ pub struct Neighbourhood {
     // Immutable once created
     pub perimeter_roads: BTreeSet<RoadID>,
     pub border_intersections: BTreeSet<IntersectionID>,
-    name: String,
+    pub name: String,
     // Mercator
     pub boundary_polygon: Polygon,
     boundary_area_km2: f64,
