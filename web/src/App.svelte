@@ -139,6 +139,10 @@
           url: `${import.meta.env.BASE_URL}/filters/school_street_icon.gif`,
         },
         {
+          id: "diagonal_filter",
+          url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
+        },
+        {
           id: "oneway-arrow",
           url: onewayArrowUrl,
         },

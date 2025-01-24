@@ -85,13 +85,15 @@ const layerZorder = [
   "debug-borders",
   "debug-filters",
 
-  "debug-intersections",
-  "debug-movements-outline",
-  "debug-movements-fill",
-
   "cells",
   "interior-roads-outlines",
   "interior-roads",
+  "debug-intersections",
+  "debug-movements-outline",
+  "debug-movements-fill",
+  "debug-editable-intersections",
+  "editable-intersections",
+  "intersection-filters",
 
   "compare-route",
 

@@ -15,6 +15,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
+  import EditableIntersectionLayer from "./layers/EditableIntersectionLayer.svelte";
   import { backend, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
@@ -124,6 +125,7 @@
       {:else if state.state == "chose-road"}
         <InteriorRoadLayer interactive={false} />
       {/if}
+      <EditableIntersectionLayer />
     </RenderNeighbourhood>
 
     {#if state.state == "chose-road"}

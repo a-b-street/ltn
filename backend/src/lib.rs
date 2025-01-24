@@ -225,6 +225,33 @@ impl LTN {
         self.after_edit();
     }
 
+    /// Takes an IntersectionID
+    #[wasm_bindgen(js_name = addDiagonalFilter)]
+    pub fn add_diagonal_filter(&mut self, intersection_id: usize) -> Result<(), JsValue> {
+        self.map
+            .add_diagonal_filter(IntersectionID(intersection_id));
+        self.after_edit();
+        Ok(())
+    }
+
+    /// Takes an IntersectionID
+    #[wasm_bindgen(js_name = rotateDiagonalFilter)]
+    pub fn rotate_diagonal_filter(&mut self, intersection_id: usize) -> Result<(), JsValue> {
+        self.map
+            .rotate_diagonal_filter(IntersectionID(intersection_id));
+        self.after_edit();
+        Ok(())
+    }
+
+    /// Takes an IntersectionID
+    #[wasm_bindgen(js_name = deleteDiagonalFilter)]
+    pub fn delete_diagonal_filter(&mut self, intersection_id: usize) -> Result<(), JsValue> {
+        self.map
+            .delete_diagonal_filter(IntersectionID(intersection_id));
+        self.after_edit();
+        Ok(())
+    }
+
     #[wasm_bindgen(js_name = toggleDirection)]
     pub fn toggle_direction(&mut self, road: usize) {
         self.map.toggle_direction(RoadID(road));
@@ -345,6 +372,7 @@ impl LTN {
                 .map(|i| {
                     let mut f = self.map.mercator.to_wgs84_gj(&i.point);
                     f.set_property("has_turn_restrictions", !i.turn_restrictions.is_empty());
+                    f.set_property("intersection_id", i.id.0);
                     f
                 })
                 .collect::<Vec<_>>(),

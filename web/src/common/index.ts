@@ -1,4 +1,7 @@
-import type { ExpressionSpecification } from "maplibre-gl";
+import type {
+  DataDrivenPropertyValueSpecification,
+  ExpressionSpecification,
+} from "maplibre-gl";
 
 export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as DisableInteractiveLayers } from "./DisableInteractiveLayers.svelte";
@@ -50,4 +53,31 @@ export function prettyPrintTime(seconds: number): string {
   let minutes = Math.floor(seconds / 60);
   let leftover = Math.round(seconds - minutes * 60);
   return `${minutes}m${leftover}s`;
+}
+
+/**
+ * Create a zoom-independent distance.
+ *
+ * This is useful (e.g.) for using symbol layers whose output reflects the size of a physical feature on the map.
+ *
+ * @param mapMeters The length on the map in meters
+ * @param minimumPixels A minimum size (in pixels) at all zoom levels. You can set it to 0 if you want the feature to disappear at low zoom levels.
+ */
+export function mapMetersToPixels(
+  mapMeters: number,
+  minimumPixels: number = 4,
+): DataDrivenPropertyValueSpecification<number> {
+  // Random googling gives me these values - I'm not entirely sure they're correct but they seem about right.
+  const minZoomPixelsPerMeter = 15654.303392;
+  const maxZoomPixelsPerMeter = 0.0597164283;
+
+  return [
+    "interpolate",
+    ["exponential", 2],
+    ["zoom"],
+    0,
+    ["max", ["/", mapMeters, minZoomPixelsPerMeter], minimumPixels],
+    22,
+    ["max", ["/", mapMeters, maxZoomPixelsPerMeter], minimumPixels],
+  ];
 }

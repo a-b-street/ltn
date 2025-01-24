@@ -1,21 +1,21 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt;
 
+use crate::geo_helpers::{
+    angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing, invert_polygon,
+    limit_angle, linestring_intersection,
+};
+use crate::impact::Impact;
+use crate::Router;
 use anyhow::Result;
 use geo::{
     Closest, ClosestPoint, Coord, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint,
     LineString, Point, Polygon,
 };
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::Serialize;
-use utils::{Mercator, Tags};
-
-use crate::geo_helpers::{
-    angle_of_pt_on_line, buffer_aabb, invert_polygon, limit_angle, linestring_intersection,
-};
-use crate::impact::Impact;
-use crate::Router;
+use utils::{osm2graph, Mercator, Tags};
 
 pub struct MapModel {
     pub roads: Vec<Road>,
@@ -43,6 +43,7 @@ pub struct MapModel {
     // Just from the basemap, existing filters
     pub original_modal_filters: BTreeMap<RoadID, ModalFilter>,
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
+    pub diagonal_filters: BTreeMap<IntersectionID, DiagonalFilter>,
 
     // Every road is filled out
     pub directions: BTreeMap<RoadID, Direction>,
@@ -57,7 +58,7 @@ pub struct MapModel {
     pub boundaries: BTreeMap<String, Feature>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
 pub struct RoadID(pub usize);
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
 pub struct IntersectionID(pub usize);
@@ -74,8 +75,9 @@ impl fmt::Display for IntersectionID {
     }
 }
 
-/// A segment of a road network - no intersections happen *within* a Road.
-/// An osm Way is "broken into multiple `Road`s
+/// A segment of a road network - no intersections happen *within* a `Road`.
+/// An osm Way is divided into potentially multiple `Road`s
+#[derive(Debug, Clone)]
 pub struct Road {
     pub id: RoadID,
     pub src_i: IntersectionID,
@@ -87,13 +89,43 @@ pub struct Road {
 }
 
 /// Connection between `Road` (segments).
+#[derive(Debug, Clone)]
 pub struct Intersection {
     pub id: IntersectionID,
     pub node: osm_reader::NodeID,
     pub point: Point,
+    // Ordered clockwise from North
     pub roads: Vec<RoadID>,
     /// (from, to) is not allowed. May be redundant with the road directions.
     pub turn_restrictions: Vec<(RoadID, RoadID)>,
+}
+
+impl Intersection {
+    pub(crate) fn from_graph(mut value: osm2graph::Intersection, roads: &[Road]) -> Self {
+        // Sort intersection roads clockwise, starting from North
+        value.edges.sort_by_cached_key(|road_id| {
+            let road = &roads[road_id.0];
+            let bearing = bearing_from_endpoint(value.point, &road.linestring);
+            // work around that f64 is not Ord
+            debug_assert!(
+                bearing.is_finite(),
+                "Assuming bearing output is always 0...360, this shouldn't happen"
+            );
+            (bearing * 1e6) as i64
+        });
+
+        Intersection {
+            id: IntersectionID(value.id.0),
+            point: value.point,
+            node: value.osm_node,
+            roads: value.edges.into_iter().map(|e| RoadID(e.0)).collect(),
+            turn_restrictions: Vec::new(),
+        }
+    }
+
+    pub fn roads_iter<'a>(&'a self, map: &'a MapModel) -> impl Iterator<Item = &'a Road> {
+        self.roads.iter().map(move |road_id| map.get_r(*road_id))
+    }
 }
 
 impl MapModel {
@@ -256,6 +288,34 @@ impl MapModel {
         self.after_edited();
     }
 
+    pub fn add_diagonal_filter(&mut self, i: IntersectionID) {
+        let intersection = self.get_i(i);
+        let diagonal_filter = DiagonalFilter::new(intersection, 0, self);
+        let cmd = Command::SetDiagonalFilter(i, Some(diagonal_filter));
+        let undo_cmd = self.do_edit(cmd);
+        self.undo_stack.push(undo_cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+    }
+
+    pub fn rotate_diagonal_filter(&mut self, i: IntersectionID) {
+        let intersection = self.get_i(i);
+        let diagonal_filter = DiagonalFilter::new(intersection, 1, self);
+        let cmd = Command::SetDiagonalFilter(i, Some(diagonal_filter));
+        let undo_cmd = self.do_edit(cmd);
+        self.undo_stack.push(undo_cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+    }
+
+    pub fn delete_diagonal_filter(&mut self, i: IntersectionID) {
+        let cmd = Command::SetDiagonalFilter(i, None);
+        let undo_cmd = self.do_edit(cmd);
+        self.undo_stack.push(undo_cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+    }
+
     pub fn toggle_direction(&mut self, r: RoadID) {
         let dir = match self.directions[&r] {
             Direction::Forwards => Direction::Backwards,
@@ -281,6 +341,17 @@ impl MapModel {
                     self.modal_filters.remove(&r);
                 }
                 Command::SetModalFilter(r, prev)
+            }
+            Command::SetDiagonalFilter(i, filter) => {
+                let prev = self.diagonal_filters.get(&i).cloned();
+                if let Some(filter) = filter {
+                    info!("added filter to {i:?}: {filter:?}");
+                    self.diagonal_filters.insert(i, filter);
+                } else {
+                    let filter = self.diagonal_filters.remove(&i);
+                    info!("removed filter from {i:?}: {filter:?}");
+                }
+                Command::SetDiagonalFilter(i, prev)
             }
             Command::SetDirection(r, dir) => {
                 info!("changed direction of {r} to {}", dir.to_string());
@@ -338,6 +409,8 @@ impl MapModel {
         }
     }
 
+    /// Because ids like RoadID and IntersectionID aren't guaranteed to be stable across loads,
+    /// we use mor permanent markers like GPS points to map to features.
     pub fn to_savefile(&self) -> FeatureCollection {
         // Edited filters only
         let mut gj = self.filters_to_gj();
@@ -379,6 +452,19 @@ impl MapModel {
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
 
+        for (i, filter) in &self.diagonal_filters {
+            let intersection = self.get_i(*i);
+            let mut f = self.mercator.to_wgs84_gj(&intersection.point);
+            f.set_property("kind", "diagonal_filter");
+            let split_offset = intersection
+                .roads
+                .iter()
+                .position(|el| el == &filter.group_a[0])
+                .expect("filter must contain roads that belong to intersection");
+            f.set_property("split_offset", split_offset);
+            gj.features.push(f);
+        }
+
         gj.foreign_members = Some(
             serde_json::json!({
                 "study_area_name": self.study_area_name,
@@ -406,7 +492,12 @@ impl MapModel {
         let mut cmds = Vec::new();
 
         for f in gj.features {
-            match f.property("kind").unwrap().as_str().unwrap() {
+            match f
+                .property("kind")
+                .expect("savefile feature missing `kind`")
+                .as_str()
+                .unwrap()
+            {
                 "modal_filter" => {
                     let kind = FilterKind::from_string(get_str_prop(&f, "filter_kind")?)?;
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
@@ -439,6 +530,27 @@ impl MapModel {
                 }
                 "study_area_boundary" => {
                     // TODO Detect if it's close enough to boundary_polygon? Overwrite?
+                }
+                "diagonal_filter" => {
+                    let i = {
+                        let gj_pt: Point = f.geometry.as_ref().unwrap().try_into()?;
+                        let pt = self.mercator.pt_to_mercator(gj_pt.into());
+                        self.closest_intersection
+                            .nearest_neighbor(&Point(pt))
+                            .expect("intersection near saved editable intersection")
+                            .data
+                    };
+                    let intersection = self.get_i(i);
+                    let split_offset = f
+                        .property("split_offset")
+                        .expect("missing split_offset")
+                        .as_u64()
+                        .expect("unsigned integer");
+
+                    let diagonal_filter =
+                        DiagonalFilter::new(intersection, split_offset as usize, self);
+                    self.diagonal_filters
+                        .insert(intersection.id, diagonal_filter);
                 }
                 x => bail!("Unknown kind in savefile: {x}"),
             }
@@ -612,6 +724,68 @@ pub struct ModalFilter {
     pub percent_along: f64,
 }
 
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct DiagonalFilter {
+    pub angle: f64,
+    pub group_a: Vec<RoadID>,
+    pub group_b: Vec<RoadID>,
+}
+
+impl DiagonalFilter {
+    /// Precondition: Intersection must be a 4-way intersection
+    fn new(
+        intersection: &Intersection,
+        split_offset: usize,
+        map_model: &MapModel,
+    ) -> DiagonalFilter {
+        // TODO: need to validate topology - some 4-way intersections cannot support all orientations
+        debug_assert_eq!(
+            intersection.roads.len(),
+            4,
+            "diagonal filters only support 4-way intersections"
+        );
+
+        let group_a: Vec<RoadID> = (0..2)
+            .into_iter()
+            .map(|offset| intersection.roads[(offset + split_offset) % intersection.roads.len()])
+            .collect();
+
+        let group_b: Vec<RoadID> = (2..4)
+            .into_iter()
+            .map(|offset| intersection.roads[(offset + split_offset) % intersection.roads.len()])
+            .collect();
+
+        let road_1 = map_model.get_r(group_a[0]);
+        let road_2 = map_model.get_r(group_a[1]);
+
+        let bearing_1 = bearing_from_endpoint(intersection.point, &road_1.linestring);
+        let bearing_2 = bearing_from_endpoint(intersection.point, &road_2.linestring);
+        let diagonal_angle = diagonal_bearing(bearing_1, bearing_2);
+        DiagonalFilter {
+            angle: diagonal_angle,
+            group_a,
+            group_b,
+        }
+    }
+
+    // `movement`: (from, to)
+    pub fn allows_movement(&self, movement: &(RoadID, RoadID)) -> bool {
+        let (from, to) = movement;
+
+        debug_assert!(self.group_a.contains(from) || self.group_b.contains(from));
+        debug_assert!(self.group_a.contains(to) || self.group_b.contains(to));
+
+        self.group_a.contains(from) && self.group_a.contains(to)
+            || self.group_b.contains(from) && self.group_b.contains(to)
+    }
+}
+
+impl From<&DiagonalFilter> for JsonValue {
+    fn from(value: &DiagonalFilter) -> Self {
+        serde_json::to_value(value).expect("valid JSON fields")
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FilterKind {
     WalkCycleOnly,
@@ -687,6 +861,7 @@ impl Direction {
 
 pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
+    SetDiagonalFilter(IntersectionID, Option<DiagonalFilter>),
     SetDirection(RoadID, Direction),
     Multiple(Vec<Command>),
 }

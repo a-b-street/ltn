@@ -17,6 +17,7 @@
     prettyPrintTime,
   } from "./common";
   import { ModalFilterLayer, RenderNeighbourhood } from "./layers";
+  import EditableIntersectionLayer from "./layers/EditableIntersectionLayer.svelte";
   import {
     backend,
     mode,
@@ -102,6 +103,7 @@
           "fill-opacity": 0.6,
         }}
       />
+      <EditableIntersectionLayer />
     </RenderNeighbourhood>
 
     <GeoJSON data={perRoadGj} generateId>

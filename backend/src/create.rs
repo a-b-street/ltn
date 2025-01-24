@@ -138,19 +138,6 @@ pub fn create_from_osm(
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
 
-    // Copy all the fields
-    let intersections: Vec<Intersection> = graph
-        .intersections
-        .into_values()
-        .map(|i| Intersection {
-            id: IntersectionID(i.id.0),
-            point: i.point,
-            node: i.osm_node,
-            roads: i.edges.into_iter().map(|e| RoadID(e.0)).collect(),
-            turn_restrictions: Vec::new(),
-        })
-        .collect();
-
     // Add in a bit
     let roads: Vec<Road> = graph
         .edges
@@ -164,6 +151,13 @@ pub fn create_from_osm(
             speed_mph: parse_maxspeed_mph(&e.osm_tags),
             tags: e.osm_tags,
         })
+        .collect();
+
+    // Copy all the fields
+    let intersections: Vec<Intersection> = graph
+        .intersections
+        .into_values()
+        .map(|i| Intersection::from_graph(i, &roads))
         .collect();
 
     for ls in &mut osm.railways {
@@ -213,6 +207,7 @@ pub fn create_from_osm(
 
         original_modal_filters: BTreeMap::new(),
         modal_filters: BTreeMap::new(),
+        diagonal_filters: BTreeMap::new(),
 
         directions,
 
