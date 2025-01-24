@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Feature } from "geojson";
+  import type { Feature, FeatureCollection } from "geojson";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
@@ -22,6 +22,7 @@
   $: boundaryNames = gj.features
     .filter((f: Feature) => f.properties!.kind == "boundary")
     .map((f: Feature) => f.properties!.name);
+  $: edits = countEdits(gj);
 
   function pickNeighbourhood(name: string) {
     $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
@@ -77,6 +78,26 @@
       "debug_route_snapper.geojson",
       $backend!.toRouteSnapperGj(),
     );
+  }
+
+  function countEdits(gj: FeatureCollection): {
+    modalFilters: number;
+    deletedModalFilters: number;
+    directions: number;
+  } {
+    let modalFilters = 0;
+    let deletedModalFilters = 0;
+    let directions = 0;
+    for (let f of gj.features) {
+      if (f.properties!.kind == "modal_filter") {
+        modalFilters++;
+      } else if (f.properties!.kind == "deleted_existing_modal_filter") {
+        deletedModalFilters++;
+      } else if (f.properties!.kind == "direction") {
+        directions++;
+      }
+    }
+    return { modalFilters, deletedModalFilters, directions };
   }
 
   // TODO Hover on button and highlight on map
@@ -166,7 +187,18 @@
     </ul>
 
     <hr />
+
     <p>Current project: {$projectName}</p>
+
+    <p>
+      {edits.modalFilters} new modal filter(s) added
+    </p>
+    <p>
+      {edits.deletedModalFilters}
+      existing modal filter(s) removed
+    </p>
+    <p>{edits.directions} road segment direction(s) changed</p>
+
     <button on:click={exportGJ}>Export project to GeoJSON</button>
     <button class="secondary" on:click={debugRouteSnapper}>
       Debug route-snapper
