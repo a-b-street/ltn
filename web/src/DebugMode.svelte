@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { CircleLayer, GeoJSON } from "svelte-maplibre";
   import { notNull, PropertiesTable } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
