@@ -70,7 +70,7 @@
           </Link>
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "network" })}>
+          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
             Pick neighbourhood
           </Link>
         </li>

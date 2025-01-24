@@ -75,7 +75,7 @@ async function getOsmInput(gj: any): Promise<[ArrayBuffer, Feature<Polygon>]> {
 
 export function afterProjectLoaded() {
   mode.set({
-    mode: "network",
+    mode: "pick-neighbourhood",
   });
   // The stores are unused; the WASM API is used directly. This TS wrapper is unused.
   routeTool.set(

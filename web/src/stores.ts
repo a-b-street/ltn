@@ -15,7 +15,7 @@ export type Mode =
       mode: "new-project";
     }
   | {
-      mode: "network";
+      mode: "pick-neighbourhood";
     }
   | {
       mode: "set-boundary";
@@ -36,7 +36,10 @@ export type Mode =
     }
   | {
       mode: "route";
-      prevMode: "network" | "neighbourhood" | "impact-one-destination";
+      prevMode:
+        | "pick-neighbourhood"
+        | "neighbourhood"
+        | "impact-one-destination";
     }
   | {
       mode: "predict-impact";
