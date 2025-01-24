@@ -113,7 +113,8 @@
       <ul>
         <li>
           <Link
-            on:click={() => ($mode = { mode: "route", prevMode: "network" })}
+            on:click={() =>
+              ($mode = { mode: "route", prevMode: "pick-neighbourhood" })}
           >
             Route
           </Link>

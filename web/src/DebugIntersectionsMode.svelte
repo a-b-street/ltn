@@ -32,7 +32,7 @@
           </Link>
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "network" })}>
+          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
             Pick neighbourhood
           </Link>
         </li>
@@ -42,7 +42,7 @@
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "network" })} />
+    <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
 
     <p>Purple intersections have some kind of turn restriction.</p>
 

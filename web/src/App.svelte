@@ -29,7 +29,7 @@
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactDetailMode from "./ImpactDetailMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
-  import NetworkMode from "./NetworkMode.svelte";
+  import PickNeighbourhoodMode from "./PickNeighbourhoodMode.svelte";
   import PredictImpactMode from "./PredictImpactMode.svelte";
   import RouteMode from "./RouteMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
@@ -160,8 +160,8 @@
             paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
           />
         </GeoJSON>
-        {#if $mode.mode == "network"}
-          <NetworkMode />
+        {#if $mode.mode == "pick-neighbourhood"}
+          <PickNeighbourhoodMode />
         {:else if $mode.mode == "set-boundary"}
           <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
         {:else if $mode.mode == "auto-boundaries"}

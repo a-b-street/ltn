@@ -26,7 +26,10 @@
     route_pt_b,
   } from "./stores";
 
-  export let prevMode: "network" | "neighbourhood" | "impact-one-destination";
+  export let prevMode:
+    | "pick-neighbourhood"
+    | "neighbourhood"
+    | "impact-one-destination";
 
   $: gj = $backend!.compareRoute($route_pt_a, $route_pt_b, $mainRoadPenalty);
 
@@ -45,7 +48,7 @@
           </Link>
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "network" })}>
+          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
             Pick neighbourhood
           </Link>
         </li>
