@@ -74,6 +74,8 @@ impl fmt::Display for IntersectionID {
     }
 }
 
+/// A segment of a road network - no intersections happen *within* a Road.
+/// An osm Way is "broken into multiple `Road`s
 pub struct Road {
     pub id: RoadID,
     pub src_i: IntersectionID,
@@ -84,6 +86,7 @@ pub struct Road {
     pub speed_mph: usize,
 }
 
+/// Connection between `Road` (segments).
 pub struct Intersection {
     pub id: IntersectionID,
     pub node: osm_reader::NodeID,
