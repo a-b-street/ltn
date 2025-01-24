@@ -90,7 +90,7 @@
 </script>
 
 <div class="pico">
-    <About class="pico" />
+  <About class="pico" />
 </div>
 <Layout>
   <div slot="top" class="pico" style="display: flex">

@@ -1,7 +1,11 @@
 mod slice_nearest_boundary;
 pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 
-use geo::{BooleanOps, BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line, LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect, Validation};
+use geo::{
+    BooleanOps, BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
+    LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
+    Validation,
+};
 use rstar::AABB;
 use utils::LineSplit;
 
@@ -139,11 +143,14 @@ pub fn make_polygon_valid(polygon: &Polygon) -> Polygon {
     let mut valid_multipolygon = polygon.union(polygon);
 
     // I don't think we should get more than one piece back for any sane input, but we'll see...
-    debug_assert!(valid_multipolygon.0.len() == 1, "MultiPolygon not handle yet");
+    debug_assert!(
+        valid_multipolygon.0.len() == 1,
+        "MultiPolygon not handle yet"
+    );
 
     let Some(valid_polygon) = valid_multipolygon.0.pop() else {
         debug_assert!(false, "empty valid polygon not handled yet");
-        return polygon.clone()
+        return polygon.clone();
     };
 
     debug_assert!(valid_polygon.is_valid());

@@ -2,10 +2,7 @@ use std::collections::BTreeSet;
 
 use crate::geo_helpers::{make_polygon_valid, SliceNearestFrechetBoundary};
 use anyhow::Result;
-use geo::{
-    Area, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry,
-    Relate,
-};
+use geo::{Area, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
 

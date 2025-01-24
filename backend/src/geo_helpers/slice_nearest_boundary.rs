@@ -103,7 +103,10 @@ impl SliceNearestFrechetBoundary for Polygon {
             }
         }
 
-        let assemble = |starting_segment_idx: usize, ending_segment_idx: usize, starting_coord, ending_coord| {
+        let assemble = |starting_segment_idx: usize,
+                        ending_segment_idx: usize,
+                        starting_coord,
+                        ending_coord| {
             let mut coords = match starting_segment_idx.cmp(&ending_segment_idx) {
                 Ordering::Less => {
                     let mut coords = exterior.0[starting_segment_idx..=ending_segment_idx].to_vec();
