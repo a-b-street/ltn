@@ -441,11 +441,9 @@ impl MapModel {
             }
         }
 
-        if !cmds.is_empty() {
-            let cmd = self.do_edit(Command::Multiple(cmds));
-            self.undo_stack.push(cmd);
-            self.redo_queue.clear();
-        }
+        // Keep the undo stack empty. A user shouldn't be able to undo and clear the whole
+        // savefile.
+        self.do_edit(Command::Multiple(cmds));
         self.after_edited();
 
         Ok(())
