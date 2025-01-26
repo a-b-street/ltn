@@ -27,6 +27,7 @@ mod impact;
 mod map_model;
 mod movements;
 mod neighbourhood;
+pub mod od;
 mod render_cells;
 mod route;
 mod route_snapper;
@@ -63,7 +64,9 @@ impl LTN {
         let boundary: Feature = serde_wasm_bindgen::from_value(boundary_input)?;
         let polygon = boundary.try_into().map_err(err_to_js)?;
 
-        let map = MapModel::new(input_bytes, polygon, study_area_name).map_err(err_to_js)?;
+        let demand = None;
+        let map =
+            MapModel::new(input_bytes, polygon, study_area_name, demand).map_err(err_to_js)?;
         Ok(LTN {
             map,
             neighbourhood: None,

@@ -42,11 +42,13 @@ impl NeighbourhoodFixture {
         let boundary: Feature = std::fs::read_to_string(&boundary_path)?.parse()?;
         let polygon: Polygon = boundary.try_into()?;
 
+        let demand = None;
         Ok(move || {
             MapModel::new(
                 &input_bytes,
                 polygon.clone(),
                 Some(study_area_name.to_string()),
+                None,
             )
         })
     }

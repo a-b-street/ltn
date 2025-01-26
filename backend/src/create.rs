@@ -11,8 +11,8 @@ use utils::{
 };
 
 use crate::{
-    impact::Impact, Direction, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID,
-    Router,
+    impact::Impact, od::DemandModel, Direction, FilterKind, Intersection, IntersectionID, MapModel,
+    Road, RoadID, Router,
 };
 
 #[derive(Default)]
@@ -132,6 +132,7 @@ pub fn create_from_osm(
     input_bytes: &[u8],
     boundary_wgs84: Polygon,
     study_area_name: Option<String>,
+    demand: Option<DemandModel>,
 ) -> Result<MapModel> {
     let mut osm = Osm::default();
     let mut graph = Graph::new(input_bytes, is_road, &mut osm)?;
@@ -217,7 +218,7 @@ pub fn create_from_osm(
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
     };
-    map.impact = Some(Impact::new(&map));
+    map.impact = Some(Impact::new(&map, demand));
 
     let graph = GraphSubset {
         node_to_edge: graph.node_to_edge,

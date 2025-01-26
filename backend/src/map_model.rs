@@ -6,6 +6,8 @@ use crate::geo_helpers::{
     limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
+use crate::impact::Impact;
+use crate::{od::DemandModel, Router};
 use crate::Router;
 use anyhow::Result;
 use geo::{
@@ -134,8 +136,9 @@ impl MapModel {
         input_bytes: &[u8],
         boundary_wgs84: Polygon,
         study_area_name: Option<String>,
+        demand: Option<DemandModel>,
     ) -> Result<MapModel> {
-        crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name)
+        crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name, demand)
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
