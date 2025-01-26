@@ -19,8 +19,8 @@ impl DemandModel {
         // Turn all of the zones into Mercator. Don't do this when originally building and
         // serializing them, because that process might not use exactly the same Mercator object.
         for zone in self.zones.values_mut() {
-            map.mercator.to_mercator_in_place(&mut zone.mp);
-            let bbox = zone.mp.bounding_rect().unwrap();
+            map.mercator.to_mercator_in_place(&mut zone.geometry);
+            let bbox = zone.geometry.bounding_rect().unwrap();
             zone.x1 = (bbox.min().x * 100.0) as i64;
             zone.y1 = (bbox.min().y * 100.0) as i64;
             zone.x2 = (bbox.max().x * 100.0) as i64;
@@ -66,12 +66,17 @@ impl DemandModel {
 #[derive(Serialize, Deserialize)]
 pub struct Zone {
     // WGS84 when built originally and serialized, then Mercator right before being used
-    pub mp: MultiPolygon,
+    #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
+    pub geometry: MultiPolygon,
     // The bbox, rounded to centimeters, for generate_range to work. Only calculated right before
     // use.
+    #[serde(skip_deserializing, skip_serializing)]
     pub x1: i64,
+    #[serde(skip_deserializing, skip_serializing)]
     pub y1: i64,
+    #[serde(skip_deserializing, skip_serializing)]
     pub x2: i64,
+    #[serde(skip_deserializing, skip_serializing)]
     pub y2: i64,
 }
 
@@ -81,7 +86,7 @@ impl Zone {
             let x = (rng.generate_range(self.x1..=self.x2) as f64) / 100.0;
             let y = (rng.generate_range(self.y1..=self.y2) as f64) / 100.0;
             let pt = Point::new(x, y);
-            if self.mp.contains(&pt) {
+            if self.geometry.contains(&pt) {
                 return pt;
             }
         }
