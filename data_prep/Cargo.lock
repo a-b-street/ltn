@@ -211,10 +211,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "backend",
+ "bincode",
  "csv",
  "geo",
  "geojson",
  "serde",
+ "utils",
 ]
 
 [[package]]

@@ -1,8 +1,11 @@
-use anyhow::Result;
-use geo::MultiPolygon;
-use serde::Deserialize;
+use std::collections::{BTreeMap, BTreeSet};
 
-use backend::od::Zone;
+use anyhow::Result;
+use geo::{Intersects, MultiPolygon};
+use serde::Deserialize;
+use utils::Mercator;
+
+use backend::od::DemandModel;
 
 fn main() -> Result<()> {
     let study_areas: Vec<StudyArea> = geojson::de::deserialize_feature_collection_str_to_vec(
@@ -10,13 +13,52 @@ fn main() -> Result<()> {
     )?;
     println!("Read {} study area boundaries", study_areas.len());
 
-    let zones: Vec<Zone> = geojson::de::deserialize_feature_collection_str_to_vec(
+    let input_zones: Vec<Zone> = geojson::de::deserialize_feature_collection_str_to_vec(
         &std::fs::read_to_string("zones.geojson")?,
     )?;
+    let zones: BTreeMap<String, Zone> = input_zones
+        .into_iter()
+        .map(|zone| (zone.name.clone(), zone))
+        .collect();
     println!("Read {} zones", zones.len());
 
     let desire_lines = read_desire_lines("od.csv")?;
     println!("Read {} desire lines", desire_lines.len());
+
+    for study_area in study_areas {
+        let subset_zones = find_matching_zones(study_area.geometry, &zones);
+        let mut subset_desire_lines = Vec::new();
+        for (zone1, zone2, count) in &desire_lines {
+            if subset_zones.contains(zone1) && subset_zones.contains(zone2) {
+                subset_desire_lines.push((zone1.clone(), zone2.clone(), *count));
+            }
+        }
+        let demand = DemandModel {
+            zones: subset_zones
+                .into_iter()
+                .map(|name| {
+                    (
+                        name.clone(),
+                        backend::od::Zone {
+                            geometry: zones[&name].geometry.clone(),
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 0,
+                        },
+                    )
+                })
+                .collect(),
+            desire_lines: subset_desire_lines,
+        };
+        let path = format!("out/demand_{}_{}.bin", study_area.kind, study_area.name);
+        println!(
+            "Writing {path} with {} matching zones and {} desire lines",
+            demand.zones.len(),
+            demand.desire_lines.len()
+        );
+        std::fs::write(path, bincode::serialize(&demand)?)?;
+    }
 
     Ok(())
 }
@@ -27,6 +69,13 @@ struct StudyArea {
     geometry: MultiPolygon,
     name: String,
     kind: String,
+}
+
+#[derive(Deserialize)]
+struct Zone {
+    #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
+    geometry: MultiPolygon,
+    name: String,
 }
 
 fn read_desire_lines(path: &str) -> Result<Vec<(String, String, usize)>> {
@@ -48,4 +97,22 @@ struct DesireLineRow {
     geo_code2: String,
     car_driver: usize,
     car_passenger: usize,
+}
+
+fn find_matching_zones(
+    boundary_wgs84: MultiPolygon,
+    zones: &BTreeMap<String, Zone>,
+) -> BTreeSet<String> {
+    let mut matches = BTreeSet::new();
+    let mercator = Mercator::from(boundary_wgs84.clone()).unwrap();
+    let boundary_mercator = mercator.to_mercator(&boundary_wgs84);
+
+    for zone in zones.values() {
+        let zone_mercator = mercator.to_mercator(&zone.geometry);
+        if boundary_mercator.intersects(&zone_mercator) {
+            matches.insert(zone.name.clone());
+        }
+    }
+
+    matches
 }

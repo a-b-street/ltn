@@ -11,4 +11,7 @@ wget https://maps.gov.scot/ATOM/shapefiles/SG_IntermediateZoneBdry_2011.zip
 unzip SG_IntermediateZoneBdry_2011.zip
 ogr2ogr zones.geojson -t_srs EPSG:4326 -nlt PROMOTE_TO_MULTI SG_IntermediateZone_Bdry_2011.shp -sql 'SELECT InterZone as name FROM SG_IntermediateZone_Bdry_2011'
 rm -f SG_IntermediateZone_Bdry_2011* SG_IntermediateZoneBdry_2011.zip
+
+mkdir -p out
+cargo run --release
 ```
