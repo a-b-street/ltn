@@ -68,7 +68,7 @@
     <BackButton on:click={() => ($mode = { mode: "neighbourhood" })} />
 
     <h4>Roads</h4>
-    <p>Click a road to visit it's OSM object.</p>
+    <p>Click a road to visit its OSM object.</p>
     <div
       style="display: flex; align-items: start; justify-content: space-between;"
     >
