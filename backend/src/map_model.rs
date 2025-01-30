@@ -386,6 +386,9 @@ impl MapModel {
         self.after_edited();
     }
 
+    // NOTE: this method is used both for saving and for serializing to the frontend,
+    // but for ModalFilters and DiagonalFilters we need different information in each case. It might be good
+    // to split up this functionality
     pub fn filters_to_gj(&self) -> FeatureCollection {
         let mut features = Vec::new();
         for (r, filter) in &self.modal_filters {
@@ -400,6 +403,16 @@ impl MapModel {
             f.set_property("road", r.0);
             f.set_property("angle", angle);
             f.set_property("edited", Some(filter) != self.original_modal_filters.get(r));
+            features.push(f);
+        }
+        for (i, filter) in &self.diagonal_filters {
+            let intersection = self.get_i(*i);
+            let mut f = self.mercator.to_wgs84_gj(&intersection.point);
+            f.set_property("filter_kind", FilterKind::DiagonalFilter.to_string());
+            f.set_property("intersection_id", i.0);
+            f.set_property("filter", filter);
+            // part of being a "filter"
+            f.set_property("edited", true);
             features.push(f);
         }
         FeatureCollection {
@@ -452,14 +465,6 @@ impl MapModel {
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
 
-        for (i, filter) in &self.diagonal_filters {
-            let intersection = self.get_i(*i);
-            let mut f = self.mercator.to_wgs84_gj(&intersection.point);
-            f.set_property("kind", "diagonal_filter");
-            f.set_property("is_rotated", filter.is_rotated);
-            gj.features.push(f);
-        }
-
         gj.foreign_members = Some(
             serde_json::json!({
                 "study_area_name": self.study_area_name,
@@ -468,7 +473,6 @@ impl MapModel {
             .unwrap()
             .clone(),
         );
-
         gj
     }
 
@@ -495,12 +499,37 @@ impl MapModel {
             {
                 "modal_filter" => {
                     let kind = FilterKind::from_string(get_str_prop(&f, "filter_kind")?)?;
-                    let gj_pt: Point = f.geometry.unwrap().try_into()?;
-                    cmds.push(self.add_modal_filter_cmd(
-                        self.mercator.pt_to_mercator(gj_pt.into()),
-                        None,
-                        kind,
-                    ));
+                    let gj_pt: Point = f.geometry.as_ref().unwrap().try_into()?;
+                    match kind {
+                        FilterKind::DiagonalFilter => {
+                            let i = {
+                                let pt = self.mercator.pt_to_mercator(gj_pt.into());
+                                self.closest_intersection
+                                    .nearest_neighbor(&Point(pt))
+                                    .expect("intersection near saved editable intersection")
+                                    .data
+                            };
+                            let intersection = self.get_i(i);
+                            let filter = f.property("filter").unwrap().as_object().unwrap();
+                            let is_rotated = filter
+                                .get("is_rotated")
+                                .expect("missing is_rotated")
+                                .as_bool()
+                                .expect("expected a bool");
+
+                            let diagonal_filter =
+                                DiagonalFilter::new(intersection, is_rotated, self);
+                            self.diagonal_filters
+                                .insert(intersection.id, diagonal_filter);
+                        }
+                        _ => {
+                            cmds.push(self.add_modal_filter_cmd(
+                                self.mercator.pt_to_mercator(gj_pt.into()),
+                                None,
+                                kind,
+                            ));
+                        }
+                    }
                 }
                 "deleted_existing_modal_filter" => {
                     let gj_pt: Point = f.geometry.unwrap().try_into()?;
@@ -525,26 +554,6 @@ impl MapModel {
                 }
                 "study_area_boundary" => {
                     // TODO Detect if it's close enough to boundary_polygon? Overwrite?
-                }
-                "diagonal_filter" => {
-                    let i = {
-                        let gj_pt: Point = f.geometry.as_ref().unwrap().try_into()?;
-                        let pt = self.mercator.pt_to_mercator(gj_pt.into());
-                        self.closest_intersection
-                            .nearest_neighbor(&Point(pt))
-                            .expect("intersection near saved editable intersection")
-                            .data
-                    };
-                    let intersection = self.get_i(i);
-                    let is_rotated = f
-                        .property("is_rotated")
-                        .expect("missing is_rotated")
-                        .as_bool()
-                        .expect("expected a bool");
-
-                    let diagonal_filter = DiagonalFilter::new(intersection, is_rotated, self);
-                    self.diagonal_filters
-                        .insert(intersection.id, diagonal_filter);
                 }
                 x => bail!("Unknown kind in savefile: {x}"),
             }
@@ -798,6 +807,7 @@ pub enum FilterKind {
     NoEntry,
     BusGate,
     SchoolStreet,
+    DiagonalFilter,
 }
 
 // TODO strum?
@@ -808,6 +818,7 @@ impl FilterKind {
             Self::NoEntry => "no_entry",
             Self::BusGate => "bus_gate",
             Self::SchoolStreet => "school_street",
+            Self::DiagonalFilter => "diagonal_filter",
         }
     }
 
@@ -817,6 +828,7 @@ impl FilterKind {
             "no_entry" => Ok(Self::NoEntry),
             "bus_gate" => Ok(Self::BusGate),
             "school_street" => Ok(Self::SchoolStreet),
+            "diagonal_filter" => Ok(Self::DiagonalFilter),
             _ => bail!("Invalid FilterKind: {x}"),
         }
     }

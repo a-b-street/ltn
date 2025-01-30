@@ -5,7 +5,6 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import EditableIntersectionLayer from "./layers/EditableIntersectionLayer.svelte";
   import { backend, mode } from "./stores";
 
   export let road: Feature;
@@ -103,6 +102,5 @@
     </DotMarker>
 
     <ModalFilterLayer />
-    <EditableIntersectionLayer />
   </div>
 </SplitComponent>

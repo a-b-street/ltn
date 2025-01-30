@@ -22,7 +22,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
-  import EditableIntersectionLayer from "./layers/EditableIntersectionLayer.svelte";
+  import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
   import { backend, mode } from "./stores";
 
   let intersection: DebugIntersection | null = null;
@@ -120,22 +120,13 @@
           </Popup>
         </div>
       </InteriorRoadLayer>
-      <EditableIntersectionLayer />
     </RenderNeighbourhood>
 
-    <GeoJSON data={notNull($backend).renderModalFilters()} generateId>
-      <CircleLayer
-        {...layerId("debug-filters")}
-        paint={{
-          "circle-radius": 15,
-          "circle-color": "black",
-        }}
-      >
-        <Popup openOn="hover" let:props>
-          <PropertiesTable properties={props} />
-        </Popup>
-      </CircleLayer>
-    </GeoJSON>
+    <ModalFilterLayer>
+      <Popup openOn="hover" let:props>
+        <PropertiesTable properties={props} />
+      </Popup>
+    </ModalFilterLayer>
 
     <GeoJSON data={notNull($backend).getAllIntersections()} generateId>
       <CircleLayer

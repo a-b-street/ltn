@@ -304,11 +304,12 @@ pub fn invert_polygon(wgs84_polygon: Polygon) -> Polygon {
 ///
 /// That is, given the bearing of a and b, returns the bearing of line c.
 ///
+/// ```ignore
 ///       a    b
 ///        \  /
 ///      ∂° \/ ∂°
 ///    ------------ c
-///
+/// ```
 pub fn diagonal_bearing(bearing_a: f64, bearing_b: f64) -> f64 {
     let angle_between = bearing_b - bearing_a;
     (angle_between / 2.0 + 90.0 + bearing_a) % 360.0

@@ -1,11 +1,6 @@
 <script lang="ts">
   import { getContext } from "svelte";
-  import {
-    CircleLayer,
-    hoverStateFilter,
-    Popup,
-    SymbolLayer,
-  } from "svelte-maplibre";
+  import { CircleLayer, hoverStateFilter, Popup } from "svelte-maplibre";
   import { layerId, mapMetersToPixels } from "../common";
   import { Style } from "../common/colors";
   import {
@@ -74,24 +69,3 @@
     />
   </Popup>
 </CircleLayer>
-
-<SymbolLayer
-  {...layerId("intersection-filters")}
-  filter={[
-    "all",
-    ["==", ["get", "kind"], "editable_intersection"],
-    ["to-boolean", ["get", "filter"]],
-  ]}
-  layout={{
-    "icon-image": "diagonal_filter",
-    "icon-rotate": [
-      "case",
-      ["has", "filter"],
-      ["get", "angle", ["get", "filter"]],
-      0,
-    ],
-    "icon-allow-overlap": true,
-    "icon-size": 0.07,
-  }}
-  interactive={false}
-/>

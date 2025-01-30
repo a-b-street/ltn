@@ -18,7 +18,6 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
-  import EditableIntersectionLayer from "./layers/EditableIntersectionLayer.svelte";
   import {
     backend,
     mainRoadPenalty,
@@ -106,7 +105,6 @@
         <CellLayer />
         <OneWayLayer />
         <InteriorRoadLayer interactive={false} />
-        <EditableIntersectionLayer />
       </RenderNeighbourhood>
     {/if}
 
