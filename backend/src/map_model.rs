@@ -731,6 +731,16 @@ pub struct DiagonalFilter {
     pub group_b: Vec<RoadID>,
 }
 
+/// A DiagonalFilter is placed at a 4-way intersection, and prevents traffic from going "straight"
+/// through the intersection. Traffic must turn.
+///
+/// The DiagonalFilter can be placed in one of two rotations to determine which way traffic is forced
+/// to turn.
+///
+/// Note: When all the roads at the intersection are 1-way roads, there is only one reasonable
+/// orientation for the diagonal filter, the other orientation would effectively block the intersection.
+/// We could choose to enforce "reasonable" filtering in the UI, or keep the interface consistent
+/// and leave it up to the user to manually ensure the filter is orientated reasonably.
 impl DiagonalFilter {
     /// Precondition: Intersection must be a 4-way intersection
     fn new(
@@ -738,7 +748,6 @@ impl DiagonalFilter {
         split_offset: usize,
         map_model: &MapModel,
     ) -> DiagonalFilter {
-        // TODO: need to validate topology - some 4-way intersections cannot support all orientations
         debug_assert_eq!(
             intersection.roads.len(),
             4,
