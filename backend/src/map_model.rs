@@ -410,7 +410,7 @@ impl MapModel {
     }
 
     /// Because ids like RoadID and IntersectionID aren't guaranteed to be stable across loads,
-    /// we use mor permanent markers like GPS points to map to features.
+    /// we use more permanent markers like GPS points to map to features.
     pub fn to_savefile(&self) -> FeatureCollection {
         // Edited filters only
         let mut gj = self.filters_to_gj();
