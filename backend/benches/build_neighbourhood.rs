@@ -8,14 +8,14 @@ fn benchmark_build_neighbourhood(c: &mut Criterion) {
         NeighbourhoodFixture::BRISTOL_WEST,
         NeighbourhoodFixture::STRASBOURG,
     ] {
+        let (map, boundary_geo) = neighbourhood.neighbourhood_params().unwrap();
+        let edit_perimeter_roads = false;
         c.bench_function(
             &format!(
                 "build neighbourhood: {name}",
                 name = neighbourhood.savefile_name
             ),
             |b| {
-                let (map, boundary_geo) = neighbourhood.neighbourhood_params().unwrap();
-                let edit_perimeter_roads = false;
                 b.iter(|| {
                     let neighbourhood = Neighbourhood::new(
                         &map,
