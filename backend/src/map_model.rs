@@ -781,8 +781,8 @@ impl DiagonalFilter {
         debug_assert!(self.group_a.contains(from) || self.group_b.contains(from));
         debug_assert!(self.group_a.contains(to) || self.group_b.contains(to));
 
-        self.group_a.contains(from) && self.group_a.contains(to)
-            || self.group_b.contains(from) && self.group_b.contains(to)
+        (self.group_a.contains(from) && self.group_a.contains(to))
+            || (self.group_b.contains(from) && self.group_b.contains(to))
     }
 }
 
