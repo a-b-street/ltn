@@ -290,7 +290,7 @@ impl MapModel {
 
     pub fn add_diagonal_filter(&mut self, i: IntersectionID) {
         let intersection = self.get_i(i);
-        let diagonal_filter = DiagonalFilter::new(intersection, 0, self);
+        let diagonal_filter = DiagonalFilter::new(intersection, false, self);
         let cmd = Command::SetDiagonalFilter(i, Some(diagonal_filter));
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
@@ -300,7 +300,7 @@ impl MapModel {
 
     pub fn rotate_diagonal_filter(&mut self, i: IntersectionID) {
         let intersection = self.get_i(i);
-        let diagonal_filter = DiagonalFilter::new(intersection, 1, self);
+        let diagonal_filter = DiagonalFilter::new(intersection, true, self);
         let cmd = Command::SetDiagonalFilter(i, Some(diagonal_filter));
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
@@ -456,12 +456,7 @@ impl MapModel {
             let intersection = self.get_i(*i);
             let mut f = self.mercator.to_wgs84_gj(&intersection.point);
             f.set_property("kind", "diagonal_filter");
-            let split_offset = intersection
-                .roads
-                .iter()
-                .position(|el| el == &filter.group_a[0])
-                .expect("filter must contain roads that belong to intersection");
-            f.set_property("split_offset", split_offset);
+            f.set_property("is_rotated", filter.is_rotated);
             gj.features.push(f);
         }
 
@@ -541,14 +536,13 @@ impl MapModel {
                             .data
                     };
                     let intersection = self.get_i(i);
-                    let split_offset = f
-                        .property("split_offset")
-                        .expect("missing split_offset")
-                        .as_u64()
-                        .expect("unsigned integer");
+                    let is_rotated = f
+                        .property("is_rotated")
+                        .expect("missing is_rotated")
+                        .as_bool()
+                        .expect("expected a bool");
 
-                    let diagonal_filter =
-                        DiagonalFilter::new(intersection, split_offset as usize, self);
+                    let diagonal_filter = DiagonalFilter::new(intersection, is_rotated, self);
                     self.diagonal_filters
                         .insert(intersection.id, diagonal_filter);
                 }
@@ -724,13 +718,6 @@ pub struct ModalFilter {
     pub percent_along: f64,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
-pub struct DiagonalFilter {
-    pub angle: f64,
-    pub group_a: Vec<RoadID>,
-    pub group_b: Vec<RoadID>,
-}
-
 /// A DiagonalFilter is placed at a 4-way intersection, and prevents traffic from going "straight"
 /// through the intersection. Traffic must turn.
 ///
@@ -741,26 +728,35 @@ pub struct DiagonalFilter {
 /// orientation for the diagonal filter, the other orientation would effectively block the intersection.
 /// We could choose to enforce "reasonable" filtering in the UI, or keep the interface consistent
 /// and leave it up to the user to manually ensure the filter is orientated reasonably.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct DiagonalFilter {
+    /// Travel within these roads are allowed, but not to the other group.
+    pub group_a: Vec<RoadID>,
+    /// Travel within these roads are allowed, but not to the other group.
+    pub group_b: Vec<RoadID>,
+    /// The topological orientation of the filter - it determines how `intersection.roads` are split
+    /// into `group_a` and `group_b`.
+    pub is_rotated: bool,
+    /// How many degrees to rotate a vertical line to split `group_a` from `group_b`
+    pub angle: f32,
+}
+
 impl DiagonalFilter {
     /// Precondition: Intersection must be a 4-way intersection
-    fn new(
-        intersection: &Intersection,
-        split_offset: usize,
-        map_model: &MapModel,
-    ) -> DiagonalFilter {
+    fn new(intersection: &Intersection, is_rotated: bool, map_model: &MapModel) -> DiagonalFilter {
         debug_assert_eq!(
             intersection.roads.len(),
             4,
             "diagonal filters only support 4-way intersections"
         );
 
+        let split_offset = if is_rotated { 1 } else { 0 };
+
         let group_a: Vec<RoadID> = (0..2)
-            .into_iter()
             .map(|offset| intersection.roads[(offset + split_offset) % intersection.roads.len()])
             .collect();
 
         let group_b: Vec<RoadID> = (2..4)
-            .into_iter()
             .map(|offset| intersection.roads[(offset + split_offset) % intersection.roads.len()])
             .collect();
 
@@ -769,11 +765,12 @@ impl DiagonalFilter {
 
         let bearing_1 = bearing_from_endpoint(intersection.point, &road_1.linestring);
         let bearing_2 = bearing_from_endpoint(intersection.point, &road_2.linestring);
-        let diagonal_angle = diagonal_bearing(bearing_1, bearing_2);
+        let angle = diagonal_bearing(bearing_1, bearing_2) as f32;
         DiagonalFilter {
-            angle: diagonal_angle,
             group_a,
             group_b,
+            is_rotated,
+            angle,
         }
     }
 

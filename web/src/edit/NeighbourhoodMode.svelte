@@ -113,7 +113,7 @@
       return;
     }
 
-    if (intersection.hasAlreadyRotatedFilter) {
+    if (intersection.hasRotatedFilter) {
       $backend!.deleteDiagonalFilter(intersection);
       $mutationCounter++;
     } else if (intersection.filter) {

@@ -3,6 +3,7 @@ import type { Feature, Point } from "geojson";
 export type IntersectionId = number;
 
 export type DiagonalFilter = {
+  is_rotated: boolean;
   angle: number;
 };
 
@@ -31,12 +32,7 @@ export class Intersection {
     return this.feature.properties.filter?.angle;
   }
 
-  get hasAlreadyRotatedFilter(): boolean {
-    if (this.filterAngle === undefined) {
-      return false;
-    }
-    // This is potentially incorrect, if the roads aren't (approximately) evenly distributed.
-    // An alternative could be to explicitly track "isRotated" state.
-    return this.filterAngle > 180;
+  get hasRotatedFilter(): boolean {
+    return this.feature.properties.filter?.is_rotated ?? false;
   }
 }

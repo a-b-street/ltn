@@ -6,7 +6,7 @@
 
 <div style="display: flex; align-items: center;">
   {#if intersection.filter}
-    {#if intersection.hasAlreadyRotatedFilter}
+    {#if intersection.hasRotatedFilter}
       <div class="icon">❌</div>
       <img
         src={`${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`}
