@@ -27,7 +27,7 @@
     // The Feature from maplibre has its nested properties serialized as a JSON string.
     // see: https://github.com/dimfeld/svelte-maplibre/discussions/162#discussioncomment-9295264
     //
-    // So we refetch the corresponding IntersectionFeature from the neighbourhood to get all it's properties.
+    // So we refetch the corresponding IntersectionFeature from the neighbourhood to get all its properties.
     let intersectionFeature = neighbourhood.features[intersectionIdx];
     let intersection = new Intersection(
       intersectionFeature as IntersectionFeature,
