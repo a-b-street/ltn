@@ -6,9 +6,7 @@ use crate::geo_helpers::{
     limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
-use crate::impact::Impact;
 use crate::{od::DemandModel, Router};
-use crate::Router;
 use anyhow::Result;
 use geo::{
     Closest, ClosestPoint, Coord, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint,

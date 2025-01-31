@@ -20,10 +20,11 @@ export class Backend {
 
   constructor(
     osmInput: Uint8Array,
+    demandInput: Uint8Array | undefined,
     boundary: Feature<Polygon>,
     studyAreaName: string | undefined,
   ) {
-    this.inner = new LTN(osmInput, boundary, studyAreaName);
+    this.inner = new LTN(osmInput, demandInput || new Uint8Array(), boundary, studyAreaName);
   }
 
   getInvertedBoundary(): Feature<Polygon> {

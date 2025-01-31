@@ -22,13 +22,14 @@ export async function loadFromLocalStorage(key: string) {
   try {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
-    console.time("get OSM input");
-    let [buffer, boundary] = await getOsmInput(gj);
-    console.timeEnd("get OSM input");
+    console.time("get input files");
+    let [osmBuffer, demandBuffer, boundary] = await getInputFiles(gj);
+    console.timeEnd("get input files");
     console.time("load");
     backend.set(
       new Backend(
-        new Uint8Array(buffer),
+        new Uint8Array(osmBuffer),
+        demandBuffer ? new Uint8Array(demandBuffer) : undefined,
         boundary,
         gj.study_area_name || undefined,
       ),
@@ -44,24 +45,38 @@ export async function loadFromLocalStorage(key: string) {
   }
 }
 
-// Returns OSM input and the boundary polygon, either from a pre-hosted pbf
-// file or from Overpass.
-async function getOsmInput(gj: any): Promise<[ArrayBuffer, Feature<Polygon>]> {
+// Returns OSM input, optional demand model input, and the boundary polygon,
+// either from pre-hosted files or from Overpass.
+async function getInputFiles(
+  gj: any,
+): Promise<[ArrayBuffer, ArrayBuffer | null, Feature<Polygon>]> {
   if (gj.study_area_name) {
     let url1 = get(useLocalVite)
       ? `/osm/${gj.study_area_name}.pbf`
       : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
     console.log(`Grabbing ${url1}`);
-    let resp1 = await fetch(url1);
-    let bytes = await resp1.arrayBuffer();
+    let resp1 = await safeFetch(url1);
+    let osmBytes = await resp1.arrayBuffer();
 
     let url2 = get(useLocalVite)
       ? `/boundaries/${gj.study_area_name}.geojson`
       : `https://assets.od2net.org/boundaries/${gj.study_area_name}.geojson`;
-    let resp2 = await fetch(url2);
+    let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
-    return [bytes, boundary];
+    let url3 = get(useLocalVite)
+      ? `/cnt_demand/${gj.study_area_name}.bin`
+      : `https://assets.od2net.org/cnt_demand/${gj.study_area_name}.bin`;
+    console.log(`Grabbing ${url3}`);
+    let demandBytes = null;
+    try {
+      let resp3 = await safeFetch(url3);
+      demandBytes = await resp3.arrayBuffer();
+    } catch (err) {
+      console.log(`No demand model: ${err}`);
+    }
+
+    return [osmBytes, demandBytes, boundary];
   } else {
     console.log(`Grabbing from Overpass`);
     let study_area_boundary = gj.features.find(
@@ -69,7 +84,7 @@ async function getOsmInput(gj: any): Promise<[ArrayBuffer, Feature<Polygon>]> {
     )!;
     let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
     let bytes = await resp.arrayBuffer();
-    return [bytes, study_area_boundary];
+    return [bytes, null, study_area_boundary];
   }
 }
 
@@ -103,4 +118,12 @@ function randomPoint(): LngLat {
   let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
   let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
   return new LngLat(lng, lat);
+}
+
+async function safeFetch(url: string): Promise<Response> {
+  let resp = await fetch(url);
+  if (!resp.ok) {
+    throw new Error(`${url} not OK: ${resp.status}`);
+  }
+  return resp;
 }

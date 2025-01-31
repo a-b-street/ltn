@@ -34,16 +34,17 @@ automatically use the latest OSM data. These are manually managed and hosted by
 Dustin on assets.od2net.org.
 
 If you're developing locally, you can avoid hitting od2net.org by setting up
-two directories in `web/public/`: `osm` and `boundaries`. If
+three directories in `web/public/`: `osm`, `boundaries`, and `cnt_demand`. If
 `web/public/osm/areas.json` exists, then the Svelte app will load from
 localhost, not od2net.org. You can copy from od2net.org to set this up,
 choosing what study areas to cache:
 
 ```
 AREAS="bristol edinburgh strasbourg ut_dallas"
+DEMAND_AREAS=""
 
 cd web/public
-mkdir boundaries osm
+mkdir boundaries osm cnt_demand
 
 cd osm
 wget https://assets.od2net.org/severance_pbfs/areas.json
@@ -55,6 +56,12 @@ cd ../boundaries
 for x in $AREAS; do
   wget https://assets.od2net.org/boundaries/$x.geojson
 done
+
+cd ../cnt_demand
+for x in $DEMAND_AREAS; do
+  wget https://assets.od2net.org/cnt_demand/$x.bin
+done
+
 ```
 
 ### Tests

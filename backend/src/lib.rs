@@ -52,6 +52,8 @@ impl LTN {
     #[wasm_bindgen(constructor)]
     pub fn new(
         input_bytes: &[u8],
+        // Option doesn't work; the caller should just pass in 0 bytes to mean empty
+        demand_bytes: &[u8],
         boundary_input: JsValue,
         study_area_name: Option<String>,
     ) -> Result<LTN, JsValue> {
@@ -64,7 +66,10 @@ impl LTN {
         let boundary: Feature = serde_wasm_bindgen::from_value(boundary_input)?;
         let polygon = boundary.try_into().map_err(err_to_js)?;
 
-        let demand = None;
+        let mut demand = None;
+        if demand_bytes.len() > 0 {
+            demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
+        }
         let map =
             MapModel::new(input_bytes, polygon, study_area_name, demand).map_err(err_to_js)?;
         Ok(LTN {

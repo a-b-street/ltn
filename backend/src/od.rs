@@ -16,6 +16,12 @@ pub struct DemandModel {
 
 impl DemandModel {
     pub fn make_requests(mut self, map: &MapModel) -> Vec<(IntersectionID, IntersectionID, usize)> {
+        info!(
+            "Making requests from {} zones and {} desire lines",
+            self.zones.len(),
+            self.desire_lines.len()
+        );
+
         // Turn all of the zones into Mercator. Don't do this when originally building and
         // serializing them, because that process might not use exactly the same Mercator object.
         for zone in self.zones.values_mut() {
@@ -66,7 +72,6 @@ impl DemandModel {
 #[derive(Serialize, Deserialize)]
 pub struct Zone {
     // WGS84 when built originally and serialized, then Mercator right before being used
-    #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
     pub geometry: MultiPolygon,
     // The bbox, rounded to centimeters, for generate_range to work. Only calculated right before
     // use.
