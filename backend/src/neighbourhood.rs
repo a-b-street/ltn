@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use crate::geo_helpers::{make_polygon_valid, SliceNearestFrechetBoundary};
 use anyhow::Result;
-use geo::{Area, Distance, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
+use geo::{Area, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
 use geojson::{Feature, FeatureCollection, Geometry};
 use web_time::Instant;
 
@@ -17,6 +17,7 @@ pub struct Neighbourhood {
     pub interior_roads: BTreeSet<RoadID>,
     // Immutable once created
     pub perimeter_roads: BTreeSet<RoadID>,
+    pub editable_intersections: BTreeSet<IntersectionID>,
     pub border_intersections: BTreeSet<IntersectionID>,
     pub name: String,
     // Mercator
@@ -74,17 +75,28 @@ impl Neighbourhood {
         }
 
         let t2 = Instant::now();
+        let mut editable_intersections = BTreeSet::new();
         let mut border_intersections = BTreeSet::new();
         for obj in map
             .closest_intersection
             .locate_in_envelope_intersecting(&bbox)
         {
-            // Check distance to the polygon's linestring, rather than the polygon itself. Points
-            // contained within a polygon and right on the linestring both count as 0.
-            let dist = Euclidean::distance(obj.geom(), boundary_polygon.exterior());
-            // Allow a small tolerance
-            if dist < 0.1 {
-                border_intersections.insert(obj.data);
+            let intersection = map.get_i(obj.data);
+            let mut interior_connections = 0;
+            let mut perimeter_connections = 0;
+
+            for road_id in &intersection.roads {
+                if interior_roads.contains(&road_id) {
+                    interior_connections += 1;
+                } else if perimeter_roads.contains(&road_id) {
+                    perimeter_connections += 1;
+                }
+            }
+
+            if interior_connections == 4 && perimeter_connections == 0 {
+                editable_intersections.insert(intersection.id);
+            } else if interior_connections > 0 && perimeter_connections > 0 {
+                border_intersections.insert(intersection.id);
             }
         }
 
@@ -110,6 +122,7 @@ impl Neighbourhood {
         let mut n = Self {
             interior_roads,
             perimeter_roads,
+            editable_intersections,
             border_intersections,
             name,
             boundary_polygon,
@@ -191,6 +204,16 @@ impl Neighbourhood {
                 f.set_property("cell_color", *color);
             }
 
+            features.push(f);
+        }
+
+        for intersection_id in &self.editable_intersections {
+            let intersection = map.get_i(*intersection_id);
+            let mut f = map.mercator.to_wgs84_gj(&intersection.point);
+            f.set_property("kind", "editable_intersection");
+            f.set_property("intersection_id", intersection_id.0);
+            let filter = map.diagonal_filters.get(intersection_id);
+            f.set_property("filter", filter);
             features.push(f);
         }
 

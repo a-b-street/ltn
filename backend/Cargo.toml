@@ -46,6 +46,9 @@ opt-level = 3
 [[bench]]
 name = "build_neighbourhood"
 harness = false
+[[bench]]
+name = "build_map_model"
+harness = false
 
 [patch.crates-io]
 # use unreleased `geo` and `geo-types` to fix crash: https://github.com/a-b-street/ltn/issues/54

@@ -29,6 +29,10 @@ impl NeighbourhoodFixture {
 
 impl NeighbourhoodFixture {
     pub fn map_model(&self) -> Result<MapModel> {
+        self.map_model_builder()?()
+    }
+
+    pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
         let study_area_name = &self.study_area_name;
 
         let pbf_path = format!("../web/public/osm/{study_area_name}.pbf");
@@ -36,10 +40,15 @@ impl NeighbourhoodFixture {
 
         let boundary_path = format!("../web/public/boundaries/{study_area_name}.geojson");
         let boundary: Feature = std::fs::read_to_string(&boundary_path)?.parse()?;
+        let polygon: Polygon = boundary.try_into()?;
 
-        let polygon = boundary.try_into()?;
-
-        MapModel::new(&input_bytes, polygon, Some(study_area_name.to_string()))
+        Ok(move || {
+            MapModel::new(
+                &input_bytes,
+                polygon.clone(),
+                Some(study_area_name.to_string()),
+            )
+        })
     }
 
     pub fn savefile(&self) -> Result<FeatureCollection> {

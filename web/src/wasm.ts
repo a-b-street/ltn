@@ -8,6 +8,7 @@ import type {
   Polygon,
 } from "geojson";
 import type { LngLat } from "maplibre-gl";
+import type { Intersection, IntersectionFeature } from "./common/Intersection";
 
 // This is a thin TS wrapper around the auto-generated TS API. The TS
 // definitions here are trusted blindly, not checked. Little work should happen
@@ -95,6 +96,18 @@ export class Backend {
 
   deleteModalFilter(road: number) {
     this.inner.deleteModalFilter(road);
+  }
+
+  addDiagonalFilter(intersection: Intersection) {
+    this.inner.addDiagonalFilter(intersection.intersectionId);
+  }
+
+  rotateDiagonalFilter(intersection: Intersection) {
+    this.inner.rotateDiagonalFilter(intersection.intersectionId);
+  }
+
+  deleteDiagonalFilter(intersection: Intersection) {
+    this.inner.deleteDiagonalFilter(intersection.intersectionId);
   }
 
   toggleDirection(road: number) {
@@ -234,6 +247,7 @@ export interface RenderNeighbourhoodOutput {
           color: string;
         }
       >
+    | IntersectionFeature
   )[];
   undo_length: number;
   redo_length: number;

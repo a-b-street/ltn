@@ -107,6 +107,37 @@ pub fn angle_of_line(line: Line) -> f64 {
     (line.dy()).atan2(line.dx()).to_degrees()
 }
 
+/// North is 0°
+/// East is 90°
+/// South  is 180°
+/// West is 270°
+pub fn euclidean_bearing(origin: Coord, destination: Coord) -> f64 {
+    (angle_of_line(Line::new(origin, destination)) + 450.0) % 360.0
+}
+
+/// The bearing of the first segment of `linestring` starting from `endpoint`.
+///
+/// precondition: `endpoint` must be either the first or last point in `linestring`
+/// precondition: `linestring` must have at least 2 coordinates
+pub fn bearing_from_endpoint(endpoint: Point, linestring: &LineString) -> f64 {
+    assert!(
+        linestring.0.len() >= 2,
+        "zero length roads should be filtered out"
+    );
+    let next_coord = if endpoint.0 == linestring.0[0] {
+        linestring.0[1]
+    } else if endpoint.0 == linestring.0[linestring.0.len() - 1] {
+        linestring.0[linestring.0.len() - 2]
+    } else {
+        // I'm assuming this won't happen, but maybe it's possible,
+        // e.g. to different rounding schemes.
+        debug_assert!(false, "road does not terminate at intersection");
+        linestring.0[1]
+    };
+
+    euclidean_bearing(endpoint.0, next_coord)
+}
+
 pub fn angle_of_pt_on_line(linestring: &LineString, pt: Coord) -> f64 {
     let line = linestring
         .lines()
@@ -266,4 +297,104 @@ pub fn invert_polygon(wgs84_polygon: Polygon) -> Polygon {
         ]),
         vec![wgs84_polygon.into_inner().0],
     )
+}
+
+/// The "diagonal line" is an equal angular distance from a and b.
+/// The diagonal bearing is the bearing of this "diagonal line".
+///
+/// That is, given the bearing of a and b, returns the bearing of line c.
+///
+/// ```ignore
+///       a    b
+///        \  /
+///      ∂° \/ ∂°
+///    ------------ c
+/// ```
+pub fn diagonal_bearing(bearing_a: f64, bearing_b: f64) -> f64 {
+    let angle_between = bearing_b - bearing_a;
+    (angle_between / 2.0 + 90.0 + bearing_a) % 360.0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::assert_relative_eq;
+    use geo::wkt;
+
+    #[test]
+    fn test_line_bearing() {
+        let p1 = Point::new(0.0, 0.0);
+
+        // Due South in our projection
+        assert_relative_eq!(90.0, angle_of_line(Line::new(p1, Point::new(0.0, 1.0))));
+        // East
+        assert_relative_eq!(0.0, angle_of_line(Line::new(p1, Point::new(1.0, 0.0))));
+        // North
+        assert_relative_eq!(-90.0, angle_of_line(Line::new(p1, Point::new(0.0, -1.0))));
+        // West
+        assert_relative_eq!(180.0, angle_of_line(Line::new(p1, Point::new(-1.0, 0.0))));
+    }
+
+    #[test]
+    fn test_bearing_from_endpoint() {
+        let p1 = Point::new(0.0, 0.0);
+
+        // p1 is start point
+
+        // North
+        assert_relative_eq!(
+            0.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. 0.,0. -1.)))
+        );
+        // East
+        assert_relative_eq!(
+            90.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. 0.,1. 0.)))
+        );
+        // South
+        assert_relative_eq!(
+            180.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. 0.,0. 1.)))
+        );
+        // West
+        assert_relative_eq!(
+            270.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. 0.,-1. 0.)))
+        );
+        // Northwest
+        assert_relative_eq!(
+            315.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. 0.,-1. -1.)))
+        );
+
+        // Flipped - p1 is now the end point, not the start point
+
+        // North
+        assert_relative_eq!(
+            0.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. -1.,0. 0.)))
+        );
+        // East
+        assert_relative_eq!(
+            90.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(1. 0.,0. 0.)))
+        );
+        // South
+        assert_relative_eq!(
+            180.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(0. 1., 0. 0.)))
+        );
+        // West
+        assert_relative_eq!(
+            270.,
+            bearing_from_endpoint(p1, &wkt!(LINESTRING(-1. 0.,0. 0.)))
+        );
+    }
+
+    #[test]
+    fn test_diagonal_angle() {
+        assert_eq!(135.0, diagonal_bearing(0., 90.));
+        assert_eq!(270.0, diagonal_bearing(135., 225.));
+        assert_eq!(270.0, diagonal_bearing(300., 60.));
+    }
 }

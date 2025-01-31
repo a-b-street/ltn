@@ -1,10 +1,20 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON } from "svelte-maplibre";
+  import type { FeatureCollection } from "geojson";
+  import {
+    CircleLayer,
+    FillLayer,
+    GeoJSON,
+    hoverStateFilter,
+    LineLayer,
+    type LayerClickInfo,
+  } from "svelte-maplibre";
   import { notNull, PropertiesTable } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { layerId, Link, mapMetersToPixels, PrevNext } from "./common";
+  import { Style } from "./common/colors";
+  import type { IntersectionFeature } from "./common/Intersection";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -12,7 +22,22 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
+  import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
   import { backend, mode } from "./stores";
+
+  let intersection: DebugIntersection | null = null;
+  type DebugIntersection = {
+    feature: IntersectionFeature;
+    movements: FeatureCollection;
+    movementIdx: number;
+  };
+
+  function pickIntersection(e: CustomEvent<LayerClickInfo>) {
+    let feature = e.detail.features[0] as IntersectionFeature;
+    let movements = $backend!.getMovements(feature.properties.intersection_id);
+    let movementIdx = 0;
+    intersection = { feature, movements, movementIdx };
+  }
 </script>
 
 <SplitComponent>
@@ -41,6 +66,29 @@
 
   <div slot="sidebar">
     <BackButton on:click={() => ($mode = { mode: "neighbourhood" })} />
+
+    <h4>Roads</h4>
+    <p>Click a road to visit its OSM object.</p>
+    <div
+      style="display: flex; align-items: start; justify-content: space-between;"
+    >
+      <h4>Intersections</h4>
+      {#if intersection}
+        <button class="close-btn" on:click={() => (intersection = null)}>
+          Ⓧ
+        </button>
+      {/if}
+    </div>
+    {#if intersection}
+      <PropertiesTable properties={intersection.feature.properties} />
+      <h5>Turn restrictions:</h5>
+      <PrevNext
+        list={intersection.movements.features}
+        bind:idx={intersection.movementIdx}
+      />
+    {:else}
+      <p>Click an intersection to inspect its movements.</p>
+    {/if}
   </div>
 
   <div slot="map">
@@ -74,18 +122,73 @@
       </InteriorRoadLayer>
     </RenderNeighbourhood>
 
-    <GeoJSON data={notNull($backend).renderModalFilters()} generateId>
+    <ModalFilterLayer>
+      <Popup openOn="hover" let:props>
+        <PropertiesTable properties={props} />
+      </Popup>
+    </ModalFilterLayer>
+
+    <GeoJSON data={notNull($backend).getAllIntersections()} generateId>
       <CircleLayer
-        {...layerId("debug-filters")}
+        {...layerId("debug-intersections")}
         paint={{
-          "circle-radius": 15,
-          "circle-color": "black",
+          "circle-radius": mapMetersToPixels(30),
+          "circle-color": Style.mapFeature.hover.backgroundColor,
+          "circle-stroke-color": Style.mapFeature.hover.backgroundColor,
+          "circle-stroke-opacity": 0.8,
+          "circle-stroke-width": hoverStateFilter(0, 3),
+          "circle-opacity": [
+            "case",
+            [
+              "==",
+              ["get", "intersection_id"],
+              intersection?.feature?.properties?.intersection_id ?? -1,
+            ],
+            0.3,
+            hoverStateFilter(0.0, 0.5),
+          ],
         }}
+        manageHoverState
+        hoverCursor="pointer"
+        on:click={pickIntersection}
       >
         <Popup openOn="hover" let:props>
           <PropertiesTable properties={props} />
         </Popup>
       </CircleLayer>
     </GeoJSON>
+
+    {#if intersection}
+      <GeoJSON data={intersection.movements} generateId>
+        <LineLayer
+          {...layerId("debug-movements-outline")}
+          paint={{
+            "line-width": 2,
+            "line-color": "red",
+          }}
+        />
+
+        <FillLayer
+          {...layerId("debug-movements-fill")}
+          filter={["==", ["id"], intersection.movementIdx]}
+          paint={{
+            "fill-color": "cyan",
+          }}
+        />
+      </GeoJSON>
+    {/if}
   </div>
 </SplitComponent>
+
+<style>
+  button.close-btn {
+    padding: 4px;
+    background: none;
+    color: black;
+    border: none;
+    font-size: 120%;
+  }
+  button.close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+</style>

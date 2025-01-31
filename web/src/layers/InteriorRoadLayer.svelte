@@ -1,11 +1,12 @@
 <script lang="ts">
+  // TODO: This should be called "EditableRoadLayer" or something, because it optionally includes the Perimeter (requires changes to backend as well)
   import type { Feature } from "geojson";
   import type { ExpressionSpecification, LngLat } from "maplibre-gl";
   import { getContext } from "svelte";
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { makeRamp } from "svelte-utils/map";
   import { layerId, roadLineWidth } from "../common";
-  import { speedColorScale, speedLimits } from "../common/colors";
+  import { speedColorScale, speedLimits, Style } from "../common/colors";
   import { roadStyle, thickRoadsForShortcuts } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
@@ -50,7 +51,7 @@
         maxShortcuts,
         "#A32015",
       ],
-      "blue",
+      Style.mapFeature.hover.backgroundColor,
     );
   }
 

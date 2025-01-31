@@ -38,7 +38,9 @@
 
 <svelte:window on:keydown={onKeyDown} />
 
-<div style="display: flex; justify-content: space-between;">
+<div
+  style="display: flex; justify-content: space-between; align-items: center;"
+>
   <button disabled={idx == 0} on:click={prev} data-tooltip="Left">
     Previous
   </button>

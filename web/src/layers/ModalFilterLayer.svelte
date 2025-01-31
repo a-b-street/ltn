@@ -12,6 +12,7 @@
 <GeoJSON data={gj} generateId>
   <SymbolLayer
     {...layerId("modal-filters")}
+    filter={["!=", ["get", "filter_kind"], "diagonal_filter"]}
     layout={{
       "icon-image": ["get", "filter_kind"],
       "icon-rotate": ["get", "angle"],
@@ -25,4 +26,15 @@
   >
     <slot />
   </SymbolLayer>
+  <SymbolLayer
+    {...layerId("intersection-filters")}
+    filter={["==", ["get", "filter_kind"], "diagonal_filter"]}
+    layout={{
+      "icon-image": "diagonal_filter",
+      "icon-rotate": ["get", "angle", ["get", "filter"]],
+      "icon-allow-overlap": true,
+      "icon-size": 0.07,
+    }}
+    interactive={false}
+  />
 </GeoJSON>

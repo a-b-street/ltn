@@ -41,6 +41,12 @@ impl MapModel {
                     continue;
                 }
 
+                if let Some(diagonal_filter) = self.diagonal_filters.get(&i) {
+                    if !diagonal_filter.allows_movement(&(*r1, *r2)) {
+                        continue;
+                    }
+                }
+
                 let polygon = render_arrow(i, road1, road2);
                 features.push(self.mercator.to_wgs84_gj(&polygon));
             }

@@ -10,6 +10,7 @@
   import AnimatePaths from "../AnimatePaths.svelte";
   import { HelpButton, Link } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
+  import type { Intersection } from "../common/Intersection";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -18,6 +19,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "../layers";
+  import EditableIntersectionLayer from "../layers/EditableIntersectionLayer.svelte";
   import {
     animateShortcuts,
     autosave,
@@ -100,6 +102,27 @@
     let f = e.detail.features[0];
     $backend!.deleteModalFilter(f.properties!.road);
     $mutationCounter++;
+  }
+
+  function onClickIntersection(intersection: Intersection) {
+    if (action != "filter") {
+      console.assert(
+        false,
+        `this shouldn't happen - intersections should only be clickable when in 'filter' mode, not ${action}`,
+      );
+      return;
+    }
+
+    if (intersection.hasRotatedFilter) {
+      $backend!.deleteDiagonalFilter(intersection);
+      $mutationCounter++;
+    } else if (intersection.filter) {
+      $backend!.rotateDiagonalFilter(intersection);
+      $mutationCounter++;
+    } else {
+      $backend!.addDiagonalFilter(intersection);
+      $mutationCounter++;
+    }
   }
 
   function onKeyDown(e: KeyboardEvent) {
@@ -339,6 +362,11 @@
           </Popup>
         </div>
       </InteriorRoadLayer>
+      <EditableIntersectionLayer
+        interactive={action == "filter"}
+        neighbourhood={gj}
+        {onClickIntersection}
+      />
     </RenderNeighbourhood>
 
     {#if $animateShortcuts}
