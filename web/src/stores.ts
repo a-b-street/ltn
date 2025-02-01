@@ -52,7 +52,10 @@ export type Mode =
       mode: "debug-intersections";
     }
   | {
-      mode: "debug";
+      mode: "debug-neighbourhood";
+    }
+  | {
+      mode: "debug-demand";
     };
 
 export let map: Writable<Map | null> = writable(null);

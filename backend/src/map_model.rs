@@ -49,6 +49,7 @@ pub struct MapModel {
     pub directions: BTreeMap<RoadID, Direction>,
 
     pub impact: Option<Impact>,
+    pub demand: Option<DemandModel>,
 
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,

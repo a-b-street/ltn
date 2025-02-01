@@ -396,6 +396,14 @@ impl LTN {
         )
     }
 
+    #[wasm_bindgen(js_name = getDemandModel)]
+    pub fn get_demand_model(&self) -> Result<String, JsValue> {
+        let Some(ref demand) = self.map.demand else {
+            return Err(JsValue::from_str("no demand model"));
+        };
+        Ok(serde_json::to_string(&demand.to_gj(&self.map)).map_err(err_to_js)?)
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {

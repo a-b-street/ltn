@@ -213,12 +213,19 @@ pub fn create_from_osm(
         directions,
 
         impact: None,
+        demand: None,
 
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
     };
-    map.impact = Some(Impact::new(&map, demand));
+    if let Some(mut demand) = demand {
+        demand.finish_loading(&map.mercator);
+        map.impact = Some(Impact::new(&map, Some(&demand)));
+        map.demand = Some(demand);
+    } else {
+        map.impact = Some(Impact::new(&map, None));
+    }
 
     let graph = GraphSubset {
         node_to_edge: graph.node_to_edge,

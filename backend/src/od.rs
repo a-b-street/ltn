@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
 use geo::{BoundingRect, Contains, MultiPolygon, Point};
+use geojson::GeoJson;
 use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
+use utils::Mercator;
 
 use crate::{IntersectionID, MapModel};
 
@@ -15,23 +17,25 @@ pub struct DemandModel {
 }
 
 impl DemandModel {
-    pub fn make_requests(mut self, map: &MapModel) -> Vec<(IntersectionID, IntersectionID, usize)> {
-        info!(
-            "Making requests from {} zones and {} desire lines",
-            self.zones.len(),
-            self.desire_lines.len()
-        );
-
-        // Turn all of the zones into Mercator. Don't do this when originally building and
-        // serializing them, because that process might not use exactly the same Mercator object.
+    /// Turn all of the zones into Mercator. Don't do this when originally building and serializing
+    /// them, because that process might not use exactly the same Mercator object.
+    pub fn finish_loading(&mut self, mercator: &Mercator) {
         for zone in self.zones.values_mut() {
-            map.mercator.to_mercator_in_place(&mut zone.geometry);
+            mercator.to_mercator_in_place(&mut zone.geometry);
             let bbox = zone.geometry.bounding_rect().unwrap();
             zone.x1 = (bbox.min().x * 100.0) as i64;
             zone.y1 = (bbox.min().y * 100.0) as i64;
             zone.x2 = (bbox.max().x * 100.0) as i64;
             zone.y2 = (bbox.max().y * 100.0) as i64;
         }
+    }
+
+    pub fn make_requests(&self, map: &MapModel) -> Vec<(IntersectionID, IntersectionID, usize)> {
+        info!(
+            "Making requests from {} zones and {} desire lines",
+            self.zones.len(),
+            self.desire_lines.len()
+        );
 
         // TODO Plumb through UI
         // To speed up the impact calculation, how many specific requests per (zone1, zone2)? If
@@ -66,6 +70,16 @@ impl DemandModel {
             }
         }
         requests
+    }
+
+    pub fn to_gj(&self, map: &MapModel) -> GeoJson {
+        let mut features = Vec::new();
+        for (id, zone) in &self.zones {
+            let mut f = map.mercator.to_wgs84_gj(&zone.geometry);
+            f.set_property("id", id.clone());
+            features.push(f);
+        }
+        GeoJson::from(features)
     }
 }
 

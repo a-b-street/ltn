@@ -20,7 +20,7 @@ pub struct Impact {
 
 impl Impact {
     /// Calculates `requests` only
-    pub fn new(map: &MapModel, demand: Option<od::DemandModel>) -> Self {
+    pub fn new(map: &MapModel, demand: Option<&od::DemandModel>) -> Self {
         Self {
             requests: match demand {
                 Some(demand) => demand.make_requests(map),
