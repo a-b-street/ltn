@@ -206,10 +206,16 @@ export class Backend {
     return JSON.parse(this.inner.getMovements(intersection));
   }
 
-  getDemandModel(): FeatureCollection<MultiPolygon, { id: string }> {
+  getDemandModel(): FeatureCollection<MultiPolygon, ZoneDemandProps> {
     return JSON.parse(this.inner.getDemandModel());
   }
 }
+
+export type ZoneDemandProps = {
+  name: string;
+  counts_from: number[];
+  counts_to: number[];
+};
 
 export interface RenderNeighbourhoodOutput {
   type: "FeatureCollection";

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use geo::{BoundingRect, Contains, MultiPolygon, Point};
 use geojson::GeoJson;
 use nanorand::{Rng, WyRand};
@@ -8,19 +6,22 @@ use utils::Mercator;
 
 use crate::{IntersectionID, MapModel};
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct ZoneID(pub usize);
+
 /// Origin/destination demand data, representing driving trips between two zones.
 #[derive(Serialize, Deserialize)]
 pub struct DemandModel {
-    pub zones: HashMap<String, Zone>,
-    // (zone1, zone2, count), with count being the number of trips between the two zones
-    pub desire_lines: Vec<(String, String, usize)>,
+    pub zones: Vec<Zone>,
+    // (zone1, zone2, count), with count being the number of trips from zone1 to zone2
+    pub desire_lines: Vec<(ZoneID, ZoneID, usize)>,
 }
 
 impl DemandModel {
     /// Turn all of the zones into Mercator. Don't do this when originally building and serializing
     /// them, because that process might not use exactly the same Mercator object.
     pub fn finish_loading(&mut self, mercator: &Mercator) {
-        for zone in self.zones.values_mut() {
+        for zone in &mut self.zones {
             mercator.to_mercator_in_place(&mut zone.geometry);
             let bbox = zone.geometry.bounding_rect().unwrap();
             zone.x1 = (bbox.min().x * 100.0) as i64;
@@ -53,8 +54,8 @@ impl DemandModel {
             };
 
             for _ in 0..iterations {
-                let pt1 = self.zones[zone1].random_point(&mut rng);
-                let pt2 = self.zones[zone2].random_point(&mut rng);
+                let pt1 = self.zones[zone1.0].random_point(&mut rng);
+                let pt2 = self.zones[zone2.0].random_point(&mut rng);
                 if let (Some(i1), Some(i2)) = (
                     map.closest_intersection
                         .nearest_neighbor(&pt1)
@@ -73,10 +74,26 @@ impl DemandModel {
     }
 
     pub fn to_gj(&self, map: &MapModel) -> GeoJson {
+        // Per (from, to) pair, how many trips?
+        let mut from: Vec<Vec<usize>> =
+            std::iter::repeat_with(|| std::iter::repeat(0).take(self.zones.len()).collect())
+                .take(self.zones.len()).collect();
+        // Per (to, from) pair, how many trips?
+        let mut to: Vec<Vec<usize>> =
+            std::iter::repeat_with(|| std::iter::repeat(0).take(self.zones.len()).collect())
+                .take(self.zones.len()).collect();
+
+        for (zone1, zone2, count) in &self.desire_lines {
+            from[zone1.0][zone2.0] += count;
+            to[zone2.0][zone1.0] += count;
+        }
+
         let mut features = Vec::new();
-        for (id, zone) in &self.zones {
+        for (idx, zone) in self.zones.iter().enumerate() {
             let mut f = map.mercator.to_wgs84_gj(&zone.geometry);
-            f.set_property("id", id.clone());
+            f.set_property("name", zone.name.clone());
+            f.set_property("counts_from", std::mem::take(&mut from[idx]));
+            f.set_property("counts_to", std::mem::take(&mut to[idx]));
             features.push(f);
         }
         GeoJson::from(features)
@@ -85,10 +102,12 @@ impl DemandModel {
 
 #[derive(Serialize, Deserialize)]
 pub struct Zone {
-    // WGS84 when built originally and serialized, then Mercator right before being used
+    /// An original opaque string ID, from different data sources.
+    pub name: String,
+    /// WGS84 when built originally and serialized, then Mercator right before being used
     pub geometry: MultiPolygon,
-    // The bbox, rounded to centimeters, for generate_range to work. Only calculated right before
-    // use.
+    /// The bbox, rounded to centimeters, for generate_range to work. Only calculated right before
+    /// use.
     #[serde(skip_deserializing, skip_serializing)]
     pub x1: i64,
     #[serde(skip_deserializing, skip_serializing)]

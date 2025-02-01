@@ -5,7 +5,7 @@ use geo::{Intersects, MultiPolygon};
 use serde::Deserialize;
 use utils::Mercator;
 
-use backend::od::DemandModel;
+use backend::od::{DemandModel, ZoneID};
 
 fn main() -> Result<()> {
     let study_areas: Vec<StudyArea> = geojson::de::deserialize_feature_collection_str_to_vec(
@@ -27,26 +27,23 @@ fn main() -> Result<()> {
 
     for study_area in study_areas {
         let subset_zones = find_matching_zones(study_area.geometry, &zones);
+
         let mut subset_desire_lines = Vec::new();
         for (zone1, zone2, count) in &desire_lines {
-            if subset_zones.contains(zone1) && subset_zones.contains(zone2) {
-                subset_desire_lines.push((zone1.clone(), zone2.clone(), *count));
+            if let (Some(from), Some(to)) = (subset_zones.get(zone1), subset_zones.get(zone2)) {
+                subset_desire_lines.push((*from, *to, *count));
             }
         }
         let demand = DemandModel {
             zones: subset_zones
-                .into_iter()
-                .map(|name| {
-                    (
-                        name.clone(),
-                        backend::od::Zone {
-                            geometry: zones[&name].geometry.clone(),
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 0,
-                        },
-                    )
+                .into_keys()
+                .map(|name| backend::od::Zone {
+                    name: name.clone(),
+                    geometry: zones[&name].geometry.clone(),
+                    x1: 0,
+                    y1: 0,
+                    x2: 0,
+                    y2: 0,
                 })
                 .collect(),
             desire_lines: subset_desire_lines,
@@ -99,10 +96,11 @@ struct DesireLineRow {
     car_passenger: usize,
 }
 
+/// Returns a mapping from original zone name to sequential IDs
 fn find_matching_zones(
     boundary_wgs84: MultiPolygon,
     zones: &BTreeMap<String, Zone>,
-) -> BTreeSet<String> {
+) -> BTreeMap<String, ZoneID> {
     let mut matches = BTreeSet::new();
     let mercator = Mercator::from(boundary_wgs84.clone()).unwrap();
     let boundary_mercator = mercator.to_mercator(&boundary_wgs84);
@@ -115,4 +113,8 @@ fn find_matching_zones(
     }
 
     matches
+        .into_iter()
+        .enumerate()
+        .map(|(idx, name)| (name, ZoneID(idx)))
+        .collect()
 }
