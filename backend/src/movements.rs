@@ -69,7 +69,7 @@ fn render_arrow(i: IntersectionID, road1: &Road, road2: &Road) -> Polygon {
 fn pt_near_intersection(i: IntersectionID, road: &Road) -> Point {
     // If the road is long enough, offset from the intersection this much
     let distance_away = 10.0;
-    let len = road.linestring.length::<Euclidean>();
+    let len = Euclidean.length(&road.linestring);
 
     if len > distance_away {
         let pct = if road.src_i == i {

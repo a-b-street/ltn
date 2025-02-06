@@ -9,8 +9,8 @@ use crate::impact::Impact;
 use crate::Router;
 use anyhow::Result;
 use geo::{
-    Closest, ClosestPoint, Coord, Euclidean, Length, Line, LineInterpolatePoint, LineLocatePoint,
-    LineString, Point, Polygon,
+    Closest, ClosestPoint, Coord, Distance, Euclidean, Length, LineInterpolatePoint,
+    LineLocatePoint, LineString, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
@@ -212,7 +212,7 @@ impl MapModel {
                     Closest::SinglePoint(pt) => Some(pt),
                     Closest::Indeterminate => None,
                 } {
-                    let score = Line::new(click_pt, hit_pt.into()).length::<Euclidean>();
+                    let score = Euclidean.distance(click_pt, hit_pt.0);
                     let percent_along = road.linestring.line_locate_point(&hit_pt).unwrap();
                     Some(((score * 100.0) as usize, road.id, percent_along))
                 } else {
@@ -229,16 +229,14 @@ impl MapModel {
         self.roads
             .iter()
             .min_by_key(|r| {
-                let diff1 = Line::new(
+                let diff1 = Euclidean.distance(
                     r.linestring.points().next().unwrap(),
                     linestring.points().next().unwrap(),
-                )
-                .length::<Euclidean>();
-                let diff2 = Line::new(
+                );
+                let diff2 = Euclidean.distance(
                     r.linestring.points().last().unwrap(),
                     linestring.points().last().unwrap(),
-                )
-                .length::<Euclidean>();
+                );
                 ((diff1 + diff2) * 100.0) as usize
             })
             .unwrap()
@@ -703,7 +701,7 @@ impl MapModel {
 impl Road {
     // How long does it take for a car following the speed limit to cross this road?
     pub fn cost_seconds(&self) -> f64 {
-        let meters = self.linestring.length::<Euclidean>();
+        let meters = Euclidean.length(&self.linestring);
         let meters_per_second = (self.speed_mph as f64) * 0.44704;
         meters / meters_per_second
     }

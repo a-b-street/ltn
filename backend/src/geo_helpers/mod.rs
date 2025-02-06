@@ -141,7 +141,7 @@ pub fn bearing_from_endpoint(endpoint: Point, linestring: &LineString) -> f64 {
 pub fn angle_of_pt_on_line(linestring: &LineString, pt: Coord) -> f64 {
     let line = linestring
         .lines()
-        .min_by_key(|line| (Euclidean::distance(line, pt) * 10e9) as usize)
+        .min_by_key(|line| (Euclidean.distance(line, pt) * 10e9) as usize)
         .unwrap();
     angle_of_line(line)
 }
@@ -193,7 +193,7 @@ pub fn make_arrow(line: Line, thickness: f64, double_ended: bool) -> Option<Poly
     let head_size = thickness * 2.0;
     let triangle_height = head_size / 2.0_f64.sqrt();
     let angle = angle_of_line(line);
-    let length = line.length::<Euclidean>();
+    let length = Euclidean.length(&line);
 
     if length < triangle_height * 3.0 {
         return None;
