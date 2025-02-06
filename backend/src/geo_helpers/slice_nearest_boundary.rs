@@ -70,7 +70,7 @@ impl SliceNearestFrechetBoundary for Polygon {
         let mut segment_idx_closest_to_final = 0;
         let mut coord_closest_to_final = coord!(x: 0., y: 0.);
         for (segment_idx, segment) in exterior.lines().enumerate() {
-            let new_first_distance = Euclidean::distance(&segment, first_coord);
+            let new_first_distance = Euclidean.distance(&segment, first_coord);
             if new_first_distance < distance_to_first {
                 distance_to_first = new_first_distance;
                 segment_idx_closest_to_first = segment_idx;
@@ -86,7 +86,7 @@ impl SliceNearestFrechetBoundary for Polygon {
                 };
             }
 
-            let new_final_distance = Euclidean::distance(&segment, final_coord);
+            let new_final_distance = Euclidean.distance(&segment, final_coord);
             if new_final_distance < distance_to_final {
                 distance_to_final = new_final_distance;
                 segment_idx_closest_to_final = segment_idx;

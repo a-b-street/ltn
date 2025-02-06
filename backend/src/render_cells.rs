@@ -57,7 +57,7 @@ impl RenderCells {
                 let road = map.get_r(*r);
                 let slice = slice_linestring(&road.linestring, interval.start, interval.end);
                 // Walk along the center line
-                for pt in slice.densify::<Euclidean>(RESOLUTION_M / 2.0).0 {
+                for pt in Euclidean.densify(&slice, RESOLUTION_M / 2.0).0 {
                     let grid_idx = grid.idx(
                         ((pt.x - bounds.min().x) / RESOLUTION_M) as usize,
                         ((pt.y - bounds.min().y) / RESOLUTION_M) as usize,
@@ -90,9 +90,8 @@ impl RenderCells {
         // the area. The grid covers the rectangular bounds of the polygon. Rather than make an
         // enum with 3 cases, just assign a new index to mean "boundary."
         let boundary_marker = cells.len();
-        for pt in boundary_polygon
-            .exterior()
-            .densify::<Euclidean>(RESOLUTION_M / 2.0)
+        for pt in Euclidean
+            .densify(boundary_polygon.exterior(), RESOLUTION_M / 2.0)
             .0
         {
             // TODO Refactor helpers to transform between map-space and the grid tiles. Possibly

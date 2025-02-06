@@ -140,7 +140,7 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
                         if interval.start == 0.0 {
                             visited_start = true;
                         }
-                        if interval.end == next_road.linestring.length::<Euclidean>() {
+                        if interval.end == Euclidean.length(&next_road.linestring) {
                             visited_end = true;
                         }
                     }

@@ -171,7 +171,7 @@ impl Route {
         let mut time = 0.0;
         for (r, _) in &self.steps {
             let road = &map.roads[r.0];
-            distance += road.linestring.length::<Euclidean>();
+            distance += Euclidean.length(&road.linestring);
             time += road.cost_seconds();
         }
         (distance, time)

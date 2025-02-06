@@ -69,7 +69,7 @@ impl Shortcuts {
                             let road = map.find_edge(i1, i2);
                             steps.push((road.id, i1, i2));
                             *count_per_road.entry(road.id).or_insert(0) += 1;
-                            shortcut_length += road.linestring.length::<Euclidean>();
+                            shortcut_length += Euclidean.length(&road.linestring);
                         }
 
                         // How long is the shortest route through the original router, using this
@@ -79,7 +79,7 @@ impl Shortcuts {
                             map.get_i(*start).point.into(),
                             map.get_i(*end).point.into(),
                         ) {
-                            Some(route) => route.to_linestring(map).length::<Euclidean>(),
+                            Some(route) => Euclidean.length(&route.to_linestring(map)),
                             None => {
                                 warn!("Found a shortcut from {start} to {end}, but not a route using the whole map");
                                 shortcut_length
@@ -123,7 +123,7 @@ impl Path {
         }
         let linestring = LineString::new(pts);
 
-        let length = linestring.length::<Euclidean>();
+        let length = Euclidean.length(&linestring);
         let mut f = map.mercator.to_wgs84_gj(&linestring);
         f.set_property("directness", self.directness);
         f.set_property("length_meters", length);

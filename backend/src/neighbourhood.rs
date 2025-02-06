@@ -344,11 +344,11 @@ fn line_in_polygon(
     let mut sum = 0.0;
     // TODO: update this to use i_overlay impl
     for clipped in clip_linestring_to_polygon(linestring, polygon) {
-        sum += clipped.length::<Euclidean>();
+        sum += Euclidean.length(&clipped);
     }
     // How much of the clipped linestring is inside the boundary? If it's nearly 1, then this
     // road is interior.
-    let ratio_inside = sum / linestring.length::<Euclidean>();
+    let ratio_inside = sum / Euclidean.length(linestring);
     if ratio_inside > 0.99 {
         LineInPolygon::Inside
     } else if ratio_inside < 0.01 {
