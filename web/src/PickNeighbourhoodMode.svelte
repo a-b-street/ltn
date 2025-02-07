@@ -150,6 +150,11 @@
             Debug intersections
           </Link>
         </li>
+        <li>
+          <Link on:click={() => ($mode = { mode: "debug-demand" })}>
+            Debug demand
+          </Link>
+        </li>
       </ul>
     </nav>
   </div>

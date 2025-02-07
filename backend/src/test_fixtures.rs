@@ -45,10 +45,12 @@ impl NeighbourhoodFixture {
         let multi_polygon: MultiPolygon = polygon.into();
 
         Ok(move || {
+            let demand = None;
             MapModel::new(
                 &input_bytes,
                 multi_polygon.clone(),
                 Some(study_area_name.to_string()),
+                demand,
             )
         })
     }

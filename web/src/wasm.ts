@@ -20,10 +20,16 @@ export class Backend {
 
   constructor(
     osmInput: Uint8Array,
+    demandInput: Uint8Array | undefined,
     boundary: Feature<Polygon>,
     studyAreaName: string | undefined,
   ) {
-    this.inner = new LTN(osmInput, boundary, studyAreaName);
+    this.inner = new LTN(
+      osmInput,
+      demandInput || new Uint8Array(),
+      boundary,
+      studyAreaName,
+    );
   }
 
   getInvertedBoundary(): Feature<Polygon> {
@@ -199,7 +205,17 @@ export class Backend {
   getMovements(intersection: number): FeatureCollection<Polygon> {
     return JSON.parse(this.inner.getMovements(intersection));
   }
+
+  getDemandModel(): FeatureCollection<MultiPolygon, ZoneDemandProps> {
+    return JSON.parse(this.inner.getDemandModel());
+  }
 }
+
+export type ZoneDemandProps = {
+  name: string;
+  counts_from: number[];
+  counts_to: number[];
+};
 
 export interface RenderNeighbourhoodOutput {
   type: "FeatureCollection";

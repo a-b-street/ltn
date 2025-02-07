@@ -130,13 +130,13 @@ impl Router {
     pub fn od_to_counts(
         &self,
         map: &MapModel,
-        requests: &Vec<(IntersectionID, IntersectionID)>,
+        requests: &Vec<(IntersectionID, IntersectionID, usize)>,
     ) -> HashMap<RoadID, usize> {
         let mut results = HashMap::new();
-        for (i1, i2) in requests {
+        for (i1, i2, count) in requests {
             if let Some(route) = self.route_from_intersections(map, *i1, *i2) {
                 for (r, _) in route.steps {
-                    *results.entry(r).or_insert(0) += 1;
+                    *results.entry(r).or_insert(0) += *count;
                 }
             }
         }
