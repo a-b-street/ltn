@@ -27,6 +27,7 @@ mod impact;
 mod map_model;
 mod movements;
 mod neighbourhood;
+pub mod od;
 mod render_cells;
 mod route;
 mod route_snapper;
@@ -51,6 +52,8 @@ impl LTN {
     #[wasm_bindgen(constructor)]
     pub fn new(
         input_bytes: &[u8],
+        // Option doesn't work; the caller should just pass in 0 bytes to mean empty
+        demand_bytes: &[u8],
         boundary_input: JsValue,
         study_area_name: Option<String>,
     ) -> Result<LTN, JsValue> {
@@ -70,7 +73,12 @@ impl LTN {
             }
         };
 
-        let map = MapModel::new(input_bytes, multi_polygon, study_area_name).map_err(err_to_js)?;
+        let mut demand = None;
+        if demand_bytes.len() > 0 {
+            demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
+        }
+        let map = MapModel::new(input_bytes, multi_polygon, study_area_name, demand)
+            .map_err(err_to_js)?;
         Ok(LTN {
             map,
             neighbourhood: None,
@@ -393,6 +401,14 @@ impl LTN {
             serde_json::to_string(&self.map.get_movements(IntersectionID(intersection)))
                 .map_err(err_to_js)?,
         )
+    }
+
+    #[wasm_bindgen(js_name = getDemandModel)]
+    pub fn get_demand_model(&self) -> Result<String, JsValue> {
+        let Some(ref demand) = self.map.demand else {
+            return Err(JsValue::from_str("no demand model"));
+        };
+        Ok(serde_json::to_string(&demand.to_gj(&self.map)).map_err(err_to_js)?)
     }
 
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to

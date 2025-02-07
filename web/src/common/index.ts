@@ -90,3 +90,7 @@ export async function safeFetch(url: string): Promise<Response> {
   }
   return response;
 }
+
+export function sum(list: number[]): number {
+  return list.reduce((total, x) => total + x, 0);
+}

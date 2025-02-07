@@ -107,6 +107,9 @@ const layerZorder = [
   "draw-area-lines",
   "draw-area-preview",
 
+  "debug-demand-fill",
+  "debug-demand-outline",
+
   "one-ways",
 
   dataviz("Road labels"),

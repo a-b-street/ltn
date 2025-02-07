@@ -229,7 +229,9 @@
           </Link>
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "debug" })}>Debug</Link>
+          <Link on:click={() => ($mode = { mode: "debug-neighbourhood" })}>
+            Debug
+          </Link>
         </li>
       </ul>
     </nav>

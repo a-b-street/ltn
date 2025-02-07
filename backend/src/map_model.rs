@@ -6,7 +6,7 @@ use crate::geo_helpers::{
     invert_multi_polygon, limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
-use crate::Router;
+use crate::{od::DemandModel, Router};
 use anyhow::Result;
 use geo::{
     Closest, ClosestPoint, Coord, Distance, Euclidean, Length, LineInterpolatePoint,
@@ -49,6 +49,7 @@ pub struct MapModel {
     pub directions: BTreeMap<RoadID, Direction>,
 
     pub impact: Option<Impact>,
+    pub demand: Option<DemandModel>,
 
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
@@ -134,8 +135,9 @@ impl MapModel {
         input_bytes: &[u8],
         boundary_wgs84: MultiPolygon,
         study_area_name: Option<String>,
+        demand: Option<DemandModel>,
     ) -> Result<MapModel> {
-        crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name)
+        crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name, demand)
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {

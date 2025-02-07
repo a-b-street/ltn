@@ -24,8 +24,9 @@
   } from "svelte-utils/top_bar_layout";
   import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
+  import DebugDemandMode from "./DebugDemandMode.svelte";
   import DebugIntersectionsMode from "./DebugIntersectionsMode.svelte";
-  import DebugMode from "./DebugMode.svelte";
+  import DebugNeighbourhoodMode from "./DebugNeighbourhoodMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactDetailMode from "./ImpactDetailMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
@@ -182,10 +183,12 @@
           <PredictImpactMode />
         {:else if $mode.mode == "impact-detail"}
           <ImpactDetailMode road={$mode.road} />
-        {:else if $mode.mode == "debug"}
-          <DebugMode />
+        {:else if $mode.mode == "debug-neighbourhood"}
+          <DebugNeighbourhoodMode />
         {:else if $mode.mode == "debug-intersections"}
           <DebugIntersectionsMode />
+        {:else if $mode.mode == "debug-demand"}
+          <DebugDemandMode />
         {/if}
       {/if}
       <DisableInteractiveLayers />

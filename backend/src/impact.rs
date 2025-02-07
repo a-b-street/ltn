@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 
 use geojson::{Feature, FeatureCollection};
-use nanorand::{Rng, WyRand};
 
-use crate::{IntersectionID, MapModel, RoadID};
+use crate::{od, IntersectionID, MapModel, RoadID};
 
 // TODO Rename?
 /// Besides just studying the impact on shortcuts within one neighbourhood boundary, the user can
@@ -11,7 +10,8 @@ use crate::{IntersectionID, MapModel, RoadID};
 /// before and after changes for every origin/destination "OD" pairs, then counting routes per
 /// road.
 pub struct Impact {
-    requests: Vec<(IntersectionID, IntersectionID)>,
+    // (i1, i2, count) -- `count` identical trips from `i1` to `i2`
+    requests: Vec<(IntersectionID, IntersectionID, usize)>,
 
     // TODO Can use Vec for perf
     counts_before: HashMap<RoadID, usize>,
@@ -20,9 +20,12 @@ pub struct Impact {
 
 impl Impact {
     /// Calculates `requests` only
-    pub fn new(map: &MapModel) -> Self {
+    pub fn new(map: &MapModel, demand: Option<&od::DemandModel>) -> Self {
         Self {
-            requests: synthetic_od_requests(map),
+            requests: match demand {
+                Some(demand) => demand.make_requests(map),
+                None => od::synthetic_od_requests(map),
+            },
             counts_before: HashMap::new(),
             counts_after: HashMap::new(),
         }
@@ -91,7 +94,7 @@ impl Impact {
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
-        for (i1, i2) in &self.requests {
+        for (i1, i2, _) in &self.requests {
             let Some(route1) = router_before.route_from_intersections(map, *i1, *i2) else {
                 continue;
             };
@@ -109,18 +112,4 @@ impl Impact {
 
         changed_paths
     }
-}
-
-/// Deterministically produce a bunch of OD pairs, just as a fallback when there's no real data
-fn synthetic_od_requests(map: &MapModel) -> Vec<(IntersectionID, IntersectionID)> {
-    let num_requests = 1_000;
-
-    let mut rng = WyRand::new_seed(42);
-    let mut requests = Vec::new();
-    for _ in 0..num_requests {
-        let i1 = IntersectionID(rng.generate_range(0..map.intersections.len()));
-        let i2 = IntersectionID(rng.generate_range(0..map.intersections.len()));
-        requests.push((i1, i2));
-    }
-    requests
 }
