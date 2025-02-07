@@ -1,6 +1,9 @@
 *.swp
 target/
 node_modules/
+data_prep/scotland/tmp
 # Local symlinks to avoid hitting od2net.org
 web/public/osm
 web/public/boundaries
+web/public/cnt_osm
+web/public/cnt_boundaries
