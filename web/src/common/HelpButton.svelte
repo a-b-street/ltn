@@ -20,7 +20,7 @@
 
 <style>
   button {
-    background: none;
+    background: none !important;
     border: 1px solid rgba(0, 0, 0, 0);
   }
 
