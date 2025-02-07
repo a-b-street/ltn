@@ -104,8 +104,8 @@ async function getInputFiles(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
     )!;
     let resp = await safeFetch(overpassQueryForPolygon(study_area_boundary));
-    let bytes = await resp.arrayBuffer();
-    return [bytes, null, study_area_boundary];
+    let osmBytes = await resp.arrayBuffer();
+    return [osmBytes, null, study_area_boundary];
   }
 }
 
