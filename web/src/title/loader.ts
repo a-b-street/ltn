@@ -4,6 +4,7 @@ import { RouteTool } from "route-snapper-ts";
 import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
 import { get, writable } from "svelte/store";
+import { safeFetch } from "../common";
 import { routeTool } from "../common/draw_area/stores";
 import {
   backend,
@@ -23,7 +24,7 @@ export async function loadFromLocalStorage(key: string) {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
     console.time("get OSM input");
-    let [buffer, boundary] = await getOsmInput(gj);
+    let [buffer, boundary] = await getOsmInput(gj, key.startsWith("ltn_cnt/"));
     console.timeEnd("get OSM input");
     console.time("load");
     backend.set(
@@ -46,19 +47,38 @@ export async function loadFromLocalStorage(key: string) {
 
 // Returns OSM input and the boundary polygon, either from a pre-hosted pbf
 // file or from Overpass.
-async function getOsmInput(gj: any): Promise<[ArrayBuffer, Feature<Polygon>]> {
-  if (gj.study_area_name) {
+async function getOsmInput(
+  gj: any,
+  isCnt: boolean,
+): Promise<[ArrayBuffer, Feature<Polygon>]> {
+  if (isCnt) {
+    // CNT projects are stored in a different place
+    let url1 = get(useLocalVite)
+      ? `/cnt_osm/${gj.study_area_name}.osm.pbf`
+      : `https://assets.od2net.org/cnt_osm/${gj.study_area_name}.osm.pbf`;
+    console.log(`Grabbing ${url1}`);
+    let resp1 = await safeFetch(url1);
+    let bytes = await resp1.arrayBuffer();
+
+    let url2 = get(useLocalVite)
+      ? `/cnt_boundaries/${gj.study_area_name}.geojson`
+      : `https://assets.od2net.org/cnt_boundaries/${gj.study_area_name}.geojson`;
+    let resp2 = await safeFetch(url2);
+    let boundary = await resp2.json();
+
+    return [bytes, boundary];
+  } else if (gj.study_area_name) {
     let url1 = get(useLocalVite)
       ? `/osm/${gj.study_area_name}.pbf`
       : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
     console.log(`Grabbing ${url1}`);
-    let resp1 = await fetch(url1);
+    let resp1 = await safeFetch(url1);
     let bytes = await resp1.arrayBuffer();
 
     let url2 = get(useLocalVite)
       ? `/boundaries/${gj.study_area_name}.geojson`
       : `https://assets.od2net.org/boundaries/${gj.study_area_name}.geojson`;
-    let resp2 = await fetch(url2);
+    let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
     return [bytes, boundary];
@@ -67,7 +87,7 @@ async function getOsmInput(gj: any): Promise<[ArrayBuffer, Feature<Polygon>]> {
     let study_area_boundary = gj.features.find(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
     )!;
-    let resp = await fetch(overpassQueryForPolygon(study_area_boundary));
+    let resp = await safeFetch(overpassQueryForPolygon(study_area_boundary));
     let bytes = await resp.arrayBuffer();
     return [bytes, study_area_boundary];
   }

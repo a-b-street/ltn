@@ -81,3 +81,12 @@ export function mapMetersToPixels(
     ["max", ["/", mapMeters, maxZoomPixelsPerMeter], minimumPixels],
   ];
 }
+
+// Fetch a URL, throwing if the HTTP response isn't OK.
+export async function safeFetch(url: string): Promise<Response> {
+  let response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`${url} not OK: ${response.status}`);
+  }
+  return response;
+}
