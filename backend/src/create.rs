@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
-use geo::{Coord, LineInterpolatePoint, LineString, Polygon};
+use geo::{Coord, LineInterpolatePoint, LineString, MultiPolygon};
 use osm_reader::{NodeID, OsmID, RelationID, WayID};
 use petgraph::graphmap::UnGraphMap;
 use rstar::{primitives::GeomWithData, RTree};
@@ -130,7 +130,7 @@ impl OsmReader for Osm {
 
 pub fn create_from_osm(
     input_bytes: &[u8],
-    boundary_wgs84: Polygon,
+    boundary_wgs84: MultiPolygon,
     study_area_name: Option<String>,
 ) -> Result<MapModel> {
     let mut osm = Osm::default();

@@ -3,8 +3,8 @@ pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 
 use geo::{
     BooleanOps, BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
-    LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, Point, Polygon, Rect,
-    Validation,
+    LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point,
+    Polygon, Rect, Validation,
 };
 use rstar::AABB;
 use utils::LineSplit;
@@ -296,6 +296,25 @@ pub fn invert_polygon(wgs84_polygon: Polygon) -> Polygon {
             (180.0, 90.0),
         ]),
         vec![wgs84_polygon.into_inner().0],
+    )
+}
+
+/// Create a polygon covering the world, minus a hole for each polygon in the input multipolygon.
+/// Assumes the input polygons are in WGS84 and have no holes themselves.
+pub fn invert_multi_polygon(wgs84_multipolygon: MultiPolygon) -> Polygon {
+    Polygon::new(
+        LineString::from(vec![
+            (180.0, 90.0),
+            (-180.0, 90.0),
+            (-180.0, -90.0),
+            (180.0, -90.0),
+            (180.0, 90.0),
+        ]),
+        wgs84_multipolygon
+            .0
+            .into_iter()
+            .map(|polygon| polygon.into_inner().0)
+            .collect(),
     )
 }
 

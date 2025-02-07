@@ -2,15 +2,15 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt;
 
 use crate::geo_helpers::{
-    angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing, invert_polygon,
-    limit_angle, linestring_intersection,
+    angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
+    invert_multi_polygon, limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
 use crate::Router;
 use anyhow::Result;
 use geo::{
     Closest, ClosestPoint, Coord, Distance, Euclidean, Length, LineInterpolatePoint,
-    LineLocatePoint, LineString, Point, Polygon,
+    LineLocatePoint, LineString, MultiPolygon, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
@@ -24,7 +24,7 @@ pub struct MapModel {
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
     pub study_area_name: Option<String>,
-    pub boundary_wgs84: Polygon,
+    pub boundary_wgs84: MultiPolygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
     pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
 
@@ -132,7 +132,7 @@ impl MapModel {
     /// Call with bytes of an osm.pbf or osm.xml string
     pub fn new(
         input_bytes: &[u8],
-        boundary_wgs84: Polygon,
+        boundary_wgs84: MultiPolygon,
         study_area_name: Option<String>,
     ) -> Result<MapModel> {
         crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name)
@@ -680,7 +680,7 @@ impl MapModel {
 
     /// Return a polygon covering the world, minus a hole for the study area boundary, in WGS84
     pub fn invert_study_area_boundary(&self) -> Polygon {
-        invert_polygon(self.boundary_wgs84.clone())
+        invert_multi_polygon(self.boundary_wgs84.clone())
     }
 
     /// What're the names of bus routes along a road?

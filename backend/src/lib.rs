@@ -61,9 +61,16 @@ impl LTN {
         });
 
         let boundary: Feature = serde_wasm_bindgen::from_value(boundary_input)?;
-        let polygon = boundary.try_into().map_err(err_to_js)?;
+        let boundary_geom: geo::Geometry = boundary.try_into().map_err(err_to_js)?;
+        let multi_polygon = match boundary_geom {
+            geo::Geometry::Polygon(p) => p.into(),
+            geo::Geometry::MultiPolygon(mp) => mp,
+            _ => {
+                return Err(JsValue::from_str("unexpected boundary geometry type"));
+            }
+        };
 
-        let map = MapModel::new(input_bytes, polygon, study_area_name).map_err(err_to_js)?;
+        let map = MapModel::new(input_bytes, multi_polygon, study_area_name).map_err(err_to_js)?;
         Ok(LTN {
             map,
             neighbourhood: None,
