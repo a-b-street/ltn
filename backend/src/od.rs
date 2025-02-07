@@ -139,10 +139,12 @@ pub fn synthetic_od_requests(map: &MapModel) -> Vec<(IntersectionID, Intersectio
 
     let mut rng = WyRand::new_seed(42);
     let mut requests = Vec::new();
-    for _ in 0..num_requests {
+    while requests.len() != num_requests {
         let i1 = IntersectionID(rng.generate_range(0..map.intersections.len()));
         let i2 = IntersectionID(rng.generate_range(0..map.intersections.len()));
-        requests.push((i1, i2, 1));
+        if i1 != i2 {
+            requests.push((i1, i2, 1));
+        }
     }
     requests
 }
