@@ -3,8 +3,10 @@ import json
 
 
 # This tool takes a GeoJSON with many features, and prepares Osmium to extract
-# a boundary for each one. The output filenames are based on a feature's `kind`
-# and `name` properties. See
+# a boundary for each one. It's faster to create multiple PBF extracts (based
+# on --batch_size) with one osmium pass, so this script writes a config that's
+# then later run. The output filenames are based on a feature's `kind` and
+# `name` properties. See
 # https://osmcode.org/osmium-tool/manual.html#creating-geographic-extracts
 def main():
     parser = argparse.ArgumentParser()
