@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { ControlButton, LineLayer, VectorTileSource } from "svelte-maplibre";
+  import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { QualitativeLegend, SequentialLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
-  import { layerId, roadLineWidth } from "../common";
+  import { HelpButton, layerId, roadLineWidth } from "../common";
   import { assetUrl } from "../stores";
 
   let showTraffic = false;
@@ -30,30 +30,57 @@
   };
 </script>
 
-<ControlButton on:click={() => (showTraffic = !showTraffic)}>
+<button class="secondary" on:click={() => (showTraffic = !showTraffic)}>
   Traffic
-</ControlButton>
+</button>
 {#if showTraffic}
   <div>
     <SequentialLegend colorScale={traffic.colorScale} limits={traffic.limits} />
+    <HelpButton>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </HelpButton>
   </div>
 {/if}
 
-<ControlButton on:click={() => (showLos = !showLos)}>
+<button class="secondary" on:click={() => (showLos = !showLos)}>
   Level of Service
-</ControlButton>
+</button>
 {#if showLos}
   <div>
     <QualitativeLegend colors={levelOfServiceColors} horiz />
+    <HelpButton>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </HelpButton>
   </div>
 {/if}
 
-<ControlButton on:click={() => (showExistingInfra = !showExistingInfra)}>
+<button
+  class="secondary"
+  on:click={() => (showExistingInfra = !showExistingInfra)}
+>
   Existing cycle infrastructure
-</ControlButton>
+</button>
 {#if showExistingInfra}
   <div>
     <QualitativeLegend colors={infraTypeColors} horiz />
+    <HelpButton>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </HelpButton>
   </div>
 {/if}
 
