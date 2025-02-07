@@ -55,6 +55,21 @@ cd ../boundaries
 for x in $AREAS; do
   wget https://assets.od2net.org/boundaries/$x.geojson
 done
+cd ..
+```
+
+There are two more directories particular to Scotland. To cache all of that data:
+
+```
+# Still in web/public
+
+mkdir cnt_osm cnt_boundaries
+jq '.features[] | .properties.kind + "_" + .properties.name' ../../data_prep/scotland/boundaries.geojson | sed 's/"//g' | while read x; do
+  wget https://assets.od2net.org/cnt_boundaries/$x.geojson
+  wget https://assets.od2net.org/cnt_osm/$x.osm.pbf
+  mv $x.geojson cnt_boundaries
+  mv $x.osm.pbf cnt_osm
+done
 ```
 
 ### Tests
