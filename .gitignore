@@ -3,6 +3,7 @@ target/
 node_modules/
 data_prep/scotland/tmp
 data_prep/scotland/demand
+data_prep/scotland/out_layers
 # Local symlinks to avoid hitting od2net.org
 web/public/osm
 web/public/boundaries
