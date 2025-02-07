@@ -4,27 +4,20 @@
 # For expediency and deterministic tests, this script downloads some
 # pre-configured areas, which the web app will load from localhost.
 
-cd "$(git rev-parse --show-toplevel)"
+APP_ROOT=$(git rev-parse --show-toplevel)
+
+./bin/download-local-test-data.sh
 
 download_to_subdir() {
     local subdir=$1
     local url=$2
 
     mkdir -p "$subdir"
-    (wget -P "$subdir" --timestamping "$url" && echo "✅ $url") \
-        || echo "❌ Download failed: $url"
+    (wget -P "$subdir" --timestamping "$url" && echo "✅ (CNT) $url") \
+        || echo "❌ (CNT) Download failed: $url"
 }
 
-cd web/public
-
-download_to_subdir osm https://assets.od2net.org/severance_pbfs/areas.json
-
-# Global data used for tests and demo data
-AREAS="bristol edinburgh strasbourg ut_dallas"
-for x in $AREAS; do
-    download_to_subdir severance_pbfs "https://assets.od2net.org/severance_pbfs/$x.pbf"
-    download_to_subdir boundaries "https://assets.od2net.org/boundaries/$x.geojson"
-done
+cd "${APP_ROOT}/web/public"
 
 # Scotland specific data
 jq '.features[] | .properties.kind + "_" + .properties.name' ../../data_prep/scotland/boundaries.geojson | sed 's/"//g' | while read x; do

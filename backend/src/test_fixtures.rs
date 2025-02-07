@@ -35,7 +35,7 @@ impl NeighbourhoodFixture {
     pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
         let study_area_name = &self.study_area_name;
 
-        let pbf_path = format!("../web/public/osm/{study_area_name}.pbf");
+        let pbf_path = format!("../web/public/severance_pbfs/{study_area_name}.pbf");
         let input_bytes = std::fs::read(&pbf_path)?;
 
         let boundary_path = format!("../web/public/boundaries/{study_area_name}.geojson");
