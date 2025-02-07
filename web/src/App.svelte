@@ -42,6 +42,7 @@
     maptilerApiKey,
     maptilerBasemap,
     mode,
+    projectName,
     showAbout,
     useLocalVite,
   } from "./stores";
@@ -153,7 +154,9 @@
       <NavigationControl />
       <ScaleControl />
       <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
-      <ContextualLayers />
+      {#if $projectName.startsWith("ltn_cnt/")}
+        <ContextualLayers />
+      {/if}
 
       <div bind:this={mapDiv} />
 
