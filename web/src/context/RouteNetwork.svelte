@@ -3,9 +3,9 @@
     DataDrivenPropertyValueSpecification,
     ExpressionSpecification,
   } from "maplibre-gl";
-  import { ControlButton, LineLayer, VectorTileSource } from "svelte-maplibre";
+  import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { layerId } from "../common";
+  import { HelpButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
   let show = false;
@@ -131,8 +131,13 @@
   }
 </script>
 
-<ControlButton on:click={() => (show = !show)}>Route network</ControlButton>
+<button class="secondary" on:click={() => (show = !show)}>Route network</button>
 {#if show}
+  <HelpButton>
+    <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
+      Data from NPT
+    </a>
+  </HelpButton>
   <label>
     Trip purpose:
     <select bind:value={purpose}>
