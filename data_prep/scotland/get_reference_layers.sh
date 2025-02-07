@@ -28,7 +28,7 @@ function gp_and_hospitals {
           $1 \
           -sql 'SELECT address AS name FROM "GP_Practices_-_Scotland"'
 
-  # Manually register and download GeoJSON from https://data.spatialhub.scot/dataset/gp_practices-i://data.spatialhub.scot/dataset/nhs_hospitals-is
+  # Manually register and download GeoJSON from https://data.spatialhub.scot/dataset/nhs_hospitals-is
   ogr2ogr tmp/hospitals.geojson \
           -t_srs EPSG:4326 \
           $2 \
