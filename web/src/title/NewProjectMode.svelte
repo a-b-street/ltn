@@ -5,14 +5,14 @@
   import { Loading } from "svelte-utils";
   import { OverpassSelector } from "svelte-utils/overpass";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { Link } from "../common";
+  import { Link, safeFetch } from "../common";
   import {
+    assetUrl,
     autosave,
     backend,
     map,
     mode,
     projectName,
-    useLocalVite,
   } from "../stores";
   import { Backend } from "../wasm";
   import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
@@ -23,11 +23,7 @@
   let loading = "";
 
   onMount(async () => {
-    let resp = await fetch(
-      $useLocalVite
-        ? "/osm/areas.json"
-        : "https://assets.od2net.org/severance_pbfs/areas.json",
-    );
+    let resp = await safeFetch(assetUrl("severance_pbfs/areas.json"));
     exampleAreas = await resp.json();
   });
 

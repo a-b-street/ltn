@@ -7,6 +7,7 @@ import { get, writable } from "svelte/store";
 import { safeFetch } from "../common";
 import { routeTool } from "../common/draw_area/stores";
 import {
+  assetUrl,
   backend,
   map,
   mode,
@@ -14,7 +15,6 @@ import {
   projectName,
   route_pt_a,
   route_pt_b,
-  useLocalVite,
 } from "../stores";
 import { Backend } from "../wasm";
 
@@ -57,22 +57,16 @@ async function getInputFiles(
 ): Promise<[ArrayBuffer, ArrayBuffer | null, Feature<Polygon>]> {
   if (isCnt) {
     // CNT projects are stored in a different place
-    let url1 = get(useLocalVite)
-      ? `/cnt_osm/${gj.study_area_name}.osm.pbf`
-      : `https://assets.od2net.org/cnt_osm/${gj.study_area_name}.osm.pbf`;
+    let url1 = assetUrl(`cnt_osm/${gj.study_area_name}.osm.pbf`);
     console.log(`Grabbing ${url1}`);
     let resp1 = await safeFetch(url1);
     let osmBytes = await resp1.arrayBuffer();
 
-    let url2 = get(useLocalVite)
-      ? `/cnt_boundaries/${gj.study_area_name}.geojson`
-      : `https://assets.od2net.org/cnt_boundaries/${gj.study_area_name}.geojson`;
+    let url2 = assetUrl(`cnt_boundaries/${gj.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
-    let url3 = get(useLocalVite)
-      ? `/cnt_demand/demand_${gj.study_area_name}.bin`
-      : `https://assets.od2net.org/cnt_demand/demand_${gj.study_area_name}.bin`;
+    let url3 = assetUrl(`cnt_demand/demand_${gj.study_area_name}.bin`);
     console.log(`Grabbing ${url3}`);
     let demandBytes = null;
     try {
@@ -84,16 +78,12 @@ async function getInputFiles(
 
     return [osmBytes, demandBytes, boundary];
   } else if (gj.study_area_name) {
-    let url1 = get(useLocalVite)
-      ? `/osm/${gj.study_area_name}.pbf`
-      : `https://assets.od2net.org/severance_pbfs/${gj.study_area_name}.pbf`;
+    let url1 = assetUrl(`severance_pbfs/${gj.study_area_name}.pbf`);
     console.log(`Grabbing ${url1}`);
     let resp1 = await safeFetch(url1);
     let osmBytes = await resp1.arrayBuffer();
 
-    let url2 = get(useLocalVite)
-      ? `/boundaries/${gj.study_area_name}.geojson`
-      : `https://assets.od2net.org/boundaries/${gj.study_area_name}.geojson`;
+    let url2 = assetUrl(`boundaries/${gj.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 

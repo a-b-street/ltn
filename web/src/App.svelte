@@ -2,6 +2,7 @@
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
   import About from "./About.svelte";
+  import ContextualLayers from "./context/ContextualLayers.svelte";
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import initLtn from "backend";
   import type { Map } from "maplibre-gl";
@@ -56,7 +57,7 @@
 
     // When running locally if a vite public/ directory is set up, load from that for speed
     try {
-      let resp = await fetch("/osm/areas.json");
+      let resp = await fetch("/severance_pbfs/areas.json");
       if (resp.ok) {
         $useLocalVite = true;
         console.log("Using local cache, not od2net.org");
@@ -152,7 +153,10 @@
       <NavigationControl />
       <ScaleControl />
       <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
+      <ContextualLayers />
+
       <div bind:this={mapDiv} />
+
       {#if $mode.mode == "title"}
         <TitleMode {wasmReady} firstLoad={$mode.firstLoad} />
       {:else if $mode.mode == "new-project"}

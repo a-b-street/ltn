@@ -60,7 +60,6 @@ export type Mode =
 
 export let map: Writable<Map | null> = writable(null);
 
-export let useLocalVite: Writable<boolean> = writable(false);
 // The exact key in local storage
 export let projectName: Writable<string> = writable("");
 export let showAbout: Writable<boolean> = writable(true);
@@ -90,4 +89,10 @@ export function autosave() {
     window.alert("Autosave failed; no projectName set?!");
   }
   window.localStorage.setItem(key, JSON.stringify(get(backend)!.toSavefile()));
+}
+
+export let useLocalVite: Writable<boolean> = writable(false);
+
+export function assetUrl(path: string): string {
+  return get(useLocalVite) ? `/${path}` : `https://assets.od2net.org/${path}`;
 }

@@ -112,6 +112,15 @@ const layerZorder = [
 
   "one-ways",
 
+  // Contextual layers cover up most things
+  "context-traffic",
+  "context-los",
+  "context-existing-infra",
+  "context-route-network",
+  "context-gp-practices",
+  "context-hospitals",
+  "context-schools",
+
   dataviz("Road labels"),
   streets("road_label"),
 

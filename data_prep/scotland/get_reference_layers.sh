@@ -65,3 +65,7 @@ function population {
 #gp_and_hospitals ~/Downloads/GP_Practices_-_Scotland.json ~/Downloads/NHS_Hospitals_-_Scotland.json
 #cbd
 #population
+
+echo "For maintainer only:"
+echo "  mv $OUT/* ~/cloudflare_sync/cnt_layers/"
+echo "And then upload"
