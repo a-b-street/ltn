@@ -5,6 +5,10 @@
   import { HelpButton, layerId, roadLineWidth } from "../common";
   import { assetUrl } from "../stores";
 
+  // The NPT project bundles together a few layers into one pmtiles file, all
+  // related to the Cycling By Design guidance
+  // (https://www.transport.gov.scot/media/50323/cycling-by-design-update-2019-final-document-15-september-2021-1.pdf).
+
   let showTraffic = false;
   let showLos = false;
   let showExistingInfra = false;
