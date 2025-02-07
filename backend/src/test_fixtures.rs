@@ -1,6 +1,6 @@
 use crate::MapModel;
 use anyhow::Result;
-use geo::Polygon;
+use geo::{MultiPolygon, Polygon};
 use geojson::{Feature, FeatureCollection};
 
 pub struct NeighbourhoodFixture {
@@ -40,12 +40,14 @@ impl NeighbourhoodFixture {
 
         let boundary_path = format!("../web/public/boundaries/{study_area_name}.geojson");
         let boundary: Feature = std::fs::read_to_string(&boundary_path)?.parse()?;
+        // All test study area boundaries are polygons for now
         let polygon: Polygon = boundary.try_into()?;
+        let multi_polygon: MultiPolygon = polygon.into();
 
         Ok(move || {
             MapModel::new(
                 &input_bytes,
-                polygon.clone(),
+                multi_polygon.clone(),
                 Some(study_area_name.to_string()),
             )
         })

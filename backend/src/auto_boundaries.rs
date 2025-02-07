@@ -53,7 +53,11 @@ impl MapModel {
             severances.push(linestring.clone());
         }
 
-        for polygon in split_polygon(self.mercator.to_mercator(&self.boundary_wgs84), severances) {
+        let boundary_mercator = self.mercator.to_mercator(&self.boundary_wgs84);
+        for polygon in boundary_mercator
+            .into_iter()
+            .flat_map(|boundary_polygon| split_polygon(boundary_polygon, &severances))
+        {
             // TODO This is expensive; could this info somehow be retained?
             let touches_big_road = boundary_touches_any(&polygon, &road_severances);
             let touches_railway = boundary_touches_any(&polygon, &self.railways);
@@ -78,7 +82,7 @@ impl MapModel {
 }
 
 // TODO Revisit some of this; conversions are now in geo
-fn split_polygon(polygon: Polygon, linestrings: Vec<LineString>) -> Vec<Polygon> {
+fn split_polygon(polygon: Polygon, linestrings: &Vec<LineString>) -> Vec<Polygon> {
     let mut shape = to_i_overlay_contour(polygon.exterior());
 
     // geo Polygon's are explicitly closed LineStrings, but i_overlay Polygon's are not.
