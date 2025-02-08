@@ -3,7 +3,7 @@ use geojson::GeoJson;
 
 use crate::{
     geo_helpers::{make_arrow, thicken_line},
-    Direction, IntersectionID, MapModel, Road,
+    IntersectionID, MapModel, Road,
 };
 
 impl MapModel {
@@ -11,45 +11,11 @@ impl MapModel {
         let mut features = Vec::new();
 
         let intersection = self.get_i(i);
-        for r1 in &intersection.roads {
-            for r2 in &intersection.roads {
-                // TODO Handle u-turns at dead-ends
-                if r1 == r2 {
-                    continue;
-                }
-                let road1 = self.get_r(*r1);
-                let road2 = self.get_r(*r2);
-
-                // If road1 is one-way, can we go towards i?
-                let ok1 = match self.directions[r1] {
-                    Direction::BothWays => true,
-                    Direction::Forwards => road1.dst_i == i,
-                    Direction::Backwards => road1.src_i == i,
-                };
-                // If road2 is one-way, can we go away from i?
-                let ok2 = match self.directions[r2] {
-                    Direction::BothWays => true,
-                    Direction::Forwards => road2.src_i == i,
-                    Direction::Backwards => road2.dst_i == i,
-                };
-                if !ok1 || !ok2 {
-                    continue;
-                }
-
-                // Is there a turn restriction between this pair?
-                if intersection.turn_restrictions.contains(&(*r1, *r2)) {
-                    continue;
-                }
-
-                if let Some(diagonal_filter) = self.diagonal_filters.get(&i) {
-                    if !diagonal_filter.allows_movement(&(*r1, *r2)) {
-                        continue;
-                    }
-                }
-
-                let polygon = render_arrow(i, road1, road2);
-                features.push(self.mercator.to_wgs84_gj(&polygon));
-            }
+        for (r1, r2) in intersection.allowed_movements(&self.router_input_after()) {
+            let road1 = self.get_r(r1);
+            let road2 = self.get_r(r2);
+            let polygon = render_arrow(i, road1, road2);
+            features.push(self.mercator.to_wgs84_gj(&polygon));
         }
 
         GeoJson::from(features)

@@ -4,7 +4,7 @@ use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
 use utils::Mercator;
 
-use crate::{IntersectionID, MapModel};
+use crate::{MapModel, RoadID};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct ZoneID(pub usize);
@@ -31,7 +31,7 @@ impl DemandModel {
         }
     }
 
-    pub fn make_requests(&self, map: &MapModel) -> Vec<(IntersectionID, IntersectionID, usize)> {
+    pub fn make_requests(&self, map: &MapModel) -> Vec<(RoadID, RoadID, usize)> {
         info!(
             "Making requests from {} zones and {} desire lines",
             self.zones.len(),
@@ -57,12 +57,8 @@ impl DemandModel {
                 let pt1 = self.zones[zone1.0].random_point(&mut rng);
                 let pt2 = self.zones[zone2.0].random_point(&mut rng);
                 if let (Some(i1), Some(i2)) = (
-                    map.closest_intersection
-                        .nearest_neighbor(&pt1)
-                        .map(|obj| obj.data),
-                    map.closest_intersection
-                        .nearest_neighbor(&pt2)
-                        .map(|obj| obj.data),
+                    map.closest_road.nearest_neighbor(&pt1).map(|obj| obj.data),
+                    map.closest_road.nearest_neighbor(&pt2).map(|obj| obj.data),
                 ) {
                     if i1 != i2 {
                         requests.push((i1, i2, trip_count));
@@ -134,16 +130,16 @@ impl Zone {
 }
 
 /// Deterministically produce a bunch of OD pairs, just as a fallback when there's no real data
-pub fn synthetic_od_requests(map: &MapModel) -> Vec<(IntersectionID, IntersectionID, usize)> {
+pub fn synthetic_od_requests(map: &MapModel) -> Vec<(RoadID, RoadID, usize)> {
     let num_requests = 1_000;
 
     let mut rng = WyRand::new_seed(42);
     let mut requests = Vec::new();
     while requests.len() != num_requests {
-        let i1 = IntersectionID(rng.generate_range(0..map.intersections.len()));
-        let i2 = IntersectionID(rng.generate_range(0..map.intersections.len()));
-        if i1 != i2 {
-            requests.push((i1, i2, 1));
+        let r1 = RoadID(rng.generate_range(0..map.roads.len()));
+        let r2 = RoadID(rng.generate_range(0..map.roads.len()));
+        if r1 != r2 {
+            requests.push((r1, r2, 1));
         }
     }
     requests

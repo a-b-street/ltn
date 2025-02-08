@@ -11,7 +11,7 @@
   filter={[
     "all",
     ["==", ["get", "kind"], "interior_road"],
-    ["!=", ["get", "direction"], "both"],
+    ["!=", ["get", "travel_flow"], "both"],
   ]}
   layout={{
     "icon-image": "oneway_arrow",
@@ -19,10 +19,10 @@
     "symbol-placement": "line",
     "symbol-spacing": 50,
     "icon-allow-overlap": true,
-    "icon-rotate": ["case", ["==", ["get", "direction"], "forwards"], 0, 180],
+    "icon-rotate": ["case", ["==", ["get", "travel_flow"], "forwards"], 0, 180],
   }}
   paint={{
-    "icon-opacity": ["case", ["get", "direction_edited"], 1.0, 0.5],
+    "icon-opacity": ["case", ["get", "travel_flow_edited"], 1.0, 0.5],
   }}
   interactive={false}
   hoverCursor="pointer"

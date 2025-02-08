@@ -12,7 +12,7 @@ use wasm_bindgen::prelude::*;
 
 use self::cells::Cell;
 pub use self::map_model::{
-    Direction, FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID,
+    FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow,
 };
 pub use self::neighbourhood::Neighbourhood;
 use self::render_cells::RenderCells;
@@ -269,9 +269,9 @@ impl LTN {
         Ok(())
     }
 
-    #[wasm_bindgen(js_name = toggleDirection)]
-    pub fn toggle_direction(&mut self, road: usize) {
-        self.map.toggle_direction(RoadID(road));
+    #[wasm_bindgen(js_name = toggleTravelFlow)]
+    pub fn toggle_travel_flow(&mut self, road: usize) {
+        self.map.toggle_travel_flow(RoadID(road));
         self.after_edit();
     }
 

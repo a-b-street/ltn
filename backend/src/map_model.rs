@@ -1,11 +1,9 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::fmt;
-
 use crate::geo_helpers::{
     angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
     invert_multi_polygon, limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
+use crate::route::RouterInput;
 use crate::{od::DemandModel, Router};
 use anyhow::Result;
 use geo::{
@@ -14,7 +12,9 @@ use geo::{
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::fmt;
 use utils::{osm2graph, Mercator, Tags};
 
 pub struct MapModel {
@@ -33,8 +33,7 @@ pub struct MapModel {
     pub waterways: Vec<LineString>,
 
     // TODO Wasteful, can share some
-    // This is guaranteed to exist, only Option during MapModel::new internals
-    pub router_before: Option<Router>,
+    pub router_before: Router,
     // Calculated lazily. Changes with edits and main_road_penalty.
     pub router_after: Option<Router>,
     // Calculated lazily. No edits, just main_road_penalty.
@@ -46,7 +45,7 @@ pub struct MapModel {
     pub diagonal_filters: BTreeMap<IntersectionID, DiagonalFilter>,
 
     // Every road is filled out
-    pub directions: BTreeMap<RoadID, Direction>,
+    pub travel_flows: BTreeMap<RoadID, TravelFlow>,
 
     pub impact: Option<Impact>,
     pub demand: Option<DemandModel>,
@@ -78,7 +77,7 @@ impl fmt::Display for IntersectionID {
 
 /// A segment of a road network - no intersections happen *within* a `Road`.
 /// An osm Way is divided into potentially multiple `Road`s
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Road {
     pub id: RoadID,
     pub src_i: IntersectionID,
@@ -89,6 +88,22 @@ pub struct Road {
     pub speed_mph: usize,
 }
 
+impl fmt::Debug for Road {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct(&format!(
+            "r({id}): i({src})-->i({dst})",
+            id = self.id.0,
+            src = self.src_i.0,
+            dst = self.dst_i.0
+        ))
+        .field("way", &self.way.to_string())
+        .field("linestring", &self.linestring)
+        .field("tags", &self.tags)
+        .field("speed_mph", &self.speed_mph)
+        .finish()
+    }
+}
+
 /// Connection between `Road` (segments).
 #[derive(Debug, Clone)]
 pub struct Intersection {
@@ -97,7 +112,7 @@ pub struct Intersection {
     pub point: Point,
     // Ordered clockwise from North
     pub roads: Vec<RoadID>,
-    /// (from, to) is not allowed. May be redundant with the road directions.
+    /// (from, to) is not allowed. May be redundant with the road TravelFlow.
     pub turn_restrictions: Vec<(RoadID, RoadID)>,
 }
 
@@ -124,8 +139,48 @@ impl Intersection {
         }
     }
 
-    pub fn roads_iter<'a>(&'a self, map: &'a MapModel) -> impl Iterator<Item = &'a Road> {
-        self.roads.iter().map(move |road_id| map.get_r(*road_id))
+    pub fn allowed_movements_from<'a>(
+        &'a self,
+        from_r: RoadID,
+        router_input: &'a impl RouterInput,
+    ) -> impl Iterator<Item = (RoadID, Direction)> + 'a {
+        debug_assert!(
+            self.roads.contains(&from_r),
+            "{from_r:?} is not connected to intersection {self:?}"
+        );
+        let from_road = router_input.get_r(from_r);
+        self.roads.iter().filter_map(move |road_id| {
+            let to_road = router_input.get_r(*road_id);
+            if to_road.id == from_road.id {
+                return None;
+            }
+            if self.turn_restrictions.contains(&(from_r, to_road.id)) {
+                return None;
+            }
+            if let Some(diagonal_filter) = router_input.diagonal_filter(self.id) {
+                if !diagonal_filter.allows_movement(&(from_road.id, to_road.id)) {
+                    return None;
+                }
+            }
+            let travel_flow = router_input.travel_flow(to_road.id);
+            if self.id == to_road.src_i && travel_flow.flows_forwards() {
+                Some((to_road.id, Direction::Forwards))
+            } else if self.id == to_road.dst_i && travel_flow.flows_backwards() {
+                Some((to_road.id, Direction::Backwards))
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn allowed_movements(&self, router_input: &impl RouterInput) -> Vec<(RoadID, RoadID)> {
+        let mut movements = vec![];
+        for from_r in &self.roads {
+            for (to_r, _) in self.allowed_movements_from(*from_r, router_input) {
+                movements.push((*from_r, to_r))
+            }
+        }
+        movements
     }
 }
 
@@ -316,13 +371,13 @@ impl MapModel {
         self.after_edited();
     }
 
-    pub fn toggle_direction(&mut self, r: RoadID) {
-        let dir = match self.directions[&r] {
-            Direction::Forwards => Direction::Backwards,
-            Direction::Backwards => Direction::BothWays,
-            Direction::BothWays => Direction::Forwards,
+    pub fn toggle_travel_flow(&mut self, r: RoadID) {
+        let dir = match self.travel_flows[&r] {
+            TravelFlow::FORWARDS => TravelFlow::BACKWARDS,
+            TravelFlow::BACKWARDS => TravelFlow::BothWays,
+            TravelFlow::BothWays => TravelFlow::FORWARDS,
         };
-        let cmd = self.do_edit(Command::SetDirection(r, dir));
+        let cmd = self.do_edit(Command::SetTravelFlow(r, dir));
         self.undo_stack.push(cmd);
         self.redo_queue.clear();
         self.after_edited();
@@ -353,11 +408,11 @@ impl MapModel {
                 }
                 Command::SetDiagonalFilter(i, prev)
             }
-            Command::SetDirection(r, dir) => {
-                info!("changed direction of {r} to {}", dir.to_string());
-                let prev = self.directions[&r];
-                self.directions.insert(r, dir);
-                Command::SetDirection(r, prev)
+            Command::SetTravelFlow(r, dir) => {
+                info!("changed travel flow of {r} to {}", dir.to_string());
+                let prev = self.travel_flows[&r];
+                self.travel_flows.insert(r, dir);
+                Command::SetTravelFlow(r, prev)
             }
             Command::Multiple(list) => {
                 let undo_list = list.into_iter().map(|cmd| self.do_edit(cmd)).collect();
@@ -449,12 +504,12 @@ impl MapModel {
             gj.features.push(f);
         }
 
-        // Any direction edits
+        // Any travel flow edits
         for r in &self.roads {
-            if self.directions[&r.id] != Direction::from_osm(&r.tags) {
+            if self.travel_flows[&r.id] != TravelFlow::from_osm(&r.tags) {
                 let mut f = self.mercator.to_wgs84_gj(&r.linestring);
-                f.set_property("kind", "direction");
-                f.set_property("direction", self.directions[&r.id].to_string());
+                f.set_property("kind", "travel_flow");
+                f.set_property("travel_flow", self.travel_flows[&r.id].to_string());
                 gj.features.push(f);
             }
         }
@@ -480,8 +535,8 @@ impl MapModel {
         // Clear previous state
         self.boundaries.clear();
         self.modal_filters = self.original_modal_filters.clone();
-        for (r, dir) in &mut self.directions {
-            *dir = Direction::from_osm(&self.roads[r.0].tags);
+        for (r, dir) in &mut self.travel_flows {
+            *dir = TravelFlow::from_osm(&self.roads[r.0].tags);
         }
         self.undo_stack.clear();
         self.redo_queue.clear();
@@ -538,12 +593,12 @@ impl MapModel {
                     let (r, _) = self.closest_point_on_road(pt, None).unwrap();
                     cmds.push(Command::SetModalFilter(r, None));
                 }
-                "direction" => {
-                    let dir = Direction::from_string(get_str_prop(&f, "direction")?)?;
+                "travel_flow" => {
+                    let dir = TravelFlow::from_string(get_str_prop(&f, "travel_flow")?)?;
                     let mut linestring: LineString = f.geometry.unwrap().try_into()?;
                     self.mercator.to_mercator_in_place(&mut linestring);
                     let r = self.most_similar_linestring(&linestring);
-                    cmds.push(Command::SetDirection(r, dir));
+                    cmds.push(Command::SetTravelFlow(r, dir));
                 }
                 "boundary" => {
                     let name = get_str_prop(&f, "name")?;
@@ -567,34 +622,95 @@ impl MapModel {
         Ok(())
     }
 
-    // Lazily builds the router if needed.
-    pub fn rebuild_router(&mut self, main_road_penalty: f64) {
-        if self
-            .router_after
-            .as_ref()
-            .map(|r| r.main_road_penalty != main_road_penalty)
-            .unwrap_or(true)
-        {
-            self.router_after = Some(Router::new(
-                &self.roads,
-                &self.modal_filters,
-                &self.directions,
-                main_road_penalty,
-            ));
+    pub fn router_input_before(&self) -> impl RouterInput + use<'_> {
+        struct RouterInputBefore<'a> {
+            map: &'a MapModel,
+        }
+        impl RouterInput for RouterInputBefore<'_> {
+            fn roads_iter(&self) -> impl Iterator<Item = &Road> {
+                self.map.roads.iter()
+            }
+
+            fn get_r(&self, r: RoadID) -> &Road {
+                self.map.get_r(r)
+            }
+
+            fn get_i(&self, i: IntersectionID) -> &Intersection {
+                self.map.get_i(i)
+            }
+
+            fn modal_filter(&self, r: RoadID) -> Option<&ModalFilter> {
+                self.map.original_modal_filters.get(&r)
+            }
+
+            fn travel_flow(&self, r: RoadID) -> TravelFlow {
+                let road = self.get_r(r);
+                TravelFlow::from_osm(&road.tags)
+            }
+
+            fn diagonal_filter(&self, _i: IntersectionID) -> Option<&DiagonalFilter> {
+                // We don't import pre-existing diagonal filters from OSM
+                // As there isn't a well known tagging / topological structure that we can easily identify.
+                None
+            }
         }
 
+        RouterInputBefore { map: self }
+    }
+
+    pub fn router_input_after(&self) -> impl RouterInput + use<'_> {
+        struct RouterInputAfter<'a> {
+            map: &'a MapModel,
+        }
+        impl RouterInput for RouterInputAfter<'_> {
+            fn roads_iter(&self) -> impl Iterator<Item = &Road> {
+                self.map.roads.iter()
+            }
+
+            fn get_r(&self, r: RoadID) -> &Road {
+                self.map.get_r(r)
+            }
+
+            fn get_i(&self, i: IntersectionID) -> &Intersection {
+                self.map.get_i(i)
+            }
+
+            fn modal_filter(&self, r: RoadID) -> Option<&ModalFilter> {
+                self.map.modal_filters.get(&r)
+            }
+
+            fn travel_flow(&self, r: RoadID) -> TravelFlow {
+                self.map.travel_flows[&r]
+            }
+
+            fn diagonal_filter(&self, i: IntersectionID) -> Option<&DiagonalFilter> {
+                self.map.diagonal_filters.get(&i)
+            }
+        }
+        RouterInputAfter { map: self }
+    }
+
+    // Lazily builds the router if needed.
+    pub fn rebuild_router(&mut self, main_road_penalty: f64) {
         if self
             .router_before_with_penalty
             .as_ref()
             .map(|r| r.main_road_penalty != main_road_penalty)
             .unwrap_or(true)
         {
-            self.router_before_with_penalty = Some(Router::new(
-                &self.roads,
-                &self.original_modal_filters,
-                &self.original_directions(),
-                main_road_penalty,
-            ));
+            let router_before_with_penalty =
+                Router::new(&self.router_input_before(), main_road_penalty);
+            self.router_before_with_penalty = Some(router_before_with_penalty);
+        }
+
+        if self
+            .router_after
+            .as_ref()
+            .map(|r| r.main_road_penalty != main_road_penalty)
+            .unwrap_or(true)
+        {
+            let router_after = Router::new(&self.router_input_after(), main_road_penalty);
+            self.router_after = Some(router_after);
         }
     }
 
@@ -690,14 +806,6 @@ impl MapModel {
         let way = self.get_r(r).way;
         self.bus_routes_on_roads.get(&way)
     }
-
-    fn original_directions(&self) -> BTreeMap<RoadID, Direction> {
-        let mut directions = BTreeMap::new();
-        for r in &self.roads {
-            directions.insert(r.id, Direction::from_osm(&r.tags));
-        }
-        directions
-    }
 }
 
 impl Road {
@@ -721,7 +829,7 @@ impl Road {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ModalFilter {
     pub kind: FilterKind,
     pub percent_along: f64,
@@ -834,43 +942,58 @@ impl FilterKind {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Debug, Copy, PartialEq, PartialOrd, Ord, Eq, Serialize, Deserialize)]
+pub enum TravelFlow {
+    BothWays,
+    OneWay(Direction),
+}
+impl TravelFlow {
+    pub const FORWARDS: TravelFlow = TravelFlow::OneWay(Direction::Forwards);
+    pub const BACKWARDS: TravelFlow = TravelFlow::OneWay(Direction::Backwards);
+
+    pub fn flows_forwards(self) -> bool {
+        matches!(self, TravelFlow::FORWARDS | TravelFlow::BothWays)
+    }
+    pub fn flows_backwards(self) -> bool {
+        matches!(self, TravelFlow::BACKWARDS | TravelFlow::BothWays)
+    }
+}
+
+#[derive(Clone, Debug, Copy, PartialEq, PartialOrd, Ord, Eq, Serialize, Deserialize)]
 pub enum Direction {
     Forwards,
     Backwards,
-    BothWays,
 }
 
-impl Direction {
+impl TravelFlow {
     pub fn from_osm(tags: &Tags) -> Self {
         // TODO Improve this
         if tags.is("oneway", "yes") {
-            Self::Forwards
+            Self::FORWARDS
         } else if tags.is("oneway", "-1") {
-            Self::Backwards
+            Self::BACKWARDS
         } else {
             // https://wiki.openstreetmap.org/wiki/Key:oneway#Implied_oneway_restriction
             if tags.is("highway", "motorway") || tags.is("junction", "roundabout") {
-                return Self::Forwards;
+                return Self::FORWARDS;
             }
 
             Self::BothWays
         }
     }
 
-    // TODO strum?
     pub fn to_string(self) -> &'static str {
         match self {
-            Self::Forwards => "forwards",
-            Self::Backwards => "backwards",
+            Self::FORWARDS => "forwards",
+            Self::BACKWARDS => "backwards",
             Self::BothWays => "both",
         }
     }
 
     pub fn from_string(x: &str) -> Result<Self> {
         match x {
-            "forwards" => Ok(Self::Forwards),
-            "backwards" => Ok(Self::Backwards),
+            "forwards" => Ok(Self::FORWARDS),
+            "backwards" => Ok(Self::BACKWARDS),
             "both" => Ok(Self::BothWays),
             _ => bail!("Invalid Direction: {x}"),
         }
@@ -880,7 +1003,7 @@ impl Direction {
 pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
     SetDiagonalFilter(IntersectionID, Option<DiagonalFilter>),
-    SetDirection(RoadID, Direction),
+    SetTravelFlow(RoadID, TravelFlow),
     Multiple(Vec<Command>),
 }
 

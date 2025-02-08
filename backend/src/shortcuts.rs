@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use fast_paths::InputGraph;
 use geo::{Euclidean, Length, LineString};
 use geojson::Feature;
-use utils::NodeMap;
 
-use crate::{Direction, IntersectionID, MapModel, Neighbourhood, RoadID};
+use crate::map_model::Direction;
+use crate::route::Router;
+use crate::{MapModel, Neighbourhood, RoadID};
 
 pub struct Shortcuts {
     pub paths: Vec<Path>,
@@ -13,80 +13,53 @@ pub struct Shortcuts {
 }
 
 pub struct Path {
-    steps: Vec<(RoadID, IntersectionID, IntersectionID)>,
+    // TODO: dedupe - make this `Route`
+    steps: Vec<(RoadID, Direction)>,
     directness: f64,
 }
 
 impl Shortcuts {
     pub fn new(map: &MapModel, neighbourhood: &Neighbourhood) -> Self {
-        let mut input_graph = InputGraph::new();
-        let mut node_map = NodeMap::new();
-
-        for r in neighbourhood.editable_roads() {
-            if map.modal_filters.contains_key(&r) {
-                continue;
-            }
-            let road = map.get_r(r);
-            // Loops can't be part of a shortest path
-            if road.src_i == road.dst_i {
-                continue;
-            }
-
-            let i1 = node_map.get_or_insert(road.src_i);
-            let i2 = node_map.get_or_insert(road.dst_i);
-            let cost = (road.cost_seconds() * 100.0) as usize;
-            match map.directions[&r] {
-                Direction::Forwards => {
-                    input_graph.add_edge(i1, i2, cost);
-                }
-                Direction::Backwards => {
-                    input_graph.add_edge(i2, i1, cost);
-                }
-                Direction::BothWays => {
-                    input_graph.add_edge(i1, i2, cost);
-                    input_graph.add_edge(i2, i1, cost);
-                }
-            }
-        }
-        input_graph.freeze();
-        let ch = fast_paths::prepare(&input_graph);
-        let mut path_calc = fast_paths::create_calculator(&ch);
-
+        let router_input = neighbourhood.router_input(map);
+        let router = Router::new(&router_input, 1.0);
         let mut paths = Vec::new();
         let mut count_per_road = HashMap::new();
-        for start in &neighbourhood.border_intersections {
-            for end in &neighbourhood.border_intersections {
-                if start == end {
-                    continue;
-                }
-                if let (Some(i1), Some(i2)) = (node_map.get(*start), node_map.get(*end)) {
-                    if let Some(path) = path_calc.calc_path(&ch, i1, i2) {
-                        let mut steps = Vec::new();
+        for start_i in &neighbourhood.border_intersections {
+            let start_intersection = map.get_i(*start_i);
+            for start_r in &start_intersection.roads {
+                for end_i in &neighbourhood.border_intersections {
+                    if start_i == end_i {
+                        continue;
+                    }
+                    let end_intersection = map.get_i(*end_i);
+                    for end_r in &end_intersection.roads {
+                        let Some(route) = router.route_from_roads(*start_r, *end_r) else {
+                            continue;
+                        };
                         let mut shortcut_length = 0.0;
-                        for pair in path.get_nodes().windows(2) {
-                            let i1 = node_map.translate_id(pair[0]);
-                            let i2 = node_map.translate_id(pair[1]);
-                            let road = map.find_edge(i1, i2);
-                            steps.push((road.id, i1, i2));
+                        for (r, _direction) in &route.steps {
+                            let road = map.get_r(*r);
                             *count_per_road.entry(road.id).or_insert(0) += 1;
                             shortcut_length += Euclidean.length(&road.linestring);
                         }
 
                         // How long is the shortest route through the original router, using this
                         // neighbourhood or not?
-                        let direct_length = match map.router_before.as_ref().unwrap().route(
-                            map,
-                            map.get_i(*start).point.into(),
-                            map.get_i(*end).point.into(),
-                        ) {
+                        let direct_length = match map
+                            .router_before
+                            .route_from_roads(*start_r, *end_r)
+                        {
                             Some(route) => Euclidean.length(&route.to_linestring(map)),
                             None => {
-                                warn!("Found a shortcut from {start} to {end}, but not a route using the whole map");
+                                warn!("Found a shortcut from {start_r} to {end_r}, but not a route using the whole map");
                                 shortcut_length
                             }
                         };
                         let directness = shortcut_length / direct_length;
-                        paths.push(Path { steps, directness });
+                        paths.push(Path {
+                            steps: route.steps,
+                            directness,
+                        });
                     }
                 }
             }
@@ -103,7 +76,7 @@ impl Shortcuts {
     pub fn subset(&self, crosses: RoadID) -> Vec<&Path> {
         self.paths
             .iter()
-            .filter(|path| path.steps.iter().any(|(r, _, _)| *r == crosses))
+            .filter(|path| path.steps.iter().any(|(r, _)| *r == crosses))
             .collect()
     }
 }
@@ -111,11 +84,12 @@ impl Shortcuts {
 impl Path {
     pub fn to_gj(&self, map: &MapModel) -> Feature {
         let mut pts = Vec::new();
-        for (r, i1, _i2) in &self.steps {
+        for (r, direction) in &self.steps {
             let road = map.get_r(*r);
-            if *i1 == road.src_i {
+            if *direction == Direction::Forwards {
                 pts.extend(road.linestring.0.clone());
             } else {
+                // PERF: reverse iter to avoid clone
                 let mut rev = road.linestring.0.clone();
                 rev.reverse();
                 pts.extend(rev);

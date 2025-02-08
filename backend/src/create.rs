@@ -11,8 +11,8 @@ use utils::{
 };
 
 use crate::{
-    impact::Impact, od::DemandModel, Direction, FilterKind, Intersection, IntersectionID, MapModel,
-    Road, RoadID, Router,
+    impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
+    RoadID, Router, TravelFlow,
 };
 
 #[derive(Default)]
@@ -184,9 +184,9 @@ pub fn create_from_osm(
 
     info!("Finalizing the map model");
 
-    let mut directions = BTreeMap::new();
+    let mut travel_flows = BTreeMap::new();
     for r in &roads {
-        directions.insert(r.id, Direction::from_osm(&r.tags));
+        travel_flows.insert(r.id, TravelFlow::from_osm(&r.tags));
     }
 
     let mut map = MapModel {
@@ -202,7 +202,7 @@ pub fn create_from_osm(
         railways: osm.railways,
         waterways: osm.waterways,
 
-        router_before: None,
+        router_before: Router::empty(),
         router_after: None,
         router_before_with_penalty: None,
 
@@ -210,7 +210,7 @@ pub fn create_from_osm(
         modal_filters: BTreeMap::new(),
         diagonal_filters: BTreeMap::new(),
 
-        directions,
+        travel_flows,
 
         impact: None,
         demand: None,
@@ -235,13 +235,8 @@ pub fn create_from_osm(
     apply_existing_filters(&mut map, osm.barrier_nodes, &graph);
     apply_turn_restrictions(&mut map, osm.turn_restrictions);
 
-    let main_road_penalty = 1.0;
-    map.router_before = Some(Router::new(
-        &map.roads,
-        &map.modal_filters,
-        &map.directions,
-        main_road_penalty,
-    ));
+    let router_before = Router::new(&map.router_input_before(), 1.0);
+    map.router_before = router_before;
 
     Ok(map)
 }
