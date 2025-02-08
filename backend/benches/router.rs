@@ -9,17 +9,13 @@ fn benchmark_build_router(c: &mut Criterion) {
         NeighbourhoodFixture::STRASBOURG,
     ] {
         let map = neighbourhood.map_model().unwrap();
+        let routing_input_before = map.router_input_before();
         let main_road_penalty = 1.0;
         c.bench_function(
             &format!("build router: {name}", name = neighbourhood.savefile_name),
             |b| {
                 b.iter(|| {
-                    let router = Router::new(
-                        &map.roads,
-                        &map.modal_filters,
-                        &map.directions,
-                        main_road_penalty,
-                    );
+                    let router = Router::new(&routing_input_before, main_road_penalty);
                     black_box(router);
                 });
             },
@@ -34,12 +30,7 @@ fn benchmark_route(c: &mut Criterion) {
     ] {
         let map = neighbourhood.map_model().unwrap();
         let main_road_penalty = 1.0;
-        let router = Router::new(
-            &map.roads,
-            &map.modal_filters,
-            &map.directions,
-            main_road_penalty,
-        );
+        let router = Router::new(&map.router_input_before(), main_road_penalty);
 
         let route_requests = synthetic_od_requests(&map);
         c.bench_function(
@@ -48,13 +39,16 @@ fn benchmark_route(c: &mut Criterion) {
                 b.iter(|| {
                     let mut num_found = 0;
                     for (start, end, _) in &route_requests {
-                        if let Some(_found) = router.route_from_intersections(&map, *start, *end) {
+                        if let Some(_found) = router.route_from_roads(*start, *end) {
                             num_found += 1;
                         }
                     }
                     match neighbourhood {
-                        NeighbourhoodFixture::BRISTOL_EAST => assert_eq!(num_found, 850),
-                        NeighbourhoodFixture::STRASBOURG => assert_eq!(num_found, 892),
+                        // These exact numbers are brittle - but they should only change if the
+                        // routing logic or the input data are updated, and even then they shouldn't
+                        // change by much.
+                        NeighbourhoodFixture::BRISTOL_EAST => assert_eq!(num_found, 842),
+                        NeighbourhoodFixture::STRASBOURG => assert_eq!(num_found, 902),
                         _ => todo!(
                             "unknown neighbourhood: {neighbourhood:?}, (num_found: {num_found})"
                         ),

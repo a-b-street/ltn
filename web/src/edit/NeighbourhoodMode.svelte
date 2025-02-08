@@ -93,7 +93,7 @@
       $backend!.addModalFilter(pt, $filterType);
       $mutationCounter++;
     } else if (action == "oneway") {
-      $backend!.toggleDirection(f.properties!.road);
+      $backend!.toggleTravelFlow(f.properties!.road);
       $mutationCounter++;
     }
   }

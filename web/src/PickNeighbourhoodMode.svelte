@@ -83,21 +83,21 @@
   function countEdits(gj: FeatureCollection): {
     modalFilters: number;
     deletedModalFilters: number;
-    directions: number;
+    travelFlows: number;
   } {
     let modalFilters = 0;
     let deletedModalFilters = 0;
-    let directions = 0;
+    let travelFlows = 0;
     for (let f of gj.features) {
       if (f.properties!.kind == "modal_filter") {
         modalFilters++;
       } else if (f.properties!.kind == "deleted_existing_modal_filter") {
         deletedModalFilters++;
-      } else if (f.properties!.kind == "direction") {
-        directions++;
+      } else if (f.properties!.kind == "travel_flow") {
+        travelFlows++;
       }
     }
-    return { modalFilters, deletedModalFilters, directions };
+    return { modalFilters, deletedModalFilters, travelFlows };
   }
 
   // TODO Hover on button and highlight on map
@@ -202,7 +202,7 @@
       {edits.deletedModalFilters}
       existing modal filter(s) removed
     </p>
-    <p>{edits.directions} road segment direction(s) changed</p>
+    <p>{edits.travelFlows} road segment direction(s) changed</p>
 
     <button on:click={exportGJ}>Export project to GeoJSON</button>
     <button class="secondary" on:click={debugRouteSnapper}>

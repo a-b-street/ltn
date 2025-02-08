@@ -117,8 +117,8 @@ export class Backend {
     this.inner.deleteDiagonalFilter(intersection.intersectionId);
   }
 
-  toggleDirection(road: number) {
-    this.inner.toggleDirection(road);
+  toggleTravelFlow(road: number) {
+    this.inner.toggleTravelFlow(road);
   }
 
   undo() {
@@ -234,8 +234,8 @@ export interface RenderNeighbourhoodOutput {
         {
           kind: "interior_road";
           shortcuts: number;
-          direction: "forwards" | "backwards" | "both";
-          direction_edited: boolean;
+          travel_flow: "forwards" | "backwards" | "both";
+          travel_flow_edited: boolean;
           edited: boolean;
           road: number;
           cell_color: "disconnected" | number;

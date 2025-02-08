@@ -10,7 +10,12 @@ use crate::geo_helpers::{
     aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination,
     invert_polygon, make_arrow,
 };
-use crate::{Cell, Direction, IntersectionID, MapModel, RenderCells, RoadID, Shortcuts};
+use crate::map_model::DiagonalFilter;
+use crate::route::RouterInput;
+use crate::{
+    Cell, Intersection, IntersectionID, MapModel, ModalFilter, RenderCells, Road, RoadID,
+    Shortcuts, TravelFlow,
+};
 
 pub struct Neighbourhood {
     // Immutable once created
@@ -151,6 +156,7 @@ impl Neighbourhood {
         }
     }
 
+    // PERF: return iter
     pub fn editable_roads(&self) -> Vec<RoadID> {
         if self.edit_perimeter_roads {
             self.interior_roads
@@ -160,6 +166,47 @@ impl Neighbourhood {
                 .collect()
         } else {
             self.interior_roads.iter().cloned().collect()
+        }
+    }
+
+    pub fn router_input<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
+        struct NeighbourhoodRouterInput<'a> {
+            pub(crate) map: &'a MapModel,
+            pub(crate) neighbourhood: &'a Neighbourhood,
+        }
+
+        impl RouterInput for NeighbourhoodRouterInput<'_> {
+            fn roads_iter(&self) -> impl Iterator<Item = &Road> {
+                self.neighbourhood
+                    .editable_roads()
+                    .into_iter()
+                    .map(|r| self.map.get_r(r))
+            }
+
+            fn get_r(&self, r: RoadID) -> &Road {
+                self.map.get_r(r)
+            }
+
+            fn get_i(&self, i: IntersectionID) -> &Intersection {
+                self.map.get_i(i)
+            }
+
+            fn modal_filter(&self, r: RoadID) -> Option<&ModalFilter> {
+                self.map.modal_filters.get(&r)
+            }
+
+            fn travel_flow(&self, r: RoadID) -> TravelFlow {
+                self.map.travel_flows[&r]
+            }
+
+            fn diagonal_filter(&self, r: IntersectionID) -> Option<&DiagonalFilter> {
+                self.map.diagonal_filters.get(&r)
+            }
+        }
+
+        NeighbourhoodRouterInput {
+            map: &map,
+            neighbourhood: &self,
         }
     }
 
@@ -189,14 +236,14 @@ impl Neighbourhood {
                     .cloned()
                     .unwrap_or(0),
             );
-            f.set_property("direction", map.directions[&r].to_string());
+            f.set_property("travel_flow", map.travel_flows[&r].to_string());
             f.set_property(
-                "direction_edited",
-                map.directions[&r] != Direction::from_osm(&road.tags),
+                "travel_flow_edited",
+                map.travel_flows[&r] != TravelFlow::from_osm(&road.tags),
             );
             f.set_property(
                 "edited",
-                map.directions[&r] != Direction::from_osm(&road.tags)
+                map.travel_flows[&r] != TravelFlow::from_osm(&road.tags)
                     || map.modal_filters.get(&r) != map.original_modal_filters.get(&r),
             );
             f.set_property("road", r.0);
@@ -288,14 +335,14 @@ impl Neighbourhood {
             // Point out of the neighbourhood
             let mut line = Line::new(pt_closer, pt_farther);
             // If the road is one-way and points in, then flip it
-            if (map.directions[r] == Direction::Forwards && road.src_i == i)
-                || (map.directions[r] == Direction::Backwards && road.dst_i == i)
+            if (map.travel_flows[r] == TravelFlow::FORWARDS && road.src_i == i)
+                || (map.travel_flows[r] == TravelFlow::BACKWARDS && road.dst_i == i)
             {
                 std::mem::swap(&mut line.start, &mut line.end);
             }
 
             let thickness = 6.0;
-            let double_ended = map.directions[r] == Direction::BothWays;
+            let double_ended = map.travel_flows[r] == TravelFlow::BothWays;
             if let Some(polygon) = make_arrow(line, thickness, double_ended) {
                 let mut f = map.mercator.to_wgs84_gj(&polygon);
                 f.set_property("kind", "border_arrow");

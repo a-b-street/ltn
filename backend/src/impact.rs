@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use geojson::{Feature, FeatureCollection};
 
-use crate::{od, IntersectionID, MapModel, RoadID};
+use crate::{od, MapModel, RoadID};
 
 // TODO Rename?
 /// Besides just studying the impact on shortcuts within one neighbourhood boundary, the user can
@@ -10,8 +10,8 @@ use crate::{od, IntersectionID, MapModel, RoadID};
 /// before and after changes for every origin/destination "OD" pairs, then counting routes per
 /// road.
 pub struct Impact {
-    // (i1, i2, count) -- `count` identical trips from `i1` to `i2`
-    requests: Vec<(IntersectionID, IntersectionID, usize)>,
+    // (r1, r2, count) -- `count` identical trips from `r1` to `r2`
+    requests: Vec<(RoadID, RoadID, usize)>,
 
     // TODO Can use Vec for perf
     counts_before: HashMap<RoadID, usize>,
@@ -40,11 +40,7 @@ impl Impact {
     pub fn recalculate(&mut self, map: &MapModel) -> FeatureCollection {
         if self.counts_before.is_empty() {
             info!("Calculating impacts before edits");
-            self.counts_before = map
-                .router_before
-                .as_ref()
-                .unwrap()
-                .od_to_counts(map, &self.requests);
+            self.counts_before = map.router_before.od_to_counts(&self.requests);
         }
 
         if self.counts_after.is_empty() {
@@ -53,7 +49,7 @@ impl Impact {
                 .router_after
                 .as_ref()
                 .expect("need to rebuild_router")
-                .od_to_counts(map, &self.requests);
+                .od_to_counts(&self.requests);
         }
 
         let mut features = Vec::new();
@@ -90,15 +86,14 @@ impl Impact {
     pub fn get_impacts_on_road(&self, map: &MapModel, road: RoadID) -> Vec<(Feature, Feature)> {
         let mut changed_paths = Vec::new();
 
-        let router_before = map.router_before.as_ref().unwrap();
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
-        for (i1, i2, _) in &self.requests {
-            let Some(route1) = router_before.route_from_intersections(map, *i1, *i2) else {
+        for (r1, r2, _) in &self.requests {
+            let Some(route1) = map.router_before.route_from_roads(*r1, *r2) else {
                 continue;
             };
-            let Some(route2) = router_after.route_from_intersections(map, *i1, *i2) else {
+            let Some(route2) = router_after.route_from_roads(*r1, *r2) else {
                 continue;
             };
             if route1.crosses_road(road) != route2.crosses_road(road) {
