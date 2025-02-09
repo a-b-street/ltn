@@ -13,4 +13,8 @@ Importing existing modal filters and turn restrictions from OSM can be very comp
 
 ## Viewing the OSM unit test inputs
 
-TODO
+To understand a unit test input:
+
+-  Just manually read it -- many are small enough to understand
+-  Load in <https://dabreegster.github.io/geojson-viewer/> -- but note relations don't show up
+-  Use JOSM
