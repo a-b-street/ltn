@@ -48,8 +48,21 @@ function railway_stations {
   get_scotland_osm
   osmium tags-filter tmp/scotland-latest.osm.pbf n/railway=station -o tmp/railways.osm.pbf
   osmium export tmp/railways.osm.pbf -o tmp/railways.geojson
-  # Strip most tag
+  # Strip most tags
   jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: { name: .properties.name } }] }' tmp/railways.geojson > $OUT/railways.geojson
+}
+
+function bus_routes {
+  get_scotland_osm
+  # Bus routes are represented as relations. Note many routes cross the same
+  # way, but osmium only outputs the way once when we export to GeoJSON
+  osmium tags-filter tmp/scotland-latest.osm.pbf r/route=bus -o tmp/bus_routes.osm.pbf
+  # The relations also include stop positions as points. Only keep LineStrings,
+  # representing roads.
+  osmium export tmp/bus_routes.osm.pbf --geometry-type=linestring -o tmp/bus_routes_v1.geojson
+  # Strip all tags
+  jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: {} }] }' tmp/bus_routes_v1.geojson > tmp/bus_routes_v2.geojson
+  tippecanoe tmp/bus_routes_v2.geojson -zg -l bus_routes -o $OUT/bus_routes.pmtiles
 }
 
 function get_scotland_osm {
@@ -74,6 +87,7 @@ download_to_subdir() {
 #gp_and_hospitals ~/Downloads/GP_Practices_-_Scotland.json ~/Downloads/NHS_Hospitals_-_Scotland.json
 #cbd
 #railway_stations
+#bus_routes
 
 echo "For maintainer only:"
 echo "  mv $OUT/* ~/cloudflare_sync/cnt_layers/"

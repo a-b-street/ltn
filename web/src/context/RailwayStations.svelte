@@ -22,7 +22,7 @@
         >
           railway stations
         </a>
-         according to OpenStreetMap.
+        according to OpenStreetMap.
       </p>
     </HelpButton>
   </div>
