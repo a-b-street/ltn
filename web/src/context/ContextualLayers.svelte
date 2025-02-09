@@ -3,6 +3,7 @@
   import icon from "../../assets/layers.svg?url";
   import CBD from "./CBD.svelte";
   import POIs from "./POIs.svelte";
+  import RailwayStations from "./RailwayStations.svelte";
   import RouteNetwork from "./RouteNetwork.svelte";
 
   let expand = false;
@@ -23,6 +24,7 @@
       style:visibility={expand ? "visible" : "collapse"}
     >
       <POIs />
+      <RailwayStations />
       <CBD />
       <RouteNetwork />
     </div>

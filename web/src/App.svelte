@@ -1,6 +1,7 @@
 <script lang="ts">
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
+  import nationalRailUrl from "../assets/national_rail.png?url";
   import About from "./About.svelte";
   import ContextualLayers from "./context/ContextualLayers.svelte";
   import "@picocss/pico/css/pico.conditional.jade.min.css";
@@ -146,8 +147,12 @@
           url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
         },
         {
-          id: "oneway-arrow",
+          id: "oneway_arrow",
           url: onewayArrowUrl,
+        },
+        {
+          id: "national_rail",
+          url: nationalRailUrl,
         },
       ]}
     >

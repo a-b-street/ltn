@@ -14,7 +14,7 @@
     ["!=", ["get", "direction"], "both"],
   ]}
   layout={{
-    "icon-image": "oneway-arrow",
+    "icon-image": "oneway_arrow",
     "icon-size": 1.0,
     "symbol-placement": "line",
     "symbol-spacing": 50,
