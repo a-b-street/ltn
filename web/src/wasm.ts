@@ -8,6 +8,7 @@ import type {
   Polygon,
 } from "geojson";
 import type { LngLat } from "maplibre-gl";
+import { sum } from "./common";
 import type { Intersection, IntersectionFeature } from "./common/Intersection";
 
 // This is a thin TS wrapper around the auto-generated TS API. The TS
@@ -207,7 +208,12 @@ export class Backend {
   }
 
   getDemandModel(): FeatureCollection<MultiPolygon, ZoneDemandProps> {
-    return JSON.parse(this.inner.getDemandModel());
+    let gj = JSON.parse(this.inner.getDemandModel());
+    for (let f of gj.features) {
+      f.properties.sum_from = sum(f.properties.counts_from);
+      f.properties.sum_to = sum(f.properties.counts_to);
+    }
+    return gj;
   }
 }
 
@@ -215,6 +221,8 @@ export type ZoneDemandProps = {
   name: string;
   counts_from: number[];
   counts_to: number[];
+  sum_from: number;
+  sum_to: number;
 };
 
 export interface RenderNeighbourhoodOutput {
