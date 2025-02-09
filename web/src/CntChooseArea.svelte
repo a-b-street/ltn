@@ -79,6 +79,7 @@
       );
 
       window.location.href = `index.html?project=${project}`;
+      return;
     }
   }
 
