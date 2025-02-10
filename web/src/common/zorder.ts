@@ -117,9 +117,11 @@ const layerZorder = [
   "context-los",
   "context-existing-infra",
   "context-route-network",
+  "context-bus-routes",
   "context-gp-practices",
   "context-hospitals",
   "context-schools",
+  "context-railway-stations",
 
   dataviz("Road labels"),
   streets("road_label"),

@@ -1,1 +1,2 @@
-Material Design icons from <https://material.io/resources/icons>, Apache license
+- Material Design icons from <https://material.io/resources/icons>, Apache license
+- National Rail logo from [Wikipedia](https://en.m.wikipedia.org/wiki/File:National_Rail_logo.svg), public domain

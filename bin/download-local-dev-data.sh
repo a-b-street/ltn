@@ -27,6 +27,6 @@ jq '.features[] | .properties.kind + "_" + .properties.name' ../../data_prep/sco
     download_to_subdir cnt_demand "https://assets.od2net.org/cnt_demand/demand_$x.bin"
 done
 
-for x in cbd.pmtiles gp_practices.geojson hospitals.geojson population.pmtiles route_network.pmtiles schools.geojson; do
+for x in bus_routes.pmtiles cbd.pmtiles gp_practices.geojson hospitals.geojson population.pmtiles railways.geojson route_network.pmtiles schools.geojson; do
     download_to_subdir cnt_layers https://assets.od2net.org/cnt_layers/$x
 done
