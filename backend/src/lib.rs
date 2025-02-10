@@ -28,6 +28,8 @@ mod map_model;
 mod movements;
 mod neighbourhood;
 pub mod od;
+#[cfg(test)]
+mod osm_tests;
 mod render_cells;
 mod route;
 mod route_snapper;
