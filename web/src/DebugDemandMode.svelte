@@ -48,8 +48,11 @@
         makeRamp(["get", key], limits, demandColorScale),
       ];
     } else {
-      // The arrays get stringified as properties and can't be used. Make an
-      // expression with a copy of the numbers.
+      // The GJ has nested arrays with the counts, but MapLibre stringifies
+      // these properties, so we can't use them for styling. Instead we
+      // dynamically make an expression to color each neighbourhood, by
+      // embedding the counts. The number of zones doesn't get too big,
+      // so this works well enough.
       let key: "counts_from" | "counts_to" = showTo
         ? "counts_to"
         : "counts_from";
@@ -103,6 +106,14 @@
       Trips to
     </label>
 
+    <p>
+      Trips {showTo ? "from" : "to"}
+      {hoveredId == null ? "each zone" : "this zone"}:
+    </p>
+    <SequentialLegend colorScale={demandColorScale} {limits} />
+
+    <hr />
+
     {#if current && hoveredId != null}
       <u>{current.properties.name}</u>
       <p>
@@ -118,13 +129,6 @@
     {:else}
       <p>Hover on a zone</p>
     {/if}
-
-    <hr />
-    <p>
-      Trips {showTo ? "from" : "to"}
-      {hoveredId == null ? "each zone" : "this zone"}:
-    </p>
-    <SequentialLegend colorScale={demandColorScale} {limits} />
   </div>
 
   <div slot="map">
