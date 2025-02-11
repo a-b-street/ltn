@@ -2,7 +2,6 @@ use anyhow::Result;
 use geojson::FeatureCollection;
 
 use crate::test_fixtures::NeighbourhoodFixture;
-use crate::Neighbourhood;
 
 #[test]
 fn test_bristol_west() {
@@ -35,18 +34,9 @@ fn test_example(neighbourhood_fixture: &NeighbourhoodFixture) {
 
 // TODO Must run from 'backend'
 // TODO web/public/osm must be symlinked to local PBF copies
-fn get_gj(neighbourhood: &NeighbourhoodFixture) -> Result<String> {
-    let (map, boundary_geo) = neighbourhood.neighbourhood_params()?;
-    let edit_perimeter_roads = false;
-    let neighbourhood = Neighbourhood::new(
-        &map,
-        neighbourhood.neighbourhood_name.to_string(),
-        boundary_geo,
-        edit_perimeter_roads,
-    )?;
-
+fn get_gj(neighbourhood_fixture: &NeighbourhoodFixture) -> Result<String> {
+    let (neighbourhood, map) = neighbourhood_fixture.neighbourhood_map()?;
     let mut gj = prune_features(neighbourhood.to_gj(&map));
-
     // Include all existing modal filters anywhere in the map
     for mut f in map.filters_to_gj().features {
         f.set_property("kind", "existing_modal_filter");

@@ -1,8 +1,9 @@
-use crate::MapModel;
+use crate::{MapModel, Neighbourhood};
 use anyhow::Result;
 use geo::{MultiPolygon, Polygon};
 use geojson::{Feature, FeatureCollection};
 
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub struct NeighbourhoodFixture {
     pub study_area_name: &'static str,
     pub neighbourhood_name: &'static str,
@@ -30,6 +31,18 @@ impl NeighbourhoodFixture {
 impl NeighbourhoodFixture {
     pub fn map_model(&self) -> Result<MapModel> {
         self.map_model_builder()?()
+    }
+
+    pub fn neighbourhood_map(&self) -> Result<(Neighbourhood, MapModel)> {
+        let (map, boundary_geo) = self.neighbourhood_params()?;
+        let edit_perimeter_roads = false;
+        let neighbourhood = Neighbourhood::new(
+            &map,
+            self.neighbourhood_name.to_string(),
+            boundary_geo,
+            edit_perimeter_roads,
+        )?;
+        Ok((neighbourhood, map))
     }
 
     pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {

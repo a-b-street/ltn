@@ -44,10 +44,16 @@ approx = "0.5.1"
 opt-level = 3
 
 [[bench]]
+name = "build_map_model"
+harness = false
+[[bench]]
 name = "build_neighbourhood"
 harness = false
 [[bench]]
-name = "build_map_model"
+name = "router"
+harness = false
+[[bench]]
+name = "shortcuts"
 harness = false
 
 [patch.crates-io]
