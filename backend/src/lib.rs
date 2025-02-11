@@ -16,8 +16,8 @@ pub use self::map_model::{
 };
 pub use self::neighbourhood::Neighbourhood;
 use self::render_cells::RenderCells;
-use self::route::Router;
-use self::shortcuts::Shortcuts;
+pub use self::route::Router;
+pub use self::shortcuts::Shortcuts;
 
 mod auto_boundaries;
 mod cells;
