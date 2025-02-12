@@ -17,7 +17,7 @@ download_to_subdir() {
 
 cd "${APP_ROOT}/web/public"
 
-download_to_subdir osm https://assets.od2net.org/severance_pbfs/areas.json
+download_to_subdir severance_pbfs https://assets.od2net.org/severance_pbfs/areas.json
 
 # Global data used for tests and demo data
 AREAS="bristol edinburgh strasbourg ut_dallas"
