@@ -27,12 +27,20 @@ impl Shortcuts {
         for start_i in &neighbourhood.border_intersections {
             let start_intersection = map.get_i(*start_i);
             for start_r in &start_intersection.roads {
+                // It's not a "shortcut" unless it cuts through the interior.
+                if !neighbourhood.interior_roads.contains(start_r) {
+                    continue;
+                }
                 for end_i in &neighbourhood.border_intersections {
                     if start_i == end_i {
                         continue;
                     }
                     let end_intersection = map.get_i(*end_i);
                     for end_r in &end_intersection.roads {
+                        // It's not a "shortcut" unless it cuts through the interior.
+                        if !neighbourhood.interior_roads.contains(end_r) {
+                            continue;
+                        }
                         let Some(route) = router.route_from_roads(*start_r, *end_r) else {
                             continue;
                         };
