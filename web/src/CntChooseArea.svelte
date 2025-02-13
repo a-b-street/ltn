@@ -78,7 +78,7 @@
         }),
       );
 
-      window.location.href = `index.html?project=${project}`;
+      window.location.href = `index.html?project=${encodeURIComponent(project)}`;
       return;
     }
   }
