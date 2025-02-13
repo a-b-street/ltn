@@ -62,7 +62,8 @@ export let map: Writable<Map | null> = writable(null);
 
 // The exact key in local storage
 export let projectName: Writable<string> = writable("");
-export let showAbout: Writable<boolean> = writable(true);
+// False until user activates
+export let showAbout: Writable<boolean> = writable(false);
 
 export let backend: Writable<Backend | null> = writable(null);
 export let route_pt_a: Writable<LngLat> = writable(new LngLat(0, 0));
