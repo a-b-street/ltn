@@ -23,6 +23,7 @@
       let params = new URLSearchParams(window.location.search);
       let loadProject = params.get("project");
       if (loadProject) {
+        loading = `Loading project ${loadProject}`;
         loadFromLocalStorage(loadProject);
       }
     } else {
