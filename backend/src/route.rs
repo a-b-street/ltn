@@ -128,22 +128,23 @@ impl Router {
 
         // TODO Reuse: (Note `calc_path` is mutable)
         let mut path_calc = fast_paths::create_calculator(&self.ch);
-        let mut paths = vec![];
-        for start_direction in [Direction::Forwards, Direction::Backwards] {
-            for end_direction in [Direction::Forwards, Direction::Backwards] {
-                let Some(start) = self.node_map.get((start, start_direction)) else {
-                    continue;
-                };
-                let Some(end) = self.node_map.get((end, end_direction)) else {
-                    continue;
-                };
-
-                if let Some(path) = path_calc.calc_path(&self.ch, start, end) {
-                    paths.push(path);
-                }
-            }
+        let mut starts = vec![];
+        let mut ends = vec![];
+        for direction in [Direction::Forwards, Direction::Backwards] {
+            // We consider all start/end pairs equally.
+            let extra_weight = 0;
+            if let Some(start) = self.node_map.get((start, direction)) {
+                starts.push((start, extra_weight));
+            };
+            if let Some(end) = self.node_map.get((end, direction)) {
+                ends.push((end, extra_weight));
+            };
         }
-        let shortest_path = paths.iter().min_by_key(|path| path.get_weight())?;
+        if starts.is_empty() || ends.is_empty() {
+            return None;
+        }
+        let shortest_path =
+            path_calc.calc_path_multiple_sources_and_targets(&self.ch, starts, ends)?;
         let steps: Vec<_> = shortest_path
             .get_nodes()
             .iter()
