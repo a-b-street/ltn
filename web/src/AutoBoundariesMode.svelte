@@ -140,15 +140,7 @@
         }}
         on:click={add}
         hoverCursor="pointer"
-      >
-        <Popup openOn="hover" let:props>
-          <p>Area: {props.area_km2.toFixed(1)} km²</p>
-          <p>
-            Borders roads = {props.touches_big_road}, railway = {props.touches_railway},
-            water = {props.touches_waterway}
-          </p>
-        </Popup>
-      </FillLayer>
+      />
 
       <LineLayer
         {...layerId("auto-boundaries-severances")}
