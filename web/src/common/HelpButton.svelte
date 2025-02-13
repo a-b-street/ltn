@@ -7,7 +7,7 @@
   let show = false;
 </script>
 
-<button on:click={() => (show = true)}>
+<button class="help" on:click={() => (show = true)}>
   <img src={icon} title="Help" alt="Help" />
 </button>
 
@@ -19,7 +19,7 @@
 {/if}
 
 <style>
-  button {
+  button.help {
     background: none;
     border: 1px solid rgba(0, 0, 0, 0);
   }
