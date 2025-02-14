@@ -65,6 +65,21 @@ function bus_routes {
   tippecanoe tmp/bus_routes_v2.geojson -zg -l bus_routes -o $OUT/bus_routes.pmtiles
 }
 
+function population {
+  # From https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020
+  download_to_subdir tmp https://maps.gov.scot/ATOM/shapefiles/SG_SIMD_2020.zip
+  cd tmp
+  unzip SG_SIMD_2020.zip
+  ogr2ogr population.geojson \
+          -t_srs EPSG:4326 \
+          SG_SIMD_2020.shp \
+          -nlt PROMOTE_TO_MULTI \
+          -sql 'SELECT DataZone as id, Rankv2 as imd_rank, Percentv2 as imd_percentile, SAPE2017 as population, OGR_GEOM_AREA as area FROM SG_SIMD_2020'
+  rm -f SG_SIMD_2020* SIMD2020v2*xlsx
+  cd ..
+  tippecanoe tmp/population.geojson -zg --generate-ids -l population -o $OUT/population.pmtiles
+}
+
 function get_scotland_osm {
   # Download Scotland OSM data
   if [ ! -f tmp/scotland-latest.osm.pbf ]; then
@@ -88,6 +103,7 @@ download_to_subdir() {
 #cbd
 #railway_stations
 #bus_routes
+#population
 
 echo "For maintainer only:"
 echo "  mv $OUT/* ~/cloudflare_sync/cnt_layers/"
