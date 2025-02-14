@@ -52,6 +52,8 @@
       return;
     }
 
+    // REIVEW: can we change to be like this to align with ltn_cnt project keys?
+    //let key = `ltn/${example}/${newProjectName}`;
     let key = `ltn_${newProjectName}`;
     window.localStorage.setItem(
       key,

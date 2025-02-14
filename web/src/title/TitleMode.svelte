@@ -1,7 +1,10 @@
 <script lang="ts">
   import { Pencil, Trash2 } from "lucide-svelte";
+  import { getContext } from "svelte";
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import type { AppFocus } from "../App.svelte";
+  import CntChooseArea from "../CntChooseArea.svelte";
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { backend, map, mode, projectName } from "../stores";
@@ -11,6 +14,7 @@
   export let firstLoad: boolean;
 
   let loading = "";
+  let appFocus: AppFocus = getContext("appFocus");
 
   // When other modes reset here, they can't clear state without a race condition
   {
@@ -119,50 +123,65 @@
   </div>
   <div slot="sidebar">
     {#if $map && wasmReady}
-      <div>
-        <Link on:click={() => ($mode = { mode: "new-project" })}>
-          New project
-        </Link>
-      </div>
+      {#if appFocus == "global"}
+        <div>
+          <Link on:click={() => ($mode = { mode: "new-project" })}>
+            New project
+          </Link>
+        </div>
 
-      <p>Load a saved project:</p>
-      <ul>
-        {#each projectList as [study_area_name, projects]}
-          <u>{study_area_name ?? "custom area"}</u>
-          {#each projects as project}
-            <li>
-              <span style="display: flex; justify-content: space-between;">
-                <Link on:click={() => loadProject(project)}>
-                  {project.slice("ltn_".length)}
-                </Link>
-                <span style="display: flex; gap: 16px;">
-                  <button
-                    class="outline icon-btn"
-                    aria-label="Rename project"
-                    on:click={() => renameProject(project)}
-                  >
-                    <Pencil color="black" />
-                  </button>
-                  <button
-                    class="icon-btn destructive"
-                    aria-label="Delete project"
-                    on:click={() => deleteProject(project)}
-                  >
-                    <Trash2 color="white" />
-                  </button>
+        <p>Load a saved project:</p>
+        <ul>
+          {#each projectList as [study_area_name, projects]}
+            <u>{study_area_name ?? "custom area"}</u>
+            {#each projects as project}
+              <li>
+                <span style="display: flex; justify-content: space-between;">
+                  <Link on:click={() => loadProject(project)}>
+                    {project.slice("ltn_".length)}
+                  </Link>
+                  <span style="display: flex; gap: 16px;">
+                    <button
+                      class="outline icon-btn"
+                      aria-label="Rename project"
+                      on:click={() => renameProject(project)}
+                    >
+                      <Pencil color="black" />
+                    </button>
+                    <button
+                      class="icon-btn destructive"
+                      aria-label="Delete project"
+                      on:click={() => deleteProject(project)}
+                    >
+                      <Trash2 color="white" />
+                    </button>
+                  </span>
                 </span>
-              </span>
-            </li>
+              </li>
+            {/each}
           {/each}
-        {/each}
-      </ul>
+        </ul>
 
-      <label>
-        Load a project from a file
-        <input bind:this={fileInput} on:change={loadFile} type="file" />
-      </label>
+        <label>
+          Load a project from a file
+          <input bind:this={fileInput} on:change={loadFile} type="file" />
+        </label>
+      {:else if appFocus == "cnt"}
+        <CntChooseArea {loadProject} bind:activityIndicatorText={loading} />
+      {/if}
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
   </div>
 </SplitComponent>
+
+<style>
+  /* app specificity to override existing rule for .left  */
+  :global(#app .app-focus-cnt .left) {
+    width: 35%;
+  }
+  /* app specificity to override existing rule for .left  */
+  :global(#app .app-focus-cnt .main) {
+    width: 65%;
+  }
+</style>

@@ -18,7 +18,35 @@ import {
 } from "../stores";
 import { Backend } from "../wasm";
 
+// Returns whether the project name is already taken, otherwise the project is created.
+export async function createNewProject(
+  kind: "ltn_cnt" | "ltn",
+  studyAreaName: string,
+  projectName: string,
+): Promise<boolean> {
+  console.assert(studyAreaName != "");
+  console.assert(projectName != "");
+
+  let key = `${kind}/${studyAreaName}/${projectName}`;
+
+  if (window.localStorage.getItem(key)) {
+    return false;
+  }
+
+  window.localStorage.setItem(
+    key,
+    JSON.stringify({
+      type: "FeatureCollection",
+      features: [],
+      study_area_name: studyAreaName,
+    }),
+  );
+  await loadFromLocalStorage(key);
+  return true;
+}
+
 export async function loadFromLocalStorage(key: string) {
+  // REVIEW: rename this to "projectKey" or something - it's more than just the projectName.
   projectName.set(key);
   try {
     let gj = JSON.parse(window.localStorage.getItem(key)!);

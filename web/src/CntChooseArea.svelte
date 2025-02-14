@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { Link } from "./common";
-  import "@picocss/pico/css/pico.conditional.jade.min.css";
   import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
   import { onMount } from "svelte";
   import {
@@ -8,12 +6,15 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
-    MapLibre,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
   import boundariesUrl from "../assets/cnt_boundaries.geojson?url";
-  import { maptilerApiKey } from "./stores";
+  import { Link } from "./common";
+  import { createNewProject } from "./title/loader";
+
+  export let loadProject: (project: string) => void;
+  export let activityIndicatorText: string;
 
   let gj: FeatureCollection<
     Polygon | MultiPolygon,
@@ -40,38 +41,27 @@
     newFile(`${props.kind}_${props.name}`);
   }
 
-  function newFile(boundary: string) {
-    let filename = "";
-    while (true) {
-      filename =
+  async function newFile(studyAreaName: string) {
+    let projectName = "";
+    let created = false;
+    while (!created) {
+      projectName =
         window.prompt(
-          `Please pick a project name to create in ${boundary}`,
-          filename,
+          `Please pick a project name to create in ${studyAreaName}`,
+          projectName,
         ) || "";
-      if (filename == "") {
+      if (projectName == "") {
         // If the user leaves this blank or presses cancel, stop prompting them.
         return;
       }
-      let project = `ltn_cnt/${boundary}/${filename}`;
-      if (window.localStorage.getItem(project) != null) {
+      activityIndicatorText = `Loading pre-clipped OSM area ${studyAreaName}`;
+      created = await createNewProject("ltn_cnt", studyAreaName, projectName);
+      activityIndicatorText = "";
+      if (!created) {
         window.alert(
-          `The project name ${filename} is already used; please pick another`,
+          `The project name ${projectName} is already used; please pick another`,
         );
-        continue;
       }
-
-      // Create a blank project
-      window.localStorage.setItem(
-        project,
-        JSON.stringify({
-          type: "FeatureCollection",
-          features: [],
-          study_area_name: boundary,
-        }),
-      );
-
-      window.location.href = `index.html?project=${encodeURIComponent(project)}`;
-      return;
     }
   }
 
@@ -98,98 +88,66 @@
   }
 </script>
 
-<div style="display: flex">
-  <div class="pico left">
-    <h2>Connected Neighbourhoods Tool</h2>
+<p>Choose a boundary below or on the map to begin sketching:</p>
+<ul style="columns: 3">
+  {#each ladNames as name}
+    <li><Link on:click={() => newFile(`LAD_${name}`)}>{name}</Link></li>
+  {/each}
+</ul>
 
-    <p>Choose a boundary below or on the map to begin sketching:</p>
-    <ul style="columns: 3">
-      {#each ladNames as name}
-        <li><Link on:click={() => newFile(`LAD_${name}`)}>{name}</Link></li>
-      {/each}
-    </ul>
+<hr />
 
-    <hr />
+<p>Or continue with a previously opened file:</p>
 
-    <p>Or continue with a previously opened file:</p>
-
-    <div style="columns: 2">
-      {#each listAllFiles() as [boundary, list]}
-        <div class="group">
-          <h2>{boundary}</h2>
-          {#each list as filename}
-            <p>
-              <a href={`index.html?project=ltn_cnt/${boundary}/${filename}`}>
-                {filename}
-              </a>
-            </p>
-          {/each}
-        </div>
-      {/each}
-    </div>
-
-    <style>
-      .group {
-        border: 1px solid black;
-        padding: 4px;
-        margin-bottom: 8px;
-        break-inside: avoid-column;
-      }
-    </style>
-  </div>
-
-  <div class="main">
-    <div style="position: relative; width: 100%; height: 100%;">
-      <MapLibre
-        style={`https://api.maptiler.com/maps/streets-v2/style.json?key=${maptilerApiKey}`}
-        standardControls
-        bounds={[-8.943, 54.631, -0.901, 59.489]}
-        on:error={(e) => {
-          // @ts-expect-error ErrorEvent isn't exported
-          console.log(e.detail.error);
-        }}
-      >
-        <GeoJSON data={gj} generateId>
-          <FillLayer
-            paint={{
-              "fill-color": "rgb(200, 100, 240)",
-              "fill-outline-color": "rgb(200, 100, 240)",
-              "fill-opacity": hoverStateFilter(0.0, 0.5),
-            }}
-            beforeId="Road labels"
-            manageHoverState
-            hoverCursor="pointer"
-            on:click={onClick}
+<div style="columns: 2">
+  {#each listAllFiles() as [boundary, projectNames]}
+    <div class="group">
+      <h2>{boundary}</h2>
+      {#each projectNames as projectName}
+        <p>
+          <Link
+            on:click={() => loadProject(`ltn_cnt/${boundary}/${projectName}`)}
           >
-            <Popup openOn="hover" let:props>
-              <p>{props.name}</p>
-            </Popup>
-          </FillLayer>
-
-          <LineLayer
-            paint={{
-              "line-color": "rgb(200, 100, 240)",
-              "line-width": 2.5,
-            }}
-            beforeId="Road labels"
-            manageHoverState
-          />
-        </GeoJSON>
-      </MapLibre>
+            {projectName}
+          </Link>
+        </p>
+      {/each}
     </div>
-  </div>
+  {/each}
 </div>
 
-<style>
-  .left {
-    width: 35%;
-    height: 100vh;
-    overflow: scroll;
-    padding: 8px;
-  }
+<GeoJSON data={gj} generateId>
+  <FillLayer
+    paint={{
+      "fill-color": "rgb(200, 100, 240)",
+      "fill-outline-color": "rgb(200, 100, 240)",
+      "fill-opacity": hoverStateFilter(0.0, 0.5),
+    }}
+    beforeId="Road labels"
+    manageHoverState
+    hoverCursor="pointer"
+    on:click={onClick}
+  >
+    <Popup openOn="hover" let:props>
+      <p>{props.name}</p>
+    </Popup>
+  </FillLayer>
 
-  .main {
-    width: 65%;
-    height: 100vh;
+  <LineLayer
+    paint={{
+      "line-color": "rgb(200, 100, 240)",
+      "line-width": 2.5,
+    }}
+    beforeId="Road labels"
+    manageHoverState
+  />
+</GeoJSON>
+
+<style>
+  .group {
+    border: 1px solid black;
+    padding: 4px;
+    margin-bottom: 8px;
+    break-inside: avoid-column;
   }
 </style>
