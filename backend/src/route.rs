@@ -1,6 +1,7 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 
-use fast_paths::{FastGraph, InputGraph};
+use fast_paths::{FastGraph, InputGraph, PathCalculator};
 use geo::{Coord, Euclidean, Length, LineString};
 use utils::NodeMap;
 
@@ -8,9 +9,9 @@ use crate::map_model::{DiagonalFilter, Direction};
 use crate::{Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow};
 
 // For vehicles only
-#[derive(Debug, Clone)]
 pub struct Router {
     ch: FastGraph,
+    path_calculator: RefCell<PathCalculator>,
     node_map: NodeMap<(RoadID, Direction)>,
     pub main_road_penalty: f64,
 }
@@ -43,9 +44,11 @@ impl Router {
         let node_map = NodeMap::new();
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
+        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
 
         Self {
             ch,
+            path_calculator,
             node_map,
             main_road_penalty: 1.0,
         }
@@ -107,9 +110,11 @@ impl Router {
         }
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
+        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
 
         Self {
             ch,
+            path_calculator,
             node_map,
             main_road_penalty,
         }
@@ -126,8 +131,6 @@ impl Router {
             return None;
         }
 
-        // TODO Reuse: (Note `calc_path` is mutable)
-        let mut path_calc = fast_paths::create_calculator(&self.ch);
         let mut starts = vec![];
         let mut ends = vec![];
         for direction in [Direction::Forwards, Direction::Backwards] {
@@ -143,8 +146,10 @@ impl Router {
         if starts.is_empty() || ends.is_empty() {
             return None;
         }
-        let shortest_path =
-            path_calc.calc_path_multiple_sources_and_targets(&self.ch, starts, ends)?;
+        let shortest_path = self
+            .path_calculator
+            .borrow_mut()
+            .calc_path_multiple_sources_and_targets(&self.ch, starts, ends)?;
         let steps: Vec<_> = shortest_path
             .get_nodes()
             .iter()
