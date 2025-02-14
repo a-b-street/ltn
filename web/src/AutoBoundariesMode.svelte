@@ -8,7 +8,7 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { downloadGeneratedFile } from "svelte-utils";
-  import { isLine, isPolygon, Popup } from "svelte-utils/map";
+  import { isLine, isPolygon } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";

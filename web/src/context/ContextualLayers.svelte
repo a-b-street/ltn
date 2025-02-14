@@ -4,6 +4,7 @@
   import BusRoutes from "./BusRoutes.svelte";
   import CBD from "./CBD.svelte";
   import POIs from "./POIs.svelte";
+  import Population from "./Population.svelte";
   import RailwayStations from "./RailwayStations.svelte";
   import RouteNetwork from "./RouteNetwork.svelte";
 
@@ -25,6 +26,7 @@
       style:visibility={expand ? "visible" : "collapse"}
     >
       <POIs />
+      <Population />
       <RailwayStations />
       <BusRoutes />
       <CBD />
