@@ -150,6 +150,11 @@ impl LTN {
         Ok(serde_json::to_string(&self.map.filters_to_gj()).map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = renderTurnRestrictions)]
+    pub fn render_turn_restrictions(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&self.map.turn_restrictions_to_gj()).map_err(err_to_js)?)
+    }
+
     #[wasm_bindgen(js_name = renderNeighbourhood)]
     pub fn render_neighbourhood(&self) -> Result<String, JsValue> {
         Ok(
@@ -419,6 +424,7 @@ impl LTN {
                     let mut f = self.map.mercator.to_wgs84_gj(&i.point);
                     f.set_property("has_turn_restrictions", !i.turn_restrictions.is_empty());
                     f.set_property("intersection_id", i.id.0);
+                    f.set_property("osm", i.node.to_string());
                     f
                 })
                 .collect::<Vec<_>>(),
