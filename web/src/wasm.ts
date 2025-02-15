@@ -68,6 +68,13 @@ export class Backend {
     return JSON.parse(this.inner.renderModalFilters());
   }
 
+  renderTurnRestrictions(): FeatureCollection<
+    Point,
+    { angle: number; edited: boolean }
+  > {
+    return JSON.parse(this.inner.renderTurnRestrictions());
+  }
+
   // This adds a 'color' property to all cells. It's nicer to keep this on the
   // frontend, since it's about styling.
   renderNeighbourhood(): RenderNeighbourhoodOutput {
@@ -213,7 +220,7 @@ export class Backend {
 
   getAllIntersections(): FeatureCollection<
     Point,
-    { has_turn_restrictions: boolean }
+    { intersection_id: number; has_turn_restrictions: boolean; osm: string }
   > {
     return JSON.parse(this.inner.getAllIntersections());
   }

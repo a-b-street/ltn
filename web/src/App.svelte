@@ -147,6 +147,10 @@
           url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
         },
         {
+          id: "no_straight_ahead",
+          url: `${import.meta.env.BASE_URL}/filters/no_straight_ahead.png`,
+        },
+        {
           id: "oneway_arrow",
           url: onewayArrowUrl,
         },

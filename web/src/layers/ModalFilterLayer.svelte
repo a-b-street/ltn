@@ -3,6 +3,8 @@
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
+  // TODO Maybe make another component wrapping both of these
+  import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
@@ -41,3 +43,5 @@
     interactive={false}
   />
 </GeoJSON>
+
+<TurnRestrictionLayer />
