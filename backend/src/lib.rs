@@ -292,6 +292,14 @@ impl LTN {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = getTurnRestrictionTargets)]
+    pub fn get_turn_restriction_targets_wasm(&self, road: usize) -> Result<String, JsValue> {
+        Ok(
+            serde_json::to_string(&self.map.get_turn_restriction_targets(RoadID(road)))
+                .map_err(err_to_js)?,
+        )
+    }
+
     #[wasm_bindgen(js_name = toggleTravelFlow)]
     pub fn toggle_travel_flow(&mut self, road: usize) {
         self.map.toggle_travel_flow(RoadID(road));
