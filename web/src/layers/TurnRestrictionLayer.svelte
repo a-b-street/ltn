@@ -1,8 +1,19 @@
 <script lang="ts">
-  import { GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import type { Feature, Geometry } from "geojson";
+  import { GeoJSON, LineLayer, SymbolLayer } from "svelte-maplibre";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
+
+  let hoveredIcon: Feature | null = null;
+  $: showArrow =
+    hoveredIcon == null
+      ? emptyGeojson()
+      : {
+          type: "Feature" as const,
+          geometry: JSON.parse(hoveredIcon.properties!.arrow) as Geometry,
+          properties: {},
+        };
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj =
@@ -22,10 +33,21 @@
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
     manageHoverState
+    bind:hovered={hoveredIcon}
   >
     <Popup let:props>
       No {props.kind} turn, based on bearing {Math.round(props.bearing)}. Rotate
       this icon {Math.round(props.icon_angle)}
     </Popup>
   </SymbolLayer>
+</GeoJSON>
+
+<GeoJSON data={showArrow}>
+  <LineLayer
+    {...layerId("turn-restrictions-debug-arrows")}
+    paint={{
+      "line-width": 2,
+      "line-color": "red",
+    }}
+  />
 </GeoJSON>

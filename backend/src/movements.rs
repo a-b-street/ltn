@@ -31,7 +31,8 @@ impl MapModel {
                 // TODO Group by road first and offset them
 
                 let from = self.get_r(*from);
-                let line = movement_line(i.id, from, self.get_r(*to));
+                let to = self.get_r(*to);
+                let line = movement_line(i.id, from, to);
                 // Place at the end of the 'from' road
                 let pt = line.start;
 
@@ -49,11 +50,16 @@ impl MapModel {
                 let bearing = euclidean_bearing(line.start, line.end);
                 let kind = classify_bearing(bearing);
 
+                // Render the polygon arrow showing this restriction more clearly
+                let arrow = render_arrow(i.id, from, to);
+                let arrow_geometry = self.mercator.to_wgs84_gj(&arrow).geometry.take().unwrap();
+
                 let mut f = self.mercator.to_wgs84_gj(&Point::from(pt));
                 f.set_property("kind", kind);
                 f.set_property("icon_angle", icon_angle);
                 // TODO Temporarily, to debug
                 f.set_property("bearing", bearing);
+                f.set_property("arrow", serde_json::to_value(arrow_geometry).unwrap());
                 // Editing isn't possible yet
                 f.set_property("edited", false);
                 features.push(f);
