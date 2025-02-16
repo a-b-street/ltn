@@ -70,7 +70,13 @@ export class Backend {
 
   renderTurnRestrictions(): FeatureCollection<
     Point,
-    { angle: number; edited: boolean }
+    {
+      kind: "left" | "right" | "straight" | "u";
+      icon_angle: number;
+      // TODO Temporary, for debugging
+      bearing: number;
+      edited: boolean;
+    }
   > {
     return JSON.parse(this.inner.renderTurnRestrictions());
   }

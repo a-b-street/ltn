@@ -147,8 +147,20 @@
           url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
         },
         {
-          id: "no_straight_ahead",
-          url: `${import.meta.env.BASE_URL}/filters/no_straight_ahead.png`,
+          id: "no_straight_turn",
+          url: `${import.meta.env.BASE_URL}/filters/no_straight_turn.png`,
+        },
+        {
+          id: "no_left_turn",
+          url: `${import.meta.env.BASE_URL}/filters/no_left_turn.png`,
+        },
+        {
+          id: "no_right_turn",
+          url: `${import.meta.env.BASE_URL}/filters/no_right_turn.png`,
+        },
+        {
+          id: "no_u_turn",
+          url: `${import.meta.env.BASE_URL}/filters/no_u_turn.png`,
         },
         {
           id: "oneway_arrow",

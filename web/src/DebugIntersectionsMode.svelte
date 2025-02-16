@@ -18,7 +18,7 @@
   let idx = 0;
 
   function pickIntersection(e: CustomEvent<LayerClickInfo>) {
-    currentOsm = e.detail.features[0].properties.osm;
+    currentOsm = e.detail.features[0].properties!.osm;
     movements = $backend!.getMovements(e.detail.features[0].id as number);
     idx = 0;
   }

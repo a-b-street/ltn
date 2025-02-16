@@ -2,7 +2,7 @@ use geo::{Euclidean, Length, Line, LineInterpolatePoint, Point, Polygon};
 use geojson::GeoJson;
 
 use crate::{
-    geo_helpers::{euclidean_bearing, make_arrow, thicken_line},
+    geo_helpers::{angle_of_pt_on_line, euclidean_bearing, limit_angle, make_arrow, thicken_line},
     IntersectionID, MapModel, Road,
 };
 
@@ -29,10 +29,31 @@ impl MapModel {
                 // TODO Skip if it's redundant with the one-ways
 
                 // TODO Group by road first and offset them
-                let line = movement_line(i.id, self.get_r(*from), self.get_r(*to));
 
-                let mut f = self.mercator.to_wgs84_gj(&Point::from(line.start));
-                f.set_property("angle", euclidean_bearing(line.start, line.end));
+                let from = self.get_r(*from);
+                let line = movement_line(i.id, from, self.get_r(*to));
+                // Place at the end of the 'from' road
+                let pt = line.start;
+
+                // Rotate the icon based on the 'from' road's angle only, but make sure that road
+                // points at the intersection
+                let mut road_pointing_at_i = from.linestring.clone();
+                if from.src_i == i.id {
+                    road_pointing_at_i.0.reverse();
+                }
+                // TODO Why +90 and +180? Kind of dunno, just making it look correct
+                let icon_angle =
+                    limit_angle(angle_of_pt_on_line(&road_pointing_at_i, pt.into()) + 90.0) + 180.0;
+
+                // Use the angle between the two roads to determine the type of turn
+                let bearing = euclidean_bearing(line.start, line.end);
+                let kind = classify_bearing(bearing);
+
+                let mut f = self.mercator.to_wgs84_gj(&Point::from(pt));
+                f.set_property("kind", kind);
+                f.set_property("icon_angle", icon_angle);
+                // TODO Temporarily, to debug
+                f.set_property("bearing", bearing);
                 // Editing isn't possible yet
                 f.set_property("edited", false);
                 features.push(f);
@@ -74,4 +95,20 @@ fn pt_near_intersection(i: IntersectionID, road: &Road) -> Point {
     // If not, just take the other endpoint
     let pct = if road.src_i == i { 1.0 } else { 0.0 };
     road.linestring.line_interpolate_point(pct).unwrap()
+}
+
+// TODO Unit test this? Or just draw it
+fn classify_bearing(bearing: f64) -> &'static str {
+    // Remember 0 is north (straight), 90 is east (right), 270 is west (left)
+    let threshold = 30.0;
+
+    if bearing <= 0.0 + threshold || bearing >= 360.0 - threshold {
+        "straight"
+    } else if bearing > 0.0 + threshold && bearing <= 90.0 + threshold {
+        "right"
+    } else if bearing < 360.0 - threshold && bearing >= 270.0 - threshold {
+        "left"
+    } else {
+        "u"
+    }
 }
