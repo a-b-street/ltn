@@ -8,6 +8,7 @@
   import type { LngLat } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import {
+    Control,
     GeoJSON,
     hoverStateFilter,
     LineLayer,
@@ -293,43 +294,7 @@
       </mark>
     {/if}
 
-    <div style="display: flex; justify-content: space-between;">
-      <button
-        on:click={() => (action = { kind: "filter" })}
-        disabled={action.kind == "filter"}
-        data-tooltip="hotkey 1"
-      >
-        <img
-          src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
-          width="30"
-          alt="Add a modal filter"
-        />
-        Add a modal filter
-      </button>
-      <button
-        on:click={() => (action = { kind: "freehand-filters" })}
-        disabled={action.kind == "freehand-filters"}
-        data-tooltip="hotkey 2"
-      >
-        Add many modal filters along line
-      </button>
-      <button
-        on:click={() => (action = { kind: "oneway" })}
-        disabled={action.kind == "oneway"}
-        data-tooltip="hotkey 3"
-      >
-        Reverse directions
-      </button>
-      <button
-        on:click={() => (action = startTurnRestrictionAction())}
-        disabled={action.kind == "turn_restriction"}
-        data-tooltip="hotkey 4"
-      >
-        Restrict turns
-      </button>
-    </div>
-
-    <button on:click={() => (settingFilterType = true)}>
+    <button class="outline" on:click={() => (settingFilterType = true)}>
       Change modal filter type
     </button>
 
@@ -363,14 +328,24 @@
     </div>
 
     <div style="display: flex; justify-content: space-between;">
-      <button disabled={undoLength == 0} on:click={undo} data-tooltip="Ctrl+Z">
+      <button
+        class="outline"
+        disabled={undoLength == 0}
+        on:click={undo}
+        data-tooltip="Ctrl+Z"
+      >
         {#if undoLength == 0}
           Undo
         {:else}
           Undo ({undoLength})
         {/if}
       </button>
-      <button disabled={redoLength == 0} on:click={redo} data-tooltip="Ctrl+Y">
+      <button
+        class="outline"
+        disabled={redoLength == 0}
+        on:click={redo}
+        data-tooltip="Ctrl+Y"
+      >
         {#if redoLength == 0}
           Redo
         {:else}
@@ -385,6 +360,44 @@
   </div>
 
   <div slot="map">
+    <Control position="bottom-right">
+      <div class="pico">
+        <button
+          on:click={() => (action = { kind: "filter" })}
+          disabled={action.kind == "filter"}
+          data-tooltip="hotkey 1"
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+            width="30"
+            alt="Add a modal filter"
+          />
+          Add a modal filter
+        </button>
+        <button
+          on:click={() => (action = { kind: "freehand-filters" })}
+          disabled={action.kind == "freehand-filters"}
+          data-tooltip="hotkey 2"
+        >
+          Add many modal filters along line
+        </button>
+        <button
+          on:click={() => (action = { kind: "oneway" })}
+          disabled={action.kind == "oneway"}
+          data-tooltip="hotkey 3"
+        >
+          Reverse directions
+        </button>
+        <button
+          on:click={() => (action = startTurnRestrictionAction())}
+          disabled={action.kind == "turn_restriction"}
+          data-tooltip="hotkey 4"
+        >
+          Restrict turns
+        </button>
+      </div>
+    </Control>
+
     <RenderNeighbourhood input={gj}>
       <HighlightBoundaryLayer />
       <CellLayer />
