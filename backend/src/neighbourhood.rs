@@ -1,16 +1,15 @@
 use std::collections::BTreeSet;
 
-use crate::geo_helpers::{make_polygon_valid, SliceNearestFrechetBoundary};
+use crate::geo_helpers::{invert_feature_geometry_in_place, SliceNearestFrechetBoundary};
 use anyhow::Result;
-use geo::{Area, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
-use geojson::{Feature, FeatureCollection, Geometry};
+use geo::{Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
+use geojson::{Feature, FeatureCollection};
 use web_time::Instant;
 
 use crate::geo_helpers::{
-    aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination,
-    invert_polygon, make_arrow,
+    aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination, make_arrow,
 };
-use crate::map_model::DiagonalFilter;
+use crate::map_model::{DiagonalFilter, NeighbourhoodStats};
 use crate::route::RouterInput;
 use crate::{
     Cell, Intersection, IntersectionID, MapModel, ModalFilter, RenderCells, Road, RoadID,
@@ -24,14 +23,10 @@ pub struct Neighbourhood {
     pub perimeter_roads: BTreeSet<RoadID>,
     pub editable_intersections: BTreeSet<IntersectionID>,
     pub border_intersections: BTreeSet<IntersectionID>,
-    pub name: String,
-    // Mercator
-    pub boundary_polygon: Polygon,
-    boundary_area_km2: f64,
     /// If true, shortcuts across perimeter roads will be calculated, and the user can edit these
     /// roads.
     pub edit_perimeter_roads: bool,
-
+    pub neighbourhood_boundary: NeighbourhoodStats,
     // Updated after mutations
     derived: Option<DerivedNeighbourhoodState>,
 }
@@ -44,24 +39,27 @@ struct DerivedNeighbourhoodState {
 impl Neighbourhood {
     pub fn new(
         map: &MapModel,
-        name: String,
-        boundary_polygon: Polygon,
+        neighbourhood_boundary: NeighbourhoodStats,
         edit_perimeter_roads: bool,
     ) -> Result<Self> {
-        // Later topology checks require a valid boundary - notably the "is perimeter" check.
-        let boundary_polygon = make_polygon_valid(&boundary_polygon);
-
         let t1 = Instant::now();
-        let bbox = buffer_aabb(aabb(&boundary_polygon), 50.0);
+        let bbox = buffer_aabb(aabb(neighbourhood_boundary.geometry()), 50.0);
 
-        let prepared_boundary = PreparedGeometry::from(&boundary_polygon);
+        let prepared_boundary = PreparedGeometry::from(neighbourhood_boundary.geometry());
 
         let mut interior_roads = BTreeSet::new();
         let mut perimeter_roads = BTreeSet::new();
-        debug!("boundary_polygon: {boundary_polygon:?}",);
+        debug!(
+            "boundary_polygon: {boundary_polygon:?}",
+            boundary_polygon = neighbourhood_boundary.geometry()
+        );
         for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
             let r = &map.roads[obj.data.0];
-            let result = line_in_polygon(&r.linestring, &boundary_polygon, &prepared_boundary);
+            let result = line_in_polygon(
+                &r.linestring,
+                &neighbourhood_boundary.geometry(),
+                &prepared_boundary,
+            );
             debug!(
                 "linestring {road_id}: {linestring:?}, way: {way_id}, result: {result:?}",
                 road_id = obj.data,
@@ -116,8 +114,6 @@ impl Neighbourhood {
             bail!("No perimeter roads");
         }
 
-        // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
-        let boundary_area_km2 = boundary_polygon.unsigned_area() / 1_000_000.0;
         let t3 = Instant::now();
 
         if true {
@@ -127,11 +123,9 @@ impl Neighbourhood {
         let mut n = Self {
             interior_roads,
             perimeter_roads,
+            neighbourhood_boundary,
             editable_intersections,
             border_intersections,
-            name,
-            boundary_polygon,
-            boundary_area_km2,
             edit_perimeter_roads,
             derived: None,
         };
@@ -154,6 +148,14 @@ impl Neighbourhood {
         if true {
             info!("Neighbourhood edited, total {:?}. Finding cells took {:?}, rendering cells took {:?}, finding shortcuts took {:?}", t4 - t1, t2 - t1, t3 - t2, t4 - t3);
         }
+    }
+
+    pub fn boundary_polygon(&self) -> &Polygon {
+        &self.neighbourhood_boundary.geometry()
+    }
+
+    pub fn name(&self) -> &str {
+        &self.neighbourhood_boundary.name()
     }
 
     // PERF: return iter
@@ -217,9 +219,8 @@ impl Neighbourhood {
 
         // Invert the boundary
         {
-            let mut boundary_feature = map.boundaries.get(&self.name).cloned().unwrap();
-            let p: Polygon = boundary_feature.clone().try_into().unwrap();
-            boundary_feature.geometry = Some(Geometry::from(&invert_polygon(p)));
+            let mut boundary_feature = self.neighbourhood_boundary.to_feature(map);
+            invert_feature_geometry_in_place(&mut boundary_feature);
             features.push(boundary_feature);
         }
 
@@ -288,10 +289,11 @@ impl Neighbourhood {
             features,
             bbox: None,
             foreign_members: Some(
+                // The features are items within the neighbourhood.
+                // The foreign members are properties of the *entire* neighborhood.
                 serde_json::json!({
                     "undo_length": map.undo_stack.len(),
                     "redo_length": map.redo_queue.len(),
-                    "area_km2": self.boundary_area_km2,
                 })
                 .as_object()
                 .unwrap()

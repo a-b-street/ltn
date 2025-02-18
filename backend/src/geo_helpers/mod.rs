@@ -284,6 +284,17 @@ pub fn thicken_line(line: Line, thickness: f64) -> Polygon {
     )
 }
 
+pub fn invert_feature_geometry_in_place(wgs84_feature: &mut geojson::Feature) {
+    let Some(geometry) = &wgs84_feature.geometry else {
+        unreachable!("unexpected missing geometry");
+    };
+    let wgs84_polygon = geo::Polygon::try_from(geometry).unwrap();
+    let inverted = invert_polygon(wgs84_polygon);
+
+    let geojson_geometry = geojson::Geometry::from(&inverted);
+    wgs84_feature.geometry = Some(geojson_geometry)
+}
+
 /// Create a polygon covering the world, minus a hole for the input polygon. Assumes the input is
 /// in WGS84 and has no holes itself.
 pub fn invert_polygon(wgs84_polygon: Polygon) -> Polygon {

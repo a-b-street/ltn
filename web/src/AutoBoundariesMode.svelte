@@ -43,9 +43,9 @@
         mode: "neighbourhood",
       };
     } catch (err) {
-      console.log(err);
+      console.log("error when setting auto-generated neighborhood", err);
       window.alert(
-        "Known georust bug hit, sorry. You may need to just refresh the page now.",
+        "Sorry, an error occurred. You may need to refresh the page for the application to continue working.",
       );
     }
   }

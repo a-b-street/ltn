@@ -40,7 +40,7 @@ impl RenderCells {
     /// a grid, and then extracts a polygon from the raster. The results don't look perfect, but
     /// it's fast.
     pub fn new(map: &MapModel, neighbourhood: &Neighbourhood, cells: &Vec<Cell>) -> RenderCells {
-        let boundary_polygon = neighbourhood.boundary_polygon.clone();
+        let boundary_polygon = neighbourhood.boundary_polygon().clone();
         // Make a 2D grid covering the polygon. Each tile in the grid contains a cell index, which
         // will become a color by the end. None means no cell is assigned yet.
         let bounds = <Option<Rect>>::from(boundary_polygon.bounding_rect()).unwrap();

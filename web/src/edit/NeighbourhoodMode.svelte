@@ -46,13 +46,15 @@
     $map!.doubleClickZoom.enable();
   }
 
+  type NeighbourhoodBoundaryFeature = Feature<
+    Polygon,
+    { name: string; area_km2: number; waypoints: Waypoint[] }
+  >;
+
   let settingFilterType = false;
   let undoLength = 0;
   let redoLength = 0;
-  let boundary: Feature<
-    Polygon,
-    { name: string; waypoints: Waypoint[] }
-  > | null;
+  let boundary: NeighbourhoodBoundaryFeature | null;
 
   let gj: RenderNeighbourhoodOutput;
   let allShortcuts = $backend!.getAllShortcuts();
@@ -239,7 +241,7 @@
   <div slot="sidebar">
     <p>
       Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
-      , with an area of {gj.area_km2.toFixed(1)} km²
+      , with an area of {notNull(boundary).properties.area_km2.toFixed(1)} km²
     </p>
 
     {#if numDisconnectedCells > 0}
