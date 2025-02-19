@@ -19,7 +19,7 @@ import type { Intersection, IntersectionFeature } from "./common/Intersection";
 
 export type NeighbourhoodBoundaryFeature = Feature<
   Polygon,
-  { name: string; waypoints: Waypoint[]; area_km2: number }
+  { name: string; waypoints: Waypoint[]; area_km2: number; simd: number }
 >;
 
 export class Backend {

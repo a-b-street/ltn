@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Feature, FeatureCollection } from "geojson";
+  import type { FeatureCollection } from "geojson";
   import { Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
@@ -17,11 +17,9 @@
   } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = $backend!.getAllNeighbourhoods();
-  $: boundaryNames = gj.features
-    .filter((f: Feature) => f.properties!.kind == "boundary")
-    .map((f: Feature) => f.properties!.name);
-  $: edits = countEdits(gj);
+  $: boundaries = $backend!.getAllNeighbourhoods();
+  $: boundaryNames = boundaries.features.map((f) => f.properties.name);
+  $: edits = countEdits(boundaries);
 
   function pickNeighbourhood(name: string) {
     $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
@@ -37,7 +35,7 @@
       $backend!.deleteNeighbourhoodBoundary(name);
       autosave();
       // TODO Improve perf, don't call this twice
-      gj = $backend!.getAllNeighbourhoods();
+      boundaries = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -50,7 +48,7 @@
     if (newName) {
       $backend!.renameNeighbourhoodBoundary(name, newName);
       autosave();
-      gj = $backend!.getAllNeighbourhoods();
+      boundaries = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -214,7 +212,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={gj} generateId>
+    <GeoJSON data={boundaries} generateId>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
@@ -227,9 +225,17 @@
           pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
         hoverCursor="pointer"
       >
+        <!-- 
+         REVIEW: How to do type checking to the usage of `props`? 
+         Maybe something like this: https://stackoverflow.com/questions/73531618/svelte-components-with-generics
+       -->
         <Popup openOn="hover" let:props>
-          <p>{props.name}</p>
-          <p>Area: {props.area_km2.toFixed(1)} km²</p>
+          <h2>{props.name}</h2>
+          <b>Area:</b>
+          {props.area_km2.toFixed(1)} km²
+          <br />
+          <b>SIMD:</b>
+          {props.simd.toFixed(1)}
         </Popup>
       </FillLayer>
     </GeoJSON>

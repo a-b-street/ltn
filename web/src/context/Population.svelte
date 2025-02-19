@@ -1,17 +1,36 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import {
     FillLayer,
+    GeoJSON,
     hoverStateFilter,
     LineLayer,
     VectorTileSource,
   } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { emptyGeojson, makeRamp, Popup } from "svelte-utils/map";
   import { HelpButton, layerId } from "../common";
-  import { assetUrl } from "../stores";
+  import { assetUrl, backend } from "../stores";
 
   let showSIMD = false;
+  let aggregateSIMDToNeighbourhoods = false;
   let showDensity = false;
+
+  $: neighbourhoods = emptyGeojson();
+  onMount(() => {
+    if ($backend) {
+      neighbourhoods = $backend!.getAllNeighbourhoods();
+    } else {
+      backend.subscribe((b) => {
+        if (b) {
+          console.log("backend loaded async");
+          neighbourhoods = b.getAllNeighbourhoods();
+        } else {
+          console.log("backend still not loaded");
+        }
+      });
+    }
+  });
 
   // Color ramp from https://www.ons.gov.uk/census/maps/choropleth, dark to light.
   let simdColorScale = ["#080C54", "#186290", "#1F9EB7", "#80C6A3", "#CDE594"];
@@ -27,7 +46,10 @@
 {#if showSIMD}
   <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
   <p>Darker colours are more deprived</p>
-
+  <label>
+    <input type="checkbox" bind:checked={aggregateSIMDToNeighbourhoods} />
+    Aggregate to LTN boundaries.
+  </label>
   <HelpButton>
     <p>
       This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
@@ -62,6 +84,28 @@
   </HelpButton>
 {/if}
 
+<GeoJSON data={neighbourhoods} generateId>
+  <FillLayer
+    {...layerId("context-simd-per-neighbourhood")}
+    manageHoverState
+    paint={{
+      "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
+      "fill-opacity": hoverStateFilter(0.7, 0.9),
+    }}
+    layout={{
+      visibility:
+        showSIMD && aggregateSIMDToNeighbourhoods ? "visible" : "none",
+    }}
+  >
+    <!-- REVIEW: handle click to take you to neighbourhood? -->
+    <Popup openOn="hover" let:props>
+      <h2>{props.name}</h2>
+      <b>SIMD:</b>
+      {props.simd.toFixed(1)}
+    </Popup>
+  </FillLayer>
+</GeoJSON>
+
 <VectorTileSource
   url={`pmtiles://${assetUrl("cnt_layers/population.pmtiles")}`}
 >
@@ -71,6 +115,7 @@
     manageHoverState
     paint={{
       "fill-color": makeRamp(
+        // REVIEW: shouldn't this be `simd_percentile` (missing the leading `s`)?
         ["get", "imd_percentile"],
         simdLimits,
         simdColorScale,
@@ -78,7 +123,8 @@
       "fill-opacity": hoverStateFilter(0.7, 0.9),
     }}
     layout={{
-      visibility: showSIMD ? "visible" : "none",
+      visibility:
+        showSIMD && !aggregateSIMDToNeighbourhoods ? "visible" : "none",
     }}
   >
     <Popup openOn="hover" let:props>
@@ -123,7 +169,10 @@
     sourceLayer="population"
     paint={{ "line-color": "black", "line-width": 1 }}
     layout={{
-      visibility: showSIMD || showDensity ? "visible" : "none",
+      visibility:
+        (showSIMD && !aggregateSIMDToNeighbourhoods) || showDensity
+          ? "visible"
+          : "none",
     }}
   />
 </VectorTileSource>
