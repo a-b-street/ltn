@@ -5,20 +5,22 @@
     LineString,
     Polygon,
   } from "geojson";
-  import type { LngLat } from "maplibre-gl";
+  import type { LngLat, MapMouseEvent } from "maplibre-gl";
+  import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
   import {
     Control,
     GeoJSON,
     hoverStateFilter,
     LineLayer,
+    MapEvents,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { notNull, SequentialLegend } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import AnimatePaths from "../AnimatePaths.svelte";
-  import { HelpButton, Link, roadLineWidth } from "../common";
+  import { HelpButton, layerId, Link, roadLineWidth } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
   import type { Intersection } from "../common/Intersection";
   import {
@@ -57,15 +59,20 @@
     | {
         kind: "turn_restriction";
         from_road_id: number | null;
-        possible_targets: FeatureCollection<LineString, { road: number }>;
+        from_road_name: string;
+        possible_targets: FeatureCollection<
+          LineString,
+          { road: number; name: string }
+        >;
       };
   function startTurnRestrictionAction(): Action {
     return {
       kind: "turn_restriction",
       from_road_id: null,
+      from_road_name: "",
       possible_targets: emptyGeojson() as FeatureCollection<
         LineString,
-        { road: number }
+        { road: number; name: string }
       >,
     };
   }
@@ -124,12 +131,30 @@
       $backend!.toggleTravelFlow(f.properties!.road);
       $mutationCounter++;
     } else if (action.kind == "turn_restriction") {
-      // TODO If clicking a target, that adds a TR
       action.from_road_id = f.properties!.road;
+      action.from_road_name = f.properties!.name || "unnamed road";
       action.possible_targets = $backend!.getTurnRestrictionTargets(
         f.properties!.road,
       );
+      // TODO The blue hover state gets stuck
     }
+  }
+
+  function onMapClick(e: CustomEvent<MapMouseEvent>) {
+    if (action.kind != "turn_restriction") {
+      return;
+    }
+
+    // If we click a blank area, reset some state
+    if (
+      $map!.queryRenderedFeatures(e.detail.point, {
+        layers: ["interior-roads"],
+      }).length > 0
+    ) {
+      return;
+    }
+
+    action = startTurnRestrictionAction();
   }
 
   function createTurnRestriction(e: CustomEvent<LayerClickInfo>) {
@@ -360,6 +385,8 @@
   </div>
 
   <div slot="map">
+    <MapEvents on:click={onMapClick} />
+
     <Control position="bottom-right">
       <div class="pico">
         <button
@@ -454,6 +481,7 @@
     {#if action.kind == "turn_restriction"}
       <GeoJSON data={action.possible_targets || emptyGeojson()} generateId>
         <LineLayer
+          {...layerId("turn-restriction-targets")}
           manageHoverState
           paint={{
             "line-color": "yellow",
@@ -461,7 +489,12 @@
             "line-width": roadLineWidth(1),
           }}
           on:click={createTurnRestriction}
-        />
+        >
+          <Popup openOn="hover" let:props>
+            Create a turn restriction from {action.from_road_name} to {props.name ||
+              "unnamed road"}
+          </Popup>
+        </LineLayer>
       </GeoJSON>
     {/if}
   </div>

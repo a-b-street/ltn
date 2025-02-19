@@ -146,7 +146,7 @@ export class Backend {
 
   getTurnRestrictionTargets(
     road: number,
-  ): FeatureCollection<LineString, { road: number }> {
+  ): FeatureCollection<LineString, { road: number; name: string }> {
     return JSON.parse(this.inner.getTurnRestrictionTargets(road));
   }
 
