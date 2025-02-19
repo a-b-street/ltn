@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { Feature, LineString, Polygon } from "geojson";
+  import type { Feature, LineString } from "geojson";
   import type { LngLat } from "maplibre-gl";
-  import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
   import { notNull, SequentialLegend } from "svelte-utils";
@@ -31,7 +30,10 @@
     mutationCounter,
     roadStyle,
   } from "../stores";
-  import type { RenderNeighbourhoodOutput } from "../wasm";
+  import type {
+    NeighbourhoodBoundaryFeature,
+    RenderNeighbourhoodOutput,
+  } from "../wasm";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
 
@@ -45,11 +47,6 @@
   } else {
     $map!.doubleClickZoom.enable();
   }
-
-  type NeighbourhoodBoundaryFeature = Feature<
-    Polygon,
-    { name: string; area_km2: number; waypoints: Waypoint[] }
-  >;
 
   let settingFilterType = false;
   let undoLength = 0;

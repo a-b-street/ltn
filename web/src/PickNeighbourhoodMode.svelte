@@ -17,7 +17,7 @@
   } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = $backend!.toSavefile();
+  $: gj = $backend!.getAllNeighbourhoods();
   $: boundaryNames = gj.features
     .filter((f: Feature) => f.properties!.kind == "boundary")
     .map((f: Feature) => f.properties!.name);
@@ -37,7 +37,7 @@
       $backend!.deleteNeighbourhoodBoundary(name);
       autosave();
       // TODO Improve perf, don't call this twice
-      gj = $backend!.toSavefile();
+      gj = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -50,7 +50,7 @@
     if (newName) {
       $backend!.renameNeighbourhoodBoundary(name, newName);
       autosave();
-      gj = $backend!.toSavefile();
+      gj = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -229,6 +229,7 @@
       >
         <Popup openOn="hover" let:props>
           <p>{props.name}</p>
+          <p>Area: {props.area_km2.toFixed(1)} km²</p>
         </Popup>
       </FillLayer>
     </GeoJSON>
