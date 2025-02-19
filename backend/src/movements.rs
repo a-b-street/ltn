@@ -87,6 +87,9 @@ impl MapModel {
                 let to = self.get_r(*r);
                 let mut f = self.mercator.to_wgs84_gj(&to.linestring);
                 f.set_property("road", r.0);
+                if let Some(name) = to.tags.get("name") {
+                    f.set_property("name", name.clone());
+                }
                 features.push(f);
             }
         }
