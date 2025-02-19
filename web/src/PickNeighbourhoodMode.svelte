@@ -2,10 +2,11 @@
   import type { FeatureCollection } from "geojson";
   import { Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
+  import { downloadGeneratedFile, notNull, SequentialLegend } from "svelte-utils";
+  import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId, Link } from "./common";
+  import { simdColorScale, simdLimits } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
   import {
@@ -17,9 +18,9 @@
   } from "./stores";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: boundaries = $backend!.getAllNeighbourhoods();
-  $: boundaryNames = boundaries.features.map((f) => f.properties.name);
-  $: edits = countEdits(boundaries);
+  $: neighbourhoods = $backend!.getAllNeighbourhoods();
+  $: edits = countEdits(neighbourhoods);
+  let selectedPrioritization: "none" | "area" | "simd" = "none";
 
   function pickNeighbourhood(name: string) {
     $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
@@ -35,7 +36,7 @@
       $backend!.deleteNeighbourhoodBoundary(name);
       autosave();
       // TODO Improve perf, don't call this twice
-      boundaries = $backend!.getAllNeighbourhoods();
+      neighbourhoods = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -48,7 +49,7 @@
     if (newName) {
       $backend!.renameNeighbourhoodBoundary(name, newName);
       autosave();
-      boundaries = $backend!.getAllNeighbourhoods();
+      neighbourhoods = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -96,6 +97,8 @@
     }
     return { modalFilters, deletedModalFilters, travelFlows };
   }
+
+  let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];
 
   // TODO Hover on button and highlight on map
 </script>
@@ -157,20 +160,16 @@
   </div>
 
   <div slot="sidebar">
-    <div><Link on:click={newBoundary}>Draw a new boundary</Link></div>
-    <div>
-      <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
-        Use an auto-generated boundary
-      </Link>
-    </div>
-
-    <ul>
-      {#each boundaryNames as name}
+    <h3>Neighbourhoods</h3>
+    <ul class="neighbourhood-list">
+      {#each neighbourhoods.features as { properties: { name, area_km2, simd } }}
         <li>
           <span style="display: flex; justify-content: space-between;">
+            <span class="neighbourhood-name">
             <Link on:click={() => pickNeighbourhood(name)}>
               {name}
             </Link>
+            </span>
             <span style="display: flex; gap: 16px;">
               <button
                 class="outline icon-btn"
@@ -188,9 +187,48 @@
               </button>
             </span>
           </span>
+          {#if selectedPrioritization == "area"}
+            <span>
+              <b>Area:</b>
+              {area_km2.toFixed(1)} km²
+            </span>
+          {:else if selectedPrioritization == "simd"}
+            <span>
+              <b>SIMD (percentile):</b>
+              {simd.toFixed(1)}
+            </span>
+          {/if}
         </li>
       {/each}
+      <li>
+        ➕ Add a new neighbourhood:
+        <ul style="margin-bottom: 0;"><!-- pico override -->
+          <li>
+            <Link on:click={newBoundary}>Draw a boundary</Link>
+          </li>
+          <li>
+            <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
+              Use a generated boundary
+            </Link>
+          </li>
+        </ul>
+      </li>
     </ul>
+    <h3>Prioritization</h3>
+    <p>Compare metrics across your neighbourhoods.</p>
+    <div style="display: flex; gap: 16px; align-items: center;">
+      <label for="prioritization-selection">Metric</label>
+      <select id="prioritization-selection" bind:value={selectedPrioritization}>
+        <option value="none">None</option>
+        <option value="area">Area (km²)</option>
+        <option value="simd">SIMD (percentile)</option>
+      </select>
+    </div>
+    {#if selectedPrioritization == "simd" }
+    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+    {:else if selectedPrioritization == "area" }
+    <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
+    {/if}
 
     <hr />
 
@@ -212,7 +250,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={boundaries} generateId>
+    <GeoJSON data={neighbourhoods} generateId>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
@@ -224,21 +262,85 @@
         on:click={(e) =>
           pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
         hoverCursor="pointer"
+        layout={{
+          visibility: selectedPrioritization == "none" ? "visible" : "none",
+        }}
       >
         <!-- 
-         REVIEW: How to do type checking to the usage of `props`? 
-         Maybe something like this: https://stackoverflow.com/questions/73531618/svelte-components-with-generics
-       -->
+             REVIEW: How to do type checking to the usage of `props`? 
+             Maybe something like this: https://stackoverflow.com/questions/73531618/svelte-components-with-generics
+           -->
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
           <b>Area:</b>
           {props.area_km2.toFixed(1)} km²
           <br />
-          <b>SIMD:</b>
+          <b>SIMD (percentile):</b>
           {props.simd.toFixed(1)}
+        </Popup>
+      </FillLayer>
+
+      <!-- REVIEW: Should clicking on a neighbourhood in the "prioritization" layer take you to neighbourhood? -->
+      <FillLayer
+        {...layerId("neighbourhood-prioritization-simd")}
+        manageHoverState
+        paint={{
+          "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
+          "fill-opacity": hoverStateFilter(0.7, 0.9),
+        }}
+        layout={{
+          visibility: selectedPrioritization == "simd" ? "visible" : "none",
+        }}
+      >
+        <Popup openOn="hover" let:props>
+          <h2>{props.name}</h2>
+          <b>SIMD:</b> {props.simd.toFixed(1)}
+        </Popup>
+      </FillLayer>
+      <FillLayer
+        {...layerId("neighbourhood-prioritization-area")}
+        manageHoverState
+        paint={{
+          "fill-color": makeRamp(
+            ["get", "area_km2"],
+            areaLimits,
+            simdColorScale,
+          ),
+          "fill-opacity": hoverStateFilter(0.7, 0.9),
+        }}
+        layout={{
+          visibility: selectedPrioritization == "area" ? "visible" : "none",
+        }}
+      >
+        <Popup openOn="hover" let:props>
+          <h2>{props.name}</h2>
+          <b>Area:</b> {props.area_km2.toFixed(1)} km²
         </Popup>
       </FillLayer>
     </GeoJSON>
     <ModalFilterLayer />
   </div>
 </SplitComponent>
+
+<style>
+  ul.neighbourhood-list {
+    padding: 4px;
+  }
+
+  ul.neighbourhood-list .neighbourhood-name {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  ul.neighbourhood-list > li {
+    list-style: none;
+    margin: 0;
+    padding: 16px 8px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: leading;
+    width: 100%;
+    border-bottom: solid #ddd 1px;
+  }
+</style>

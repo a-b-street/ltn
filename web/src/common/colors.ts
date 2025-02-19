@@ -8,6 +8,18 @@ export let speedColorScale = [
 ];
 export let speedLimits = [20, 30, 40, 50, 60, 70];
 
+// Color ramp from https://www.ons.gov.uk/census/maps/choropleth, dark to light.
+export let simdColorScale = [
+  "#080C54",
+  "#186290",
+  "#1F9EB7",
+  "#80C6A3",
+  "#CDE594",
+];
+
+// The percentiles are [1, 100]. The 5 colors cover 4 each.
+export let simdLimits = [0, 20, 40, 60, 80, 100];
+
 export const Style = {
   mapFeature: {
     hover: {
