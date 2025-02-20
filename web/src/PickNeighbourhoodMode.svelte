@@ -21,29 +21,13 @@
     projectName,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
+  import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
 
   // Note we do this to trigger a refresh when loading stuff
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
-  let selectedPrioritization: "none" | "area" | "simd" = "none";
-  let currentURLParam = new URL(window.location.href).searchParams.get(
-    "prioritizationMetric",
-  );
-  if (currentURLParam == "area") {
-    selectedPrioritization = "area";
-  } else if (currentURLParam == "simd") {
-    selectedPrioritization = "simd";
-  }
 
-  $: {
-    const url = new URL(window.location.href);
-    if (selectedPrioritization == "none") {
-      url.searchParams.delete("prioritizationMetric");
-    } else {
-      url.searchParams.set("prioritizationMetric", selectedPrioritization);
-    }
-    history.replaceState({}, "", url);
-  }
+  let selectedPrioritization: "none" | "area" | "simd" = "none"; 
   let hoveredNeighbourhoodFromList: string | null = null;
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
@@ -256,14 +240,8 @@
     </ul>
     <h3>Prioritization</h3>
     <p>Compare metrics across your neighbourhoods.</p>
-    <div style="display: flex; gap: 16px; align-items: center;">
-      <label for="prioritization-selection">Metric</label>
-      <select id="prioritization-selection" bind:value={selectedPrioritization}>
-        <option value="none">None</option>
-        <option value="area">Area (km²)</option>
-        <option value="simd">SIMD (percentile)</option>
-      </select>
-    </div>
+    <PrioritizationSelect bind:selectedPrioritization />
+   
     {#if selectedPrioritization == "simd"}
       <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
     {:else if selectedPrioritization == "area"}
