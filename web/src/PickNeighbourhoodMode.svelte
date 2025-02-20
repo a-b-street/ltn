@@ -2,7 +2,11 @@
   import type { FeatureCollection } from "geojson";
   import { Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import { downloadGeneratedFile, notNull, SequentialLegend } from "svelte-utils";
+  import {
+    downloadGeneratedFile,
+    notNull,
+    SequentialLegend,
+  } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId, Link } from "./common";
@@ -16,11 +20,14 @@
     mode,
     projectName,
   } from "./stores";
+  import type { NeighbourhoodBoundaryFeature } from "./wasm";
 
   // Note we do this to trigger a refresh when loading stuff
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
   let selectedPrioritization: "none" | "area" | "simd" = "none";
+  let hoveredNeighbourhoodFromList: string | null = null;
+  let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
   function pickNeighbourhood(name: string) {
     $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
@@ -160,10 +167,24 @@
   </div>
 
   <div slot="sidebar">
-    <h3>Neighbourhoods</h3>
+    <h3 style="padding: 4px 8px; margin-bottom: 0">Neighbourhoods</h3>
     <ul class="neighbourhood-list">
       {#each neighbourhoods.features as { properties: { name, area_km2, simd } }}
-        <li>
+        <!-- 
+          TODO: use hoveredNeighbourhoodFromList to highlight the feature on the map.
+          It's tricky, because we have to plumb it through to 
+          maplibre somehow. I tried using feature-state via <JoinedData>, but failed.
+          The proximate error was that joining data requires referencing a source-id,
+          but maplibre complains when you try to set the feature state of a GeoJSON layer 
+          with a source-id.
+
+          Maybe dustin has a clever idea?
+        -->
+        <li
+          on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
+          on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
+          class:highlighted={hoveredMapFeature?.properties.name == name}
+        >
           <span style="display: flex; justify-content: space-between;">
             <span class="neighbourhood-name">
             <Link on:click={() => pickNeighbourhood(name)}>
@@ -202,7 +223,8 @@
       {/each}
       <li>
         ➕ Add a new neighbourhood:
-        <ul style="margin-bottom: 0;"><!-- pico override -->
+        <ul style="margin-bottom: 0;">
+          <!-- pico override -->
           <li>
             <Link on:click={newBoundary}>Draw a boundary</Link>
           </li>
@@ -224,10 +246,10 @@
         <option value="simd">SIMD (percentile)</option>
       </select>
     </div>
-    {#if selectedPrioritization == "simd" }
-    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
-    {:else if selectedPrioritization == "area" }
-    <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
+    {#if selectedPrioritization == "simd"}
+      <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+    {:else if selectedPrioritization == "area"}
+      <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
     {/if}
 
     <hr />
@@ -258,13 +280,14 @@
           "fill-color": "black",
           "fill-opacity": hoverStateFilter(0.3, 0.5),
         }}
-        manageHoverState
-        on:click={(e) =>
-          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
-        hoverCursor="pointer"
         layout={{
           visibility: selectedPrioritization == "none" ? "visible" : "none",
         }}
+        manageHoverState
+        bind:hovered={hoveredMapFeature}
+        hoverCursor="pointer"
+        on:click={(e) =>
+          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
       >
         <!-- 
              REVIEW: How to do type checking to the usage of `props`? 
@@ -283,7 +306,6 @@
       <!-- REVIEW: Should clicking on a neighbourhood in the "prioritization" layer take you to neighbourhood? -->
       <FillLayer
         {...layerId("neighbourhood-prioritization-simd")}
-        manageHoverState
         paint={{
           "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
           "fill-opacity": hoverStateFilter(0.7, 0.9),
@@ -291,15 +313,20 @@
         layout={{
           visibility: selectedPrioritization == "simd" ? "visible" : "none",
         }}
+        manageHoverState
+        bind:hovered={hoveredMapFeature}
+        hoverCursor="pointer"
+        on:click={(e) =>
+          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
       >
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
-          <b>SIMD:</b> {props.simd.toFixed(1)}
+          <b>SIMD:</b>
+          {props.simd.toFixed(1)}
         </Popup>
       </FillLayer>
       <FillLayer
         {...layerId("neighbourhood-prioritization-area")}
-        manageHoverState
         paint={{
           "fill-color": makeRamp(
             ["get", "area_km2"],
@@ -311,10 +338,16 @@
         layout={{
           visibility: selectedPrioritization == "area" ? "visible" : "none",
         }}
+        manageHoverState
+        bind:hovered={hoveredMapFeature}
+        hoverCursor="pointer"
+        on:click={(e) =>
+          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
       >
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
-          <b>Area:</b> {props.area_km2.toFixed(1)} km²
+          <b>Area:</b>
+          {props.area_km2.toFixed(1)} km²
         </Popup>
       </FillLayer>
     </GeoJSON>
@@ -324,12 +357,7 @@
 
 <style>
   ul.neighbourhood-list {
-    padding: 4px;
-  }
-
-  ul.neighbourhood-list .neighbourhood-name {
-    font-weight: bold;
-    font-size: 1.2em;
+    padding: 0px;
   }
 
   ul.neighbourhood-list > li {
@@ -342,5 +370,14 @@
     align-items: leading;
     width: 100%;
     border-bottom: solid #ddd 1px;
+  }
+
+  ul.neighbourhood-list > li.highlighted {
+    background-color: #f0fcaa;
+  }
+
+  ul.neighbourhood-list .neighbourhood-name {
+    font-weight: bold;
+    font-size: 1.2em;
   }
 </style>
