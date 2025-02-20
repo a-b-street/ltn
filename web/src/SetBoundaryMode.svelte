@@ -24,7 +24,9 @@
       // version of this tool, or an auto-generated boundary. Just
       // "backfill" by using the full geometry as freehand points.
       // Editing will be very painful in practice, but it won't break.
-      $waypoints = existing.geometry.coordinates[0].slice(1).map((point) => {
+      // Note the second polygon ring is used, because the boundary is expressed as
+      // "everywhere" minus a hole for the boundary, to achieve the fade-outside effect.
+      $waypoints = existing.geometry.coordinates[1].slice(1).map((point) => {
         return { point: gjPosition(point), snapped: false };
       });
     }
