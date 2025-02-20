@@ -1,11 +1,10 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
+  import { Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import deleteIcon from "../assets/delete.svg?url";
-  import editIcon from "../assets/edit.svg?url";
   import { HelpButton, layerId, Link } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
@@ -174,18 +173,22 @@
             <Link on:click={() => pickNeighbourhood(name)}>
               {name}
             </Link>
-            <button
-              class="secondary"
-              on:click={() => renameNeighbourhood(name)}
-            >
-              <img src={editIcon} alt="Rename neighbourhood" />
-            </button>
-            <button
-              class="secondary"
-              on:click={() => deleteNeighbourhood(name)}
-            >
-              <img src={deleteIcon} alt="Delete neighbourhood" />
-            </button>
+            <span style="display: flex; gap: 16px;">
+              <button
+                class="outline icon-btn"
+                aria-label="Rename neighbourhood"
+                on:click={() => renameNeighbourhood(name)}
+              >
+                <Pencil color="black" />
+              </button>
+              <button
+                class="icon-btn destructive"
+                aria-label="Delete neighbourhood"
+                on:click={() => deleteNeighbourhood(name)}
+              >
+                <Trash2 color="white" />
+              </button>
+            </span>
           </span>
         </li>
       {/each}

@@ -207,3 +207,61 @@
     </MapLibre>
   </div>
 </Layout>
+
+<style>
+  :global(.pico .icon-btn.destructive),
+  :global(.icon-btn.destructive) {
+    background-color: #dc2626;
+  }
+
+  :global(.pico .icon-btn),
+  :global(.icon-btn) {
+    margin: 0;
+    height: 36px;
+    width: 36px;
+    aspect-ratio: 1;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :global(.pico .icon-btn):hover,
+  :global(.icon-btn):hover {
+    background-color: #ddd;
+  }
+
+  :global(.pico .icon-btn.destructive):hover,
+  :global(.icon-btn.destructive):hover {
+    background-color: #891717;
+  }
+
+  :global(.pico .icon-btn svg),
+  :global(.icon-btn svg) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  :global(.pico nav[aria-label="breadcrumb"] ul) {
+    margin-left: 4px;
+  }
+
+  :global(.pico nav[aria-label="breadcrumb"] ul > li) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  :global(.pico nav[aria-label="breadcrumb"] ul li:before) {
+    /* pico overrides to reconcile breadcrumb li becoming `flex` */
+    display: none;
+  }
+
+  :global(.pico nav[aria-label="breadcrumb"] ul li:not(:last-child)::after) {
+    /* pico overrides to reconcile breadcrumb li becoming `flex` */
+    position: static;
+    margin-right: -32px;
+    margin-left: -16px;
+  }
+</style>

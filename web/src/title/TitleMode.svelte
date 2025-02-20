@@ -1,8 +1,7 @@
 <script lang="ts">
+  import { Pencil, Trash2 } from "lucide-svelte";
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import deleteIcon from "../../assets/delete.svg?url";
-  import editIcon from "../../assets/edit.svg?url";
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { backend, map, mode, projectName } from "../stores";
@@ -136,18 +135,22 @@
                 <Link on:click={() => loadProject(project)}>
                   {project.slice("ltn_".length)}
                 </Link>
-                <button
-                  class="secondary"
-                  on:click={() => renameProject(project)}
-                >
-                  <img src={editIcon} alt="Rename project" />
-                </button>
-                <button
-                  class="secondary"
-                  on:click={() => deleteProject(project)}
-                >
-                  <img src={deleteIcon} alt="Delete project" />
-                </button>
+                <span style="display: flex; gap: 16px;">
+                  <button
+                    class="outline icon-btn"
+                    aria-label="Rename project"
+                    on:click={() => renameProject(project)}
+                  >
+                    <Pencil color="black" />
+                  </button>
+                  <button
+                    class="icon-btn destructive"
+                    aria-label="Delete project"
+                    on:click={() => deleteProject(project)}
+                  >
+                    <Trash2 color="white" />
+                  </button>
+                </span>
               </span>
             </li>
           {/each}

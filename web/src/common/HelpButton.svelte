@@ -1,14 +1,14 @@
 <script lang="ts">
   // This launches a modal when clicked. The user should put the modal contents
   // as a slot beneath this component.
+  import { CircleHelp } from "lucide-svelte";
   import { Modal } from "svelte-utils";
-  import icon from "../../assets/help.svg?url";
 
   let show = false;
 </script>
 
-<button class="help" on:click={() => (show = true)}>
-  <img src={icon} title="Help" alt="Help" />
+<button class="icon-btn help" aria-label="Help" on:click={() => (show = true)}>
+  <CircleHelp color="black" />
 </button>
 
 {#if show}
@@ -21,10 +21,16 @@
 <style>
   button.help {
     background: none;
-    border: 1px solid rgba(0, 0, 0, 0);
+    border: none;
   }
 
-  button:hover {
-    border: 1px solid black;
+  /* 
+  special considerations so that the help button doesn't exapnd the
+  height of the breadcrums
+  */
+  :global(.pico nav[aria-label="breadcrumb"] ul > li) button.help {
+    height: 30px;
+    padding: 2px;
+    width: auto;
   }
 </style>
