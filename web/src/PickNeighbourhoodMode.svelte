@@ -26,6 +26,24 @@
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
   let selectedPrioritization: "none" | "area" | "simd" = "none";
+  let currentURLParam = new URL(window.location.href).searchParams.get(
+    "prioritizationMetric",
+  );
+  if (currentURLParam == "area") {
+    selectedPrioritization = "area";
+  } else if (currentURLParam == "simd") {
+    selectedPrioritization = "simd";
+  }
+
+  $: {
+    const url = new URL(window.location.href);
+    if (selectedPrioritization == "none") {
+      url.searchParams.delete("prioritizationMetric");
+    } else {
+      url.searchParams.set("prioritizationMetric", selectedPrioritization);
+    }
+    history.replaceState({}, "", url);
+  }
   let hoveredNeighbourhoodFromList: string | null = null;
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
