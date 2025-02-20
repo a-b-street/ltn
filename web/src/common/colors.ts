@@ -36,3 +36,5 @@ export let demandColorScale = [
   "#186290",
   "#080C54",
 ];
+
+export let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];

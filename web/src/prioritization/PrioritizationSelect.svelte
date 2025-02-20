@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { SequentialLegend } from "svelte-utils";
+  import { areaLimits, simdColorScale, simdLimits } from "../common/colors";
+
   export let selectedPrioritization: "none" | "area" | "simd";
 
   let currentURLParam = new URL(window.location.href).searchParams.get(
@@ -26,6 +29,12 @@
   <select id="prioritization-selection" bind:value={selectedPrioritization}>
     <option value="none">None</option>
     <option value="area">Area (km²)</option>
-    <option value="simd">SIMD (percentile)</option>
+    <option value="simd">Fake SIMD (percentile)</option>
   </select>
 </div>
+
+{#if selectedPrioritization == "simd"}
+  <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+{:else if selectedPrioritization == "area"}
+  <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
+{/if}

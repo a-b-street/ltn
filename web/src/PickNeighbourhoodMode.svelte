@@ -2,17 +2,14 @@
   import type { FeatureCollection } from "geojson";
   import { Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
-  import {
-    downloadGeneratedFile,
-    notNull,
-    SequentialLegend,
-  } from "svelte-utils";
+  import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId, Link } from "./common";
-  import { simdColorScale, simdLimits } from "./common/colors";
+  import { areaLimits, simdColorScale, simdLimits } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
+  import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
   import {
     autosave,
     backend,
@@ -21,13 +18,12 @@
     projectName,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
-  import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
 
   // Note we do this to trigger a refresh when loading stuff
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
 
-  let selectedPrioritization: "none" | "area" | "simd" = "none"; 
+  let selectedPrioritization: "none" | "area" | "simd" = "none";
   let hoveredNeighbourhoodFromList: string | null = null;
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
@@ -106,8 +102,6 @@
     }
     return { modalFilters, deletedModalFilters, travelFlows };
   }
-
-  let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];
 
   // TODO Hover on button and highlight on map
 </script>
@@ -189,9 +183,9 @@
         >
           <span style="display: flex; justify-content: space-between;">
             <span class="neighbourhood-name">
-            <Link on:click={() => pickNeighbourhood(name)}>
-              {name}
-            </Link>
+              <Link on:click={() => pickNeighbourhood(name)}>
+                {name}
+              </Link>
             </span>
             <span style="display: flex; gap: 16px;">
               <button
@@ -238,15 +232,10 @@
         </ul>
       </li>
     </ul>
+
     <h3>Prioritization</h3>
     <p>Compare metrics across your neighbourhoods.</p>
     <PrioritizationSelect bind:selectedPrioritization />
-   
-    {#if selectedPrioritization == "simd"}
-      <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
-    {:else if selectedPrioritization == "area"}
-      <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
-    {/if}
 
     <hr />
 

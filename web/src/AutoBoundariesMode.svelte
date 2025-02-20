@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ExpressionSpecification } from "maplibre-gl";
+  import { type ExpressionSpecification } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -8,16 +8,19 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { downloadGeneratedFile } from "svelte-utils";
-  import { isLine, isPolygon } from "svelte-utils/map";
+  import { isLine, isPolygon, makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
+  import { areaLimits, simdColorScale, simdLimits } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
+  import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
   import { autosave, backend, editPerimeterRoads, mode } from "./stores";
 
   let gj = $backend!.renderAutoBoundaries();
   let minArea = 0;
   let removeNonRoad = true;
+  let selectedPrioritization: "none" | "area" | "simd" = "none";
 
   function add(e: CustomEvent<LayerClickInfo>) {
     let name = pickNeighbourhoodName(
@@ -101,6 +104,10 @@
       is experimental. The colors are arbitrary, just to distinguish better.
     </p>
 
+    <h3>Prioritization</h3>
+    <p>Compare metrics across candidate neighbourhoods.</p>
+    <PrioritizationSelect bind:selectedPrioritization />
+
     <button class="secondary" on:click={download}>Export to GeoJSON</button>
 
     <label>
@@ -116,10 +123,19 @@
 
   <div slot="map">
     <GeoJSON data={gj} generateId>
-      <FillLayer
-        {...layerId("auto-boundaries-areas")}
-        filter={makeFilter(minArea, removeNonRoad)}
+      <LineLayer
+        {...layerId("auto-boundaries-severances")}
+        filter={isLine}
         manageHoverState
+        paint={{
+          "line-color": hoverStateFilter("black", "red"),
+          "line-width": 3,
+        }}
+      />
+
+      <FillLayer
+        {...layerId("neighbourhood-boundaries", false)}
+        filter={makeFilter(minArea, removeNonRoad)}
         paint={{
           "fill-color": [
             "match",
@@ -136,21 +152,71 @@
             "orange",
             "black",
           ],
-          "fill-opacity": hoverStateFilter(0.3, 0.7),
+          "fill-opacity": hoverStateFilter(0.2, 0.4),
         }}
-        on:click={add}
-        hoverCursor="pointer"
-      />
-
-      <LineLayer
-        {...layerId("auto-boundaries-severances")}
-        filter={isLine}
+        layout={{
+          visibility: selectedPrioritization == "none" ? "visible" : "none",
+        }}
         manageHoverState
+        hoverCursor="pointer"
+        on:click={add}
+      >
+        <!-- 
+             REVIEW: How to do type checking to the usage of `props`? 
+             Maybe something like this: https://stackoverflow.com/questions/73531618/svelte-components-with-generics
+           -->
+        <Popup openOn="hover" let:props>
+          <b>Area:</b>
+          {props.area_km2.toFixed(1)} km²
+          <br />
+          <b>SIMD (percentile):</b>
+          {props.simd.toFixed(1)}
+        </Popup>
+      </FillLayer>
+
+      <!-- REVIEW: Should clicking on a neighbourhood in the "prioritization" layer take you to neighbourhood? -->
+      <FillLayer
+        {...layerId("neighbourhood-prioritization-simd")}
+        filter={makeFilter(minArea, removeNonRoad)}
         paint={{
-          "line-color": hoverStateFilter("black", "red"),
-          "line-width": 3,
+          "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
+          "fill-opacity": hoverStateFilter(0.7, 0.9),
         }}
-      />
+        layout={{
+          visibility: selectedPrioritization == "simd" ? "visible" : "none",
+        }}
+        manageHoverState
+        hoverCursor="pointer"
+        on:click={add}
+      >
+        <Popup openOn="hover" let:props>
+          <b>SIMD:</b>
+          {props.simd.toFixed(1)}
+        </Popup>
+      </FillLayer>
+      <FillLayer
+        {...layerId("neighbourhood-prioritization-area")}
+        filter={makeFilter(minArea, removeNonRoad)}
+        paint={{
+          "fill-color": makeRamp(
+            ["get", "area_km2"],
+            areaLimits,
+            simdColorScale,
+          ),
+          "fill-opacity": hoverStateFilter(0.7, 0.9),
+        }}
+        layout={{
+          visibility: selectedPrioritization == "area" ? "visible" : "none",
+        }}
+        manageHoverState
+        hoverCursor="pointer"
+        on:click={add}
+      >
+        <Popup openOn="hover" let:props>
+          <b>Area:</b>
+          {props.area_km2.toFixed(1)} km²
+        </Popup>
+      </FillLayer>
     </GeoJSON>
   </div>
 </SplitComponent>

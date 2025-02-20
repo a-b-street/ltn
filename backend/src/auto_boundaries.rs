@@ -1,9 +1,10 @@
-use geo::{Area, Coord, Intersects, LineString, Polygon};
-use geojson::FeatureCollection;
+use crate::map_model::BoundaryStats;
+use crate::MapModel;
+use geo::{Coord, Intersects, LineString, Polygon};
+use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
-
-use crate::MapModel;
+use serde::{Deserialize, Serialize};
 
 impl MapModel {
     pub fn render_auto_boundaries(&self) -> FeatureCollection {
@@ -63,14 +64,48 @@ impl MapModel {
             let touches_railway = boundary_touches_any(&polygon, &self.railways);
             let touches_waterway = boundary_touches_any(&polygon, &self.waterways);
 
-            let mut f = self.mercator.to_wgs84_gj(&polygon);
-            f.set_property("kind", "area");
-            f.set_property("touches_big_road", touches_big_road);
-            f.set_property("touches_railway", touches_railway);
-            f.set_property("touches_waterway", touches_waterway);
-            // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
-            f.set_property("area_km2", polygon.unsigned_area() / 1_000_000.0);
-            features.push(f);
+            /// The static data that defines where exactly a neighbourhood is.
+            #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+            pub struct GeneratedBoundary {
+                /// `geometry` is always Mercator.
+                /// We convert it to/from wgs84 only when serializizing/deserializing GeoJSON.
+                #[serde(
+                    serialize_with = "geojson::ser::serialize_geometry",
+                    deserialize_with = "geojson::de::deserialize_geometry"
+                )]
+                pub geometry: Polygon,
+                pub touches_big_road: bool,
+                pub touches_railway: bool,
+                pub touches_waterway: bool,
+                #[serde(flatten)]
+                pub boundary_stats: BoundaryStats,
+            }
+
+            impl GeneratedBoundary {
+                pub fn to_feature(&self, map: &MapModel) -> Feature {
+                    let mut projected = self.clone();
+                    map.mercator.to_wgs84_in_place(&mut projected.geometry);
+                    let mut feature = geojson::ser::to_feature(projected)
+                        .expect("should have no unserializable fields");
+                    let props = feature
+                        .properties
+                        .as_mut()
+                        .expect("GeneratedBoundary always has properties");
+                    props.insert("kind".to_string(), "area".into());
+                    feature
+                }
+            }
+
+            let boundary_stats = BoundaryStats::new(&polygon);
+            let generated_boundary = GeneratedBoundary {
+                geometry: polygon,
+                touches_big_road,
+                touches_railway,
+                touches_waterway,
+                boundary_stats,
+            };
+
+            features.push(generated_boundary.to_feature(self));
         }
 
         FeatureCollection {

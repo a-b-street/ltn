@@ -143,6 +143,7 @@ impl LTN {
         )
     }
 
+    // REVIEW: rename get_all_auto_boundaries()? Just not sure what "render" means.
     #[wasm_bindgen(js_name = renderAutoBoundaries)]
     pub fn render_auto_boundaries(&self) -> Result<String, JsValue> {
         Ok(serde_json::to_string(&self.map.render_auto_boundaries()).map_err(err_to_js)?)
