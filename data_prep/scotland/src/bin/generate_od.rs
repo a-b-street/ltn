@@ -7,6 +7,7 @@ use utils::Mercator;
 
 use backend::od::{DemandModel, ZoneID};
 
+/// Generate travel demand (OD) model, and write to file
 fn main() -> Result<()> {
     let study_areas: Vec<StudyArea> = geojson::de::deserialize_feature_collection_str_to_vec(
         &std::fs::read_to_string("boundaries.geojson")?,

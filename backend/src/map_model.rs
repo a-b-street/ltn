@@ -3,6 +3,7 @@ use crate::geo_helpers::{
     invert_multi_polygon, limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
+use crate::neighbourhood::{NeighbourhoodBoundary, NeighbourhoodDefinition};
 use crate::route::RouterInput;
 use crate::{od::DemandModel, Router};
 use anyhow::Result;
@@ -53,9 +54,7 @@ pub struct MapModel {
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
     pub redo_queue: Vec<Command>,
-    // Stores boundary polygons in WGS84, with ALL of their GeoJSON props.
-    // TODO Reconsider
-    pub boundaries: BTreeMap<String, Feature>,
+    pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
@@ -514,13 +513,19 @@ impl MapModel {
             }
         }
 
-        gj.features.extend(self.boundaries.values().cloned());
+        for neighbourhood_boundary in self.boundaries.values() {
+            // we don't save the derived "stats" just the boundary definition
+            gj.features
+                .push(neighbourhood_boundary.definition.to_feature(self))
+        }
 
         let mut f = Feature::from(Geometry::from(&self.boundary_wgs84));
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
 
         gj.foreign_members = Some(
+            // The features are elements within the study area, we store properties of the
+            // StudyArea itself as foreign members.
             serde_json::json!({
                 "study_area_name": self.study_area_name,
             })
@@ -601,11 +606,13 @@ impl MapModel {
                     cmds.push(Command::SetTravelFlow(r, dir));
                 }
                 "boundary" => {
-                    let name = get_str_prop(&f, "name")?;
-                    if self.boundaries.contains_key(name) {
+                    let name = get_str_prop(&f, "name")?.to_string();
+                    if self.boundaries.contains_key(&name) {
                         bail!("Multiple boundaries named {name} in savefile");
                     }
-                    self.boundaries.insert(name.to_string(), f);
+                    let neighbourhood_definition = NeighbourhoodDefinition::from_feature(f, self)?;
+                    let neighbourhood_stats = NeighbourhoodBoundary::new(neighbourhood_definition);
+                    self.boundaries.insert(name, neighbourhood_stats);
                 }
                 "study_area_boundary" => {
                     // TODO Detect if it's close enough to boundary_polygon? Overwrite?

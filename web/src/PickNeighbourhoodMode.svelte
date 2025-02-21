@@ -1,13 +1,15 @@
 <script lang="ts">
-  import type { Feature, FeatureCollection } from "geojson";
-  import { Pencil, Trash2 } from "lucide-svelte";
+  import type { FeatureCollection } from "geojson";
+  import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
+  import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId, Link } from "./common";
+  import { areaLimits, simdColorScale, simdLimits } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
+  import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
   import {
     autosave,
     backend,
@@ -15,13 +17,15 @@
     mode,
     projectName,
   } from "./stores";
+  import type { NeighbourhoodBoundaryFeature } from "./wasm";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = $backend!.toSavefile();
-  $: boundaryNames = gj.features
-    .filter((f: Feature) => f.properties!.kind == "boundary")
-    .map((f: Feature) => f.properties!.name);
-  $: edits = countEdits(gj);
+  $: neighbourhoods = $backend!.getAllNeighbourhoods();
+  $: edits = countEdits(neighbourhoods);
+
+  let selectedPrioritization: "none" | "area" | "simd" = "none";
+  let hoveredNeighbourhoodFromList: string | null = null;
+  let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
   function pickNeighbourhood(name: string) {
     $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
@@ -37,7 +41,7 @@
       $backend!.deleteNeighbourhoodBoundary(name);
       autosave();
       // TODO Improve perf, don't call this twice
-      gj = $backend!.toSavefile();
+      neighbourhoods = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -50,7 +54,7 @@
     if (newName) {
       $backend!.renameNeighbourhoodBoundary(name, newName);
       autosave();
-      gj = $backend!.toSavefile();
+      neighbourhoods = $backend!.getAllNeighbourhoods();
     }
   }
 
@@ -159,20 +163,30 @@
   </div>
 
   <div slot="sidebar">
-    <div><Link on:click={newBoundary}>Draw a new boundary</Link></div>
-    <div>
-      <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
-        Use an auto-generated boundary
-      </Link>
-    </div>
+    <h3 style="padding: 4px 8px; margin-bottom: 0">Neighbourhoods</h3>
+    <ul class="neighbourhood-list">
+      {#each neighbourhoods.features as { properties: { name, area_km2, simd } }}
+        <!-- 
+          TODO: use hoveredNeighbourhoodFromList to highlight the feature on the map.
+          It's tricky, because we have to plumb it through to 
+          maplibre somehow. I tried using feature-state via <JoinedData>, but failed.
+          The proximate error was that joining data requires referencing a source-id,
+          but maplibre complains when you try to set the feature state of a GeoJSON layer 
+          with a source-id.
 
-    <ul>
-      {#each boundaryNames as name}
-        <li>
+          Maybe dustin has a clever idea?
+        -->
+        <li
+          on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
+          on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
+          class:highlighted={hoveredMapFeature?.properties.name == name}
+        >
           <span style="display: flex; justify-content: space-between;">
-            <Link on:click={() => pickNeighbourhood(name)}>
-              {name}
-            </Link>
+            <span class="neighbourhood-name">
+              <Link on:click={() => pickNeighbourhood(name)}>
+                {name}
+              </Link>
+            </span>
             <span style="display: flex; gap: 16px;">
               <button
                 class="outline icon-btn"
@@ -190,11 +204,45 @@
               </button>
             </span>
           </span>
+          {#if selectedPrioritization == "area"}
+            <span>
+              <b>Area:</b>
+              {area_km2.toFixed(1)} km²
+            </span>
+          {:else if selectedPrioritization == "simd"}
+            <span>
+              <b>SIMD (percentile):</b>
+              {simd.toFixed(1)}
+            </span>
+          {/if}
         </li>
       {/each}
+      <li>
+        Add a new neighbourhood:
+        <ul style="margin-bottom: 0; padding: 0;">
+          <!-- pico override -->
+          <li style="list-style: none;">
+            <Link on:click={newBoundary}>
+              <Pencil />
+              Draw a new boundary
+            </Link>
+          </li>
+          <li style="list-style: none;">
+            <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
+              <CirclePlus />
+              Use a generated boundary
+            </Link>
+          </li>
+        </ul>
+      </li>
     </ul>
 
-    <hr />
+    {#if $projectName.startsWith("ltn_cnt/")}
+      <h3>Prioritization</h3>
+      <p>Compare metrics across your neighbourhoods.</p>
+      <PrioritizationSelect bind:selectedPrioritization />
+      <hr />
+    {/if}
 
     <p>Current project: {$projectName}</p>
 
@@ -214,7 +262,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={gj} generateId>
+    <GeoJSON data={neighbourhoods} generateId>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
@@ -222,16 +270,95 @@
           "fill-color": "black",
           "fill-opacity": hoverStateFilter(0.3, 0.5),
         }}
+        layout={{
+          visibility: selectedPrioritization == "none" ? "visible" : "none",
+        }}
         manageHoverState
+        bind:hovered={hoveredMapFeature}
+        hoverCursor="pointer"
         on:click={(e) =>
           pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
-        hoverCursor="pointer"
       >
         <Popup openOn="hover" let:props>
-          <p>{props.name}</p>
+          <h2>{props.name}</h2>
+          <b>Area:</b>
+          {props.area_km2.toFixed(1)} km²
+        </Popup>
+      </FillLayer>
+      <FillLayer
+        {...layerId("neighbourhood-prioritization-simd")}
+        paint={{
+          "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
+          "fill-opacity": hoverStateFilter(0.7, 0.9),
+        }}
+        layout={{
+          visibility: selectedPrioritization == "simd" ? "visible" : "none",
+        }}
+        manageHoverState
+        bind:hovered={hoveredMapFeature}
+        hoverCursor="pointer"
+        on:click={(e) =>
+          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
+      >
+        <Popup openOn="hover" let:props>
+          <h2>{props.name}</h2>
+          <b>SIMD:</b>
+          {props.simd.toFixed(1)}
+        </Popup>
+      </FillLayer>
+      <FillLayer
+        {...layerId("neighbourhood-prioritization-area")}
+        paint={{
+          "fill-color": makeRamp(
+            ["get", "area_km2"],
+            areaLimits,
+            simdColorScale,
+          ),
+          "fill-opacity": hoverStateFilter(0.7, 0.9),
+        }}
+        layout={{
+          visibility: selectedPrioritization == "area" ? "visible" : "none",
+        }}
+        manageHoverState
+        bind:hovered={hoveredMapFeature}
+        hoverCursor="pointer"
+        on:click={(e) =>
+          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
+      >
+        <Popup openOn="hover" let:props>
+          <h2>{props.name}</h2>
+          <b>Area:</b>
+          {props.area_km2.toFixed(1)} km²
         </Popup>
       </FillLayer>
     </GeoJSON>
     <ModalFilterLayer />
   </div>
 </SplitComponent>
+
+<style>
+  ul.neighbourhood-list {
+    padding: 0px;
+  }
+
+  ul.neighbourhood-list > li {
+    list-style: none;
+    margin: 0;
+    padding: 16px 8px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: leading;
+    width: 100%;
+    border-bottom: solid #ddd 1px;
+  }
+
+  ul.neighbourhood-list > li.highlighted {
+    background-color: #f0fcaa;
+  }
+
+  ul.neighbourhood-list .neighbourhood-name {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+</style>

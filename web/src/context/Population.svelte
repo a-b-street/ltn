@@ -8,15 +8,11 @@
   import { SequentialLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { HelpButton, layerId } from "../common";
+  import { simdColorScale, simdLimits } from "../common/colors";
   import { assetUrl } from "../stores";
 
   let showSIMD = false;
   let showDensity = false;
-
-  // Color ramp from https://www.ons.gov.uk/census/maps/choropleth, dark to light.
-  let simdColorScale = ["#080C54", "#186290", "#1F9EB7", "#80C6A3", "#CDE594"];
-  // The percentiles are [1, 100]. The 5 colors cover 4 each.
-  let simdLimits = [0, 20, 40, 60, 80, 100];
 
   let densityColorScale = simdColorScale.toReversed();
   // Use the same (slightly rounded) buckets as https://www.ons.gov.uk/census/maps/choropleth/population/population-density/population-density/persons-per-square-kilometre. TODO Adapt for Scotland.

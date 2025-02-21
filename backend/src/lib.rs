@@ -5,7 +5,7 @@ extern crate log;
 
 use std::sync::Once;
 
-use geo::{Coord, LineString, Polygon};
+use geo::{Coord, LineString};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
@@ -14,12 +14,13 @@ use self::cells::Cell;
 pub use self::map_model::{
     FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow,
 };
-pub use self::neighbourhood::Neighbourhood;
+pub use self::neighbourhood::{Neighbourhood, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use self::render_cells::RenderCells;
 pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
 
 mod auto_boundaries;
+mod boundary_stats;
 mod cells;
 mod create;
 mod geo_helpers;
@@ -148,17 +149,19 @@ impl LTN {
         Ok(serde_json::to_string(&self.map.render_auto_boundaries()).map_err(err_to_js)?)
     }
 
-    /// Takes a name and boundary GJ polygon
+    /// `input`: GeoJson Feature w/ Polygon Geometry
     #[wasm_bindgen(js_name = setNeighbourhoodBoundary)]
     pub fn set_neighbourhood_boundary(
         &mut self,
         name: String,
-        input: JsValue,
+        neighborhood_feature: JsValue,
     ) -> Result<(), JsValue> {
-        let mut boundary_gj: Feature = serde_wasm_bindgen::from_value(input)?;
-        boundary_gj.set_property("kind", "boundary");
-        boundary_gj.set_property("name", name.clone());
-        self.map.boundaries.insert(name, boundary_gj);
+        let mut feature: Feature = serde_wasm_bindgen::from_value(neighborhood_feature)?;
+        feature.set_property("name", name.clone());
+        let neighbourhood_definition =
+            NeighbourhoodDefinition::from_feature(feature, &self.map).map_err(err_to_js)?;
+        let boundary = NeighbourhoodBoundary::new(neighbourhood_definition);
+        self.map.boundaries.insert(name, boundary);
         Ok(())
     }
 
@@ -169,9 +172,9 @@ impl LTN {
 
     #[wasm_bindgen(js_name = renameNeighbourhoodBoundary)]
     pub fn rename_neighbourhood_boundary(&mut self, old_name: String, new_name: String) {
-        let mut boundary_gj = self.map.boundaries.remove(&old_name).unwrap();
-        boundary_gj.set_property("name", new_name.clone());
-        self.map.boundaries.insert(new_name, boundary_gj);
+        let mut boundary = self.map.boundaries.remove(&old_name).unwrap();
+        boundary.definition.name = new_name.clone();
+        self.map.boundaries.insert(new_name, boundary);
     }
 
     #[wasm_bindgen(js_name = setCurrentNeighbourhood)]
@@ -180,18 +183,16 @@ impl LTN {
         name: String,
         edit_perimeter_roads: bool,
     ) -> Result<(), JsValue> {
-        let boundary_gj = self.map.boundaries.get(&name).cloned().unwrap();
-        let mut boundary_geo: Polygon = boundary_gj.try_into().map_err(err_to_js)?;
-        self.map.mercator.to_mercator_in_place(&mut boundary_geo);
+        let boundary = self.map.boundaries.get(&name).unwrap();
 
         // Are we still editing the same neighbourhood, just switching edit_perimeter_roads?
         let editing_same = self
             .neighbourhood
             .as_ref()
-            .map(|n| n.name == name)
+            .map(|n| n.name() == name)
             .unwrap_or(false);
         self.neighbourhood = Some(
-            Neighbourhood::new(&self.map, name, boundary_geo, edit_perimeter_roads)
+            Neighbourhood::new(&self.map, boundary.clone(), edit_perimeter_roads)
                 .map_err(err_to_js)?,
         );
 
@@ -378,6 +379,17 @@ impl LTN {
                 .get_impacts_on_road(&self.map, RoadID(road)),
         )
         .map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = getAllNeighbourhoods)]
+    pub fn get_all_neighbourhoods(&self) -> Result<String, JsValue> {
+        let features = self
+            .map
+            .boundaries
+            .values()
+            .map(|neighbourhood| neighbourhood.to_feature(&self.map));
+        let fc = FeatureCollection::from_iter(features);
+        Ok(serde_json::to_string(&fc).map_err(err_to_js)?)
     }
 
     #[wasm_bindgen(js_name = getAllIntersections)]

@@ -8,6 +8,7 @@ import type {
   Polygon,
 } from "geojson";
 import type { LngLat } from "maplibre-gl";
+import type { Waypoint } from "route-snapper-ts";
 import { sum } from "./common";
 import type { Intersection, IntersectionFeature } from "./common/Intersection";
 
@@ -15,6 +16,11 @@ import type { Intersection, IntersectionFeature } from "./common/Intersection";
 // definitions here are trusted blindly, not checked. Little work should happen
 // here aside from parsing and making the API nicer for both the Rust and TS
 // code. This is also a step towards moving to using web workers.
+
+export type NeighbourhoodBoundaryFeature = Feature<
+  Polygon,
+  { name: string; waypoints: Waypoint[]; area_km2: number; simd: number }
+>;
 
 export class Backend {
   inner: LTN;
@@ -194,6 +200,13 @@ export class Backend {
     ]
   > {
     return JSON.parse(this.inner.getImpactsOnRoad(road));
+  }
+
+  getAllNeighbourhoods(): FeatureCollection<
+    NeighbourhoodBoundaryFeature["geometry"],
+    NeighbourhoodBoundaryFeature["properties"]
+  > {
+    return JSON.parse(this.inner.getAllNeighbourhoods());
   }
 
   getAllIntersections(): FeatureCollection<

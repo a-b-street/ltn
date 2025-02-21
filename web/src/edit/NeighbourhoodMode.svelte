@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { Feature, LineString, Polygon } from "geojson";
+  import type { Feature, LineString } from "geojson";
   import type { LngLat } from "maplibre-gl";
-  import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
   import { type LayerClickInfo } from "svelte-maplibre";
   import { notNull, SequentialLegend } from "svelte-utils";
@@ -31,7 +30,10 @@
     mutationCounter,
     roadStyle,
   } from "../stores";
-  import type { RenderNeighbourhoodOutput } from "../wasm";
+  import type {
+    NeighbourhoodBoundaryFeature,
+    RenderNeighbourhoodOutput,
+  } from "../wasm";
   import ChangeModalFilter from "./ChangeModalFilter.svelte";
   import FreehandLine from "./FreehandLine.svelte";
 
@@ -49,10 +51,7 @@
   let settingFilterType = false;
   let undoLength = 0;
   let redoLength = 0;
-  let boundary: Feature<
-    Polygon,
-    { name: string; waypoints: Waypoint[] }
-  > | null;
+  let boundary: NeighbourhoodBoundaryFeature | null;
 
   let gj: RenderNeighbourhoodOutput;
   let allShortcuts = $backend!.getAllShortcuts();
@@ -239,7 +238,7 @@
   <div slot="sidebar">
     <p>
       Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
-      , with an area of {gj.area_km2.toFixed(1)} km²
+      , with an area of {notNull(boundary).properties.area_km2.toFixed(1)} km²
     </p>
 
     {#if numDisconnectedCells > 0}
