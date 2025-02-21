@@ -111,10 +111,10 @@
     <ul>
       <li>Only collisions between 2017 and 2023 are included</li>
       <li>
-        This tool is intended to be used when zoomed into the map, while inspecting a
-        scheme or development area. Not all points are shown when zoomed out
-        and showing large areas. Do not use this to look for trends across a
-        city or region scale.
+        This tool is intended to be used when zoomed into the map, while
+        inspecting a scheme or development area. Not all points are shown when
+        zoomed out and showing large areas. Do not use this to look for trends
+        across a city or region scale.
       </li>
       <li>
         Approximately 150 collisions from the source data aren't included, due
