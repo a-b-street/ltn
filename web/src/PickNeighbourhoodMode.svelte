@@ -112,14 +112,11 @@
   function fillColor(
     selectedPrioritization: "none" | "area" | "simd",
   ): DataDrivenPropertyValueSpecification<string> {
-    let color: DataDrivenPropertyValueSpecification<string> = "red";
-    if (selectedPrioritization == "none") {
-      color = "black";
-    } else if (selectedPrioritization == "simd") {
-      color = makeRamp(["get", "simd"], simdLimits, simdColorScale);
-    } else if (selectedPrioritization == "area") {
-      color = makeRamp(["get", "area_km2"], areaLimits, simdColorScale);
-    }
+    let color = {
+      none: "black",
+      simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
+      area: makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
+    }[selectedPrioritization];
     return [
       "case",
       ["==", ["feature-state", "highlight"], "yes"],
