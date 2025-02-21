@@ -61,6 +61,3 @@ harness = false
 # (awaiting release of https://github.com/georust/geo/pull/1279)
 geo = {  git = "https://github.com/georust/geo" }
 geo-types = {  git = "https://github.com/georust/geo" }
-
-[patch."https://github.com/georust/geojson"]
-geojson = { git = "https://github.com/michaelkirk/rust-geojson", branch = "mkirk/to-feature" }
