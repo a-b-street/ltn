@@ -8,7 +8,7 @@ fn benchmark_build_neighbourhood(c: &mut Criterion) {
         NeighbourhoodFixture::BRISTOL_WEST,
         NeighbourhoodFixture::STRASBOURG,
     ] {
-        let (map, boundary_geo) = neighbourhood.neighbourhood_params().unwrap();
+        let (neighbourhood_stats, map) = neighbourhood.neighbourhood_params().unwrap();
         let edit_perimeter_roads = false;
         c.bench_function(
             &format!(
@@ -17,13 +17,9 @@ fn benchmark_build_neighbourhood(c: &mut Criterion) {
             ),
             |b| {
                 b.iter(|| {
-                    let neighbourhood = Neighbourhood::new(
-                        &map,
-                        neighbourhood.neighbourhood_name.to_string(),
-                        boundary_geo.clone(),
-                        edit_perimeter_roads,
-                    )
-                    .unwrap();
+                    let neighbourhood =
+                        Neighbourhood::new(&map, neighbourhood_stats.clone(), edit_perimeter_roads)
+                            .unwrap();
                     black_box(neighbourhood);
                 });
             },

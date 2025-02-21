@@ -17,7 +17,7 @@
   import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
   import { autosave, backend, editPerimeterRoads, mode } from "./stores";
 
-  let gj = $backend!.getAutoBoundaries();
+  let gj = $backend!.renderAutoBoundaries();
   let minArea = 0;
   let removeNonRoad = true;
   let selectedPrioritization: "none" | "area" | "simd" = "none";
@@ -174,7 +174,6 @@
         </Popup>
       </FillLayer>
 
-      <!-- REVIEW: Should clicking on a neighbourhood in the "prioritization" layer take you to neighbourhood? -->
       <FillLayer
         {...layerId("neighbourhood-prioritization-simd")}
         filter={makeFilter(minArea, removeNonRoad)}

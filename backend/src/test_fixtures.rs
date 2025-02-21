@@ -1,3 +1,4 @@
+use crate::neighbourhood::NeighbourhoodBoundary;
 use crate::{MapModel, Neighbourhood};
 use anyhow::Result;
 use geo::{MultiPolygon, Polygon};
@@ -34,16 +35,13 @@ impl NeighbourhoodFixture {
     }
 
     pub fn neighbourhood_map(&self) -> Result<(Neighbourhood, MapModel)> {
-        let mut map = self.map_model()?;
-        map.load_savefile(self.savefile()?)?;
-
-        let neighborhood_boundary = map.boundaries[self.neighbourhood_name].clone();
+        let (neighborhood_stats, map) = self.neighbourhood_params()?;
 
         // Uncomment if you want to re-save the savefiles
         // std::fs::write(self.savefile_path(), map.to_savefile().to_string())?;
 
         let edit_perimeter_roads = false;
-        let neighbourhood = Neighbourhood::new(&map, neighborhood_boundary, edit_perimeter_roads)?;
+        let neighbourhood = Neighbourhood::new(&map, neighborhood_stats, edit_perimeter_roads)?;
         Ok((neighbourhood, map))
     }
 
@@ -71,8 +69,7 @@ impl NeighbourhoodFixture {
     }
 
     pub fn savefile(&self) -> Result<FeatureCollection> {
-        let savefile: FeatureCollection =
-            std::fs::read_to_string(&self.savefile_path())?.parse()?;
+        let savefile: FeatureCollection = std::fs::read_to_string(self.savefile_path())?.parse()?;
         Ok(savefile)
     }
 
@@ -81,5 +78,11 @@ impl NeighbourhoodFixture {
             "../tests/{savefile_name}.geojson",
             savefile_name = self.savefile_name
         )
+    }
+
+    pub fn neighbourhood_params(&self) -> Result<(NeighbourhoodBoundary, MapModel)> {
+        let mut map = self.map_model()?;
+        map.load_savefile(self.savefile()?)?;
+        Ok((map.boundaries[self.neighbourhood_name].clone(), map))
     }
 }

@@ -274,10 +274,6 @@
         on:click={(e) =>
           pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
       >
-        <!-- 
-             REVIEW: How to do type checking to the usage of `props`? 
-             Maybe something like this: https://stackoverflow.com/questions/73531618/svelte-components-with-generics
-           -->
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
           <b>Area:</b>
@@ -287,8 +283,6 @@
           {props.simd.toFixed(1)}
         </Popup>
       </FillLayer>
-
-      <!-- REVIEW: Should clicking on a neighbourhood in the "prioritization" layer take you to neighbourhood? -->
       <FillLayer
         {...layerId("neighbourhood-prioritization-simd")}
         paint={{
