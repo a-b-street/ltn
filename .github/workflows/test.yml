@@ -24,5 +24,4 @@ jobs:
 
       - name: Run tests
         run: |
-          cd backend
           cargo test --release

@@ -1,0 +1,28 @@
+[workspace]
+members = [
+    "backend",
+    "data_prep/scotland",
+]
+
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+
+[workspace.dependencies]
+anyhow = "1.0.82"
+bincode = "1.3.3"
+geo = { git = "https://github.com/georust/geo" }
+geojson = { git = "https://github.com/georust/geojson", features = ["geo-types"] }
+serde = "1.0.188"
+utils = { git = "https://github.com/a-b-street/utils", features = ["serde"] }
+
+# For local development, build dependencies in release mode once, but otherwise
+# use dev profile and avoid wasm-opt.
+[profile.dev.package."*"]
+opt-level = 3
+
+[patch.crates-io]
+geo = { git = "https://github.com/georust/geo" }
+geo-types = { git = "https://github.com/georust/geo" }
+
