@@ -89,12 +89,8 @@ function stats19 {
   mkdir -p input tmp
 
   # URLs from https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data
-  if [ ! -e "input/dft-road-casualty-statistics-casualty-1979-latest-published-year.csv" ]; then
-    download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-casualty-1979-latest-published-year.csv
-  fi
-  if [ ! -e "input/dft-road-casualty-statistics-collision-1979-latest-published-year.csv" ]; then
-    download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-collision-1979-latest-published-year.csv
-  fi
+  download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-casualty-1979-latest-published-year.csv
+  download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-collision-1979-latest-published-year.csv
 
   cargo run --release
 
