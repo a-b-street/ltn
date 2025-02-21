@@ -64,6 +64,7 @@ impl NeighbourhoodFixture {
                 multi_polygon.clone(),
                 Some(study_area_name.to_string()),
                 demand,
+                None,
             )
         })
     }

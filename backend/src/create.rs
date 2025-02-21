@@ -10,6 +10,7 @@ use utils::{
     Tags,
 };
 
+use crate::boundary_stats::PopulationZone;
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -133,11 +134,20 @@ pub fn create_from_osm(
     boundary_wgs84: MultiPolygon,
     study_area_name: Option<String>,
     demand: Option<DemandModel>,
+    mut population_zones_wgs84: Option<Vec<PopulationZone>>,
 ) -> Result<MapModel> {
     let mut osm = Osm::default();
     let mut graph = Graph::new(input_bytes, is_road, &mut osm)?;
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
+
+    if let Some(ref mut population_zones) = population_zones_wgs84 {
+        for population_zone in population_zones {
+            graph
+                .mercator
+                .to_mercator_in_place(&mut population_zone.geometry);
+        }
+    }
 
     // Add in a bit
     let roads: Vec<Road> = graph
@@ -218,6 +228,7 @@ pub fn create_from_osm(
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
+        population_zones: population_zones_wgs84,
     };
     if let Some(mut demand) = demand {
         demand.finish_loading(&map.mercator);
