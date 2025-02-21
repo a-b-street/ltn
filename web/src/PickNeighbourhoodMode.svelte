@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
+  import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -108,7 +109,35 @@
     return { modalFilters, deletedModalFilters, travelFlows };
   }
 
-  // TODO Hover on button and highlight on map
+  function fillColor(
+    selectedPrioritization: "none" | "area" | "simd",
+  ): DataDrivenPropertyValueSpecification<string> {
+    let color: DataDrivenPropertyValueSpecification<string> = "red";
+    if (selectedPrioritization == "none") {
+      color = "black";
+    } else if (selectedPrioritization == "simd") {
+      color = makeRamp(["get", "simd"], simdLimits, simdColorScale);
+    } else if (selectedPrioritization == "area") {
+      color = makeRamp(["get", "area_km2"], areaLimits, simdColorScale);
+    }
+    return [
+      "case",
+      ["==", ["feature-state", "highlight"], "yes"],
+      "yellow",
+      // @ts-expect-error MapLibre expression types are weird, but this really does work
+      color,
+    ];
+  }
+
+  function fillOpacity(
+    selectedPrioritization: "none" | "area" | "simd",
+  ): DataDrivenPropertyValueSpecification<number> {
+    return {
+      none: hoverStateFilter(0.3, 0.5),
+      simd: hoverStateFilter(0.7, 0.9),
+      area: hoverStateFilter(0.7, 0.9),
+    }[selectedPrioritization];
+  }
 </script>
 
 <SplitComponent>
@@ -269,16 +298,8 @@
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
         paint={{
-          "fill-color": [
-            "case",
-            ["==", ["feature-state", "highlight"], "yes"],
-            "yellow",
-            "black",
-          ],
-          "fill-opacity": hoverStateFilter(0.3, 0.5),
-        }}
-        layout={{
-          visibility: selectedPrioritization == "none" ? "visible" : "none",
+          "fill-color": fillColor(selectedPrioritization),
+          "fill-opacity": fillOpacity(selectedPrioritization),
         }}
         manageHoverState
         bind:hovered={hoveredMapFeature}
@@ -288,60 +309,14 @@
       >
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
-          <b>Area:</b>
-          {props.area_km2.toFixed(1)} km²
-        </Popup>
-      </FillLayer>
-      <FillLayer
-        {...layerId("neighbourhood-prioritization-simd")}
-        paint={{
-          "fill-color": [
-            "case",
-            ["==", ["feature-state", "highlight"], "yes"],
-            "yellow",
-            makeRamp(["get", "simd"], simdLimits, simdColorScale),
-          ],
-          "fill-opacity": hoverStateFilter(0.7, 0.9),
-        }}
-        layout={{
-          visibility: selectedPrioritization == "simd" ? "visible" : "none",
-        }}
-        manageHoverState
-        bind:hovered={hoveredMapFeature}
-        hoverCursor="pointer"
-        on:click={(e) =>
-          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
-      >
-        <Popup openOn="hover" let:props>
-          <h2>{props.name}</h2>
-          <b>SIMD:</b>
-          {props.simd.toFixed(1)}
-        </Popup>
-      </FillLayer>
-      <FillLayer
-        {...layerId("neighbourhood-prioritization-area")}
-        paint={{
-          "fill-color": [
-            "case",
-            ["==", ["feature-state", "highlight"], "yes"],
-            "yellow",
-            makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
-          ],
-          "fill-opacity": hoverStateFilter(0.7, 0.9),
-        }}
-        layout={{
-          visibility: selectedPrioritization == "area" ? "visible" : "none",
-        }}
-        manageHoverState
-        bind:hovered={hoveredMapFeature}
-        hoverCursor="pointer"
-        on:click={(e) =>
-          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
-      >
-        <Popup openOn="hover" let:props>
-          <h2>{props.name}</h2>
-          <b>Area:</b>
-          {props.area_km2.toFixed(1)} km²
+
+          {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
+            <b>Area:</b>
+            {props.area_km2.toFixed(1)} km²
+          {:else if selectedPrioritization == "simd"}
+            <b>Fake SIMD:</b>
+            {props.simd.toFixed(1)}
+          {/if}
         </Popup>
       </FillLayer>
     </GeoJSON>
