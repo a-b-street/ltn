@@ -7,6 +7,7 @@
   import Population from "./Population.svelte";
   import RailwayStations from "./RailwayStations.svelte";
   import RouteNetwork from "./RouteNetwork.svelte";
+  import Stats19 from "./Stats19.svelte";
 
   let expand = false;
 </script>
@@ -15,7 +16,7 @@
   <div
     class="pico"
     style:background="grey"
-    style="display: flex; flex-direction: column"
+    style="display: flex; flex-direction: column; max-height: 80vh; overflow: auto"
   >
     <button on:click={() => (expand = !expand)}>
       <img src={icon} title="Layers" alt="Layers" />
@@ -31,6 +32,7 @@
       <BusRoutes />
       <CBD />
       <RouteNetwork />
+      <Stats19 />
     </div>
   </div>
 </Control>

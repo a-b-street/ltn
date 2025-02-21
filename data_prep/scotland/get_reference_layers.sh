@@ -80,6 +80,39 @@ function population {
   tippecanoe tmp/population.geojson -zg --generate-ids -l population -o $OUT/population.pmtiles
 }
 
+function stats19 {
+  # Use code from https://github.com/acteng/atip-data-prep/tree/main/stats19
+  git submodule init
+  git submodule update
+
+  cd atip-data-prep/stats19
+  mkdir -p input tmp
+
+  # URLs from https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data
+  if [ ! -e "input/dft-road-casualty-statistics-casualty-1979-latest-published-year.csv" ]; then
+    download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-casualty-1979-latest-published-year.csv
+  fi
+  if [ ! -e "input/dft-road-casualty-statistics-collision-1979-latest-published-year.csv" ]; then
+    download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-collision-1979-latest-published-year.csv
+  fi
+
+  cargo run --release
+
+  download_to_subdir input https://raw.githubusercontent.com/georgique/world-geojson/refs/heads/develop/areas/united_kingdom/scotland.json
+  mapshaper tmp/stats19.geojson -clip input/scotland.json -o tmp/stats19_clipped.geojson
+
+  tippecanoe tmp/stats19_clipped.geojson \
+	  --force \
+	  --generate-ids \
+	  -l stats19 \
+	  -zg \
+	  --drop-densest-as-needed \
+	  --extend-zooms-if-still-dropping \
+	  -o ../../$OUT/stats19.pmtiles
+
+  cd ../../
+}
+
 function get_scotland_osm {
   # Download Scotland OSM data
   if [ ! -f tmp/scotland-latest.osm.pbf ]; then
@@ -104,6 +137,7 @@ download_to_subdir() {
 #railway_stations
 #bus_routes
 #population
+stats19
 
 echo "For maintainer only:"
 echo "  mv $OUT/* ~/cloudflare_sync/cnt_layers/"
