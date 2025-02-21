@@ -233,11 +233,12 @@
       </li>
     </ul>
 
-    <h3>Prioritization</h3>
-    <p>Compare metrics across your neighbourhoods.</p>
-    <PrioritizationSelect bind:selectedPrioritization />
-
-    <hr />
+    {#if $projectName.startsWith("ltn_cnt/")}
+      <h3>Prioritization</h3>
+      <p>Compare metrics across your neighbourhoods.</p>
+      <PrioritizationSelect bind:selectedPrioritization />
+      <hr />
+    {/if}
 
     <p>Current project: {$projectName}</p>
 
@@ -278,9 +279,6 @@
           <h2>{props.name}</h2>
           <b>Area:</b>
           {props.area_km2.toFixed(1)} km²
-          <br />
-          <b>SIMD (percentile):</b>
-          {props.simd.toFixed(1)}
         </Popup>
       </FillLayer>
       <FillLayer

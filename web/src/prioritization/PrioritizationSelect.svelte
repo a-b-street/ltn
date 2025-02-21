@@ -1,18 +1,27 @@
 <script lang="ts">
   import { SequentialLegend } from "svelte-utils";
   import { areaLimits, simdColorScale, simdLimits } from "../common/colors";
+  import { projectName } from "../stores";
 
   export let selectedPrioritization: "none" | "area" | "simd";
 
-  let currentURLParam = new URL(window.location.href).searchParams.get(
-    "prioritizationMetric",
-  );
-  if (currentURLParam == "area") {
-    selectedPrioritization = "area";
-  } else if (currentURLParam == "simd") {
-    selectedPrioritization = "simd";
+  function setSelectedPrioritizationFromURL() {
+    let currentURLParam = new URL(window.location.href).searchParams.get(
+      "prioritizationMetric",
+    );
+
+    if (currentURLParam == "area") {
+      selectedPrioritization = "area";
+    } else if (currentURLParam == "simd") {
+      selectedPrioritization = "simd";
+    }
   }
 
+  if ($projectName.startsWith("ltn_cnt/")) {
+    setSelectedPrioritizationFromURL();
+  } else {
+    selectedPrioritization = "none";
+  }
   $: {
     const url = new URL(window.location.href);
     if (selectedPrioritization == "none") {
