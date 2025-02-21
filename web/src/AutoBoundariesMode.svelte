@@ -17,7 +17,7 @@
   import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
   import { autosave, backend, editPerimeterRoads, mode } from "./stores";
 
-  let gj = $backend!.renderAutoBoundaries();
+  let gj = $backend!.getAutoBoundaries();
   let minArea = 0;
   let removeNonRoad = true;
   let selectedPrioritization: "none" | "area" | "simd" = "none";

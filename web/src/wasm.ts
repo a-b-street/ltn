@@ -79,8 +79,8 @@ export class Backend {
     return gj;
   }
 
-  renderAutoBoundaries(): FeatureCollection {
-    return JSON.parse(this.inner.renderAutoBoundaries());
+  getAutoBoundaries(): FeatureCollection {
+    return JSON.parse(this.inner.getAutoBoundaries());
   }
 
   setNeighbourhoodBoundary(name: string, input: Feature) {
