@@ -130,6 +130,7 @@ const layerZorder = [
   "context-hospitals",
   "context-schools",
   "context-railway-stations",
+  "context-stats19",
 
   dataviz("Road labels"),
   streets("road_label"),
