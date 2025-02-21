@@ -1,7 +1,12 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
-  import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
+  import {
+    FillLayer,
+    GeoJSON,
+    hoverStateFilter,
+    JoinedData,
+  } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
@@ -166,16 +171,6 @@
     <h3 style="padding: 4px 8px; margin-bottom: 0">Neighbourhoods</h3>
     <ul class="neighbourhood-list">
       {#each neighbourhoods.features as { properties: { name, area_km2, simd } }}
-        <!-- 
-          TODO: use hoveredNeighbourhoodFromList to highlight the feature on the map.
-          It's tricky, because we have to plumb it through to 
-          maplibre somehow. I tried using feature-state via <JoinedData>, but failed.
-          The proximate error was that joining data requires referencing a source-id,
-          but maplibre complains when you try to set the feature state of a GeoJSON layer 
-          with a source-id.
-
-          Maybe dustin has a clever idea?
-        -->
         <li
           on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
           on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
@@ -262,12 +257,24 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={neighbourhoods} generateId>
+    <GeoJSON data={neighbourhoods} promoteId="name">
+      <JoinedData
+        data={hoveredNeighbourhoodFromList
+          ? [{ name: hoveredNeighbourhoodFromList, highlight: "yes" }]
+          : []}
+        idCol="name"
+      />
+
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
         paint={{
-          "fill-color": "black",
+          "fill-color": [
+            "case",
+            ["==", ["feature-state", "highlight"], "yes"],
+            "yellow",
+            "black",
+          ],
           "fill-opacity": hoverStateFilter(0.3, 0.5),
         }}
         layout={{
@@ -288,7 +295,12 @@
       <FillLayer
         {...layerId("neighbourhood-prioritization-simd")}
         paint={{
-          "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
+          "fill-color": [
+            "case",
+            ["==", ["feature-state", "highlight"], "yes"],
+            "yellow",
+            makeRamp(["get", "simd"], simdLimits, simdColorScale),
+          ],
           "fill-opacity": hoverStateFilter(0.7, 0.9),
         }}
         layout={{
@@ -309,11 +321,12 @@
       <FillLayer
         {...layerId("neighbourhood-prioritization-area")}
         paint={{
-          "fill-color": makeRamp(
-            ["get", "area_km2"],
-            areaLimits,
-            simdColorScale,
-          ),
+          "fill-color": [
+            "case",
+            ["==", ["feature-state", "highlight"], "yes"],
+            "yellow",
+            makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
+          ],
           "fill-opacity": hoverStateFilter(0.7, 0.9),
         }}
         layout={{
@@ -332,6 +345,7 @@
         </Popup>
       </FillLayer>
     </GeoJSON>
+
     <ModalFilterLayer />
   </div>
 </SplitComponent>
