@@ -85,6 +85,8 @@ const layerZorder = [
 
   streets("Ferry line"),
 
+  "neighbourhood-boundaries-outline",
+
   "debug-borders",
   "debug-filters",
 
@@ -142,9 +144,6 @@ const layerZorder = [
   // These're outside the neighbourhood-boundary, but don't fade them
   "border-arrows",
   "border-arrow-outlines",
-
-  "auto-boundaries-areas",
-  "auto-boundaries-severances",
 
   "freehand-line",
 

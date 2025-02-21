@@ -8,7 +8,7 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { downloadGeneratedFile } from "svelte-utils";
-  import { isLine, isPolygon, makeRamp, Popup } from "svelte-utils/map";
+  import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
@@ -72,7 +72,6 @@
   ): ExpressionSpecification {
     let x: ExpressionSpecification = [
       "all",
-      isPolygon,
       [">=", ["get", "area_km2"], minArea],
     ];
     if (removeNonRoad) {
@@ -135,16 +134,6 @@
 
   <div slot="map">
     <GeoJSON data={gj} generateId>
-      <LineLayer
-        {...layerId("auto-boundaries-severances")}
-        filter={isLine}
-        manageHoverState
-        paint={{
-          "line-color": hoverStateFilter("black", "red"),
-          "line-width": 3,
-        }}
-      />
-
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={makeFilter(minArea, removeNonRoad)}
@@ -226,6 +215,15 @@
           {props.area_km2.toFixed(1)} km²
         </Popup>
       </FillLayer>
+
+      <LineLayer
+        {...layerId("neighbourhood-boundaries-outline", false)}
+        filter={makeFilter(minArea, removeNonRoad)}
+        paint={{
+          "line-color": "black",
+          "line-width": 1,
+        }}
+      />
     </GeoJSON>
   </div>
 </SplitComponent>

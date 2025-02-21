@@ -28,29 +28,16 @@ impl MapModel {
                     "tertiary_link",
                 ],
             ) {
-                let mut f = self.mercator.to_wgs84_gj(&road.linestring);
-                // TODO Important to distinguish, or just debugging?
-                f.set_property("kind", "road severance");
-                features.push(f);
-
                 severances.push(road.linestring.clone());
                 road_severances.push(road.linestring.clone());
             }
         }
 
         for linestring in &self.railways {
-            let mut f = self.mercator.to_wgs84_gj(linestring);
-            f.set_property("kind", "railway severance");
-            features.push(f);
-
             severances.push(linestring.clone());
         }
 
         for linestring in &self.waterways {
-            let mut f = self.mercator.to_wgs84_gj(linestring);
-            f.set_property("kind", "waterway severance");
-            features.push(f);
-
             severances.push(linestring.clone());
         }
 
@@ -105,14 +92,7 @@ impl GeneratedBoundary {
     pub fn to_feature(&self, map: &MapModel) -> Feature {
         let mut projected = self.clone();
         map.mercator.to_wgs84_in_place(&mut projected.geometry);
-        let mut feature =
-            geojson::ser::to_feature(projected).expect("should have no unserializable fields");
-        let props = feature
-            .properties
-            .as_mut()
-            .expect("GeneratedBoundary always has properties");
-        props.insert("kind".to_string(), "area".into());
-        feature
+        geojson::ser::to_feature(projected).expect("should have no unserializable fields")
     }
 }
 
