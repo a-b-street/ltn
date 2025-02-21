@@ -117,7 +117,6 @@ const layerZorder = [
 
   // Contextual layers cover up most things
   "context-simd",
-  "context-simd-per-neighbourhood",
   "context-population-density",
   "context-population-outline",
   "context-traffic",
