@@ -1,12 +1,6 @@
 <script lang="ts">
-  import type {
-    Feature,
-    FeatureCollection,
-    LineString,
-    Polygon,
-  } from "geojson";
+  import type { Feature, FeatureCollection, LineString } from "geojson";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
-  import type { Waypoint } from "route-snapper-ts";
   import { onDestroy } from "svelte";
   import {
     Control,
