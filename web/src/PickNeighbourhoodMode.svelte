@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
-  import { Pencil, Trash2 } from "lucide-svelte";
+  import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
   import { FillLayer, GeoJSON, hoverStateFilter } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
@@ -218,14 +218,18 @@
         </li>
       {/each}
       <li>
-        ➕ Add a new neighbourhood:
-        <ul style="margin-bottom: 0;">
+        Add a new neighbourhood:
+        <ul style="margin-bottom: 0; padding: 0;">
           <!-- pico override -->
-          <li>
-            <Link on:click={newBoundary}>Draw a boundary</Link>
+          <li style="list-style: none;">
+            <Link on:click={newBoundary}>
+              <Pencil />
+              Draw a new boundary
+            </Link>
           </li>
-          <li>
+          <li style="list-style: none;">
             <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
+              <CirclePlus />
               Use a generated boundary
             </Link>
           </li>
