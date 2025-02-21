@@ -264,4 +264,9 @@
     margin-right: -32px;
     margin-left: -16px;
   }
+  :global(.pico nav[aria-label="breadcrumb"] ul li:last-child) {
+    font-size: 110%;
+    font-weight: bold;
+    text-decoration: underline;
+  }
 </style>
