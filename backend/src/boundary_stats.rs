@@ -1,5 +1,4 @@
-use geo::{Area, Polygon};
-use nanorand::{RandomGen, WyRand};
+use geo::{Area, BooleanOps, Intersects, MultiPolygon, Polygon};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -9,12 +8,52 @@ pub struct BoundaryStats {
 }
 
 impl BoundaryStats {
-    pub fn new(polygon: &Polygon) -> Self {
-        // Convert from m^2 to km^2. Use unsigned area to ignore polygon orientation.
-        let area_km2 = polygon.unsigned_area() / 1_000_000.0;
-        // TODO: SIMD
-        let mut rng = WyRand::new_seed((area_km2 * 1000000.0) as u64);
-        let simd = f64::random(&mut rng) * 100.0;
-        Self { area_km2, simd }
+    pub fn new(polygon: &Polygon, population_zones: Option<&[PopulationZone]>) -> Self {
+        // Use unsigned area to ignore polygon orientation.
+        let area_meters = polygon.unsigned_area();
+
+        // TODO: review this methodology
+        // area proportional accumulation:
+        // If  3/4 the boundary is in a zone with simd 100:   0.75 * 100 = 75
+        // and 1/4 the boundary is in a zone with  simd 40:  +0.25 *  40 = 10
+        //                  than the computed simd will be:          sum = 85
+        // TODO: optimize this - populationZone should at least be prepared geometries, and
+        // TODO: maybe also introduce an overall RTree to get intersection candidates quickly
+        let mut simd = 0.0;
+        if let Some(population_zones) = population_zones {
+            for population_zone in population_zones {
+                if population_zone.geometry.intersects(polygon) {
+                    let overlap = polygon.intersection(&population_zone.geometry);
+                    let overlap_ratio = overlap.unsigned_area() / area_meters;
+                    simd += overlap_ratio * population_zone.imd_percentile as f64
+                }
+            }
+        }
+
+        Self {
+            area_km2: area_meters / 1_000_000.0,
+            simd,
+        }
     }
+}
+
+/// Note when we deserialize this entity it will be in WGS84, but we should immedately
+/// project it to our map mercator.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PopulationZone {
+    pub geometry: MultiPolygon,
+
+    // "id": "S01006506",
+    // (unused)
+
+    // "imd_rank": 4691,
+    // (unused)
+
+    // "imd_percentile": 68,
+    pub imd_percentile: u8,
+
+    // "population": 894,
+    pub population: u32,
+    // "area": 4388802.1221970674
+    // (unused - though maybe we would find it helpful for pre-computing density or to save the cost of calculating area live)
 }

@@ -24,16 +24,15 @@ export async function loadFromLocalStorage(key: string) {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
     console.time("get input files");
-    let [osmBuffer, demandBuffer, boundary] = await getInputFiles(
-      gj,
-      key.startsWith("ltn_cnt/"),
-    );
+    let { osmBuffer, demandBuffer, populationBuffer, boundary } =
+      await getInputFiles(gj, key.startsWith("ltn_cnt/"));
     console.timeEnd("get input files");
     console.time("load");
     backend.set(
       new Backend(
         new Uint8Array(osmBuffer),
         demandBuffer ? new Uint8Array(demandBuffer) : undefined,
+        populationBuffer ? new Uint8Array(populationBuffer) : undefined,
         boundary,
         gj.study_area_name || undefined,
       ),
@@ -54,13 +53,18 @@ export async function loadFromLocalStorage(key: string) {
 async function getInputFiles(
   gj: any,
   isCnt: boolean,
-): Promise<[ArrayBuffer, ArrayBuffer | null, Feature<Polygon>]> {
+): Promise<{
+  osmBuffer: ArrayBuffer;
+  boundary: Feature<Polygon>;
+  demandBuffer?: ArrayBuffer;
+  populationBuffer?: ArrayBuffer;
+}> {
   if (isCnt) {
     // CNT projects are stored in a different place
     let url1 = assetUrl(`cnt_osm/${gj.study_area_name}.osm.pbf`);
     console.log(`Grabbing ${url1}`);
     let resp1 = await safeFetch(url1);
-    let osmBytes = await resp1.arrayBuffer();
+    let osmBuffer = await resp1.arrayBuffer();
 
     let url2 = assetUrl(`cnt_boundaries/${gj.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
@@ -68,34 +72,46 @@ async function getInputFiles(
 
     let url3 = assetUrl(`cnt_demand/demand_${gj.study_area_name}.bin`);
     console.log(`Grabbing ${url3}`);
-    let demandBytes = null;
+    let demandBuffer = undefined;
     try {
       let resp3 = await safeFetch(url3);
-      demandBytes = await resp3.arrayBuffer();
+      demandBuffer = await resp3.arrayBuffer();
     } catch (err) {
       console.log(`No demand model: ${err}`);
     }
 
-    return [osmBytes, demandBytes, boundary];
+    let url4 = assetUrl(
+      `cnt_prioritization/population_${gj.study_area_name}.bin`,
+    );
+    console.log(`Grabbing ${url4}`);
+    let populationBuffer = undefined;
+    try {
+      let resp = await safeFetch(url4);
+      populationBuffer = await resp.arrayBuffer();
+    } catch (err) {
+      console.log(`No population prioritization: ${err}`);
+    }
+
+    return { osmBuffer, boundary, demandBuffer, populationBuffer };
   } else if (gj.study_area_name) {
     let url1 = assetUrl(`severance_pbfs/${gj.study_area_name}.pbf`);
     console.log(`Grabbing ${url1}`);
     let resp1 = await safeFetch(url1);
-    let osmBytes = await resp1.arrayBuffer();
+    let osmBuffer = await resp1.arrayBuffer();
 
     let url2 = assetUrl(`boundaries/${gj.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
-    return [osmBytes, null, boundary];
+    return { osmBuffer, boundary };
   } else {
     console.log(`Grabbing from Overpass`);
-    let study_area_boundary = gj.features.find(
+    let boundary = gj.features.find(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
     )!;
-    let resp = await safeFetch(overpassQueryForPolygon(study_area_boundary));
-    let osmBytes = await resp.arrayBuffer();
-    return [osmBytes, null, study_area_boundary];
+    let resp = await safeFetch(overpassQueryForPolygon(boundary));
+    let osmBuffer = await resp.arrayBuffer();
+    return { osmBuffer, boundary };
   }
 }
 

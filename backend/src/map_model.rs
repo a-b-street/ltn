@@ -1,3 +1,4 @@
+use crate::boundary_stats::PopulationZone;
 use crate::geo_helpers::{
     angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
     invert_multi_polygon, limit_angle, linestring_intersection,
@@ -55,6 +56,8 @@ pub struct MapModel {
     pub undo_stack: Vec<Command>,
     pub redo_queue: Vec<Command>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
+
+    pub population_zones: Option<Vec<PopulationZone>>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
@@ -190,8 +193,15 @@ impl MapModel {
         boundary_wgs84: MultiPolygon,
         study_area_name: Option<String>,
         demand: Option<DemandModel>,
+        population_zones: Option<Vec<PopulationZone>>,
     ) -> Result<MapModel> {
-        crate::create::create_from_osm(input_bytes, boundary_wgs84, study_area_name, demand)
+        crate::create::create_from_osm(
+            input_bytes,
+            boundary_wgs84,
+            study_area_name,
+            demand,
+            population_zones,
+        )
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
@@ -611,8 +621,11 @@ impl MapModel {
                         bail!("Multiple boundaries named {name} in savefile");
                     }
                     let neighbourhood_definition = NeighbourhoodDefinition::from_feature(f, self)?;
-                    let neighbourhood_stats = NeighbourhoodBoundary::new(neighbourhood_definition);
-                    self.boundaries.insert(name, neighbourhood_stats);
+                    let neighbourhood_boundary = NeighbourhoodBoundary::new(
+                        neighbourhood_definition,
+                        self.population_zones.as_deref(),
+                    );
+                    self.boundaries.insert(name, neighbourhood_boundary);
                 }
                 "study_area_boundary" => {
                     // TODO Detect if it's close enough to boundary_polygon? Overwrite?

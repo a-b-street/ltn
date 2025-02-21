@@ -5,11 +5,7 @@ extern crate log;
 
 use std::sync::Once;
 
-use geo::{Coord, LineString};
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
-use serde::Deserialize;
-use wasm_bindgen::prelude::*;
-
+use self::boundary_stats::PopulationZone;
 use self::cells::Cell;
 pub use self::map_model::{
     FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow,
@@ -18,9 +14,13 @@ pub use self::neighbourhood::{Neighbourhood, NeighbourhoodBoundary, Neighbourhoo
 use self::render_cells::RenderCells;
 pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
+use geo::{Coord, LineString};
+use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
+use serde::Deserialize;
+use wasm_bindgen::prelude::*;
 
 mod auto_boundaries;
-mod boundary_stats;
+pub mod boundary_stats;
 mod cells;
 mod create;
 mod geo_helpers;
@@ -57,6 +57,7 @@ impl LTN {
         input_bytes: &[u8],
         // Option doesn't work; the caller should just pass in 0 bytes to mean empty
         demand_bytes: &[u8],
+        population_zone_bytes: &[u8],
         boundary_input: JsValue,
         study_area_name: Option<String>,
     ) -> Result<LTN, JsValue> {
@@ -80,8 +81,21 @@ impl LTN {
         if demand_bytes.len() > 0 {
             demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
         }
-        let map = MapModel::new(input_bytes, multi_polygon, study_area_name, demand)
-            .map_err(err_to_js)?;
+
+        let population_zones: Option<Vec<PopulationZone>> = if population_zone_bytes.len() > 0 {
+            Some(bincode::deserialize(population_zone_bytes).map_err(err_to_js)?)
+        } else {
+            None
+        };
+
+        let map = MapModel::new(
+            input_bytes,
+            multi_polygon,
+            study_area_name,
+            demand,
+            population_zones,
+        )
+        .map_err(err_to_js)?;
         Ok(LTN {
             map,
             neighbourhood: None,
@@ -160,7 +174,10 @@ impl LTN {
         feature.set_property("name", name.clone());
         let neighbourhood_definition =
             NeighbourhoodDefinition::from_feature(feature, &self.map).map_err(err_to_js)?;
-        let boundary = NeighbourhoodBoundary::new(neighbourhood_definition);
+        let boundary = NeighbourhoodBoundary::new(
+            neighbourhood_definition,
+            self.map.population_zones.as_deref(),
+        );
         self.map.boundaries.insert(name, boundary);
         Ok(())
     }

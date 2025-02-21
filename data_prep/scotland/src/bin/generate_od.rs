@@ -6,13 +6,11 @@ use serde::Deserialize;
 use utils::Mercator;
 
 use backend::od::{DemandModel, ZoneID};
+use data_prep::StudyArea;
 
 /// Generate travel demand (OD) model, and write to file
 fn main() -> Result<()> {
-    let study_areas: Vec<StudyArea> = geojson::de::deserialize_feature_collection_str_to_vec(
-        &std::fs::read_to_string("boundaries.geojson")?,
-    )?;
-    println!("Read {} study area boundaries", study_areas.len());
+    let study_areas = StudyArea::read_all_from_file()?;
 
     let input_zones: Vec<Zone> = geojson::de::deserialize_feature_collection_str_to_vec(
         &std::fs::read_to_string("zones.geojson")?,
@@ -59,14 +57,6 @@ fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-#[derive(Deserialize)]
-struct StudyArea {
-    #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
-    geometry: MultiPolygon,
-    name: String,
-    kind: String,
 }
 
 #[derive(Deserialize)]
