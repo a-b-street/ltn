@@ -159,8 +159,12 @@
           url: `${import.meta.env.BASE_URL}/filters/no_right_turn.png`,
         },
         {
-          id: "no_u_turn",
-          url: `${import.meta.env.BASE_URL}/filters/no_u_turn.png`,
+          id: "no_u_left_to_right_turn",
+          url: `${import.meta.env.BASE_URL}/filters/no_u_left_to_right_turn.png`,
+        },
+        {
+          id: "no_u_right_to_left_turn",
+          url: `${import.meta.env.BASE_URL}/filters/no_u_right_to_left_turn.png`,
         },
         {
           id: "oneway_arrow",

@@ -71,7 +71,7 @@ export class Backend {
   renderTurnRestrictions(): FeatureCollection<
     Point,
     {
-      kind: "left" | "right" | "straight" | "u";
+      kind: "left" | "right" | "straight" | "u_left_to_right" | "u_right_to_left";
       icon_angle: number;
       // A GeoJSON geometry stringified
       arrow: string;

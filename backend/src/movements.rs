@@ -133,17 +133,18 @@ fn pt_near_intersection(i: IntersectionID, road: &Road) -> Point {
 
 /// ```ignore
 ///
-///           0 = straight
+///             0 = straight
 ///
-///           315     45
-///              \   /
-///               \ /
-/// 270 = left     *    90 = right
-///               / \
-///              /   \
-///            225    135
-///
-///            180 = u-turn
+///             315     45
+///                \   /
+///                 \ /
+/// 270 = left       *    90 = right
+///                 /|\
+///                / | \
+///              225 |  135
+///                  |
+/// u_right_to_left  |  u_left_to_right
+///                  180
 /// ```
 fn classify_relative_bearing(abs_bearing1: f64, abs_bearing2: f64) -> &'static str {
     let unnormalized_diff = abs_bearing2 - abs_bearing1;
@@ -158,8 +159,12 @@ fn classify_relative_bearing(abs_bearing1: f64, abs_bearing2: f64) -> &'static s
         "straight"
     } else if diff <= 135. {
         "right"
+    } else if diff <= 180. {
+        // These occur in places that drive on the left side of the road
+        "u_left_to_right"
     } else if diff <= 225. {
-        "u"
+        // These occur in places that drive on the right side of the road
+        "u_right_to_left"
     } else if diff <= 315. {
         "left"
     } else {
