@@ -1,4 +1,4 @@
-use crate::boundary_stats::PopulationZone;
+use crate::boundary_stats::{PopulationZone, PreparedPopulationZone};
 use crate::geo_helpers::{
     angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
     invert_multi_polygon, limit_angle, linestring_intersection,
@@ -57,7 +57,7 @@ pub struct MapModel {
     pub redo_queue: Vec<Command>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
-    pub population_zones: Option<Vec<PopulationZone>>,
+    pub population_zones: Option<Vec<PreparedPopulationZone>>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]

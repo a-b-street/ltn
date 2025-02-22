@@ -1,7 +1,7 @@
+use crate::boundary_stats::PopulationZone;
 use crate::neighbourhood::NeighbourhoodBoundary;
 use crate::{MapModel, Neighbourhood};
-use anyhow::Result;
-use geo::{MultiPolygon, Polygon};
+use anyhow::{Context, Result};
 use geojson::{Feature, FeatureCollection};
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
@@ -9,6 +9,7 @@ pub struct NeighbourhoodFixture {
     pub study_area_name: &'static str,
     pub neighbourhood_name: &'static str,
     pub savefile_name: &'static str,
+    pub is_cnt: bool,
 }
 
 impl NeighbourhoodFixture {
@@ -16,16 +17,25 @@ impl NeighbourhoodFixture {
         study_area_name: "bristol",
         neighbourhood_name: "west",
         savefile_name: "bristol_west",
+        is_cnt: false,
     };
     pub const BRISTOL_EAST: Self = Self {
         study_area_name: "bristol",
         neighbourhood_name: "east",
         savefile_name: "bristol_east",
+        is_cnt: false,
     };
     pub const STRASBOURG: Self = Self {
         study_area_name: "strasbourg",
         neighbourhood_name: "Schilik velorue",
         savefile_name: "strasbourg",
+        is_cnt: false,
+    };
+    pub const DUNDEE: Self = Self {
+        study_area_name: "LAD_Dundee City",
+        neighbourhood_name: "Hilltown",
+        savefile_name: "dundee",
+        is_cnt: true,
     };
 }
 
@@ -35,36 +45,83 @@ impl NeighbourhoodFixture {
     }
 
     pub fn neighbourhood_map(&self) -> Result<(Neighbourhood, MapModel)> {
-        let (neighborhood_stats, map) = self.neighbourhood_params()?;
+        let (boundary, map) = self.neighbourhood_params()?;
 
         // Uncomment if you want to re-save the savefiles
         // std::fs::write(self.savefile_path(), map.to_savefile().to_string())?;
 
         let edit_perimeter_roads = false;
-        let neighbourhood = Neighbourhood::new(&map, neighborhood_stats, edit_perimeter_roads)?;
+        let neighbourhood = Neighbourhood::new(&map, boundary, edit_perimeter_roads)?;
         Ok((neighbourhood, map))
+    }
+
+    pub fn pbf_path(&self) -> String {
+        if self.is_cnt {
+            format!("../web/public/cnt_osm/{}.osm.pbf", self.study_area_name)
+        } else {
+            format!("../web/public/severance_pbfs/{}.pbf", self.study_area_name)
+        }
+    }
+
+    pub fn boundary_path(&self) -> String {
+        if self.is_cnt {
+            format!(
+                "../web/public/cnt_boundaries/{}.geojson",
+                self.study_area_name
+            )
+        } else {
+            format!("../web/public/boundaries/{}.geojson", self.study_area_name)
+        }
+    }
+
+    pub fn population_zones_path(&self) -> Option<String> {
+        if self.is_cnt {
+            Some(format!(
+                "../web/public/cnt_prioritization/population_{}.bin",
+                self.study_area_name
+            ))
+        } else {
+            None
+        }
+    }
+
+    pub fn population_zones(&self) -> Option<Vec<PopulationZone>> {
+        let path = self.population_zones_path()?;
+        let population_zone_bytes =
+            std::fs::read(&path).expect(&format!("unable to read population_zones: {path}"));
+        Some(
+            bincode::deserialize(&population_zone_bytes)
+                .expect("unable to deserialize population_zones"),
+        )
     }
 
     pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
         let study_area_name = &self.study_area_name;
 
-        let pbf_path = format!("../web/public/severance_pbfs/{study_area_name}.pbf");
-        let input_bytes = std::fs::read(&pbf_path)?;
+        let input_bytes = std::fs::read(&self.pbf_path())
+            .context(format!("unable to read '{}'", self.pbf_path()))?;
 
-        let boundary_path = format!("../web/public/boundaries/{study_area_name}.geojson");
-        let boundary: Feature = std::fs::read_to_string(&boundary_path)?.parse()?;
-        // All test study area boundaries are polygons for now
-        let polygon: Polygon = boundary.try_into()?;
-        let multi_polygon: MultiPolygon = polygon.into();
-
+        let boundary: Feature = std::fs::read_to_string(&self.boundary_path())?.parse()?;
+        let geometry: geo::Geometry = boundary
+            .geometry
+            .expect("missing geometry in test fixture")
+            .try_into()?;
+        let multi_polygon = match geometry {
+            // CNT boundaries are MultiPolygons.
+            geo::Geometry::MultiPolygon(g) => g,
+            // Historically other boundaries were polygons.
+            geo::Geometry::Polygon(single_polygon) => single_polygon.into(),
+            other => bail!("unexpected geometry type {other:?}"),
+        };
         Ok(move || {
             let demand = None;
+            let population_zones = self.population_zones();
             MapModel::new(
                 &input_bytes,
                 multi_polygon.clone(),
                 Some(study_area_name.to_string()),
                 demand,
-                None,
+                population_zones,
             )
         })
     }
