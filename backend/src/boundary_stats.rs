@@ -22,8 +22,8 @@ impl BoundaryStats {
         let mut simd = 0.0;
         if let Some(population_zones) = population_zones {
             for population_zone in population_zones {
-                if population_zone.geometry.intersects(polygon) {
-                    let overlap = polygon.intersection(&population_zone.geometry);
+                let overlap = polygon.intersection(&population_zone.geometry);
+                if overlap.unsigned_area() > 0.0 {
                     let overlap_ratio = overlap.unsigned_area() / area_meters;
                     simd += overlap_ratio * population_zone.imd_percentile as f64
                 }
