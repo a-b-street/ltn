@@ -129,10 +129,8 @@ fn classify_relative_bearing(abs_bearing1: f64, abs_bearing2: f64) -> &'static s
     } else if diff <= 135. {
         "right"
     } else if diff <= 180. {
-        // These occur in places that drive on the left side of the road
         "u_left_to_right"
     } else if diff <= 225. {
-        // These occur in places that drive on the right side of the road
         "u_right_to_left"
     } else if diff <= 315. {
         "left"
