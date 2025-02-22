@@ -32,6 +32,7 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
         env!("CARGO_MANIFEST_DIR")
     );
     let demand = None;
+    let population_zones = None;
     // No test cases need this
     let boundary_wgs84 = MultiPolygon::new(Vec::new());
     let study_area_name = None;
@@ -40,6 +41,7 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
         boundary_wgs84,
         study_area_name,
         demand,
+        population_zones,
     )
     .unwrap()
 }

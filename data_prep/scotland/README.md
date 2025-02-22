@@ -14,4 +14,5 @@ rm -f SG_IntermediateZone_Bdry_2011* SG_IntermediateZoneBdry_2011.zip
 
 mkdir -p demand
 cargo run --release --bin generate_od
+cargo run --release --bin generate_prioritization
 ```
