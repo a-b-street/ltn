@@ -2,7 +2,7 @@ use geo::{Euclidean, Length, Line, LineInterpolatePoint, Point, Polygon};
 use geojson::GeoJson;
 
 use crate::{
-    geo_helpers::{angle_of_pt_on_line, euclidean_bearing, limit_angle, make_arrow, thicken_line},
+    geo_helpers::{euclidean_bearing, make_arrow, thicken_line},
     IntersectionID, MapModel, Road, RoadID,
 };
 
@@ -32,9 +32,17 @@ impl MapModel {
 
                 let from = self.get_r(*from);
                 let to = self.get_r(*to);
-                let line = movement_line(i.id, from, to);
+
+                // TODO Calculate the two absolute bearings in an easier way? Why rely on
+                // pt_near_intersection?
+                let abs_bearing_1 =
+                    euclidean_bearing(pt_near_intersection(i.id, from).into(), i.point.into());
+                let abs_bearing_2 =
+                    euclidean_bearing(i.point.into(), pt_near_intersection(i.id, to).into());
+                let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
+
                 // Place at the end of the 'from' road
-                let pt = line.start;
+                let pt = pt_near_intersection(i.id, from);
 
                 // Rotate the icon based on the 'from' road's angle only, but make sure that road
                 // points at the intersection
@@ -42,13 +50,6 @@ impl MapModel {
                 if from.src_i == i.id {
                     road_pointing_at_i.0.reverse();
                 }
-                // TODO Why +90 and +180? Kind of dunno, just making it look correct
-                let icon_angle =
-                    limit_angle(angle_of_pt_on_line(&road_pointing_at_i, pt.into()) + 90.0) + 180.0;
-
-                // Use the angle between the two roads to determine the type of turn
-                let bearing = euclidean_bearing(line.start, line.end);
-                let kind = classify_bearing(bearing);
 
                 // Render the polygon arrow showing this restriction more clearly
                 let arrow = render_arrow(i.id, from, to);
@@ -56,9 +57,9 @@ impl MapModel {
 
                 let mut f = self.mercator.to_wgs84_gj(&Point::from(pt));
                 f.set_property("kind", kind);
-                f.set_property("icon_angle", icon_angle);
-                // TODO Temporarily, to debug
-                f.set_property("bearing", bearing);
+                // Use abs_bearing_1 to rotate the angle on the screen. The icons are "oriented"
+                // north, aka 0 means no rotation needed.
+                f.set_property("icon_angle", abs_bearing_1);
                 f.set_property("arrow", serde_json::to_value(arrow_geometry).unwrap());
                 // Editing isn't possible yet
                 f.set_property("edited", false);
@@ -130,18 +131,59 @@ fn pt_near_intersection(i: IntersectionID, road: &Road) -> Point {
     road.linestring.line_interpolate_point(pct).unwrap()
 }
 
-// TODO Unit test this? Or just draw it
-fn classify_bearing(bearing: f64) -> &'static str {
-    // Remember 0 is north (straight), 90 is east (right), 270 is west (left)
-    let threshold = 30.0;
+/// ```ignore
+///
+///           0 = straight
+///
+///           315     45
+///              \   /
+///               \ /
+/// 270 = left     *    90 = right
+///               / \
+///              /   \
+///            225    135
+///
+///            180 = u-turn
+/// ```
+fn classify_relative_bearing(abs_bearing1: f64, abs_bearing2: f64) -> &'static str {
+    let unnormalized_diff = abs_bearing2 - abs_bearing1;
+    // Normalize to [0, 360]
+    let diff = if unnormalized_diff < 0.0 {
+        unnormalized_diff + 360.0
+    } else {
+        unnormalized_diff
+    };
 
-    if bearing <= 0.0 + threshold || bearing >= 360.0 - threshold {
+    if diff <= 45. {
         "straight"
-    } else if bearing > 0.0 + threshold && bearing <= 90.0 + threshold {
+    } else if diff <= 135. {
         "right"
-    } else if bearing < 360.0 - threshold && bearing >= 270.0 - threshold {
+    } else if diff <= 225. {
+        "u"
+    } else if diff <= 315. {
         "left"
     } else {
-        "u"
+        "straight"
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_classify_relative_bearing() {
+        assert_eq!("straight", classify_relative_bearing(0., 0.));
+        assert_eq!("straight", classify_relative_bearing(30., 350.));
+        assert_eq!("straight", classify_relative_bearing(350., 30.));
+        assert_eq!("straight", classify_relative_bearing(180., 180.));
+        assert_eq!("straight", classify_relative_bearing(180., 190.));
+        assert_eq!("straight", classify_relative_bearing(180., 170.));
+
+        assert_eq!("left", classify_relative_bearing(0., 270.));
+        assert_eq!("left", classify_relative_bearing(180., 90.));
+
+        assert_eq!("right", classify_relative_bearing(0., 90.));
+        assert_eq!("right", classify_relative_bearing(180., 270.));
     }
 }
