@@ -71,7 +71,12 @@ export class Backend {
   renderTurnRestrictions(): FeatureCollection<
     Point,
     {
-      kind: "left" | "right" | "straight" | "u_left_to_right" | "u_right_to_left";
+      kind:
+        | "left"
+        | "right"
+        | "straight"
+        | "u_left_to_right"
+        | "u_right_to_left";
       icon_angle: number;
       // A GeoJSON geometry stringified
       arrow: string;
@@ -140,12 +145,6 @@ export class Backend {
 
   toggleTravelFlow(road: number) {
     this.inner.toggleTravelFlow(road);
-  }
-
-  getTurnRestrictionTargets(
-    road: number,
-  ): FeatureCollection<LineString, { road: number; name: string }> {
-    return JSON.parse(this.inner.getTurnRestrictionTargets(road));
   }
 
   undo() {

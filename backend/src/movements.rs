@@ -3,7 +3,7 @@ use geojson::GeoJson;
 
 use crate::{
     geo_helpers::{euclidean_bearing, make_arrow, thicken_line},
-    IntersectionID, MapModel, Road, RoadID,
+    IntersectionID, MapModel, Road
 };
 
 impl MapModel {
@@ -69,44 +69,13 @@ impl MapModel {
 
         GeoJson::from(features)
     }
-
-    pub fn get_turn_restriction_targets(&self, from: RoadID) -> GeoJson {
-        let from = self.get_r(from);
-        let mut features = Vec::new();
-        // TODO Account for one-ways
-        for i in [from.src_i, from.dst_i] {
-            let intersection = self.get_i(i);
-            for r in &intersection.roads {
-                if *r == from.id {
-                    continue;
-                }
-                // If there's already a TR between these two, skip it.
-                if intersection.turn_restrictions.contains(&(from.id, *r)) {
-                    continue;
-                }
-
-                let to = self.get_r(*r);
-                let mut f = self.mercator.to_wgs84_gj(&to.linestring);
-                f.set_property("road", r.0);
-                if let Some(name) = to.tags.get("name") {
-                    f.set_property("name", name.clone());
-                }
-                features.push(f);
-            }
-        }
-        GeoJson::from(features)
-    }
-}
-
-fn movement_line(i: IntersectionID, road1: &Road, road2: &Road) -> Line {
-    Line::new(
-        pt_near_intersection(i, road1),
-        pt_near_intersection(i, road2),
-    )
 }
 
 fn render_arrow(i: IntersectionID, road1: &Road, road2: &Road) -> Polygon {
-    let line = movement_line(i, road1, road2);
+    let line = Line::new(
+        pt_near_intersection(i, road1),
+        pt_near_intersection(i, road2),
+    );
     let thickness = 2.0;
     let double_ended = false;
     make_arrow(line, thickness, double_ended).unwrap_or_else(|| thicken_line(line, thickness))

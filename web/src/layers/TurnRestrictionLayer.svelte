@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Feature, Geometry } from "geojson";
   import { GeoJSON, LineLayer, SymbolLayer } from "svelte-maplibre";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
 
@@ -32,13 +32,8 @@
     paint={{
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
-    manageHoverState
     bind:hovered={hoveredIcon}
-  >
-    <Popup let:props>
-      No {props.kind} turn
-    </Popup>
-  </SymbolLayer>
+  />
 </GeoJSON>
 
 <GeoJSON data={showArrow}>
