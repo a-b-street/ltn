@@ -73,8 +73,6 @@ export class Backend {
     {
       kind: "left" | "right" | "straight" | "u";
       icon_angle: number;
-      // TODO Temporary, for debugging
-      bearing: number;
       // A GeoJSON geometry stringified
       arrow: string;
       edited: boolean;

@@ -36,8 +36,7 @@
     bind:hovered={hoveredIcon}
   >
     <Popup let:props>
-      No {props.kind} turn, based on bearing {Math.round(props.bearing)}. Rotate
-      this icon {Math.round(props.icon_angle)}
+      No {props.kind} turn
     </Popup>
   </SymbolLayer>
 </GeoJSON>
