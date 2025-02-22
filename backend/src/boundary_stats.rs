@@ -1,4 +1,4 @@
-use geo::{Area, BooleanOps, Intersects, MultiPolygon, Polygon};
+use geo::{Area, BooleanOps, MultiPolygon, Polygon, PreparedGeometry, Relate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -8,7 +8,7 @@ pub struct BoundaryStats {
 }
 
 impl BoundaryStats {
-    pub fn new(polygon: &Polygon, population_zones: Option<&[PopulationZone]>) -> Self {
+    pub fn new(polygon: &Polygon, population_zones: Option<&[PreparedPopulationZone]>) -> Self {
         // Use unsigned area to ignore polygon orientation.
         let area_meters = polygon.unsigned_area();
 
@@ -22,10 +22,14 @@ impl BoundaryStats {
         let mut simd = 0.0;
         if let Some(population_zones) = population_zones {
             for population_zone in population_zones {
-                if population_zone.geometry.intersects(polygon) {
-                    let overlap = polygon.intersection(&population_zone.geometry);
+                if population_zone
+                    .prepared_geometry
+                    .relate(polygon)
+                    .is_intersects()
+                {
+                    let overlap = polygon.intersection(&population_zone.population_zone.geometry);
                     let overlap_ratio = overlap.unsigned_area() / area_meters;
-                    simd += overlap_ratio * population_zone.imd_percentile as f64
+                    simd += overlap_ratio * population_zone.population_zone.imd_percentile as f64
                 }
             }
         }
@@ -56,4 +60,9 @@ pub struct PopulationZone {
     pub population: u32,
     // "area": 4388802.1221970674
     // (unused - though maybe we would find it helpful for pre-computing density or to save the cost of calculating area live)
+}
+
+pub struct PreparedPopulationZone {
+    pub population_zone: PopulationZone,
+    pub prepared_geometry: PreparedGeometry<'static>,
 }

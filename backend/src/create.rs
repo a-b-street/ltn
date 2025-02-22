@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
-use geo::{Coord, LineInterpolatePoint, LineString, MultiPolygon};
+use geo::{Coord, LineInterpolatePoint, LineString, MultiPolygon, PreparedGeometry};
 use osm_reader::{NodeID, OsmID, RelationID, WayID};
 use petgraph::graphmap::UnGraphMap;
 use rstar::{primitives::GeomWithData, RTree};
@@ -10,7 +10,7 @@ use utils::{
     Tags,
 };
 
-use crate::boundary_stats::PopulationZone;
+use crate::boundary_stats::{PopulationZone, PreparedPopulationZone};
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -134,20 +134,28 @@ pub fn create_from_osm(
     boundary_wgs84: MultiPolygon,
     study_area_name: Option<String>,
     demand: Option<DemandModel>,
-    mut population_zones_wgs84: Option<Vec<PopulationZone>>,
+    population_zones_wgs84: Option<Vec<PopulationZone>>,
 ) -> Result<MapModel> {
     let mut osm = Osm::default();
     let mut graph = Graph::new(input_bytes, is_road, &mut osm)?;
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
 
-    if let Some(ref mut population_zones) = population_zones_wgs84 {
-        for population_zone in population_zones {
-            graph
-                .mercator
-                .to_mercator_in_place(&mut population_zone.geometry);
-        }
-    }
+    let population_zones = population_zones_wgs84.map(|population_zones_wgs84| {
+        population_zones_wgs84
+            .into_iter()
+            .map(|mut population_zone| {
+                graph
+                    .mercator
+                    .to_mercator_in_place(&mut population_zone.geometry);
+
+                PreparedPopulationZone {
+                    prepared_geometry: PreparedGeometry::from(population_zone.geometry.clone()),
+                    population_zone,
+                }
+            })
+            .collect()
+    });
 
     // Add in a bit
     let roads: Vec<Road> = graph
@@ -228,7 +236,7 @@ pub fn create_from_osm(
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
-        population_zones: population_zones_wgs84,
+        population_zones,
     };
     if let Some(mut demand) = demand {
         demand.finish_loading(&map.mercator);
