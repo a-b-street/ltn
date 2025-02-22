@@ -4,6 +4,7 @@
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
 
+  let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj =
     $mutationCounter > 0 ? $backend!.renderModalFilters() : emptyGeojson();
@@ -13,6 +14,7 @@
   <SymbolLayer
     {...layerId("modal-filters")}
     filter={["!=", ["get", "filter_kind"], "diagonal_filter"]}
+    {minzoom}
     layout={{
       "icon-image": ["get", "filter_kind"],
       "icon-rotate": ["get", "angle"],
@@ -29,6 +31,7 @@
   <SymbolLayer
     {...layerId("intersection-filters")}
     filter={["==", ["get", "filter_kind"], "diagonal_filter"]}
+    {minzoom}
     layout={{
       "icon-image": "diagonal_filter",
       "icon-rotate": ["get", "angle", ["get", "filter"]],
