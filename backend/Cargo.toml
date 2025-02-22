@@ -38,6 +38,11 @@ petgraph = "0.7.1"
 criterion = "0.5.1"
 approx = "0.5.1"
 
+
+[[bench]]
+name = "boundary_stats"
+harness = false
+
 [[bench]]
 name = "build_map_model"
 harness = false
