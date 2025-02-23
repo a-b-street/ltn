@@ -59,7 +59,7 @@ pub struct ContextData {
     pub stats19_collisions: Vec<Point>,
 }
 
-/// After deserializing `ContextData`, prepare it for use.
+/// After deserializing `ContextData`, make it faster for `BoundaryStats` to query.
 pub struct PreparedContextData {
     pub population_zones: Vec<PreparedPopulationZone>,
     pub stats19_collisions: Vec<Point>,
