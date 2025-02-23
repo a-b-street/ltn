@@ -1,9 +1,16 @@
 <script lang="ts">
   import { SequentialLegend } from "svelte-utils";
-  import { areaLimits, simdColorScale, simdLimits } from "../common/colors";
+  import {
+    areaLimits,
+    simdColorScale,
+    simdLimits,
+    stats19ColorScale,
+    stats19Limits,
+  } from "../common/colors";
   import { projectName } from "../stores";
+  import type { Prioritization } from "./index";
 
-  export let selectedPrioritization: "none" | "area" | "simd";
+  export let selectedPrioritization: Prioritization;
 
   function setSelectedPrioritizationFromURL() {
     let currentURLParam = new URL(window.location.href).searchParams.get(
@@ -14,6 +21,8 @@
       selectedPrioritization = "area";
     } else if (currentURLParam == "simd") {
       selectedPrioritization = "simd";
+    } else if (currentURLParam == "stats19") {
+      selectedPrioritization = "stats19";
     }
   }
 
@@ -39,6 +48,7 @@
     <option value="none">None</option>
     <option value="area">Area (km²)</option>
     <option value="simd">Fake SIMD (percentile)</option>
+    <option value="stats19">Collisions</option>
   </select>
 </div>
 
@@ -46,4 +56,6 @@
   <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
 {:else if selectedPrioritization == "area"}
   <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
+{:else if selectedPrioritization == "stats19"}
+  <SequentialLegend colorScale={stats19ColorScale} limits={stats19Limits} />
 {/if}

@@ -38,3 +38,6 @@ export let demandColorScale = [
 ];
 
 export let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];
+
+export let stats19Limits = [0, 100, 200, 300, 400, 1000];
+export let stats19ColorScale = demandColorScale;
