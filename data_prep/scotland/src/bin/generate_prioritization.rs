@@ -1,5 +1,5 @@
 use anyhow::Result;
-use backend::boundary_stats::PopulationZone;
+use backend::boundary_stats::{ContextData, PopulationZone};
 use data_prep::StudyArea;
 use geo::{MultiPolygon, PreparedGeometry, Relate};
 use serde::Deserialize;
@@ -17,19 +17,21 @@ fn main() -> Result<()> {
     for study_area in &study_areas {
         let study_area_start = Instant::now();
         println!("Starting {}", study_area.1.name);
-        let mut study_area_population_zones = vec![];
+        let mut context_data = ContextData {
+            population_zones: Vec::new(),
+        };
+
         for population_zone_input in &population_zone_inputs {
             if study_area
                 .0
                 .relate(&population_zone_input.0)
                 .is_intersects()
             {
-                let population_zone = PopulationZone {
+                context_data.population_zones.push(PopulationZone {
                     geometry: population_zone_input.1.geometry.clone(),
                     imd_percentile: population_zone_input.1.imd_percentile,
                     population: population_zone_input.1.population,
-                };
-                study_area_population_zones.push(population_zone);
+                });
             }
         }
 
@@ -38,10 +40,10 @@ fn main() -> Result<()> {
             "prioritization/population_{}_{}.bin",
             study_area.1.kind, study_area.1.name
         );
-        std::fs::write(&path, bincode::serialize(&study_area_population_zones)?)?;
+        std::fs::write(&path, bincode::serialize(&context_data)?)?;
         println!(
             "Wrote {} population zones to {} (took {:?})",
-            study_area_population_zones.len(),
+            context_data.population_zones.len(),
             path,
             study_area_start.elapsed()
         );

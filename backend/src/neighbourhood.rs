@@ -9,7 +9,7 @@ use geojson::{Feature, FeatureCollection};
 use serde::{Deserialize, Serialize};
 use web_time::Instant;
 
-use crate::boundary_stats::{BoundaryStats, PreparedPopulationZone};
+use crate::boundary_stats::{BoundaryStats, PreparedContextData};
 use crate::geo_helpers::{
     aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination, make_arrow,
 };
@@ -103,9 +103,9 @@ impl NeighbourhoodDefinition {
 impl NeighbourhoodBoundary {
     pub fn new(
         definition: NeighbourhoodDefinition,
-        population_zones: Option<&[PreparedPopulationZone]>,
+        context_data: Option<&PreparedContextData>,
     ) -> Self {
-        let boundary_stats = BoundaryStats::new(&definition.geometry, population_zones);
+        let boundary_stats = BoundaryStats::new(&definition.geometry, context_data);
         Self {
             definition,
             boundary_stats,
