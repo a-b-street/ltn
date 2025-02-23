@@ -10,9 +10,23 @@
     hoveredIcon == null
       ? emptyGeojson()
       : {
-          type: "Feature" as const,
-          geometry: JSON.parse(hoveredIcon.properties!.arrow) as Geometry,
-          properties: {},
+          type: "FeatureCollection" as const,
+          features: [
+            {
+              type: "Feature" as const,
+              geometry: JSON.parse(
+                hoveredIcon.properties!.from_geometry,
+              ) as Geometry,
+              properties: {},
+            },
+            {
+              type: "Feature" as const,
+              geometry: JSON.parse(
+                hoveredIcon.properties!.to_geometry,
+              ) as Geometry,
+              properties: {},
+            },
+          ],
         };
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
@@ -41,7 +55,7 @@
     {...layerId("turn-restrictions-debug-arrows")}
     interactive={false}
     paint={{
-      "line-width": 2,
+      "line-width": 4,
       "line-color": "red",
     }}
   />

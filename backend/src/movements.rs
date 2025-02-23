@@ -55,16 +55,29 @@ impl MapModel {
                         road_pointing_at_i.0.reverse();
                     }
 
-                    // Render the polygon arrow showing this restriction more clearly
-                    let arrow = render_arrow(i.id, offset, from, to);
-                    let arrow_geometry = self.mercator.to_wgs84_gj(&arrow).geometry.take().unwrap();
+                    let from_geometry = self
+                        .mercator
+                        .to_wgs84_gj(&from.linestring)
+                        .geometry
+                        .take()
+                        .unwrap();
+                    let to_geometry = self
+                        .mercator
+                        .to_wgs84_gj(&to.linestring)
+                        .geometry
+                        .take()
+                        .unwrap();
 
                     let mut f = self.mercator.to_wgs84_gj(&Point::from(pt));
                     f.set_property("kind", kind);
                     // Use abs_bearing_1 to rotate the angle on the screen. The icons are "oriented"
                     // north, aka 0 means no rotation needed.
                     f.set_property("icon_angle", abs_bearing_1);
-                    f.set_property("arrow", serde_json::to_value(arrow_geometry).unwrap());
+                    f.set_property(
+                        "from_geometry",
+                        serde_json::to_value(from_geometry).unwrap(),
+                    );
+                    f.set_property("to_geometry", serde_json::to_value(to_geometry).unwrap());
                     // Editing isn't possible yet
                     f.set_property("edited", false);
                     features.push(f);

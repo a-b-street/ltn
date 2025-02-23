@@ -78,8 +78,9 @@ export class Backend {
         | "u_left_to_right"
         | "u_right_to_left";
       icon_angle: number;
-      // A GeoJSON geometry stringified
-      arrow: string;
+      // GeoJSON geometries stringified
+      from_geometry: string;
+      to_geometry: string;
       edited: boolean;
     }
   > {
