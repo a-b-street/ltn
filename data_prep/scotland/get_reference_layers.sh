@@ -92,7 +92,7 @@ function stats19 {
   download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-casualty-1979-latest-published-year.csv
   download_to_subdir input https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-collision-1979-latest-published-year.csv
 
-  cargo run --release
+  cargo run --release -- --only_pedestrians_and_cyclists
 
   download_to_subdir input https://raw.githubusercontent.com/georgique/world-geojson/refs/heads/develop/areas/united_kingdom/scotland.json
   mapshaper tmp/stats19.geojson -clip input/scotland.json -o tmp/stats19_clipped.geojson
@@ -133,7 +133,7 @@ download_to_subdir() {
 #railway_stations
 #bus_routes
 #population
-stats19
+#stats19
 
 echo "For maintainer only:"
 echo "  mv $OUT/* ~/cloudflare_sync/cnt_layers/"
