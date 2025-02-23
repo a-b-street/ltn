@@ -12,10 +12,16 @@
   import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId, Link } from "./common";
-  import { areaLimits, simdColorScale, simdLimits } from "./common/colors";
+  import {
+    areaLimits,
+    simdColorScale,
+    simdLimits,
+    stats19ColorScale,
+    stats19Limits,
+  } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
-  import PrioritizationSelect from "./prioritization/PrioritizationSelect.svelte";
+  import { PrioritizationSelect, type Prioritization } from "./prioritization";
   import {
     autosave,
     backend,
@@ -29,7 +35,7 @@
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
 
-  let selectedPrioritization: "none" | "area" | "simd" = "none";
+  let selectedPrioritization: Prioritization = "none";
   let hoveredNeighbourhoodFromList: string | null = null;
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
@@ -110,12 +116,17 @@
   }
 
   function fillColor(
-    selectedPrioritization: "none" | "area" | "simd",
+    selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<string> {
     let color = {
       none: "black",
       simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
       area: makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
+      stats19: makeRamp(
+        ["get", "number_stats19_collisions"],
+        stats19Limits,
+        stats19ColorScale,
+      ),
     }[selectedPrioritization];
     return [
       "case",
@@ -127,12 +138,13 @@
   }
 
   function fillOpacity(
-    selectedPrioritization: "none" | "area" | "simd",
+    selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<number> {
     return {
       none: hoverStateFilter(0.3, 0.5),
       simd: hoverStateFilter(0.7, 0.9),
       area: hoverStateFilter(0.7, 0.9),
+      stats19: hoverStateFilter(0.7, 0.9),
     }[selectedPrioritization];
   }
 </script>
@@ -313,6 +325,9 @@
           {:else if selectedPrioritization == "simd"}
             <b>Fake SIMD:</b>
             {props.simd.toFixed(1)}
+          {:else if selectedPrioritization == "stats19"}
+            <b>Number of pedestrian and cyclist collisions:</b>
+            {props.number_stats19_collisions.toLocaleString()}
           {/if}
         </Popup>
       </FillLayer>
