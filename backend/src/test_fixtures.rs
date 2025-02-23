@@ -1,4 +1,4 @@
-use crate::boundary_stats::PopulationZone;
+use crate::boundary_stats::ContextData;
 use crate::neighbourhood::NeighbourhoodBoundary;
 use crate::{MapModel, Neighbourhood};
 use anyhow::{Context, Result};
@@ -74,8 +74,9 @@ impl NeighbourhoodFixture {
         }
     }
 
-    pub fn population_zones_path(&self) -> Option<String> {
+    pub fn context_data_path(&self) -> Option<String> {
         if self.is_cnt {
+            // TODO Rename this
             Some(format!(
                 "../web/public/cnt_prioritization/population_{}.bin",
                 self.study_area_name
@@ -85,14 +86,11 @@ impl NeighbourhoodFixture {
         }
     }
 
-    pub fn population_zones(&self) -> Option<Vec<PopulationZone>> {
-        let path = self.population_zones_path()?;
-        let population_zone_bytes =
-            std::fs::read(&path).expect(&format!("unable to read population_zones: {path}"));
-        Some(
-            bincode::deserialize(&population_zone_bytes)
-                .expect("unable to deserialize population_zones"),
-        )
+    pub fn context_data(&self) -> Option<ContextData> {
+        let path = self.context_data_path()?;
+        let context_data_bytes =
+            std::fs::read(&path).expect(&format!("unable to read context_data: {path}"));
+        Some(bincode::deserialize(&context_data_bytes).expect("unable to deserialize context_data"))
     }
 
     pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
@@ -115,13 +113,13 @@ impl NeighbourhoodFixture {
         };
         Ok(move || {
             let demand = None;
-            let population_zones = self.population_zones();
+            let context_data = self.context_data();
             MapModel::new(
                 &input_bytes,
                 multi_polygon.clone(),
                 Some(study_area_name.to_string()),
                 demand,
-                population_zones,
+                context_data,
             )
         })
     }

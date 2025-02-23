@@ -51,7 +51,7 @@ impl MapModel {
             let touches_railway = boundary_touches_any(&polygon, &self.railways);
             let touches_waterway = boundary_touches_any(&polygon, &self.waterways);
 
-            let boundary_stats = BoundaryStats::new(&polygon, self.population_zones.as_deref());
+            let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
             let generated_boundary = GeneratedBoundary {
                 geometry: polygon,
                 touches_big_road,

@@ -28,14 +28,14 @@ export class Backend {
   constructor(
     osmInput: Uint8Array,
     demandInput: Uint8Array | undefined,
-    populationZoneInput: Uint8Array | undefined,
+    contextDataInput: Uint8Array | undefined,
     boundary: Feature<Polygon>,
     studyAreaName: string | undefined,
   ) {
     this.inner = new LTN(
       osmInput,
       demandInput || new Uint8Array(),
-      populationZoneInput || new Uint8Array(),
+      contextDataInput || new Uint8Array(),
       boundary,
       studyAreaName,
     );

@@ -1,4 +1,4 @@
-use crate::boundary_stats::{PopulationZone, PreparedPopulationZone};
+use crate::boundary_stats::{ContextData, PreparedContextData};
 use crate::geo_helpers::{
     angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
     invert_multi_polygon, limit_angle, linestring_intersection,
@@ -57,7 +57,7 @@ pub struct MapModel {
     pub redo_queue: Vec<Command>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
-    pub population_zones: Option<Vec<PreparedPopulationZone>>,
+    pub context_data: Option<PreparedContextData>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
@@ -193,14 +193,14 @@ impl MapModel {
         boundary_wgs84: MultiPolygon,
         study_area_name: Option<String>,
         demand: Option<DemandModel>,
-        population_zones: Option<Vec<PopulationZone>>,
+        context_data: Option<ContextData>,
     ) -> Result<MapModel> {
         crate::create::create_from_osm(
             input_bytes,
             boundary_wgs84,
             study_area_name,
             demand,
-            population_zones,
+            context_data,
         )
     }
 
@@ -623,7 +623,7 @@ impl MapModel {
                     let neighbourhood_definition = NeighbourhoodDefinition::from_feature(f, self)?;
                     let neighbourhood_boundary = NeighbourhoodBoundary::new(
                         neighbourhood_definition,
-                        self.population_zones.as_deref(),
+                        self.context_data.as_ref(),
                     );
                     self.boundaries.insert(name, neighbourhood_boundary);
                 }

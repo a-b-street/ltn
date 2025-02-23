@@ -24,7 +24,7 @@ export async function loadFromLocalStorage(key: string) {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
     console.time("get input files");
-    let { osmBuffer, demandBuffer, populationBuffer, boundary } =
+    let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
       await getInputFiles(gj, key.startsWith("ltn_cnt/"));
     console.timeEnd("get input files");
     console.time("load");
@@ -32,7 +32,7 @@ export async function loadFromLocalStorage(key: string) {
       new Backend(
         new Uint8Array(osmBuffer),
         demandBuffer ? new Uint8Array(demandBuffer) : undefined,
-        populationBuffer ? new Uint8Array(populationBuffer) : undefined,
+        contextDataBuffer ? new Uint8Array(contextDataBuffer) : undefined,
         boundary,
         gj.study_area_name || undefined,
       ),
@@ -57,7 +57,7 @@ async function getInputFiles(
   osmBuffer: ArrayBuffer;
   boundary: Feature<Polygon>;
   demandBuffer?: ArrayBuffer;
-  populationBuffer?: ArrayBuffer;
+  contextDataBuffer?: ArrayBuffer;
 }> {
   if (isCnt) {
     // CNT projects are stored in a different place
@@ -80,19 +80,20 @@ async function getInputFiles(
       console.log(`No demand model: ${err}`);
     }
 
+    // TODO Rename files
     let url4 = assetUrl(
       `cnt_prioritization/population_${gj.study_area_name}.bin`,
     );
     console.log(`Grabbing ${url4}`);
-    let populationBuffer = undefined;
+    let contextDataBuffer = undefined;
     try {
       let resp = await safeFetch(url4);
-      populationBuffer = await resp.arrayBuffer();
+      contextDataBuffer = await resp.arrayBuffer();
     } catch (err) {
-      console.log(`No population prioritization: ${err}`);
+      console.log(`No context data for prioritization: ${err}`);
     }
 
-    return { osmBuffer, boundary, demandBuffer, populationBuffer };
+    return { osmBuffer, boundary, demandBuffer, contextDataBuffer };
   } else if (gj.study_area_name) {
     let url1 = assetUrl(`severance_pbfs/${gj.study_area_name}.pbf`);
     console.log(`Grabbing ${url1}`);

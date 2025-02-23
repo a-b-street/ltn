@@ -5,7 +5,7 @@ extern crate log;
 
 use std::sync::Once;
 
-use self::boundary_stats::PopulationZone;
+use self::boundary_stats::ContextData;
 use self::cells::Cell;
 pub use self::map_model::{
     FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow,
@@ -57,7 +57,7 @@ impl LTN {
         input_bytes: &[u8],
         // Option doesn't work; the caller should just pass in 0 bytes to mean empty
         demand_bytes: &[u8],
-        population_zone_bytes: &[u8],
+        context_data_bytes: &[u8],
         boundary_input: JsValue,
         study_area_name: Option<String>,
     ) -> Result<LTN, JsValue> {
@@ -82,8 +82,8 @@ impl LTN {
             demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
         }
 
-        let population_zones: Option<Vec<PopulationZone>> = if population_zone_bytes.len() > 0 {
-            Some(bincode::deserialize(population_zone_bytes).map_err(err_to_js)?)
+        let context_data: Option<ContextData> = if context_data_bytes.len() > 0 {
+            Some(bincode::deserialize(context_data_bytes).map_err(err_to_js)?)
         } else {
             None
         };
@@ -93,7 +93,7 @@ impl LTN {
             multi_polygon,
             study_area_name,
             demand,
-            population_zones,
+            context_data,
         )
         .map_err(err_to_js)?;
         Ok(LTN {
@@ -179,10 +179,8 @@ impl LTN {
         feature.set_property("name", name.clone());
         let neighbourhood_definition =
             NeighbourhoodDefinition::from_feature(feature, &self.map).map_err(err_to_js)?;
-        let boundary = NeighbourhoodBoundary::new(
-            neighbourhood_definition,
-            self.map.population_zones.as_deref(),
-        );
+        let boundary =
+            NeighbourhoodBoundary::new(neighbourhood_definition, self.map.context_data.as_ref());
         self.map.boundaries.insert(name, boundary);
         Ok(())
     }

@@ -10,7 +10,7 @@ use utils::{
     Tags,
 };
 
-use crate::boundary_stats::{PopulationZone, PreparedPopulationZone};
+use crate::boundary_stats::{ContextData, PreparedContextData, PreparedPopulationZone};
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -134,15 +134,16 @@ pub fn create_from_osm(
     boundary_wgs84: MultiPolygon,
     study_area_name: Option<String>,
     demand: Option<DemandModel>,
-    population_zones_wgs84: Option<Vec<PopulationZone>>,
+    context_data_wgs84: Option<ContextData>,
 ) -> Result<MapModel> {
     let mut osm = Osm::default();
     let mut graph = Graph::new(input_bytes, is_road, &mut osm)?;
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
 
-    let population_zones = population_zones_wgs84.map(|population_zones_wgs84| {
-        population_zones_wgs84
+    let context_data = context_data_wgs84.map(|context_data_wgs84| PreparedContextData {
+        population_zones: context_data_wgs84
+            .population_zones
             .into_iter()
             .map(|mut population_zone| {
                 graph
@@ -154,7 +155,7 @@ pub fn create_from_osm(
                     population_zone,
                 }
             })
-            .collect()
+            .collect(),
     });
 
     // Add in a bit
@@ -236,7 +237,7 @@ pub fn create_from_osm(
         undo_stack: Vec::new(),
         redo_queue: Vec::new(),
         boundaries: BTreeMap::new(),
-        population_zones,
+        context_data,
     };
     if let Some(mut demand) = demand {
         demand.finish_loading(&map.mercator);

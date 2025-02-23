@@ -8,20 +8,20 @@ pub struct BoundaryStats {
 }
 
 impl BoundaryStats {
-    pub fn new(polygon: &Polygon, population_zones: Option<&[PreparedPopulationZone]>) -> Self {
+    pub fn new(polygon: &Polygon, context_data: Option<&PreparedContextData>) -> Self {
         // Use unsigned area to ignore polygon orientation.
         let area_meters = polygon.unsigned_area();
 
-        // TODO: review this methodology
-        // area proportional accumulation:
-        // If  3/4 the boundary is in a zone with simd 100:   0.75 * 100 = 75
-        // and 1/4 the boundary is in a zone with  simd 40:  +0.25 *  40 = 10
-        //                  than the computed simd will be:          sum = 85
-        // TODO: optimize this - populationZone should at least be prepared geometries, and
-        // TODO: maybe also introduce an overall RTree to get intersection candidates quickly
         let mut simd = 0.0;
-        if let Some(population_zones) = population_zones {
-            for population_zone in population_zones {
+        if let Some(context_data) = context_data {
+            // TODO: review this methodology
+            // area proportional accumulation:
+            // If  3/4 the boundary is in a zone with simd 100:   0.75 * 100 = 75
+            // and 1/4 the boundary is in a zone with  simd 40:  +0.25 *  40 = 10
+            //                  than the computed simd will be:          sum = 85
+            // TODO: optimize this - populationZone should at least be prepared geometries, and
+            // TODO: maybe also introduce an overall RTree to get intersection candidates quickly
+            for population_zone in &context_data.population_zones {
                 if population_zone
                     .prepared_geometry
                     .relate(polygon)
@@ -39,6 +39,18 @@ impl BoundaryStats {
             simd,
         }
     }
+}
+
+/// Contextual data for a study area, used for calculating statistics about a neighbourhood
+/// boundary. This is directly serialized and deserialized.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ContextData {
+    pub population_zones: Vec<PopulationZone>,
+}
+
+/// After deserializing `ContextData`, prepare it for use.
+pub struct PreparedContextData {
+    pub population_zones: Vec<PreparedPopulationZone>,
 }
 
 /// Note when we deserialize this entity it will be in WGS84, but we should immedately
