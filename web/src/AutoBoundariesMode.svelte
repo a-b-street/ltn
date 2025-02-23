@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { type ExpressionSpecification } from "maplibre-gl";
+  import type {
+    DataDrivenPropertyValueSpecification,
+    ExpressionSpecification,
+  } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -79,6 +82,40 @@
     }
     return x;
   }
+
+  function fillColor(
+    selectedPrioritization: "none" | "area" | "simd",
+  ): DataDrivenPropertyValueSpecification<string> {
+    return {
+      none: [
+        "match",
+        ["%", ["id"], 5],
+        0,
+        "blue",
+        1,
+        "yellow",
+        2,
+        "green",
+        3,
+        "purple",
+        4,
+        "orange",
+        "black",
+      ] as DataDrivenPropertyValueSpecification<string>,
+      simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
+      area: makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
+    }[selectedPrioritization];
+  }
+
+  function fillOpacity(
+    selectedPrioritization: "none" | "area" | "simd",
+  ): DataDrivenPropertyValueSpecification<number> {
+    return {
+      none: hoverStateFilter(0.3, 0.5),
+      simd: hoverStateFilter(0.7, 0.9),
+      area: hoverStateFilter(0.7, 0.9),
+    }[selectedPrioritization];
+  }
 </script>
 
 <SplitComponent>
@@ -138,81 +175,21 @@
         {...layerId("neighbourhood-boundaries", false)}
         filter={makeFilter(minArea, removeNonRoad)}
         paint={{
-          "fill-color": [
-            "match",
-            ["%", ["id"], 5],
-            0,
-            "blue",
-            1,
-            "yellow",
-            2,
-            "green",
-            3,
-            "purple",
-            4,
-            "orange",
-            "black",
-          ],
-          "fill-opacity": hoverStateFilter(0.2, 0.4),
-        }}
-        layout={{
-          visibility: selectedPrioritization == "none" ? "visible" : "none",
-        }}
-        manageHoverState
-        hoverCursor="pointer"
-        on:click={add}
-      >
-        <!-- 
-             REVIEW: How to do type checking to the usage of `props`? 
-             Maybe something like this: https://stackoverflow.com/questions/73531618/svelte-components-with-generics
-           -->
-        <Popup openOn="hover" let:props>
-          <b>Area:</b>
-          {props.area_km2.toFixed(1)} km²
-          <br />
-        </Popup>
-      </FillLayer>
-
-      <FillLayer
-        {...layerId("neighbourhood-prioritization-simd")}
-        filter={makeFilter(minArea, removeNonRoad)}
-        paint={{
-          "fill-color": makeRamp(["get", "simd"], simdLimits, simdColorScale),
-          "fill-opacity": hoverStateFilter(0.7, 0.9),
-        }}
-        layout={{
-          visibility: selectedPrioritization == "simd" ? "visible" : "none",
+          "fill-color": fillColor(selectedPrioritization),
+          "fill-opacity": fillOpacity(selectedPrioritization),
         }}
         manageHoverState
         hoverCursor="pointer"
         on:click={add}
       >
         <Popup openOn="hover" let:props>
-          <b>SIMD:</b>
-          {props.simd.toFixed(1)}
-        </Popup>
-      </FillLayer>
-      <FillLayer
-        {...layerId("neighbourhood-prioritization-area")}
-        filter={makeFilter(minArea, removeNonRoad)}
-        paint={{
-          "fill-color": makeRamp(
-            ["get", "area_km2"],
-            areaLimits,
-            simdColorScale,
-          ),
-          "fill-opacity": hoverStateFilter(0.7, 0.9),
-        }}
-        layout={{
-          visibility: selectedPrioritization == "area" ? "visible" : "none",
-        }}
-        manageHoverState
-        hoverCursor="pointer"
-        on:click={add}
-      >
-        <Popup openOn="hover" let:props>
-          <b>Area:</b>
-          {props.area_km2.toFixed(1)} km²
+          {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
+            <b>Area:</b>
+            {props.area_km2.toFixed(1)} km²
+          {:else if selectedPrioritization == "simd"}
+            <b>Fake SIMD:</b>
+            {props.simd.toFixed(1)}
+          {/if}
         </Popup>
       </FillLayer>
 

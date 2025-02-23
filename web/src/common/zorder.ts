@@ -80,9 +80,6 @@ const layerZorder = [
   // that's fine; a boundary is too small to see before zoom 6 anyway
   "neighbourhood-boundaries",
 
-  "neighbourhood-prioritization-simd",
-  "neighbourhood-prioritization-area",
-
   streets("Ferry line"),
 
   "neighbourhood-boundaries-outline",
