@@ -156,6 +156,11 @@ pub fn create_from_osm(
                 }
             })
             .collect(),
+        stats19_collisions: context_data_wgs84
+            .stats19_collisions
+            .into_iter()
+            .map(|pt| graph.mercator.to_mercator(&pt))
+            .collect(),
     });
 
     // Add in a bit

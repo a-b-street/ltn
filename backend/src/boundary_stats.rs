@@ -1,10 +1,11 @@
-use geo::{Area, BooleanOps, MultiPolygon, Polygon, PreparedGeometry, Relate};
+use geo::{Area, BooleanOps, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct BoundaryStats {
     pub area_km2: f64,
     pub simd: f64,
+    pub number_stats19_collisions: usize,
 }
 
 impl BoundaryStats {
@@ -13,13 +14,13 @@ impl BoundaryStats {
         let area_meters = polygon.unsigned_area();
 
         let mut simd = 0.0;
+        let mut number_stats19_collisions = 0;
         if let Some(context_data) = context_data {
             // TODO: review this methodology
             // area proportional accumulation:
             // If  3/4 the boundary is in a zone with simd 100:   0.75 * 100 = 75
             // and 1/4 the boundary is in a zone with  simd 40:  +0.25 *  40 = 10
             //                  than the computed simd will be:          sum = 85
-            // TODO: optimize this - populationZone should at least be prepared geometries, and
             // TODO: maybe also introduce an overall RTree to get intersection candidates quickly
             for population_zone in &context_data.population_zones {
                 if population_zone
@@ -32,11 +33,20 @@ impl BoundaryStats {
                     simd += overlap_ratio * population_zone.population_zone.imd_percentile as f64
                 }
             }
+
+            // TODO Maybe buffer the polygon
+            let polygon_prepared = PreparedGeometry::from(polygon.clone());
+            for pt in &context_data.stats19_collisions {
+                if polygon_prepared.relate(pt).is_contains() {
+                    number_stats19_collisions += 1;
+                }
+            }
         }
 
         Self {
             area_km2: area_meters / 1_000_000.0,
             simd,
+            number_stats19_collisions,
         }
     }
 }
@@ -46,11 +56,13 @@ impl BoundaryStats {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ContextData {
     pub population_zones: Vec<PopulationZone>,
+    pub stats19_collisions: Vec<Point>,
 }
 
 /// After deserializing `ContextData`, prepare it for use.
 pub struct PreparedContextData {
     pub population_zones: Vec<PreparedPopulationZone>,
+    pub stats19_collisions: Vec<Point>,
 }
 
 /// Note when we deserialize this entity it will be in WGS84, but we should immedately
