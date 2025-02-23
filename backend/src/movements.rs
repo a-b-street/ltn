@@ -1,9 +1,10 @@
 use geo::{Euclidean, Length, Line, LineInterpolatePoint, Point, Polygon};
 use geojson::GeoJson;
+use itertools::Itertools;
 
 use crate::{
     geo_helpers::{euclidean_bearing, make_arrow, thicken_line},
-    IntersectionID, MapModel, Road
+    IntersectionID, MapModel, Road,
 };
 
 impl MapModel {
@@ -14,7 +15,7 @@ impl MapModel {
         for (r1, r2) in intersection.allowed_movements(&self.router_input_after()) {
             let road1 = self.get_r(r1);
             let road2 = self.get_r(r2);
-            let polygon = render_arrow(i, road1, road2);
+            let polygon = render_arrow(i, 0, road1, road2);
             features.push(self.mercator.to_wgs84_gj(&polygon));
         }
 
@@ -25,45 +26,49 @@ impl MapModel {
         let mut features = Vec::new();
 
         for i in &self.intersections {
-            for (from, to) in &i.turn_restrictions {
-                // TODO Skip if it's redundant with the one-ways
+            for (tr_from, tr_all_to) in i.turn_restrictions.iter().cloned().into_group_map() {
+                let from = self.get_r(tr_from);
 
-                // TODO Group by road first and offset them
+                // TODO Order the TR kinds consistently?
+                for (offset, to) in tr_all_to.into_iter().enumerate() {
+                    // TODO Skip if it's redundant with the one-ways
 
-                let from = self.get_r(*from);
-                let to = self.get_r(*to);
+                    let to = self.get_r(to);
 
-                // TODO Calculate the two absolute bearings in an easier way? Why rely on
-                // pt_near_intersection?
-                let abs_bearing_1 =
-                    euclidean_bearing(pt_near_intersection(i.id, from).into(), i.point.into());
-                let abs_bearing_2 =
-                    euclidean_bearing(i.point.into(), pt_near_intersection(i.id, to).into());
-                let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
+                    // TODO Calculate the two absolute bearings in an easier way? Why rely on
+                    // pt_near_intersection?
+                    let abs_bearing_1 = euclidean_bearing(
+                        pt_near_intersection(0, i.id, from).into(),
+                        i.point.into(),
+                    );
+                    let abs_bearing_2 =
+                        euclidean_bearing(i.point.into(), pt_near_intersection(0, i.id, to).into());
+                    let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
 
-                // Place at the end of the 'from' road
-                let pt = pt_near_intersection(i.id, from);
+                    // Place at the end of the 'from' road
+                    let pt = pt_near_intersection(offset, i.id, from);
 
-                // Rotate the icon based on the 'from' road's angle only, but make sure that road
-                // points at the intersection
-                let mut road_pointing_at_i = from.linestring.clone();
-                if from.src_i == i.id {
-                    road_pointing_at_i.0.reverse();
+                    // Rotate the icon based on the 'from' road's angle only, but make sure that road
+                    // points at the intersection
+                    let mut road_pointing_at_i = from.linestring.clone();
+                    if from.src_i == i.id {
+                        road_pointing_at_i.0.reverse();
+                    }
+
+                    // Render the polygon arrow showing this restriction more clearly
+                    let arrow = render_arrow(i.id, offset, from, to);
+                    let arrow_geometry = self.mercator.to_wgs84_gj(&arrow).geometry.take().unwrap();
+
+                    let mut f = self.mercator.to_wgs84_gj(&Point::from(pt));
+                    f.set_property("kind", kind);
+                    // Use abs_bearing_1 to rotate the angle on the screen. The icons are "oriented"
+                    // north, aka 0 means no rotation needed.
+                    f.set_property("icon_angle", abs_bearing_1);
+                    f.set_property("arrow", serde_json::to_value(arrow_geometry).unwrap());
+                    // Editing isn't possible yet
+                    f.set_property("edited", false);
+                    features.push(f);
                 }
-
-                // Render the polygon arrow showing this restriction more clearly
-                let arrow = render_arrow(i.id, from, to);
-                let arrow_geometry = self.mercator.to_wgs84_gj(&arrow).geometry.take().unwrap();
-
-                let mut f = self.mercator.to_wgs84_gj(&Point::from(pt));
-                f.set_property("kind", kind);
-                // Use abs_bearing_1 to rotate the angle on the screen. The icons are "oriented"
-                // north, aka 0 means no rotation needed.
-                f.set_property("icon_angle", abs_bearing_1);
-                f.set_property("arrow", serde_json::to_value(arrow_geometry).unwrap());
-                // Editing isn't possible yet
-                f.set_property("edited", false);
-                features.push(f);
             }
         }
 
@@ -71,19 +76,19 @@ impl MapModel {
     }
 }
 
-fn render_arrow(i: IntersectionID, road1: &Road, road2: &Road) -> Polygon {
+fn render_arrow(i: IntersectionID, offset1: usize, road1: &Road, road2: &Road) -> Polygon {
     let line = Line::new(
-        pt_near_intersection(i, road1),
-        pt_near_intersection(i, road2),
+        pt_near_intersection(offset1, i, road1),
+        pt_near_intersection(0, i, road2),
     );
     let thickness = 2.0;
     let double_ended = false;
     make_arrow(line, thickness, double_ended).unwrap_or_else(|| thicken_line(line, thickness))
 }
 
-fn pt_near_intersection(i: IntersectionID, road: &Road) -> Point {
+fn pt_near_intersection(offset: usize, i: IntersectionID, road: &Road) -> Point {
     // If the road is long enough, offset from the intersection this much
-    let distance_away = 10.0;
+    let distance_away = 5.0 * (1 + offset) as f64;
     let len = Euclidean.length(&road.linestring);
 
     if len > distance_away {

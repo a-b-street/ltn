@@ -39,6 +39,7 @@
 <GeoJSON data={showArrow}>
   <LineLayer
     {...layerId("turn-restrictions-debug-arrows")}
+    interactive={false}
     paint={{
       "line-width": 2,
       "line-color": "red",
