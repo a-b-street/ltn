@@ -80,9 +80,8 @@ async function getInputFiles(
       console.log(`No demand model: ${err}`);
     }
 
-    // TODO Rename files
     let url4 = assetUrl(
-      `cnt_prioritization/population_${gj.study_area_name}.bin`,
+      `cnt_prioritization/context_${gj.study_area_name}.bin`,
     );
     console.log(`Grabbing ${url4}`);
     let contextDataBuffer = undefined;

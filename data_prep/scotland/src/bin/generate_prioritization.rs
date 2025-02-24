@@ -45,7 +45,7 @@ fn main() -> Result<()> {
 
         std::fs::create_dir_all("prioritization")?;
         let path = format!(
-            "prioritization/population_{}_{}.bin",
+            "prioritization/context_{}_{}.bin",
             study_area.1.kind, study_area.1.name
         );
         std::fs::write(&path, bincode::serialize(&context_data)?)?;
