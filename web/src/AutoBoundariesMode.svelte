@@ -111,7 +111,7 @@
       simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
       area: makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
       stats19: makeRamp(
-        ["get", "number_stats19_collisions"],
+        ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
         stats19Limits,
         stats19ColorScale,
       ),
@@ -202,8 +202,11 @@
             <b>Fake SIMD:</b>
             {props.simd.toFixed(1)}
           {:else if selectedPrioritization == "stats19"}
-            <b>Number of pedestrian and cyclist collisions:</b>
-            {props.number_stats19_collisions.toLocaleString()}
+            <b>
+              Density of pedestrian and cyclist collisions (collisions per
+              square meter):
+            </b>
+            {(props.number_stats19_collisions / props.area_km2).toFixed(1)}
           {/if}
         </Popup>
       </FillLayer>

@@ -80,9 +80,7 @@ async function getInputFiles(
       console.log(`No demand model: ${err}`);
     }
 
-    let url4 = assetUrl(
-      `cnt_prioritization/context_${gj.study_area_name}.bin`,
-    );
+    let url4 = assetUrl(`cnt_prioritization/context_${gj.study_area_name}.bin`);
     console.log(`Grabbing ${url4}`);
     let contextDataBuffer = undefined;
     try {
