@@ -23,8 +23,8 @@ cd "${APP_ROOT}/web/public"
 jq '.features[] | .properties.kind + "_" + .properties.name' ../../data_prep/scotland/boundaries.geojson | sed 's/"//g' | while read x; do
     download_to_subdir cnt_boundaries "https://assets.od2net.org/cnt_boundaries/$x.geojson"
     download_to_subdir cnt_osm "https://assets.od2net.org/cnt_osm/$x.osm.pbf"
-    # OD Demand model
     download_to_subdir cnt_demand "https://assets.od2net.org/cnt_demand/demand_$x.bin"
+    download_to_subdir cnt_prioritization "https://assets.od2net.org/cnt_prioritization/context_$x.bin"
 done
 
 for x in bus_routes.pmtiles cbd.pmtiles gp_practices.geojson hospitals.geojson population.pmtiles railways.geojson route_network.pmtiles schools.geojson stats19.pmtiles; do

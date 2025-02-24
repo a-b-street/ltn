@@ -76,9 +76,8 @@ impl NeighbourhoodFixture {
 
     pub fn context_data_path(&self) -> Option<String> {
         if self.is_cnt {
-            // TODO Rename this
             Some(format!(
-                "../web/public/cnt_prioritization/population_{}.bin",
+                "../web/public/cnt_prioritization/context_{}.bin",
                 self.study_area_name
             ))
         } else {
