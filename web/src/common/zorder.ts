@@ -138,6 +138,8 @@ const layerZorder = [
   "animate-shortcuts",
 
   "modal-filters",
+  "turn-restrictions",
+  "turn-restrictions-debug-arrows",
 
   "boundary",
   "neighbourhood-boundary",

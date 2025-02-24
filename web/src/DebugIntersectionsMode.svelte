@@ -13,10 +13,12 @@
   import { layerId, Link, PrevNext } from "./common";
   import { backend, mode } from "./stores";
 
+  let currentOsm: string | null = null;
   let movements = emptyGeojson();
   let idx = 0;
 
   function pickIntersection(e: CustomEvent<LayerClickInfo>) {
+    currentOsm = e.detail.features[0].properties!.osm;
     movements = $backend!.getMovements(e.detail.features[0].id as number);
     idx = 0;
   }
@@ -52,6 +54,9 @@
       </button>
 
       <PrevNext list={movements.features} bind:idx />
+    {/if}
+    {#if currentOsm}
+      <a href={currentOsm} target="_blank">Open OSM</a>
     {/if}
   </div>
 
