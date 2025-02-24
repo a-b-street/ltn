@@ -3,7 +3,8 @@
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
-  // TODO Maybe make another component wrapping both of these
+  // TODO Maybe make another component wrapping both modal filters and turn
+  // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
   let minzoom = 13;

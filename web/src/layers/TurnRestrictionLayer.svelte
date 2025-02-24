@@ -37,6 +37,7 @@
 <GeoJSON data={gj} generateId>
   <SymbolLayer
     {...layerId("turn-restrictions")}
+    minzoom={13}
     layout={{
       "icon-image": ["concat", "no_", ["get", "kind"], "_turn"],
       "icon-rotate": ["get", "icon_angle"],
