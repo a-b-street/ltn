@@ -154,6 +154,12 @@ export class Backend {
     this.inner.toggleTravelFlow(road);
   }
 
+  getTurnRestrictionTargets(
+    road: number,
+  ): FeatureCollection<LineString, { road: number; name: string }> {
+    return JSON.parse(this.inner.getTurnRestrictionTargets(road));
+  }
+
   undo() {
     this.inner.undo();
   }

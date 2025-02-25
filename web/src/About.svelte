@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal, notNull } from "svelte-utils";
+  import { Modal } from "svelte-utils";
   import { showAbout } from "./stores";
 </script>
 

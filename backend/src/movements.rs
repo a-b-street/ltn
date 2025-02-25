@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::{
     geo_helpers::{euclidean_bearing, make_arrow, thicken_line},
-    IntersectionID, MapModel, Road,
+    IntersectionID, MapModel, Road, RoadID,
 };
 
 impl MapModel {
@@ -85,6 +85,33 @@ impl MapModel {
             }
         }
 
+        GeoJson::from(features)
+    }
+
+    pub fn get_turn_restriction_targets(&self, from: RoadID) -> GeoJson {
+        let from = self.get_r(from);
+        let mut features = Vec::new();
+        // TODO Account for one-ways
+        for i in [from.src_i, from.dst_i] {
+            let intersection = self.get_i(i);
+            for r in &intersection.roads {
+                if *r == from.id {
+                    continue;
+                }
+                // If there's already a TR between these two, skip it.
+                if intersection.turn_restrictions.contains(&(from.id, *r)) {
+                    continue;
+                }
+
+                let to = self.get_r(*r);
+                let mut f = self.mercator.to_wgs84_gj(&to.linestring);
+                f.set_property("road", r.0);
+                if let Some(name) = to.tags.get("name") {
+                    f.set_property("name", name.clone());
+                }
+                features.push(f);
+            }
+        }
         GeoJson::from(features)
     }
 }
