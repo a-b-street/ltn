@@ -15,7 +15,7 @@
 <Control defaultStyling={true}>
   <div
     class="pico contextual-layers"
-    style="display: flex; flex-direction: column; max-height: 80vh; overflow: auto; border-radius: 5px;"
+    style="display: flex; flex-direction: column; max-height: 80vh; max-width: 300px; overflow: auto; border-radius: 5px;"
   >
     <button
       class="show-layers-button icon-btn {expand ? 'expanded' : ''}"

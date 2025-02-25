@@ -23,7 +23,7 @@
 {#if show}
   <div style="display: flex; gap: 8px; align-items: center;">
     <img src={nationalRailUrl} alt="National Rail logo" />
-     Station
+    Station
   </div>
 {/if}
 

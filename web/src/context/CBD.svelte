@@ -67,10 +67,7 @@
   </div>
 {/if}
 
-<ContextLayerButton
-  bind:show={showExistingInfra}
-  label="Existing cycle infrastructure"
->
+<ContextLayerButton bind:show={showExistingInfra} label="Cycle infrastructure">
   <p slot="help">
     <a
       href="https://nptscot.github.io/manual/#infrastructureandtraffic"

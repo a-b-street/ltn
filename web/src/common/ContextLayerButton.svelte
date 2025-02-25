@@ -6,7 +6,7 @@
 </script>
 
 <button
-  style="display: flex; align-items: center; justify-content: leading; gap: 16px;"
+  style="display: flex; align-items: center; justify-content: leading; gap: 8px; text-align: left;"
   class="secondary"
   on:click={() => (show = !show)}
 >
