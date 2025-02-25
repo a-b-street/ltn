@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Modal, notNull } from "svelte-utils";
+  import { notNull } from "svelte-utils";
   import { showAbout } from "./stores";
+  import NewModal from "./common/NewModal.svelte";
 </script>
 
-{#if $showAbout}
-  <Modal on:close={() => ($showAbout = false)} let:dialog>
+  <NewModal bind:show={$showAbout} let:dialog>
     <h1>The low-traffic neighbourhood (LTN) tool, v2</h1>
     <p>
       This is an <b>experimental</b>
@@ -45,7 +45,6 @@
       data.
     </p>
     <center>
-      <button on:click={() => notNull(dialog).close()}>Start!</button>
+      <button on:click={() => $showAbout = false}>Start!</button>
     </center>
-  </Modal>
-{/if}
+  </NewModal>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Modal, notNull } from "svelte-utils";
   import { filterType } from "../stores";
+  import NewModal from "../common/NewModal.svelte";
 
   // TODO Use of import.meta.env.BASE_URL below is to workaround https://github.com/vitejs/vite/issues/10601
 
@@ -27,10 +27,11 @@
     ],
   ];
 
+  export let show: boolean;
   $: currentTriple = choices.find((x) => x[0] == $filterType)!;
 </script>
 
-<Modal on:close let:dialog>
+<NewModal bind:show>
   <h3>Choose a modal filter to place on streets</h3>
   <table>
     <tr>
@@ -63,6 +64,6 @@
     </tr>
   </table>
   <center>
-    <button on:click={() => notNull(dialog).close()}>Confirm</button>
+    <button on:click={() => show = false}>Confirm</button>
   </center>
-</Modal>
+</NewModal>

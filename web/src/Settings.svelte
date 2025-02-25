@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from "svelte-utils";
+  import NewModal from "./common/NewModal.svelte";
   import icon from "../assets/settings.svg?url";
   import { BasemapPicker } from "./common";
   import { thickRoadsForShortcuts } from "./stores";
@@ -11,8 +11,7 @@
   <img src={icon} alt="Settings" />
 </button>
 
-{#if show}
-  <Modal on:close={() => (show = false)}>
+  <NewModal bind:show={show}>
     <h1>Settings</h1>
 
     <BasemapPicker />
@@ -23,5 +22,4 @@
     </label>
 
     <center><button on:click={() => (show = false)}>Confirm</button></center>
-  </Modal>
-{/if}
+  </NewModal>

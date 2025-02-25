@@ -327,9 +327,7 @@
       </button>
     </div>
 
-    {#if settingFilterType}
-      <ChangeModalFilter on:close={() => (settingFilterType = false)} />
-    {/if}
+    <ChangeModalFilter bind:show={settingFilterType} />
   </div>
 
   <div slot="map">
