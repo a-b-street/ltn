@@ -8,6 +8,7 @@
   import { QualitativeLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { HelpButton, layerId } from "../common";
+  import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
   let show = false;
@@ -96,9 +97,8 @@
   };
 </script>
 
-<button class="secondary" on:click={() => (show = !show)}>Collisions</button>
-{#if show}
-  <HelpButton>
+<ContextLayerButton bind:show label="Collisions">
+  <div slot="help">
     <p>
       This layer shows collisions recorded in the <a
         href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data"
@@ -145,8 +145,9 @@
       </a>
       . Contains OS data &copy; Crown copyright and database right 2025.
     </p>
-  </HelpButton>
-
+  </div>
+</ContextLayerButton>
+{#if show}
   <fieldset>
     <label>
       <input type="checkbox" bind:checked={state.pedestrians} />

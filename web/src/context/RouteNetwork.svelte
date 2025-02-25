@@ -6,6 +6,7 @@
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { HelpButton, layerId } from "../common";
+  import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
   let show = false;
@@ -131,13 +132,14 @@
   }
 </script>
 
-<button class="secondary" on:click={() => (show = !show)}>Route network</button>
-{#if show}
-  <HelpButton>
+<ContextLayerButton bind:show label="Route network">
+  <p slot="help">
     <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
       Data from NPT
     </a>
-  </HelpButton>
+  </p>
+</ContextLayerButton>
+{#if show}
   <label>
     Trip purpose:
     <select bind:value={purpose}>

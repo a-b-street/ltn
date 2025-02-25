@@ -3,6 +3,7 @@
   import { QualitativeLegend, SequentialLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
   import { HelpButton, layerId, roadLineWidth } from "../common";
+  import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
   // The NPT project bundles together a few layers into one pmtiles file, all
@@ -34,57 +35,55 @@
   };
 </script>
 
-<button class="secondary" on:click={() => (showTraffic = !showTraffic)}>
-  Traffic
-</button>
+<ContextLayerButton bind:show={showTraffic} label="Traffic">
+  <p slot="help">
+    <a
+      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+      target="_blank"
+    >
+      Data from NPT
+    </a>
+  </p>
+</ContextLayerButton>
 {#if showTraffic}
   <div>
     <SequentialLegend colorScale={traffic.colorScale} limits={traffic.limits} />
-    <HelpButton>
-      <a
-        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-        target="_blank"
-      >
-        Data from NPT
-      </a>
-    </HelpButton>
   </div>
 {/if}
 
-<button class="secondary" on:click={() => (showLos = !showLos)}>
-  Level of Service
-</button>
+<ContextLayerButton bind:show={showLos} label="Level of Service">
+  <p slot="help">
+    <a
+      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+      target="_blank"
+    >
+      Data from NPT
+    </a>
+  </p>
+</ContextLayerButton>
 {#if showLos}
   <div>
     <QualitativeLegend colors={levelOfServiceColors} horiz />
-    <HelpButton>
-      <a
-        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-        target="_blank"
-      >
-        Data from NPT
-      </a>
-    </HelpButton>
   </div>
 {/if}
 
-<button
-  class="secondary"
-  on:click={() => (showExistingInfra = !showExistingInfra)}
+<ContextLayerButton
+  bind:show={showExistingInfra}
+  label="Existing cycle infrastructure"
 >
-  Existing cycle infrastructure
-</button>
+  <p slot="help">
+    <a
+      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+      target="_blank"
+    >
+      Data from NPT
+    </a>
+  </p>
+</ContextLayerButton>
+
 {#if showExistingInfra}
   <div>
     <QualitativeLegend colors={infraTypeColors} horiz />
-    <HelpButton>
-      <a
-        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-        target="_blank"
-      >
-        Data from NPT
-      </a>
-    </HelpButton>
   </div>
 {/if}
 

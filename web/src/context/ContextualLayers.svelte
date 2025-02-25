@@ -18,16 +18,18 @@
     style="display: flex; flex-direction: column; max-height: 80vh; overflow: auto; border-radius: 5px;"
   >
     <button
-      class="show-layers-button icon-btn {expand ? "expanded" : ""}"
+      class="show-layers-button icon-btn {expand ? 'expanded' : ''}"
       aria-label="Layers"
       on:click={() => (expand = !expand)}
     >
-    <div style="display: flex; gap: 8px; color: #333; align-items: center; justify-content: center;">
-      <Layers color="#333" />
-      {#if expand}
-      Layers
-      {/if}
-    </div>
+      <div
+        style="display: flex; gap: 8px; color: #333; align-items: center; justify-content: center;"
+      >
+        <Layers color="#333" />
+        {#if expand}
+          Layers
+        {/if}
+      </div>
     </button>
 
     <div

@@ -5,10 +5,11 @@
   import { Modal } from "svelte-utils";
 
   let show = false;
+  export let color = "black";
 </script>
 
 <button class="icon-btn help" aria-label="Help" on:click={() => (show = true)}>
-  <CircleHelp color="black" />
+  <CircleHelp {color} />
 </button>
 
 {#if show}
