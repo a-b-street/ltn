@@ -23,6 +23,10 @@ utils = { git = "https://github.com/a-b-street/utils", features = ["serde"] }
 opt-level = 3
 
 [patch.crates-io]
-geo = { git = "https://github.com/georust/geo" }
-geo-types = { git = "https://github.com/georust/geo" }
+# geo = { git = "https://github.com/georust/geo" }
+geo = { path = "../../georust/geo/geo" }
+# geo-types = { git = "https://github.com/georust/geo" }
+geo-types = { path = "../../georust/geo/geo-types" }
 
+[patch."https://github.com/georust/geo"]
+geo = { path = "../../georust/geo/geo" }
