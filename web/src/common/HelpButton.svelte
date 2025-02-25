@@ -8,16 +8,18 @@
   export let color = "black";
 </script>
 
-<button class="icon-btn help" aria-label="Help" on:click={() => (show = true)}>
+<button
+  class="icon-btn help"
+  aria-label="Help"
+  on:click|stopPropagation={() => (show = true)}
+>
   <CircleHelp {color} />
 </button>
 
-{#if show}
-  <Modal on:close={() => (show = false)}>
-    <h2>Help</h2>
-    <slot />
-  </Modal>
-{/if}
+<Modal bind:show>
+  <h2>Help</h2>
+  <slot />
+</Modal>
 
 <style>
   button.help {

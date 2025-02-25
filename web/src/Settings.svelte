@@ -11,17 +11,15 @@
   <img src={icon} alt="Settings" />
 </button>
 
-{#if show}
-  <Modal on:close={() => (show = false)}>
-    <h1>Settings</h1>
+<Modal bind:show>
+  <h1>Settings</h1>
 
-    <BasemapPicker />
+  <BasemapPicker />
 
-    <label>
-      <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
-      Road thickness depends on shortcuts
-    </label>
+  <label>
+    <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
+    Road thickness depends on shortcuts
+  </label>
 
-    <center><button on:click={() => (show = false)}>Confirm</button></center>
-  </Modal>
-{/if}
+  <center><button on:click={() => (show = false)}>Confirm</button></center>
+</Modal>

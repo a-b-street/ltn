@@ -7,7 +7,7 @@
   } from "svelte-maplibre";
   import { QualitativeLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { HelpButton, layerId } from "../common";
+  import { layerId } from "../common";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
