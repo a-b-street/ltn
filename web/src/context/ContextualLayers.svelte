@@ -23,8 +23,8 @@
     </button>
 
     <div
-      style="display: flex; flex-direction: column"
-      style:visibility={expand ? "visible" : "collapse"}
+      style="flex-direction: column"
+      style:display={expand ? "flex" : "none"}
     >
       <POIs />
       <Population />
