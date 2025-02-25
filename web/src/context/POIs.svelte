@@ -14,7 +14,7 @@
   };
 </script>
 
-<button class="secondary" on:click={() => (show = !show)}>POIs</button>
+<button class="secondary" data-expanded={show} on:click={() => (show = !show)}>POIs</button>
 {#if show}
   <div>
     <QualitativeLegend {colors} horiz />
