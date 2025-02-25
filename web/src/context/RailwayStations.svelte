@@ -19,13 +19,11 @@
     </a>
     according to OpenStreetMap.
   </p>
-</ContextLayerButton>
-{#if show}
-  <div style="display: flex; gap: 8px; align-items: center;">
+  <div slot="legend" style="display: flex; gap: 8px; align-items: center;">
     <img src={nationalRailUrl} alt="National Rail logo" />
     Station
   </div>
-{/if}
+</ContextLayerButton>
 
 <GeoJSON data={assetUrl("cnt_layers/railways.geojson")} generateId>
   <SymbolLayer

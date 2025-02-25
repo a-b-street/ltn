@@ -40,13 +40,10 @@
     </a>
     .
   </p>
-</ContextLayerButton>
-
-{#if show}
-  <div>
+  <div slot="legend">
     <QualitativeLegend {colors} horiz />
   </div>
-{/if}
+</ContextLayerButton>
 
 <GeoJSON data={assetUrl("cnt_layers/gp_practices.geojson")} generateId>
   <CircleLayer

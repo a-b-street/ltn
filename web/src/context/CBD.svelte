@@ -44,12 +44,10 @@
       Data from NPT
     </a>
   </p>
-</ContextLayerButton>
-{#if showTraffic}
-  <div>
+  <div slot="legend">
     <SequentialLegend colorScale={traffic.colorScale} limits={traffic.limits} />
   </div>
-{/if}
+</ContextLayerButton>
 
 <ContextLayerButton bind:show={showLos} label="Level of Service">
   <p slot="help">
@@ -60,12 +58,10 @@
       Data from NPT
     </a>
   </p>
-</ContextLayerButton>
-{#if showLos}
-  <div>
+  <div slot="legend">
     <QualitativeLegend colors={levelOfServiceColors} horiz />
   </div>
-{/if}
+</ContextLayerButton>
 
 <ContextLayerButton bind:show={showExistingInfra} label="Cycle infrastructure">
   <p slot="help">
@@ -76,13 +72,10 @@
       Data from NPT
     </a>
   </p>
-</ContextLayerButton>
-
-{#if showExistingInfra}
-  <div>
+  <div slot="legend">
     <QualitativeLegend colors={infraTypeColors} horiz />
   </div>
-{/if}
+</ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt_layers/cbd.pmtiles")}`}>
   <LineLayer

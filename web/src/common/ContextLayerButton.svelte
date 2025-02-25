@@ -20,9 +20,21 @@
     </HelpButton>
   {/if}
 </button>
+{#if show && $$slots.legend}
+  <div class="legend">
+    <slot name="legend" />
+  </div>
+{/if}
 
 <style>
-  :global(.pico .context-layer-help-content p) {
+  :global(.pico .context-layer-help-content p),
+  :global(.pico .context-layer-help-content ul) {
     color: black;
+  }
+  :global(.pico .context-layer-help-content ul) {
+    padding-left: 4px;
+  }
+  .legend {
+    padding: 0 8px;
   }
 </style>

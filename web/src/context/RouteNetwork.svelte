@@ -138,44 +138,45 @@
       Data from NPT
     </a>
   </p>
+
+  <div slot="legend">
+    <label>
+      Trip purpose:
+      <select bind:value={purpose}>
+        {#each purposes as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
+
+    <label>
+      Scenario:
+      <select bind:value={scenario}>
+        {#each scenarios as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
+
+    <label>
+      Network type:
+      <select bind:value={networkType}>
+        {#each networkTypes as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
+
+    <label>
+      Color by:
+      <select bind:value={colorBy}>
+        {#each colorByOptions as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
+  </div>
 </ContextLayerButton>
-{#if show}
-  <label>
-    Trip purpose:
-    <select bind:value={purpose}>
-      {#each purposes as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
-
-  <label>
-    Scenario:
-    <select bind:value={scenario}>
-      {#each scenarios as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
-
-  <label>
-    Network type:
-    <select bind:value={networkType}>
-      {#each networkTypes as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
-
-  <label>
-    Color by:
-    <select bind:value={colorBy}>
-      {#each colorByOptions as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
-{/if}
 
 <VectorTileSource
   url={`pmtiles://${assetUrl("cnt_layers/route_network.pmtiles")}`}

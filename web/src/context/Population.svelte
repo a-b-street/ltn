@@ -31,11 +31,11 @@
     . SIMD combines different domains: income; employment; health; education, skills
     and training; geographic access to services; crime; and housing.
   </p>
+  <div slot="legend">
+    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+    <p>Darker colours are more deprived</p>
+  </div>
 </ContextLayerButton>
-{#if showSIMD}
-  <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
-  <p>Darker colours are more deprived</p>
-{/if}
 
 <ContextLayerButton label="Population density" bind:show={showDensity}>
   <p slot="help">
@@ -47,11 +47,12 @@
     </a>
     .
   </p>
+
+  <div slot="legend">
+    <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
+    <p>Darker colours are denser</p>
+  </div>
 </ContextLayerButton>
-{#if showDensity}
-  <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
-  <p>Darker colours are denser</p>
-{/if}
 
 <VectorTileSource
   url={`pmtiles://${assetUrl("cnt_layers/population.pmtiles")}`}

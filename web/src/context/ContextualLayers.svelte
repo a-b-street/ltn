@@ -15,7 +15,8 @@
 <Control defaultStyling={true}>
   <div
     class="pico contextual-layers"
-    style="display: flex; flex-direction: column; max-height: 80vh; max-width: 300px; overflow: auto; border-radius: 5px;"
+    style="display: flex; flex-direction: column; max-height: 80vh; overflow: auto; border-radius: 5px;"
+    style:width={expand ? "300px" : "auto"}
   >
     <button
       class="show-layers-button icon-btn {expand ? 'expanded' : ''}"
@@ -62,5 +63,8 @@
   }
   .pico .show-layers-button:hover {
     background-color: #f2f2f2;
+  }
+  :global(.pico.contextual-layers button) {
+    padding: 8px 8px;
   }
 </style>

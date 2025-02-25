@@ -146,26 +146,30 @@
       . Contains OS data &copy; Crown copyright and database right 2025.
     </p>
   </div>
-</ContextLayerButton>
-{#if show}
-  <fieldset>
-    <label>
-      <input type="checkbox" bind:checked={state.pedestrians} />
-      Pedestrians
-    </label>
-    <label>
-      <input type="checkbox" bind:checked={state.cyclists} />
-      Cyclists
-    </label>
-  </fieldset>
-  <div>
-    Filter years:
-    <input type="number" min={2017} max={2023} bind:value={state.minYear} />
-    -
-    <input type="number" min={2017} max={2023} bind:value={state.maxYear} />
+  <div slot="legend">
+    <fieldset style="display: flex; gap: 3em;">
+      <label>
+        <input type="checkbox" bind:checked={state.pedestrians} />
+        Pedestrians
+      </label>
+      <label>
+        <input type="checkbox" bind:checked={state.cyclists} />
+        Cyclists
+      </label>
+    </fieldset>
+    <fieldset class="year-filter">
+      <label>
+        From
+        <input type="number" min={2017} max={2023} bind:value={state.minYear} />
+      </label>
+      <label>
+        To
+        <input type="number" min={2017} max={2023} bind:value={state.maxYear} />
+      </label>
+    </fieldset>
+    <QualitativeLegend colors={severityLegend} horiz />
   </div>
-  <QualitativeLegend colors={severityLegend} horiz />
-{/if}
+</ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt_layers/stats19.pmtiles")}`}>
   <CircleLayer
@@ -229,7 +233,19 @@
 </VectorTileSource>
 
 <style>
+  .year-filter {
+    display: flex;
+    gap: 3em;
+  }
+  input,
+  fieldset {
+    margin: 0;
+  }
   input {
-    width: 4em;
+    margin: 8px 0;
+  }
+
+  .year-filter input {
+    height: 36px;
   }
 </style>
