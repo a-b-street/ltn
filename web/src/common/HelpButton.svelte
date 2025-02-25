@@ -2,20 +2,24 @@
   // This launches a modal when clicked. The user should put the modal contents
   // as a slot beneath this component.
   import { CircleHelp } from "lucide-svelte";
-  import NewModal from "./NewModal.svelte";
+  import { Modal } from "svelte-utils";
 
   let show = false;
   export let color = "black";
 </script>
 
-<button class="icon-btn help" aria-label="Help" on:click|stopPropagation={() => (show = true)}>
+<button
+  class="icon-btn help"
+  aria-label="Help"
+  on:click|stopPropagation={() => (show = true)}
+>
   <CircleHelp {color} />
 </button>
 
-<NewModal bind:show={show}>
+<Modal bind:show>
   <h2>Help</h2>
   <slot />
-</NewModal>
+</Modal>
 
 <style>
   button.help {

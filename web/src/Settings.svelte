@@ -1,5 +1,5 @@
 <script lang="ts">
-  import NewModal from "./common/NewModal.svelte";
+  import { Modal } from "svelte-utils";
   import icon from "../assets/settings.svg?url";
   import { BasemapPicker } from "./common";
   import { thickRoadsForShortcuts } from "./stores";
@@ -11,15 +11,15 @@
   <img src={icon} alt="Settings" />
 </button>
 
-  <NewModal bind:show={show}>
-    <h1>Settings</h1>
+<Modal bind:show>
+  <h1>Settings</h1>
 
-    <BasemapPicker />
+  <BasemapPicker />
 
-    <label>
-      <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
-      Road thickness depends on shortcuts
-    </label>
+  <label>
+    <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
+    Road thickness depends on shortcuts
+  </label>
 
-    <center><button on:click={() => (show = false)}>Confirm</button></center>
-  </NewModal>
+  <center><button on:click={() => (show = false)}>Confirm</button></center>
+</Modal>
