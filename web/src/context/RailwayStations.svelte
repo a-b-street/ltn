@@ -3,30 +3,28 @@
   import { Popup } from "svelte-utils/map";
   import nationalRailUrl from "../../assets/national_rail.png?url";
   import { HelpButton, layerId } from "../common";
+  import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
   let show = false;
 </script>
 
-<button class="secondary" on:click={() => (show = !show)}>
-  Railway stations
-</button>
-{#if show}
-  <div>
+<ContextLayerButton bind:show label="Railway stations">
+  <div slot="legend" style="display: flex; gap: 8px; align-items: center;">
     <img src={nationalRailUrl} alt="National Rail logo" />
-    <HelpButton>
-      <p>
-        These are all <a
-          href="https://wiki.openstreetmap.org/wiki/Tag:railway%3Dstation"
-          target="_blank"
-        >
-          railway stations
-        </a>
-        according to OpenStreetMap.
-      </p>
-    </HelpButton>
+    Station
   </div>
-{/if}
+
+  <p slot="help">
+    These are all <a
+      href="https://wiki.openstreetmap.org/wiki/Tag:railway%3Dstation"
+      target="_blank"
+    >
+      railway stations
+    </a>
+    according to OpenStreetMap.
+  </p>
+</ContextLayerButton>
 
 <GeoJSON data={assetUrl("cnt_layers/railways.geojson")} generateId>
   <SymbolLayer

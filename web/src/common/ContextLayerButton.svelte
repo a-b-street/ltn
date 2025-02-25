@@ -1,0 +1,41 @@
+<script lang="ts">
+  import { HelpButton } from "../common";
+
+  export let label: string;
+  export let show = false;
+</script>
+
+<button
+  style="display: flex; align-items: center; justify-content: leading; gap: 8px; text-align: left;"
+  class="secondary"
+  on:click={() => (show = !show)}
+>
+  <input type="checkbox" bind:checked={show} />
+  {label}
+  {#if $$slots.help}
+    <HelpButton color="var(--pico-secondary-inverse)">
+      <div class="context-layer-help-content">
+        <slot name="help" />
+      </div>
+    </HelpButton>
+  {/if}
+</button>
+{#if show && $$slots.legend}
+  <div class="legend">
+    <slot name="legend" />
+  </div>
+{/if}
+
+<style>
+  :global(.pico .context-layer-help-content p),
+  :global(.pico .context-layer-help-content ul) {
+    color: black;
+  }
+  :global(.pico .context-layer-help-content ul) {
+    padding-left: 4px;
+  }
+  .legend {
+    padding: 8px;
+    background: gray;
+  }
+</style>

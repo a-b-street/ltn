@@ -6,6 +6,7 @@
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { HelpButton, layerId } from "../common";
+  import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
   let show = false;
@@ -131,49 +132,51 @@
   }
 </script>
 
-<button class="secondary" on:click={() => (show = !show)}>Route network</button>
-{#if show}
-  <HelpButton>
+<ContextLayerButton bind:show label="Route network">
+  <p slot="help">
     <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
       Data from NPT
     </a>
-  </HelpButton>
-  <label>
-    Trip purpose:
-    <select bind:value={purpose}>
-      {#each purposes as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
+  </p>
 
-  <label>
-    Scenario:
-    <select bind:value={scenario}>
-      {#each scenarios as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
+  <div slot="legend">
+    <label>
+      Trip purpose:
+      <select bind:value={purpose}>
+        {#each purposes as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
 
-  <label>
-    Network type:
-    <select bind:value={networkType}>
-      {#each networkTypes as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
+    <label>
+      Scenario:
+      <select bind:value={scenario}>
+        {#each scenarios as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
 
-  <label>
-    Color by:
-    <select bind:value={colorBy}>
-      {#each colorByOptions as [value, label]}
-        <option {value}>{label}</option>
-      {/each}
-    </select>
-  </label>
-{/if}
+    <label>
+      Network type:
+      <select bind:value={networkType}>
+        {#each networkTypes as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
+
+    <label>
+      Color by:
+      <select bind:value={colorBy}>
+        {#each colorByOptions as [value, label]}
+          <option {value}>{label}</option>
+        {/each}
+      </select>
+    </label>
+  </div>
+</ContextLayerButton>
 
 <VectorTileSource
   url={`pmtiles://${assetUrl("cnt_layers/route_network.pmtiles")}`}

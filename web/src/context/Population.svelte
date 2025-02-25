@@ -9,6 +9,7 @@
   import { makeRamp, Popup } from "svelte-utils/map";
   import { HelpButton, layerId } from "../common";
   import { simdColorScale, simdLimits } from "../common/colors";
+  import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 
   let showSIMD = false;
@@ -19,44 +20,40 @@
   let densityLimits = [0, 4700, 13000, 33000, 94000, 1980000];
 </script>
 
-<button class="secondary" on:click={() => (showSIMD = !showSIMD)}>SIMD</button>
-{#if showSIMD}
-  <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
-  <p>Darker colours are more deprived</p>
+<ContextLayerButton label="SIMD" bind:show={showSIMD}>
+  <div slot="legend">
+    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+    <p>Darker colours are more deprived</p>
+  </div>
 
-  <HelpButton>
-    <p>
-      This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
-        href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
-        target="_blank"
-      >
-        2020 data
-      </a>
-      . SIMD combines different domains: income; employment; health; education, skills
-      and training; geographic access to services; crime; and housing.
-    </p>
-  </HelpButton>
-{/if}
+  <p slot="help">
+    This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
+      href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
+      target="_blank"
+    >
+      2020 data
+    </a>
+    . SIMD combines different domains: income; employment; health; education, skills
+    and training; geographic access to services; crime; and housing.
+  </p>
+</ContextLayerButton>
 
-<button class="secondary" on:click={() => (showDensity = !showDensity)}>
-  Population density
-</button>
-{#if showDensity}
-  <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
-  <p>Darker colours are denser</p>
+<ContextLayerButton label="Population density" bind:show={showDensity}>
+  <div slot="legend">
+    <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
+    <p>Darker colours are denser</p>
+  </div>
 
-  <HelpButton>
-    <p>
-      This shows population data from <a
-        href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
-        target="_blank"
-      >
-        2020 data
-      </a>
-      .
-    </p>
-  </HelpButton>
-{/if}
+  <p slot="help">
+    This shows population data from <a
+      href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
+      target="_blank"
+    >
+      2020 data
+    </a>
+    .
+  </p>
+</ContextLayerButton>
 
 <VectorTileSource
   url={`pmtiles://${assetUrl("cnt_layers/population.pmtiles")}`}
