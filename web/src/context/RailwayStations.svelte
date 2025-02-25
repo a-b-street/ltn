@@ -2,7 +2,7 @@
   import { GeoJSON, SymbolLayer } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
   import nationalRailUrl from "../../assets/national_rail.png?url";
-  import { HelpButton, layerId } from "../common";
+  import { layerId } from "../common";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 

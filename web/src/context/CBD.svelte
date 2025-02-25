@@ -2,7 +2,7 @@
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { QualitativeLegend, SequentialLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
-  import { HelpButton, layerId, roadLineWidth } from "../common";
+  import { layerId, roadLineWidth } from "../common";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import { assetUrl } from "../stores";
 

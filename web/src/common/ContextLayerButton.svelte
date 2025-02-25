@@ -36,6 +36,6 @@
   }
   .legend {
     padding: 8px;
-    background: gray;
+    background-color: white;
   }
 </style>
