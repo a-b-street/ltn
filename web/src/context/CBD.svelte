@@ -36,34 +36,25 @@
 </script>
 
 <ContextLayerButton bind:show={showTraffic} label="Traffic">
-  <p slot="help">
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
-  </p>
   <div slot="legend">
     <SequentialLegend colorScale={traffic.colorScale} limits={traffic.limits} />
   </div>
+
+  <p slot="help">
+    <a
+      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+      target="_blank"
+    >
+      Data from NPT
+    </a>
+  </p>
 </ContextLayerButton>
 
 <ContextLayerButton bind:show={showLos} label="Level of Service">
-  <p slot="help">
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
-  </p>
   <div slot="legend">
     <QualitativeLegend colors={levelOfServiceColors} horiz />
   </div>
-</ContextLayerButton>
 
-<ContextLayerButton bind:show={showExistingInfra} label="Cycle infrastructure">
   <p slot="help">
     <a
       href="https://nptscot.github.io/manual/#infrastructureandtraffic"
@@ -72,9 +63,21 @@
       Data from NPT
     </a>
   </p>
+</ContextLayerButton>
+
+<ContextLayerButton bind:show={showExistingInfra} label="Cycle infrastructure">
   <div slot="legend">
     <QualitativeLegend colors={infraTypeColors} horiz />
   </div>
+
+  <p slot="help">
+    <a
+      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+      target="_blank"
+    >
+      Data from NPT
+    </a>
+  </p>
 </ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt_layers/cbd.pmtiles")}`}>

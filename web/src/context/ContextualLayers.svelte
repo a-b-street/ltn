@@ -24,7 +24,7 @@
       on:click={() => (expand = !expand)}
     >
       <div
-        style="display: flex; gap: 8px; color: #333; align-items: center; justify-content: center;"
+        style="display: flex; gap: 12px; color: #333; align-items: center; justify-content: center;"
       >
         <Layers color="#333" />
         {#if expand}

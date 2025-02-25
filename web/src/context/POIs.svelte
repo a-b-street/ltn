@@ -16,6 +16,10 @@
 </script>
 
 <ContextLayerButton label="POIs" bind:show>
+  <div slot="legend">
+    <QualitativeLegend {colors} horiz />
+  </div>
+
   <p slot="help">
     See Scottish data sources for
     <a
@@ -40,9 +44,6 @@
     </a>
     .
   </p>
-  <div slot="legend">
-    <QualitativeLegend {colors} horiz />
-  </div>
 </ContextLayerButton>
 
 <GeoJSON data={assetUrl("cnt_layers/gp_practices.geojson")} generateId>

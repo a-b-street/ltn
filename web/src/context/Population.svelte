@@ -21,6 +21,11 @@
 </script>
 
 <ContextLayerButton label="SIMD" bind:show={showSIMD}>
+  <div slot="legend">
+    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+    <p>Darker colours are more deprived</p>
+  </div>
+
   <p slot="help">
     This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
       href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
@@ -31,13 +36,14 @@
     . SIMD combines different domains: income; employment; health; education, skills
     and training; geographic access to services; crime; and housing.
   </p>
-  <div slot="legend">
-    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
-    <p>Darker colours are more deprived</p>
-  </div>
 </ContextLayerButton>
 
 <ContextLayerButton label="Population density" bind:show={showDensity}>
+  <div slot="legend">
+    <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
+    <p>Darker colours are denser</p>
+  </div>
+
   <p slot="help">
     This shows population data from <a
       href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
@@ -47,11 +53,6 @@
     </a>
     .
   </p>
-
-  <div slot="legend">
-    <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
-    <p>Darker colours are denser</p>
-  </div>
 </ContextLayerButton>
 
 <VectorTileSource
