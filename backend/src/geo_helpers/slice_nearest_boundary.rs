@@ -1,6 +1,6 @@
 use geo::{
-    coord, Closest, ClosestPoint, Distance, Euclidean, FrechetDistance, HasDimensions, LineString,
-    Point, Polygon,
+    coord, line_measures::FrechetDistance, Closest, ClosestPoint, Distance, Euclidean,
+    HasDimensions, LineString, Point, Polygon,
 };
 use std::cmp::Ordering;
 
@@ -31,13 +31,13 @@ impl SliceNearestFrechetBoundary for Polygon {
         // Of the two parts, the one with the lowest frechet_distance represents the best
         // candidate for its corresponding boundary.
         let (forwards_half, backwards_half) = self.split_boundary_nearest_endpoints(closest_to);
-        let forwards_frechet = forwards_half.frechet_distance(closest_to);
+        let forwards_frechet = Euclidean.frechet_distance(&forwards_half, &closest_to);
 
         // The second half of the polygon begins where the first half ends, so we
         // need to reverse `closest_to` to get an accurate (minimal) distance measure
         let mut backwards_closest_to = closest_to.clone();
         backwards_closest_to.0.reverse();
-        let backwards_frechet = backwards_half.frechet_distance(&backwards_closest_to);
+        let backwards_frechet = Euclidean.frechet_distance(&backwards_half, &backwards_closest_to);
 
         if forwards_frechet < backwards_frechet {
             (forwards_half, forwards_frechet)

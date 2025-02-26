@@ -1,4 +1,5 @@
-use geo::{Area, BooleanOps, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
+use geo::{Area, BooleanOps, Buffer, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
+use i_overlay::mesh::style::{LineJoin, OutlineStyle};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -34,8 +35,31 @@ impl BoundaryStats {
                 }
             }
 
-            // TODO Maybe buffer the polygon
-            let polygon_prepared = PreparedGeometry::from(polygon.clone());
+            // Counting incidents in a given neighbourhood, we want to include incidents that happen
+            // *on* the perimeter road, not just the interior.
+            //
+            // Our road LineString's are center-lines, so to count incidents *on* the perimeter,
+            // conceptually we need a buffer at least half a road-width beyond our perimeter.
+            //
+            // To make the analysis reasonable, we only provide one uniform buffer amount.
+            // We can't reasonably buffer each raod segment based on the "actual" road width of that
+            // segment.
+            //
+            // So how wide should we buffer?
+            //
+            // Extending beyond the perimeter road should include relatively fewer "extra"
+            // incidents, where as clipping off part of the perimeter road itself (by buffering too small)
+            // will more likely clip off relatively more incidents.
+            //
+            // Erring towards "a bit too big" will give more accurate results than
+            // "a bit too small".
+            //
+            // Conclusion: To count incidents on the perimeter, we should buffer a bit more than 1/2
+            // the expected road width.
+            let buffer_meters = 10.0;
+            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Bevel);
+            let buffered_polygon = polygon.buffer_with_style(style);
+            let polygon_prepared = PreparedGeometry::from(buffered_polygon.clone());
             for pt in &context_data.stats19_collisions {
                 if polygon_prepared.relate(pt).is_contains() {
                     number_stats19_collisions += 1;

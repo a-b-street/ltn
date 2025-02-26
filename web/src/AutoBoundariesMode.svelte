@@ -204,7 +204,7 @@
           {:else if selectedPrioritization == "stats19"}
             <b>
               Density of pedestrian and cyclist collisions (collisions per
-              square meter):
+              square kilometer):
             </b>
             {(props.number_stats19_collisions / props.area_km2).toFixed(1)}
           {/if}

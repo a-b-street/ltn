@@ -11,7 +11,11 @@ fn benchmark_build_map_model(c: &mut Criterion) {
             200
         );
         c.bench_function(
-            &format!("build stats: {name}", name = fixture.study_area_name),
+            &format!(
+                "build stats: {neighbourhood} in {study_area}",
+                neighbourhood = fixture.neighbourhood_name,
+                study_area = fixture.study_area_name
+            ),
             |b| {
                 b.iter(|| {
                     let stats = BoundaryStats::new(
@@ -19,6 +23,19 @@ fn benchmark_build_map_model(c: &mut Criterion) {
                         map.context_data.as_ref(),
                     );
                     black_box(stats);
+                });
+            },
+        );
+        c.bench_function(
+            &format!(
+                "generate auto boundaries (and stats) for all of {study_area}",
+                study_area = fixture.study_area_name
+            ),
+            |b| {
+                b.iter(|| {
+                    let boundaries = map.render_auto_boundaries();
+                    assert_eq!(boundaries.features.len(), 1102);
+                    black_box(boundaries);
                 });
             },
         );
