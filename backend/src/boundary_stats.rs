@@ -57,7 +57,7 @@ impl BoundaryStats {
             // Conclusion: To count incidents on the perimeter, we should buffer a bit more than 1/2
             // the expected road width.
             let buffer_meters = 10.0;
-            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Miter(0.1));
+            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Round(0.1));
             let buffered_polygon = polygon.buffer_with_style(style);
             let polygon_prepared = PreparedGeometry::from(buffered_polygon.clone());
             for pt in &context_data.stats19_collisions {
