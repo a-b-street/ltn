@@ -17,6 +17,8 @@ impl BoundaryStats {
         let mut simd = 0.0;
         let mut number_stats19_collisions = 0;
         if let Some(context_data) = context_data {
+            let prepared_polygon = PreparedGeometry::from(polygon);
+
             // TODO: review this methodology
             // area proportional accumulation:
             // If  3/4 the boundary is in a zone with simd 100:   0.75 * 100 = 75
@@ -26,7 +28,7 @@ impl BoundaryStats {
             for population_zone in &context_data.population_zones {
                 if population_zone
                     .prepared_geometry
-                    .relate(polygon)
+                    .relate(&prepared_polygon)
                     .is_intersects()
                 {
                     let overlap = polygon.intersection(&population_zone.population_zone.geometry);
@@ -59,9 +61,9 @@ impl BoundaryStats {
             let buffer_meters = 10.0;
             let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Bevel);
             let buffered_polygon = polygon.buffer_with_style(style);
-            let polygon_prepared = PreparedGeometry::from(buffered_polygon.clone());
+            let prepared_buffered_polygon = PreparedGeometry::from(&buffered_polygon);
             for pt in &context_data.stats19_collisions {
-                if polygon_prepared.relate(pt).is_contains() {
+                if prepared_buffered_polygon.relate(pt).is_contains() {
                     number_stats19_collisions += 1;
                 }
             }
