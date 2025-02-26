@@ -4,8 +4,9 @@ use crate::geo_helpers::{
     invert_feature_geometry_in_place, make_polygon_valid, SliceNearestFrechetBoundary,
 };
 use anyhow::Result;
-use geo::{Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
+use geo::{Buffer, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
 use geojson::{Feature, FeatureCollection};
+use i_overlay::mesh::style::{LineJoin, OutlineStyle};
 use serde::{Deserialize, Serialize};
 use web_time::Instant;
 
@@ -309,9 +310,30 @@ impl Neighbourhood {
 
         let derived = self.derived.as_ref().unwrap();
 
-        // Invert the boundary
+        // Create a neighbourhood "mask" to highlight the editable neighbourhood
         {
-            let mut boundary_feature = self.boundary.to_feature(map);
+            let mut neighbourhood_mask = self.boundary.clone();
+            // The boundary falls directly on the perimeter center line, so it's ambiguous if it
+            // includes the perimeter or not. Let's grow or shrink the boundary accordingly:
+            let buffer_offset = if self.edit_perimeter_roads {
+                10.0
+            } else {
+                // There are often short segments just inside the interior, e.g. parking lot driveways
+                // So we don't want to encroach too far with the masking.
+                -5.0
+            };
+            let mut buffered = neighbourhood_mask.definition.geometry.buffer_with_style(
+                OutlineStyle::new(buffer_offset).line_join(LineJoin::Round(0.1)),
+            );
+            neighbourhood_mask.definition.geometry = if buffered.0.len() == 1 {
+                buffered.0.pop().expect("already checked len")
+            } else {
+                // A negative buffer could sever pathological geometries into two Polygons
+                // We don't support that, and just fall back to the unbuffered boundary.
+                warn!("Buffered boundary with {} polygons", buffered.0.len());
+                neighbourhood_mask.definition.geometry
+            };
+            let mut boundary_feature = neighbourhood_mask.to_feature(map);
             invert_feature_geometry_in_place(&mut boundary_feature);
             features.push(boundary_feature);
         }
