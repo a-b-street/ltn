@@ -1,4 +1,5 @@
-use geo::{Area, BooleanOps, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
+use geo::{Area, BooleanOps, Buffer, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
+use i_overlay::mesh::style::{LineJoin, OutlineStyle};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -34,8 +35,17 @@ impl BoundaryStats {
                 }
             }
 
-            // TODO Maybe buffer the polygon
-            let polygon_prepared = PreparedGeometry::from(polygon.clone());
+            // TODO: Review this tolerance - we want to encompass any incidents "on" the road.
+            // So in theory, if our road LineString's are center-lines, we want at least half a
+            // road-width beyond. But we can't reasonably know each road width for this calculation,
+            // so a better baseline would be "a little larger than it would need to be".
+            // Since so many incidents are likely to occur *on* the perimeter road, my intuition is
+            // that erring on "too much" is likely to err the results less than "too little"
+            // (including a few extra beyond the perimeter vs. clipping off the many which are on the perimeter)
+            let buffer_meters = 10.0;
+            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Bevel);
+            let buffered_polygon = polygon.buffer_with_style(style);
+            let polygon_prepared = PreparedGeometry::from(buffered_polygon.clone());
             for pt in &context_data.stats19_collisions {
                 if polygon_prepared.relate(pt).is_contains() {
                     number_stats19_collisions += 1;
