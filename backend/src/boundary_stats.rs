@@ -35,13 +35,27 @@ impl BoundaryStats {
                 }
             }
 
-            // TODO: Review this tolerance - we want to encompass any incidents "on" the road.
-            // So in theory, if our road LineString's are center-lines, we want at least half a
-            // road-width beyond. But we can't reasonably know each road width for this calculation,
-            // so a better baseline would be "a little larger than it would need to be".
-            // Since so many incidents are likely to occur *on* the perimeter road, my intuition is
-            // that erring on "too much" is likely to err the results less than "too little"
-            // (including a few extra beyond the perimeter vs. clipping off the many which are on the perimeter)
+            // Counting incidents in a given neighbourhood, we want to include incidents that happen
+            // *on* the perimeter road, not just the interior.
+            //
+            // Our road LineString's are center-lines, so to count incidents *on* the perimeter,
+            // conceptually we need a buffer at least half a road-width beyond our perimeter.
+            //
+            // To make the analysis reasonable, we only provide one uniform buffer amount.
+            // We can't reasonably buffer each raod segment based on the "actual" road width of that
+            // segment.
+            //
+            // So how wide should we buffer?
+            //
+            // Extending beyond the perimeter road should include relatively fewer "extra"
+            // incidents, where as clipping off part of the perimeter road itself (by buffering too small)
+            // will more likely clip off relatively more incidents.
+            //
+            // Erring towards "a bit too big" will give more accurate results than
+            // "a bit too small".
+            //
+            // Conclusion: To count incidents on the perimeter, we should buffer a bit more than 1/2
+            // the expected road width.
             let buffer_meters = 10.0;
             let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Miter(0.1));
             let buffered_polygon = polygon.buffer_with_style(style);
