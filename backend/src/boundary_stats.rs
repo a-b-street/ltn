@@ -43,7 +43,7 @@ impl BoundaryStats {
             // that erring on "too much" is likely to err the results less than "too little"
             // (including a few extra beyond the perimeter vs. clipping off the many which are on the perimeter)
             let buffer_meters = 10.0;
-            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Bevel);
+            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Round(0.1));
             let buffered_polygon = polygon.buffer_with_style(style);
             let polygon_prepared = PreparedGeometry::from(buffered_polygon.clone());
             for pt in &context_data.stats19_collisions {
