@@ -46,6 +46,11 @@ pub struct MapModel {
     pub modal_filters: BTreeMap<RoadID, ModalFilter>,
     pub diagonal_filters: BTreeMap<IntersectionID, DiagonalFilter>,
 
+    /// Indexed by IntersectionID. For each intersection, a list of (from, to) roads that are not
+    /// allowed. May be redundant with the road TravelFlow.
+    pub turn_restrictions: Vec<Vec<(RoadID, RoadID)>>,
+    pub original_turn_restrictions: Vec<Vec<(RoadID, RoadID)>>,
+
     // Every road is filled out
     pub travel_flows: BTreeMap<RoadID, TravelFlow>,
 
@@ -114,8 +119,6 @@ pub struct Intersection {
     pub point: Point,
     // Ordered clockwise from North
     pub roads: Vec<RoadID>,
-    /// (from, to) is not allowed. May be redundant with the road TravelFlow.
-    pub turn_restrictions: Vec<(RoadID, RoadID)>,
 }
 
 impl Intersection {
@@ -137,7 +140,6 @@ impl Intersection {
             point: value.point,
             node: value.osm_node,
             roads: value.edges.into_iter().map(|e| RoadID(e.0)).collect(),
-            turn_restrictions: Vec::new(),
         }
     }
 
@@ -156,7 +158,10 @@ impl Intersection {
             if to_road.id == from_road.id {
                 return None;
             }
-            if self.turn_restrictions.contains(&(from_r, to_road.id)) {
+            if router_input
+                .turn_restrictions(self.id)
+                .contains(&(from_r, to_road.id))
+            {
                 return None;
             }
             if let Some(diagonal_filter) = router_input.diagonal_filter(self.id) {
@@ -391,7 +396,7 @@ impl MapModel {
             bail!("{} and {} don't share an intersection", from.id, to.id);
         };
 
-        let mut restrictions = self.get_i(i).turn_restrictions.clone();
+        let mut restrictions = self.turn_restrictions[i.0].clone();
         if restrictions.contains(&(from.id, to.id)) {
             // The frontend should never do this, but just be idempotent
             return Ok(());
@@ -450,10 +455,9 @@ impl MapModel {
                 Command::SetTravelFlow(r, prev)
             }
             Command::SetTurnRestrictions(i, restrictions) => {
-                let i = self.intersections.get_mut(i.0).unwrap();
-                let prev = std::mem::take(&mut i.turn_restrictions);
-                i.turn_restrictions = restrictions;
-                Command::SetTurnRestrictions(i.id, prev)
+                let prev = std::mem::take(&mut self.turn_restrictions[i.0]);
+                self.turn_restrictions[i.0] = restrictions;
+                Command::SetTurnRestrictions(i, prev)
             }
             Command::Multiple(list) => {
                 let undo_list = list.into_iter().map(|cmd| self.do_edit(cmd)).collect();
@@ -705,6 +709,10 @@ impl MapModel {
                 // As there isn't a well known tagging / topological structure that we can easily identify.
                 None
             }
+
+            fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)> {
+                &self.map.original_turn_restrictions[i.0]
+            }
         }
 
         RouterInputBefore { map: self }
@@ -737,6 +745,10 @@ impl MapModel {
 
             fn diagonal_filter(&self, i: IntersectionID) -> Option<&DiagonalFilter> {
                 self.map.diagonal_filters.get(&i)
+            }
+
+            fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)> {
+                &self.map.turn_restrictions[i.0]
             }
         }
         RouterInputAfter { map: self }

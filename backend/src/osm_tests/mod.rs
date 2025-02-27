@@ -19,11 +19,13 @@ fn test_no_left_turn() {
         .intersections
         .iter()
         .find(|i| i.roads.len() > 1)
-        .unwrap();
+        .unwrap()
+        .id;
     // It should have one turn restriction from south to west
-    assert_eq!(i.turn_restrictions.len(), 1);
-    assert!(map.get_r(i.turn_restrictions[0].0).tags.is("name", "south"));
-    assert!(map.get_r(i.turn_restrictions[0].1).tags.is("name", "west"));
+    let restrictions = &map.turn_restrictions[i.0];
+    assert_eq!(restrictions.len(), 1);
+    assert!(map.get_r(restrictions[0].0).tags.is("name", "south"));
+    assert!(map.get_r(restrictions[0].1).tags.is("name", "west"));
 }
 
 pub fn load_osm_xml(filename: &str) -> MapModel {

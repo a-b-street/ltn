@@ -297,6 +297,10 @@ impl Neighbourhood {
             fn diagonal_filter(&self, r: IntersectionID) -> Option<&DiagonalFilter> {
                 self.map.diagonal_filters.get(&r)
             }
+
+            fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)> {
+                &self.map.turn_restrictions[i.0]
+            }
         }
 
         NeighbourhoodRouterInput {

@@ -26,7 +26,11 @@ impl MapModel {
         let mut features = Vec::new();
 
         for i in &self.intersections {
-            for (tr_from, tr_all_to) in i.turn_restrictions.iter().cloned().into_group_map() {
+            for (tr_from, tr_all_to) in self.turn_restrictions[i.id.0]
+                .iter()
+                .cloned()
+                .into_group_map()
+            {
                 let from = self.get_r(tr_from);
 
                 // TODO Order the TR kinds consistently?
@@ -78,8 +82,10 @@ impl MapModel {
                         serde_json::to_value(from_geometry).unwrap(),
                     );
                     f.set_property("to_geometry", serde_json::to_value(to_geometry).unwrap());
-                    // Editing isn't possible yet
-                    f.set_property("edited", false);
+                    f.set_property(
+                        "edited",
+                        !self.original_turn_restrictions[i.id.0].contains(&(from.id, to.id)),
+                    );
                     features.push(f);
                 }
             }
@@ -99,7 +105,7 @@ impl MapModel {
                     continue;
                 }
                 // If there's already a TR between these two, skip it.
-                if intersection.turn_restrictions.contains(&(from.id, *r)) {
+                if self.turn_restrictions[i.0].contains(&(from.id, *r)) {
                     continue;
                 }
 

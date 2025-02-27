@@ -213,6 +213,7 @@ pub fn create_from_osm(
         travel_flows.insert(r.id, TravelFlow::from_osm(&r.tags));
     }
 
+    let num_intersections = intersections.len();
     let mut map = MapModel {
         roads,
         intersections,
@@ -233,6 +234,13 @@ pub fn create_from_osm(
         original_modal_filters: BTreeMap::new(),
         modal_filters: BTreeMap::new(),
         diagonal_filters: BTreeMap::new(),
+
+        turn_restrictions: std::iter::repeat_with(Vec::new)
+            .take(num_intersections)
+            .collect(),
+        original_turn_restrictions: std::iter::repeat_with(Vec::new)
+            .take(num_intersections)
+            .collect(),
 
         travel_flows,
 
@@ -368,7 +376,7 @@ fn apply_turn_restrictions(
     map: &mut MapModel,
     mut turn_restrictions: HashMap<NodeID, Vec<(WayID, WayID)>>,
 ) {
-    for intersection in &mut map.intersections {
+    for intersection in &map.intersections {
         if let Some(list) = turn_restrictions.remove(&intersection.node) {
             for (from_way, to_way) in list {
                 // One OSM way turns into multiple Roads. The restriction only makes sense on the
@@ -385,11 +393,15 @@ fn apply_turn_restrictions(
                 }
 
                 if let (Some(from), Some(to)) = (from, to) {
-                    intersection.turn_restrictions.push((from, to));
+                    // Set this directly; don't bother with Command and then fixing the undo/redo
+                    // queues
+                    map.original_turn_restrictions[intersection.id.0].push((from, to));
                 }
             }
         }
     }
+
+    map.turn_restrictions = map.original_turn_restrictions.clone();
 }
 
 fn is_road(tags: &Tags) -> bool {
