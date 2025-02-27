@@ -139,10 +139,11 @@
       return;
     }
 
-    // If we click a blank area, reset some state
+    // If we click a blank area, reset some state. Not sure why, but clicking
+    // layers doesn't always prevent a click on the map itself.
     if (
       $map!.queryRenderedFeatures(e.detail.point, {
-        layers: ["interior-roads"],
+        layers: ["interior-roads", "turn-restriction-targets"],
       }).length > 0
     ) {
       return;
@@ -152,7 +153,7 @@
   }
 
   function createTurnRestriction(e: CustomEvent<LayerClickInfo>) {
-    if (action.kind == "turn_restriction" && action.from_road_id) {
+    if (action.kind == "turn_restriction" && action.from_road_id != null) {
       let to = e.detail.features[0].properties!.road;
       $backend!.addTurnRestriction(action.from_road_id, to);
       $mutationCounter++;
