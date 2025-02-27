@@ -3,7 +3,6 @@
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import {
-    Control,
     GeoJSON,
     hoverStateFilter,
     LineLayer,
@@ -325,6 +324,57 @@
       </mark>
     {/if}
 
+    <div style="display: flex; justify-content: space-between">
+      <button
+        on:click={() => (action = { kind: "filter" })}
+        disabled={action.kind == "filter"}
+        data-tooltip="Add a modal filter (hotkey 1)"
+        style:width="25%"
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+          alt="Add a modal filter"
+          style:width="100%"
+        />
+      </button>
+      <button
+        on:click={() => (action = { kind: "freehand-filters" })}
+        disabled={action.kind == "freehand-filters"}
+        data-tooltip="Add many modal filters along a line (hotkey 2)"
+        style:width="25%"
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/select_freehand.png`}
+          alt="Add many modal filters along a line"
+          style:width="100%"
+        />
+      </button>
+      <button
+        on:click={() => (action = { kind: "oneway" })}
+        disabled={action.kind == "oneway"}
+        data-tooltip="Reverse directions (hotkey 3)"
+        style:width="25%"
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/one_way.png`}
+          alt="Reverse directions"
+          style:width="100%"
+        />
+      </button>
+      <button
+        on:click={() => (action = startTurnRestrictionAction())}
+        disabled={action.kind == "turn_restriction"}
+        data-tooltip="Restrict turns (hotkey 4)"
+        style:width="25%"
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.png`}
+          alt="Restrict turns"
+          style:width="100%"
+        />
+      </button>
+    </div>
+
     <button class="outline" on:click={() => (settingFilterType = true)}>
       Change modal filter type
     </button>
@@ -390,44 +440,6 @@
 
   <div slot="map">
     <MapEvents on:click={onMapClick} />
-
-    <Control position="bottom-right">
-      <div class="pico">
-        <button
-          on:click={() => (action = { kind: "filter" })}
-          disabled={action.kind == "filter"}
-          data-tooltip="hotkey 1"
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
-            width="30"
-            alt="Add a modal filter"
-          />
-          Add a modal filter
-        </button>
-        <button
-          on:click={() => (action = { kind: "freehand-filters" })}
-          disabled={action.kind == "freehand-filters"}
-          data-tooltip="hotkey 2"
-        >
-          Add many modal filters along line
-        </button>
-        <button
-          on:click={() => (action = { kind: "oneway" })}
-          disabled={action.kind == "oneway"}
-          data-tooltip="hotkey 3"
-        >
-          Reverse directions
-        </button>
-        <button
-          on:click={() => (action = startTurnRestrictionAction())}
-          disabled={action.kind == "turn_restriction"}
-          data-tooltip="hotkey 4"
-        >
-          Restrict turns
-        </button>
-      </div>
-    </Control>
 
     <RenderNeighbourhood input={gj}>
       <HighlightBoundaryLayer />
