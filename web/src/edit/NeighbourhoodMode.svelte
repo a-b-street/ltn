@@ -12,6 +12,7 @@
   import { notNull, SequentialLegend } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import onewayArrowUrl from "../../assets/arrow.png?url";
   import AnimatePaths from "../AnimatePaths.svelte";
   import { HelpButton, layerId, Link, roadLineWidth } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
@@ -355,11 +356,7 @@
         data-tooltip="Reverse directions (hotkey 3)"
         style:width="25%"
       >
-        <img
-          src={`${import.meta.env.BASE_URL}/filters/one_way.png`}
-          alt="Reverse directions"
-          style:width="100%"
-        />
+        <img src={onewayArrowUrl} alt="Reverse directions" style:width="100%" />
       </button>
       <button
         on:click={() => (action = startTurnRestrictionAction())}
