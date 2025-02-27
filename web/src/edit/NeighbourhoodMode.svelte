@@ -169,7 +169,11 @@
 
   function deleteTurnRestriction(e: CustomEvent<LayerClickInfo>) {
     let f = e.detail.features[0];
-    $backend!.deleteTurnRestriction(f.properties!.intersection, f.properties!.from_road, f.properties!.to_road);
+    $backend!.deleteTurnRestriction(
+      f.properties!.intersection,
+      f.properties!.from_road,
+      f.properties!.to_road,
+    );
     $mutationCounter++;
   }
 
@@ -470,8 +474,16 @@
       <AnimatePaths paths={allShortcuts} />
     {/if}
 
-    <ModalFilterLayer onClickModalFilter={deleteModalFilter} onClickTurnRestriction={deleteTurnRestriction}>
-      <Popup openOn="hover">Click to delete</Popup>
+    <ModalFilterLayer
+      onClickModalFilter={deleteModalFilter}
+      onClickTurnRestriction={deleteTurnRestriction}
+    >
+      <div slot="modal-filter">
+        <Popup openOn="hover">Click to delete</Popup>
+      </div>
+      <div slot="turn-restriction">
+        <Popup openOn="hover">Click to delete</Popup>
+      </div>
     </ModalFilterLayer>
 
     {#if action.kind == "freehand-filters"}

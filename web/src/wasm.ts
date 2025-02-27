@@ -161,7 +161,11 @@ export class Backend {
     this.inner.addTurnRestriction(from_road, to_road);
   }
 
-  deleteTurnRestriction(intersection: number, from_road: number, to_road: number) {
+  deleteTurnRestriction(
+    intersection: number,
+    from_road: number,
+    to_road: number,
+  ) {
     this.inner.deleteTurnRestriction(intersection, from_road, to_road);
   }
 

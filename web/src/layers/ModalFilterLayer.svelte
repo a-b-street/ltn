@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type LayerClickInfo, GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
@@ -7,8 +7,12 @@
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
-  export let onClickModalFilter: (e: CustomEvent<LayerClickInfo>) => void = () => {};
-  export let onClickTurnRestriction: (e: CustomEvent<LayerClickInfo>) => void = () => {};
+  export let onClickModalFilter: (
+    e: CustomEvent<LayerClickInfo>,
+  ) => void = () => {};
+  export let onClickTurnRestriction: (
+    e: CustomEvent<LayerClickInfo>,
+  ) => void = () => {};
 
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
@@ -32,7 +36,7 @@
     }}
     on:click={onClickModalFilter}
   >
-    <slot />
+    <slot name="modal-filter" />
   </SymbolLayer>
   <SymbolLayer
     {...layerId("intersection-filters")}
@@ -48,4 +52,6 @@
   />
 </GeoJSON>
 
-<TurnRestrictionLayer {onClickTurnRestriction} />
+<TurnRestrictionLayer {onClickTurnRestriction}>
+  <slot name="turn-restriction" />
+</TurnRestrictionLayer>
