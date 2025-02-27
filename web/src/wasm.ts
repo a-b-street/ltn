@@ -88,6 +88,9 @@ export class Backend {
       from_geometry: string;
       to_geometry: string;
       edited: boolean;
+      intersection: number;
+      from_road: number;
+      to_road: number;
     }
   > {
     return JSON.parse(this.inner.renderTurnRestrictions());
@@ -156,6 +159,10 @@ export class Backend {
 
   addTurnRestriction(from_road: number, to_road: number) {
     this.inner.addTurnRestriction(from_road, to_road);
+  }
+
+  deleteTurnRestriction(intersection: number, from_road: number, to_road: number) {
+    this.inner.deleteTurnRestriction(intersection, from_road, to_road);
   }
 
   getTurnRestrictionTargets(

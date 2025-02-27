@@ -160,9 +160,15 @@
     action = { kind: "filter" };
   }
 
-  function deleteFilter(e: CustomEvent<LayerClickInfo>) {
+  function deleteModalFilter(e: CustomEvent<LayerClickInfo>) {
     let f = e.detail.features[0];
     $backend!.deleteModalFilter(f.properties!.road);
+    $mutationCounter++;
+  }
+
+  function deleteTurnRestriction(e: CustomEvent<LayerClickInfo>) {
+    let f = e.detail.features[0];
+    $backend!.deleteTurnRestriction(f.properties!.intersection, f.properties!.from_road, f.properties!.to_road);
     $mutationCounter++;
   }
 
@@ -463,7 +469,7 @@
       <AnimatePaths paths={allShortcuts} />
     {/if}
 
-    <ModalFilterLayer on:click={deleteFilter}>
+    <ModalFilterLayer onClickModalFilter={deleteModalFilter} onClickTurnRestriction={deleteTurnRestriction}>
       <Popup openOn="hover">Click to delete</Popup>
     </ModalFilterLayer>
 

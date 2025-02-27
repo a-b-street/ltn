@@ -1,11 +1,14 @@
 <script lang="ts">
-  import { GeoJSON, SymbolLayer } from "svelte-maplibre";
+  import { type LayerClickInfo, GeoJSON, SymbolLayer } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
   // TODO Maybe make another component wrapping both modal filters and turn
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
+
+  export let onClickModalFilter: (e: CustomEvent<LayerClickInfo>) => void = () => {};
+  export let onClickTurnRestriction: (e: CustomEvent<LayerClickInfo>) => void = () => {};
 
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
@@ -27,7 +30,7 @@
     paint={{
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
-    on:click
+    on:click={onClickModalFilter}
   >
     <slot />
   </SymbolLayer>
@@ -45,4 +48,4 @@
   />
 </GeoJSON>
 
-<TurnRestrictionLayer />
+<TurnRestrictionLayer {onClickTurnRestriction} />

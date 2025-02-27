@@ -86,6 +86,9 @@ impl MapModel {
                         "edited",
                         !self.original_turn_restrictions[i.id.0].contains(&(from.id, to.id)),
                     );
+                    f.set_property("intersection", i.id.0);
+                    f.set_property("from_road", from.id.0);
+                    f.set_property("to_road", to.id.0);
                     features.push(f);
                 }
             }

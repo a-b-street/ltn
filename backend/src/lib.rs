@@ -299,6 +299,20 @@ impl LTN {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = deleteTurnRestriction)]
+    pub fn delete_turn_restriction(
+        &mut self,
+        intersection: usize,
+        from: usize,
+        to: usize,
+    ) -> Result<(), JsValue> {
+        self.map
+            .delete_turn_restriction(IntersectionID(intersection), RoadID(from), RoadID(to))
+            .map_err(err_to_js)?;
+        self.after_edit();
+        Ok(())
+    }
+
     #[wasm_bindgen(js_name = getTurnRestrictionTargets)]
     pub fn get_turn_restriction_targets_wasm(&self, road: usize) -> Result<String, JsValue> {
         Ok(

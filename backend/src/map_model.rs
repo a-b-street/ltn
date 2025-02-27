@@ -411,6 +411,23 @@ impl MapModel {
         Ok(())
     }
 
+    pub fn delete_turn_restriction(
+        &mut self,
+        i: IntersectionID,
+        from: RoadID,
+        to: RoadID,
+    ) -> Result<()> {
+        let mut restrictions = self.turn_restrictions[i.0].clone();
+        restrictions.retain(|(a, b)| (*a, *b) != (from, to));
+
+        let cmd = Command::SetTurnRestrictions(i, restrictions);
+        let undo_cmd = self.do_edit(cmd);
+        self.undo_stack.push(undo_cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+        Ok(())
+    }
+
     pub fn toggle_travel_flow(&mut self, r: RoadID) {
         let dir = match self.travel_flows[&r] {
             TravelFlow::FORWARDS => TravelFlow::BACKWARDS,
