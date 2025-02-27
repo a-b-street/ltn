@@ -290,6 +290,15 @@ impl LTN {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = addTurnRestriction)]
+    pub fn add_turn_restriction(&mut self, from: usize, to: usize) -> Result<(), JsValue> {
+        self.map
+            .add_turn_restriction(RoadID(from), RoadID(to))
+            .map_err(err_to_js)?;
+        self.after_edit();
+        Ok(())
+    }
+
     #[wasm_bindgen(js_name = getTurnRestrictionTargets)]
     pub fn get_turn_restriction_targets_wasm(&self, road: usize) -> Result<String, JsValue> {
         Ok(

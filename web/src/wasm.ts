@@ -154,6 +154,10 @@ export class Backend {
     this.inner.toggleTravelFlow(road);
   }
 
+  addTurnRestriction(from_road: number, to_road: number) {
+    this.inner.addTurnRestriction(from_road, to_road);
+  }
+
   getTurnRestrictionTargets(
     road: number,
   ): FeatureCollection<LineString, { road: number; name: string }> {

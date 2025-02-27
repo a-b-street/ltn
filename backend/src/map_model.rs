@@ -380,6 +380,32 @@ impl MapModel {
         self.after_edited();
     }
 
+    pub fn add_turn_restriction(&mut self, from: RoadID, to: RoadID) -> Result<()> {
+        let from = self.get_r(from);
+        let to = self.get_r(to);
+        let i = if from.src_i == to.src_i || from.src_i == to.dst_i {
+            from.src_i
+        } else if from.dst_i == to.src_i || from.dst_i == to.dst_i {
+            from.dst_i
+        } else {
+            bail!("{} and {} don't share an intersection", from.id, to.id);
+        };
+
+        let mut restrictions = self.get_i(i).turn_restrictions.clone();
+        if restrictions.contains(&(from.id, to.id)) {
+            // The frontend should never do this, but just be idempotent
+            return Ok(());
+        }
+        restrictions.push((from.id, to.id));
+
+        let cmd = Command::SetTurnRestrictions(i, restrictions);
+        let undo_cmd = self.do_edit(cmd);
+        self.undo_stack.push(undo_cmd);
+        self.redo_queue.clear();
+        self.after_edited();
+        Ok(())
+    }
+
     pub fn toggle_travel_flow(&mut self, r: RoadID) {
         let dir = match self.travel_flows[&r] {
             TravelFlow::FORWARDS => TravelFlow::BACKWARDS,
@@ -422,6 +448,12 @@ impl MapModel {
                 let prev = self.travel_flows[&r];
                 self.travel_flows.insert(r, dir);
                 Command::SetTravelFlow(r, prev)
+            }
+            Command::SetTurnRestrictions(i, restrictions) => {
+                let i = self.intersections.get_mut(i.0).unwrap();
+                let prev = std::mem::take(&mut i.turn_restrictions);
+                i.turn_restrictions = restrictions;
+                Command::SetTurnRestrictions(i.id, prev)
             }
             Command::Multiple(list) => {
                 let undo_list = list.into_iter().map(|cmd| self.do_edit(cmd)).collect();
@@ -1024,6 +1056,7 @@ pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
     SetDiagonalFilter(IntersectionID, Option<DiagonalFilter>),
     SetTravelFlow(RoadID, TravelFlow),
+    SetTurnRestrictions(IntersectionID, Vec<(RoadID, RoadID)>),
     Multiple(Vec<Command>),
 }
 

@@ -154,7 +154,8 @@
   function createTurnRestriction(e: CustomEvent<LayerClickInfo>) {
     if (action.kind == "turn_restriction" && action.from_road_id) {
       let to = e.detail.features[0].properties!.road;
-      window.alert(`TODO: create TR from ${action.from_road_id} to ${to}`);
+      $backend!.addTurnRestriction(action.from_road_id, to);
+      $mutationCounter++;
     }
     action = { kind: "filter" };
   }
