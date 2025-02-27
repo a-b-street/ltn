@@ -503,8 +503,16 @@
           on:click={createTurnRestriction}
         >
           <Popup openOn="hover" let:props>
-            Create a turn restriction from {action.from_road_name} to {props.name ||
-              "unnamed road"}
+            <div>
+              <img
+                src={`${import.meta.env.BASE_URL}/filters/no_${props.kind}_turn.png`}
+                width="20"
+                alt="Add turn restriction"
+              />
+
+              Create a turn restriction from {action.from_road_name} to {props.name ||
+                "unnamed road"}
+            </div>
           </Popup>
         </LineLayer>
       </GeoJSON>

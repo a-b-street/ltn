@@ -113,8 +113,20 @@ impl MapModel {
                 }
 
                 let to = self.get_r(*r);
+
+                let abs_bearing_1 = euclidean_bearing(
+                    pt_near_intersection(0, i, from).into(),
+                    intersection.point.into(),
+                );
+                let abs_bearing_2 = euclidean_bearing(
+                    intersection.point.into(),
+                    pt_near_intersection(0, i, to).into(),
+                );
+                let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
+
                 let mut f = self.mercator.to_wgs84_gj(&to.linestring);
                 f.set_property("road", r.0);
+                f.set_property("kind", kind);
                 if let Some(name) = to.tags.get("name") {
                     f.set_property("name", name.clone());
                 }

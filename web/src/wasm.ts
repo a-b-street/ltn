@@ -77,12 +77,7 @@ export class Backend {
   renderTurnRestrictions(): FeatureCollection<
     Point,
     {
-      kind:
-        | "left"
-        | "right"
-        | "straight"
-        | "u_left_to_right"
-        | "u_right_to_left";
+      kind: TurnRestrictionKind;
       icon_angle: number;
       // GeoJSON geometries stringified
       from_geometry: string;
@@ -171,7 +166,10 @@ export class Backend {
 
   getTurnRestrictionTargets(
     road: number,
-  ): FeatureCollection<LineString, { road: number; name: string }> {
+  ): FeatureCollection<
+    LineString,
+    { road: number; name: string; kind: TurnRestrictionKind }
+  > {
     return JSON.parse(this.inner.getTurnRestrictionTargets(road));
   }
 
@@ -277,6 +275,13 @@ export class Backend {
     return gj;
   }
 }
+
+type TurnRestrictionKind =
+  | "left"
+  | "right"
+  | "straight"
+  | "u_left_to_right"
+  | "u_right_to_left";
 
 export type ZoneDemandProps = {
   name: string;
