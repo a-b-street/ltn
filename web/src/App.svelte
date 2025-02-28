@@ -6,7 +6,7 @@
   import ContextualLayers from "./context/ContextualLayers.svelte";
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import initLtn from "backend";
-  import type { Map } from "maplibre-gl";
+  import type { Map, StyleSpecification } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
   import {
@@ -91,6 +91,25 @@
     mapDiv.innerHTML = "";
     mapDiv.appendChild($mapContents);
   }
+
+  async function getStyle(
+    basemap: string,
+  ): Promise<StyleSpecification | string> {
+    if (basemap != "streets-v2") {
+      return `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
+    }
+
+    // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting. Remove it, and make the regular buildings layer display at high zoom instead.
+    let resp = await fetch(
+      `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`,
+    );
+    let json = await resp.json();
+
+    json.layers = json.layers.filter((l: any) => l.id != "Building 3D");
+    delete json.layers.find((l: any) => l.id == "Building")!.maxzoom;
+
+    return json;
+  }
 </script>
 
 <div class="pico">
@@ -117,114 +136,116 @@
     {/if}
   </div>
   <div slot="main" style="position: relative; width: 100%; height: 100%;">
-    <MapLibre
-      style={`https://api.maptiler.com/maps/${$maptilerBasemap}/style.json?key=${maptilerApiKey}`}
-      hash
-      bind:map
-      on:error={(e) => {
-        // @ts-expect-error ErrorEvent isn't exported
-        console.log(e.detail.error);
-      }}
-      images={[
-        {
-          id: "walk_cycle_only",
-          url: `${import.meta.env.BASE_URL}/filters/walk_cycle_only_icon.gif`,
-        },
-        {
-          id: "no_entry",
-          url: `${import.meta.env.BASE_URL}/filters/no_entry_icon.gif`,
-        },
-        {
-          id: "bus_gate",
-          url: `${import.meta.env.BASE_URL}/filters/bus_gate_icon.gif`,
-        },
-        {
-          id: "school_street",
-          url: `${import.meta.env.BASE_URL}/filters/school_street_icon.gif`,
-        },
-        {
-          id: "diagonal_filter",
-          url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
-        },
-        {
-          id: "no_straight_turn",
-          url: `${import.meta.env.BASE_URL}/filters/no_straight_turn.png`,
-        },
-        {
-          id: "no_left_turn",
-          url: `${import.meta.env.BASE_URL}/filters/no_left_turn.png`,
-        },
-        {
-          id: "no_right_turn",
-          url: `${import.meta.env.BASE_URL}/filters/no_right_turn.png`,
-        },
-        {
-          id: "no_u_left_to_right_turn",
-          url: `${import.meta.env.BASE_URL}/filters/no_u_left_to_right_turn.png`,
-        },
-        {
-          id: "no_u_right_to_left_turn",
-          url: `${import.meta.env.BASE_URL}/filters/no_u_right_to_left_turn.png`,
-        },
-        {
-          id: "oneway_arrow",
-          url: onewayArrowUrl,
-        },
-        {
-          id: "national_rail",
-          url: nationalRailUrl,
-        },
-      ]}
-    >
-      <NavigationControl />
-      <ScaleControl />
-      <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
-      {#if $projectName.startsWith("ltn_cnt/")}
-        <ContextualLayers />
-      {/if}
-
-      <div bind:this={mapDiv} />
-
-      {#if $mode.mode == "title"}
-        <TitleMode {wasmReady} firstLoad={$mode.firstLoad} />
-      {:else if $mode.mode == "new-project"}
-        <NewProjectMode />
-      {/if}
-      {#if $backend}
-        <GeoJSON data={$backend.getInvertedBoundary()}>
-          <FillLayer
-            {...layerId("boundary")}
-            paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
-          />
-        </GeoJSON>
-        {#if $mode.mode == "pick-neighbourhood"}
-          <PickNeighbourhoodMode />
-        {:else if $mode.mode == "set-boundary"}
-          <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
-        {:else if $mode.mode == "auto-boundaries"}
-          <AutoBoundariesMode />
-        {:else if $mode.mode == "neighbourhood"}
-          <NeighbourhoodMode />
-        {:else if $mode.mode == "view-shortcuts"}
-          <ViewShortcutsMode />
-        {:else if $mode.mode == "impact-one-destination"}
-          <ImpactOneDestinationMode />
-        {:else if $mode.mode == "route"}
-          <RouteMode prevMode={$mode.prevMode} />
-        {:else if $mode.mode == "predict-impact"}
-          <PredictImpactMode />
-        {:else if $mode.mode == "impact-detail"}
-          <ImpactDetailMode road={$mode.road} />
-        {:else if $mode.mode == "debug-neighbourhood"}
-          <DebugNeighbourhoodMode />
-        {:else if $mode.mode == "debug-intersections"}
-          <DebugIntersectionsMode />
-        {:else if $mode.mode == "debug-demand"}
-          <DebugDemandMode />
+    {#await getStyle($maptilerBasemap) then style}
+      <MapLibre
+        {style}
+        hash
+        bind:map
+        on:error={(e) => {
+          // @ts-expect-error ErrorEvent isn't exported
+          console.log(e.detail.error);
+        }}
+        images={[
+          {
+            id: "walk_cycle_only",
+            url: `${import.meta.env.BASE_URL}/filters/walk_cycle_only_icon.gif`,
+          },
+          {
+            id: "no_entry",
+            url: `${import.meta.env.BASE_URL}/filters/no_entry_icon.gif`,
+          },
+          {
+            id: "bus_gate",
+            url: `${import.meta.env.BASE_URL}/filters/bus_gate_icon.gif`,
+          },
+          {
+            id: "school_street",
+            url: `${import.meta.env.BASE_URL}/filters/school_street_icon.gif`,
+          },
+          {
+            id: "diagonal_filter",
+            url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
+          },
+          {
+            id: "no_straight_turn",
+            url: `${import.meta.env.BASE_URL}/filters/no_straight_turn.png`,
+          },
+          {
+            id: "no_left_turn",
+            url: `${import.meta.env.BASE_URL}/filters/no_left_turn.png`,
+          },
+          {
+            id: "no_right_turn",
+            url: `${import.meta.env.BASE_URL}/filters/no_right_turn.png`,
+          },
+          {
+            id: "no_u_left_to_right_turn",
+            url: `${import.meta.env.BASE_URL}/filters/no_u_left_to_right_turn.png`,
+          },
+          {
+            id: "no_u_right_to_left_turn",
+            url: `${import.meta.env.BASE_URL}/filters/no_u_right_to_left_turn.png`,
+          },
+          {
+            id: "oneway_arrow",
+            url: onewayArrowUrl,
+          },
+          {
+            id: "national_rail",
+            url: nationalRailUrl,
+          },
+        ]}
+      >
+        <NavigationControl />
+        <ScaleControl />
+        <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
+        {#if $projectName.startsWith("ltn_cnt/")}
+          <ContextualLayers />
         {/if}
-      {/if}
-      <DisableInteractiveLayers />
-    </MapLibre>
+
+        <div bind:this={mapDiv} />
+
+        {#if $mode.mode == "title"}
+          <TitleMode {wasmReady} firstLoad={$mode.firstLoad} />
+        {:else if $mode.mode == "new-project"}
+          <NewProjectMode />
+        {/if}
+        {#if $backend}
+          <GeoJSON data={$backend.getInvertedBoundary()}>
+            <FillLayer
+              {...layerId("boundary")}
+              paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
+            />
+          </GeoJSON>
+          {#if $mode.mode == "pick-neighbourhood"}
+            <PickNeighbourhoodMode />
+          {:else if $mode.mode == "set-boundary"}
+            <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
+          {:else if $mode.mode == "auto-boundaries"}
+            <AutoBoundariesMode />
+          {:else if $mode.mode == "neighbourhood"}
+            <NeighbourhoodMode />
+          {:else if $mode.mode == "view-shortcuts"}
+            <ViewShortcutsMode />
+          {:else if $mode.mode == "impact-one-destination"}
+            <ImpactOneDestinationMode />
+          {:else if $mode.mode == "route"}
+            <RouteMode prevMode={$mode.prevMode} />
+          {:else if $mode.mode == "predict-impact"}
+            <PredictImpactMode />
+          {:else if $mode.mode == "impact-detail"}
+            <ImpactDetailMode road={$mode.road} />
+          {:else if $mode.mode == "debug-neighbourhood"}
+            <DebugNeighbourhoodMode />
+          {:else if $mode.mode == "debug-intersections"}
+            <DebugIntersectionsMode />
+          {:else if $mode.mode == "debug-demand"}
+            <DebugDemandMode />
+          {/if}
+        {/if}
+        <DisableInteractiveLayers />
+      </MapLibre>
+    {/await}
   </div>
 </Layout>
 
