@@ -1,3 +1,4 @@
+use anyhow::Result;
 use geo::{Euclidean, Length, Line, LineInterpolatePoint, Point, Polygon};
 use geojson::GeoJson;
 use itertools::Itertools;
@@ -121,6 +122,48 @@ impl MapModel {
         }
         GeoJson::from(features)
     }
+
+    /// Find (intersection, from, to) to represent a turn restriction
+    pub fn find_turn_restriction(
+        &self,
+        pt: Point,
+        bearing1: f64,
+        bearing2: f64,
+    ) -> Result<(IntersectionID, RoadID, RoadID)> {
+        let intersection = match self.closest_intersection.nearest_neighbor(&pt) {
+            Some(obj) => self.get_i(obj.data),
+            None => bail!("No intersection near point"),
+        };
+        // For every road attached to this intersection, calculate its absolute bearing as a (from,
+        // to) road
+        let bearings: Vec<(RoadID, f64, f64)> = intersection
+            .roads
+            .iter()
+            .map(|r| {
+                let road = self.get_r(*r);
+                let road_pt = self.get_r(*r).pt_near_intersection(0, intersection.id);
+                (
+                    road.id,
+                    euclidean_bearing(road_pt.into(), intersection.point.into()),
+                    euclidean_bearing(intersection.point.into(), road_pt.into()),
+                )
+            })
+            .collect();
+
+        // Find the best match for each bearing
+        let (from, _, _) = bearings
+            .iter()
+            .min_by_key(|(_, b1, _)| smallest_rotation(bearing1, *b1) as usize)
+            .unwrap();
+        let (to, _, _) = bearings
+            .iter()
+            .min_by_key(|(_, _, b2)| smallest_rotation(bearing2, *b2) as usize)
+            .unwrap();
+        if from == to {
+            bail!("Bearings {bearing1} and {bearing2} both matched to the same road");
+        }
+        Ok((intersection.id, *from, *to))
+    }
 }
 
 fn render_arrow(i: IntersectionID, offset1: usize, road1: &Road, road2: &Road) -> Polygon {
@@ -212,6 +255,13 @@ fn classify_relative_bearing(abs_bearing1: f64, abs_bearing2: f64) -> &'static s
     }
 }
 
+// Given two angles in [0, 360), return the smallest rotation between them
+fn smallest_rotation(b1: f64, b2: f64) -> f64 {
+    let rot1 = (b1 - b2).abs();
+    let rot2 = 360.0 - rot1;
+    rot1.min(rot2)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,5 +280,14 @@ mod tests {
 
         assert_eq!("right", classify_relative_bearing(0., 90.));
         assert_eq!("right", classify_relative_bearing(180., 270.));
+    }
+
+    #[test]
+    fn test_smallest_rotation() {
+        assert_eq!(0., smallest_rotation(30., 30.));
+        assert_eq!(10., smallest_rotation(30., 40.));
+        assert_eq!(10., smallest_rotation(40., 30.));
+        assert_eq!(10., smallest_rotation(5., 355.));
+        assert_eq!(10., smallest_rotation(355., 5.));
     }
 }

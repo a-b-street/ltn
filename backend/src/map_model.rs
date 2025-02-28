@@ -640,6 +640,7 @@ impl MapModel {
         // Clear previous state
         self.boundaries.clear();
         self.modal_filters = self.original_modal_filters.clone();
+        self.turn_restrictions = self.original_turn_restrictions.clone();
         for (r, dir) in &mut self.travel_flows {
             *dir = TravelFlow::from_osm(&self.roads[r.0].tags);
         }
@@ -704,6 +705,24 @@ impl MapModel {
                     self.mercator.to_mercator_in_place(&mut linestring);
                     let r = self.most_similar_linestring(&linestring);
                     cmds.push(Command::SetTravelFlow(r, dir));
+                }
+                "turn_restriction" => {
+                    let bearing1 = get_f64_prop(&f, "bearing1")?;
+                    let bearing2 = get_f64_prop(&f, "bearing2")?;
+                    let gj_pt: Point = f.geometry.unwrap().try_into()?;
+                    let pt = self.mercator.pt_to_mercator(gj_pt.into());
+                    let (i, from, to) =
+                        self.find_turn_restriction(pt.into(), bearing1, bearing2)?;
+                    self.turn_restrictions[i.0].push((from, to));
+                }
+                "deleted_existing_turn_restriction" => {
+                    let bearing1 = get_f64_prop(&f, "bearing1")?;
+                    let bearing2 = get_f64_prop(&f, "bearing2")?;
+                    let gj_pt: Point = f.geometry.unwrap().try_into()?;
+                    let pt = self.mercator.pt_to_mercator(gj_pt.into());
+                    let (i, from, to) =
+                        self.find_turn_restriction(pt.into(), bearing1, bearing2)?;
+                    self.turn_restrictions[i.0].retain(|(a, b)| (*a, *b) != (from, to));
                 }
                 "boundary" => {
                     let name = get_str_prop(&f, "name")?.to_string();
@@ -1134,4 +1153,14 @@ fn get_str_prop<'a>(f: &'a Feature, key: &str) -> Result<&'a str> {
         bail!("Feature's {key} property isn't a string");
     };
     Ok(string)
+}
+
+fn get_f64_prop<'a>(f: &'a Feature, key: &str) -> Result<f64> {
+    let Some(value) = f.property(key) else {
+        bail!("Feature doesn't have a {key} property");
+    };
+    let Some(n) = value.as_f64() else {
+        bail!("Feature's {key} property isn't a f64");
+    };
+    Ok(n)
 }
