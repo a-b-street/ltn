@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::{
     geo_helpers::{euclidean_bearing, make_arrow, thicken_line},
-    IntersectionID, MapModel, Road, RoadID,
+    Intersection, IntersectionID, MapModel, Road, RoadID,
 };
 
 impl MapModel {
@@ -39,18 +39,11 @@ impl MapModel {
 
                     let to = self.get_r(to);
 
-                    // TODO Calculate the two absolute bearings in an easier way? Why rely on
-                    // pt_near_intersection?
-                    let abs_bearing_1 = euclidean_bearing(
-                        pt_near_intersection(0, i.id, from).into(),
-                        i.point.into(),
-                    );
-                    let abs_bearing_2 =
-                        euclidean_bearing(i.point.into(), pt_near_intersection(0, i.id, to).into());
+                    let (abs_bearing_1, abs_bearing_2) = i.bearing_of_roads(from, to);
                     let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
 
                     // Place at the end of the 'from' road
-                    let pt = pt_near_intersection(offset, i.id, from);
+                    let pt = from.pt_near_intersection(offset, i.id);
 
                     // Rotate the icon based on the 'from' road's angle only, but make sure that road
                     // points at the intersection
@@ -114,14 +107,7 @@ impl MapModel {
 
                 let to = self.get_r(*r);
 
-                let abs_bearing_1 = euclidean_bearing(
-                    pt_near_intersection(0, i, from).into(),
-                    intersection.point.into(),
-                );
-                let abs_bearing_2 = euclidean_bearing(
-                    intersection.point.into(),
-                    pt_near_intersection(0, i, to).into(),
-                );
+                let (abs_bearing_1, abs_bearing_2) = intersection.bearing_of_roads(from, to);
                 let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
 
                 let mut f = self.mercator.to_wgs84_gj(&to.linestring);
@@ -139,31 +125,52 @@ impl MapModel {
 
 fn render_arrow(i: IntersectionID, offset1: usize, road1: &Road, road2: &Road) -> Polygon {
     let line = Line::new(
-        pt_near_intersection(offset1, i, road1),
-        pt_near_intersection(0, i, road2),
+        road1.pt_near_intersection(offset1, i),
+        road2.pt_near_intersection(0, i),
     );
     let thickness = 2.0;
     let double_ended = false;
     make_arrow(line, thickness, double_ended).unwrap_or_else(|| thicken_line(line, thickness))
 }
 
-fn pt_near_intersection(offset: usize, i: IntersectionID, road: &Road) -> Point {
-    // If the road is long enough, offset from the intersection this much
-    let distance_away = 5.0 * (1 + offset) as f64;
-    let len = Euclidean.length(&road.linestring);
-
-    if len > distance_away {
-        let pct = if road.src_i == i {
-            distance_away / len
-        } else {
-            1.0 - (distance_away / len)
-        };
-        return road.linestring.line_interpolate_point(pct).unwrap();
+impl Intersection {
+    /// Returns the absolute bearing of (road1 pointing to the intersection, road2 pointing away
+    /// from the intersection)
+    pub fn bearing_of_roads(&self, road1: &Road, road2: &Road) -> (f64, f64) {
+        // TODO Calculate the two absolute bearings in an easier way? Why rely on
+        // pt_near_intersection?
+        (
+            euclidean_bearing(
+                road1.pt_near_intersection(0, self.id).into(),
+                self.point.into(),
+            ),
+            euclidean_bearing(
+                self.point.into(),
+                road2.pt_near_intersection(0, self.id).into(),
+            ),
+        )
     }
+}
 
-    // If not, just take the other endpoint
-    let pct = if road.src_i == i { 1.0 } else { 0.0 };
-    road.linestring.line_interpolate_point(pct).unwrap()
+impl Road {
+    fn pt_near_intersection(&self, offset: usize, i: IntersectionID) -> Point {
+        // If the road is long enough, offset from the intersection this much
+        let distance_away = 5.0 * (1 + offset) as f64;
+        let len = Euclidean.length(&self.linestring);
+
+        if len > distance_away {
+            let pct = if self.src_i == i {
+                distance_away / len
+            } else {
+                1.0 - (distance_away / len)
+            };
+            return self.linestring.line_interpolate_point(pct).unwrap();
+        }
+
+        // If not, just take the other endpoint
+        let pct = if self.src_i == i { 1.0 } else { 0.0 };
+        self.linestring.line_interpolate_point(pct).unwrap()
+    }
 }
 
 /// ```ignore

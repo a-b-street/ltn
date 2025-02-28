@@ -576,6 +576,43 @@ impl MapModel {
             }
         }
 
+        // Edited turn restrictions only
+        for (idx, turn_restrictions) in self.turn_restrictions.iter().enumerate() {
+            for (from, to) in turn_restrictions {
+                if self.original_turn_restrictions[idx].contains(&(*from, *to)) {
+                    continue;
+                }
+
+                let intersection = self.get_i(IntersectionID(idx));
+                let mut f = self.mercator.to_wgs84_gj(&intersection.point);
+                f.set_property("kind", "turn_restriction");
+                // Identify the two roads by their absolute bearings
+                let (abs_bearing_1, abs_bearing_2) =
+                    intersection.bearing_of_roads(self.get_r(*from), self.get_r(*to));
+                f.set_property("bearing1", abs_bearing_1.round());
+                f.set_property("bearing2", abs_bearing_2.round());
+                gj.features.push(f);
+            }
+        }
+
+        // Look for any basemap turn restrictions that were deleted
+        for (idx, turn_restrictions) in self.original_turn_restrictions.iter().enumerate() {
+            for (from, to) in turn_restrictions {
+                if self.turn_restrictions[idx].contains(&(*from, *to)) {
+                    continue;
+                }
+
+                let intersection = self.get_i(IntersectionID(idx));
+                let mut f = self.mercator.to_wgs84_gj(&intersection.point);
+                f.set_property("kind", "deleted_existing_turn_restriction");
+                let (abs_bearing_1, abs_bearing_2) =
+                    intersection.bearing_of_roads(self.get_r(*from), self.get_r(*to));
+                f.set_property("bearing1", abs_bearing_1.round());
+                f.set_property("bearing2", abs_bearing_2.round());
+                gj.features.push(f);
+            }
+        }
+
         for neighbourhood_boundary in self.boundaries.values() {
             // we don't save the derived "stats" just the boundary definition
             gj.features
