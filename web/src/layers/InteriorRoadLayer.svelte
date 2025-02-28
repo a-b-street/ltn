@@ -93,6 +93,9 @@
     "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
+  layout={{
+    "line-sort-key": ["get", "shortcuts"],
+  }}
   on:click={(e) =>
     interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
   manageHoverState={interactive}
