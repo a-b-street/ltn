@@ -22,13 +22,7 @@
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
   import { PrioritizationSelect, type Prioritization } from "./prioritization";
-  import {
-    autosave,
-    backend,
-    editPerimeterRoads,
-    mode,
-    projectName,
-  } from "./stores";
+  import { autosave, backend, mode, projectName } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
 
   // Note we do this to trigger a refresh when loading stuff
@@ -40,7 +34,7 @@
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
   function pickNeighbourhood(name: string) {
-    $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+    $backend!.setCurrentNeighbourhood(name);
     $mode = { mode: "neighbourhood" };
   }
 

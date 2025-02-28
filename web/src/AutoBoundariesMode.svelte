@@ -24,13 +24,7 @@
   } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { PrioritizationSelect, type Prioritization } from "./prioritization";
-  import {
-    autosave,
-    backend,
-    editPerimeterRoads,
-    mode,
-    projectName,
-  } from "./stores";
+  import { autosave, backend, mode, projectName } from "./stores";
 
   let gj = $backend!.renderAutoBoundaries();
   let minArea = 0;
@@ -56,7 +50,7 @@
       };
       $backend!.setNeighbourhoodBoundary(name, feature);
       autosave();
-      $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+      $backend!.setCurrentNeighbourhood(name);
       $mode = {
         mode: "neighbourhood",
       };

@@ -5,7 +5,7 @@
   import { gjPosition, Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
-  import { autosave, backend, editPerimeterRoads, map, mode } from "./stores";
+  import { autosave, backend, map, mode } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;
@@ -38,7 +38,7 @@
         let feature = calculateArea($waypoints);
         $backend!.setNeighbourhoodBoundary(name, feature);
         autosave();
-        $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+        $backend!.setCurrentNeighbourhood(name);
         $mode = {
           mode: "neighbourhood",
         };

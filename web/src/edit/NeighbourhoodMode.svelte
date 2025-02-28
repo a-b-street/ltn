@@ -23,7 +23,6 @@
     animateShortcuts,
     autosave,
     backend,
-    editPerimeterRoads,
     filterType,
     map,
     mode,
@@ -77,14 +76,6 @@
     allShortcuts = $backend!.getAllShortcuts();
 
     autosave();
-  }
-
-  function recalculateNeighbourhoodDefinition() {
-    $backend!.setCurrentNeighbourhood(
-      boundary!.properties.name,
-      $editPerimeterRoads,
-    );
-    $mutationCounter++;
   }
 
   function onClickLine(f: Feature, pt: LngLat) {
@@ -284,15 +275,6 @@
     <label>
       <input type="checkbox" bind:checked={$animateShortcuts} />
       Animate shortcuts
-    </label>
-
-    <label>
-      <input
-        type="checkbox"
-        bind:checked={$editPerimeterRoads}
-        on:change={recalculateNeighbourhoodDefinition}
-      />
-      Include perimeter roads
     </label>
 
     <div style="border: 1px solid black; padding: 4px">

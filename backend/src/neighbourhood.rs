@@ -65,9 +65,6 @@ pub struct Neighbourhood {
     pub perimeter_roads: BTreeSet<RoadID>,
     pub editable_intersections: BTreeSet<IntersectionID>,
     pub border_intersections: BTreeSet<IntersectionID>,
-    /// If true, shortcuts across perimeter roads will be calculated, and the user can edit these
-    /// roads.
-    pub edit_perimeter_roads: bool,
     pub boundary: NeighbourhoodBoundary,
     // Updated after mutations
     derived: Option<DerivedNeighbourhoodState>,
@@ -134,11 +131,7 @@ impl NeighbourhoodBoundary {
 }
 
 impl Neighbourhood {
-    pub fn new(
-        map: &MapModel,
-        boundary: NeighbourhoodBoundary,
-        edit_perimeter_roads: bool,
-    ) -> Result<Self> {
+    pub fn new(map: &MapModel, boundary: NeighbourhoodBoundary) -> Result<Self> {
         let t1 = Instant::now();
         let bbox = buffer_aabb(aabb(boundary.geometry()), 50.0);
 
@@ -219,7 +212,6 @@ impl Neighbourhood {
             boundary,
             editable_intersections,
             border_intersections,
-            edit_perimeter_roads,
             derived: None,
         };
         n.after_edit(map);
@@ -253,15 +245,11 @@ impl Neighbourhood {
 
     // PERF: return iter
     pub fn editable_roads(&self) -> Vec<RoadID> {
-        if self.edit_perimeter_roads {
-            self.interior_roads
-                .iter()
-                .chain(self.perimeter_roads.iter())
-                .cloned()
-                .collect()
-        } else {
-            self.interior_roads.iter().cloned().collect()
-        }
+        self.interior_roads
+            .iter()
+            .chain(self.perimeter_roads.iter())
+            .cloned()
+            .collect()
     }
 
     pub fn router_input<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
@@ -273,9 +261,9 @@ impl Neighbourhood {
         impl RouterInput for NeighbourhoodRouterInput<'_> {
             fn roads_iter(&self) -> impl Iterator<Item = &Road> {
                 self.neighbourhood
-                    .editable_roads()
-                    .into_iter()
-                    .map(|r| self.map.get_r(r))
+                    .interior_roads
+                    .iter()
+                    .map(|r| self.map.get_r(*r))
             }
 
             fn get_r(&self, r: RoadID) -> &Road {
@@ -314,14 +302,8 @@ impl Neighbourhood {
         {
             let mut neighbourhood_mask = self.boundary.clone();
             // The boundary falls directly on the perimeter center line, so it's ambiguous if it
-            // includes the perimeter or not. Let's grow or shrink the boundary accordingly:
-            let buffer_offset = if self.edit_perimeter_roads {
-                10.0
-            } else {
-                // There are often short segments just inside the interior, e.g. parking lot driveways
-                // So we don't want to encroach too far with the masking.
-                -5.0
-            };
+            // includes the perimeter or not. Grow to show the perimeter is editable.
+            let buffer_offset = 10.0;
             let mut buffered = neighbourhood_mask.definition.geometry.buffer_with_style(
                 OutlineStyle::new(buffer_offset).line_join(LineJoin::Round(0.1)),
             );
@@ -341,7 +323,9 @@ impl Neighbourhood {
         for r in self.editable_roads() {
             let road = map.get_r(r);
             let mut f = road.to_gj(&map.mercator);
+            // TODO hmm
             f.set_property("kind", "interior_road");
+            // TODO hmm
             f.set_property(
                 "shortcuts",
                 derived
@@ -362,6 +346,7 @@ impl Neighbourhood {
                     || map.modal_filters.get(&r) != map.original_modal_filters.get(&r),
             );
             f.set_property("road", r.0);
+            // TODO hmm
             if let Some(color) = derived.render_cells.colors_per_road.get(&r) {
                 f.set_property("cell_color", *color);
             }
