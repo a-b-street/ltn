@@ -453,7 +453,7 @@ impl LTN {
                     let mut f = self.map.mercator.to_wgs84_gj(&i.point);
                     f.set_property(
                         "has_turn_restrictions",
-                        !self.map.turn_restrictions[i.id.00].is_empty(),
+                        !self.map.turn_restrictions[i.id.0].is_empty(),
                     );
                     f.set_property("intersection_id", i.id.0);
                     f.set_property("osm", i.node.to_string());
