@@ -325,49 +325,50 @@
       </mark>
     {/if}
 
-    <div style="display: flex; justify-content: space-between">
+    <div class="tool-palette">
       <button
         on:click={() => (action = { kind: "filter" })}
         disabled={action.kind == "filter"}
+        class:active={action.kind == "filter"}
+        class:outline={action.kind != "filter"}
         data-tooltip="Add a modal filter (hotkey 1)"
-        style:width="25%"
       >
         <img
           src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
           alt="Add a modal filter"
-          style:width="100%"
         />
       </button>
       <button
         on:click={() => (action = { kind: "freehand-filters" })}
         disabled={action.kind == "freehand-filters"}
+        class:active={action.kind == "freehand-filters"}
+        class:outline={action.kind != "freehand-filters"}
         data-tooltip="Add many modal filters along a line (hotkey 2)"
-        style:width="25%"
       >
         <img
           src={`${import.meta.env.BASE_URL}/filters/select_freehand.png`}
           alt="Add many modal filters along a line"
-          style:width="100%"
         />
       </button>
       <button
         on:click={() => (action = { kind: "oneway" })}
         disabled={action.kind == "oneway"}
+        class:active={action.kind == "oneway"}
+        class:outline={action.kind != "oneway"}
         data-tooltip="Reverse directions (hotkey 3)"
-        style:width="25%"
       >
-        <img src={onewayArrowUrl} alt="Reverse directions" style:width="100%" />
+        <img src={onewayArrowUrl} alt="Reverse directions" />
       </button>
       <button
         on:click={() => (action = startTurnRestrictionAction())}
         disabled={action.kind == "turn_restriction"}
+        class:active={action.kind == "turn_restriction"}
+        class:outline={action.kind != "turn_restriction"}
         data-tooltip="Restrict turns (hotkey 4)"
-        style:width="25%"
       >
         <img
           src={`${import.meta.env.BASE_URL}/filters/no_right_turn.png`}
           alt="Restrict turns"
-          style:width="100%"
         />
       </button>
     </div>
@@ -528,3 +529,28 @@
     {/if}
   </div>
 </SplitComponent>
+
+<style>
+  .tool-palette {
+    height: 60px;
+    display: flex;
+    justify-content: left;
+    gap: 8px;
+  }
+  .tool-palette button {
+    padding: 8px;
+    margin: 0;
+    height: 100%;
+    aspect-ratio: 1;
+  }
+  .tool-palette button img {
+    aspect-ratio: 1;
+    width: 100%;
+    object-fit: contain;
+  }
+  .tool-palette button.active:disabled {
+    border: 2px solid black;
+    /* picocss override */
+    opacity: 1;
+  }
+</style>
