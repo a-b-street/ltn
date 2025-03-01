@@ -1,13 +1,20 @@
 <script lang="ts">
-  import type { Feature, LineString } from "geojson";
-  import type { LngLat } from "maplibre-gl";
+  import type { Feature, FeatureCollection, LineString } from "geojson";
+  import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
-  import { type LayerClickInfo } from "svelte-maplibre";
+  import {
+    GeoJSON,
+    hoverStateFilter,
+    LineLayer,
+    MapEvents,
+    type LayerClickInfo,
+  } from "svelte-maplibre";
   import { notNull, SequentialLegend } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
+  import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import onewayArrowUrl from "../../assets/arrow.png?url";
   import AnimatePaths from "../AnimatePaths.svelte";
-  import { HelpButton, Link } from "../common";
+  import { HelpButton, layerId, Link, roadLineWidth } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
   import type { Intersection } from "../common/Intersection";
   import {
@@ -39,10 +46,33 @@
 
   // Caller is responsible for doing backend.setCurrentNeighbourhood
 
-  type Action = "filter" | "freehand-filters" | "oneway";
-  let action: Action = "filter";
+  type Action =
+    | { kind: "filter" }
+    | { kind: "freehand-filters" }
+    | { kind: "oneway" }
+    | {
+        kind: "turn_restriction";
+        from_road_id: number | null;
+        from_road_name: string;
+        possible_targets: FeatureCollection<
+          LineString,
+          { road: number; name: string }
+        >;
+      };
+  function startTurnRestrictionAction(): Action {
+    return {
+      kind: "turn_restriction",
+      from_road_id: null,
+      from_road_name: "",
+      possible_targets: emptyGeojson() as FeatureCollection<
+        LineString,
+        { road: number; name: string }
+      >,
+    };
+  }
+  let action: Action = { kind: "filter" };
 
-  $: if (action == "oneway") {
+  $: if (action.kind == "oneway") {
     $map!.doubleClickZoom.disable();
   } else {
     $map!.doubleClickZoom.enable();
@@ -88,26 +118,70 @@
   }
 
   function onClickLine(f: Feature, pt: LngLat) {
-    if (action == "filter") {
+    if (action.kind == "filter") {
       $backend!.addModalFilter(pt, $filterType);
       $mutationCounter++;
-    } else if (action == "oneway") {
+    } else if (action.kind == "oneway") {
       $backend!.toggleTravelFlow(f.properties!.road);
       $mutationCounter++;
+    } else if (action.kind == "turn_restriction") {
+      action.from_road_id = f.properties!.road;
+      action.from_road_name = f.properties!.name || "unnamed road";
+      action.possible_targets = $backend!.getTurnRestrictionTargets(
+        f.properties!.road,
+      );
+      // TODO The blue hover state gets stuck
     }
   }
 
-  function deleteFilter(e: CustomEvent<LayerClickInfo>) {
+  function onMapClick(e: CustomEvent<MapMouseEvent>) {
+    if (action.kind != "turn_restriction") {
+      return;
+    }
+
+    // If we click a blank area, reset some state. Not sure why, but clicking
+    // layers doesn't always prevent a click on the map itself.
+    if (
+      $map!.queryRenderedFeatures(e.detail.point, {
+        layers: ["interior-roads", "turn-restriction-targets"],
+      }).length > 0
+    ) {
+      return;
+    }
+
+    action = startTurnRestrictionAction();
+  }
+
+  function createTurnRestriction(e: CustomEvent<LayerClickInfo>) {
+    if (action.kind == "turn_restriction" && action.from_road_id != null) {
+      let to = e.detail.features[0].properties!.road;
+      $backend!.addTurnRestriction(action.from_road_id, to);
+      $mutationCounter++;
+    }
+    action = startTurnRestrictionAction();
+  }
+
+  function deleteModalFilter(e: CustomEvent<LayerClickInfo>) {
     let f = e.detail.features[0];
     $backend!.deleteModalFilter(f.properties!.road);
     $mutationCounter++;
   }
 
+  function deleteTurnRestriction(e: CustomEvent<LayerClickInfo>) {
+    let f = e.detail.features[0];
+    $backend!.deleteTurnRestriction(
+      f.properties!.intersection,
+      f.properties!.from_road,
+      f.properties!.to_road,
+    );
+    $mutationCounter++;
+  }
+
   function onClickIntersection(intersection: Intersection) {
-    if (action != "filter") {
+    if (action.kind != "filter") {
       console.assert(
         false,
-        `this shouldn't happen - intersections should only be clickable when in 'filter' mode, not ${action}`,
+        `this shouldn't happen - intersections should only be clickable when in 'filter' mode, not ${action.kind}`,
       );
       return;
     }
@@ -136,13 +210,16 @@
       redo();
     }
     if (e.key == "1") {
-      action = "filter";
+      action = { kind: "filter" };
     }
     if (e.key == "2") {
-      action = "freehand-filters";
+      action = { kind: "freehand-filters" };
     }
     if (e.key == "3") {
-      action = "oneway";
+      action = { kind: "oneway" };
+    }
+    if (e.key == "4") {
+      action = startTurnRestrictionAction();
     }
   }
   function undo() {
@@ -161,7 +238,7 @@
       $mutationCounter++;
     }
 
-    action = "filter";
+    action = { kind: "filter" };
   }
 </script>
 
@@ -248,36 +325,54 @@
       </mark>
     {/if}
 
-    <div style="display: flex; justify-content: space-between;">
+    <div style="display: flex; justify-content: space-between">
       <button
-        on:click={() => (action = "filter")}
-        disabled={action == "filter"}
-        data-tooltip="hotkey 1"
+        on:click={() => (action = { kind: "filter" })}
+        disabled={action.kind == "filter"}
+        data-tooltip="Add a modal filter (hotkey 1)"
+        style:width="25%"
       >
         <img
           src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
-          width="30"
           alt="Add a modal filter"
+          style:width="100%"
         />
-        Add a modal filter
       </button>
       <button
-        on:click={() => (action = "freehand-filters")}
-        disabled={action == "freehand-filters"}
-        data-tooltip="hotkey 2"
+        on:click={() => (action = { kind: "freehand-filters" })}
+        disabled={action.kind == "freehand-filters"}
+        data-tooltip="Add many modal filters along a line (hotkey 2)"
+        style:width="25%"
       >
-        Add many modal filters along line
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/select_freehand.png`}
+          alt="Add many modal filters along a line"
+          style:width="100%"
+        />
       </button>
       <button
-        on:click={() => (action = "oneway")}
-        disabled={action == "oneway"}
-        data-tooltip="hotkey 3"
+        on:click={() => (action = { kind: "oneway" })}
+        disabled={action.kind == "oneway"}
+        data-tooltip="Reverse directions (hotkey 3)"
+        style:width="25%"
       >
-        Reverse directions
+        <img src={onewayArrowUrl} alt="Reverse directions" style:width="100%" />
+      </button>
+      <button
+        on:click={() => (action = startTurnRestrictionAction())}
+        disabled={action.kind == "turn_restriction"}
+        data-tooltip="Restrict turns (hotkey 4)"
+        style:width="25%"
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.png`}
+          alt="Restrict turns"
+          style:width="100%"
+        />
       </button>
     </div>
 
-    <button on:click={() => (settingFilterType = true)}>
+    <button class="outline" on:click={() => (settingFilterType = true)}>
       Change modal filter type
     </button>
 
@@ -311,14 +406,24 @@
     </div>
 
     <div style="display: flex; justify-content: space-between;">
-      <button disabled={undoLength == 0} on:click={undo} data-tooltip="Ctrl+Z">
+      <button
+        class="outline"
+        disabled={undoLength == 0}
+        on:click={undo}
+        data-tooltip="Ctrl+Z"
+      >
         {#if undoLength == 0}
           Undo
         {:else}
           Undo ({undoLength})
         {/if}
       </button>
-      <button disabled={redoLength == 0} on:click={redo} data-tooltip="Ctrl+Y">
+      <button
+        class="outline"
+        disabled={redoLength == 0}
+        on:click={redo}
+        data-tooltip="Ctrl+Y"
+      >
         {#if redoLength == 0}
           Redo
         {:else}
@@ -331,13 +436,17 @@
   </div>
 
   <div slot="map">
+    <MapEvents on:click={onMapClick} />
+
     <RenderNeighbourhood input={gj}>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
 
       <InteriorRoadLayer
-        interactive={action == "filter" || action == "oneway"}
+        interactive={action.kind == "filter" ||
+          action.kind == "oneway" ||
+          (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
       >
         <div slot="line-popup">
@@ -346,7 +455,7 @@
               {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
               ({Math.round(props.speed_mph)} mph)
             </p>
-            {#if action == "filter"}
+            {#if action.kind == "filter"}
               <div>
                 <img
                   src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
@@ -355,14 +464,16 @@
                 />
                 Click to add modal filter
               </div>
-            {:else}
+            {:else if action.kind == "oneway"}
               <p>Click to change direction</p>
+            {:else if action.kind == "turn_restriction"}
+              <p>Click to create a turn restriction from here</p>
             {/if}
           </Popup>
         </div>
       </InteriorRoadLayer>
       <EditableIntersectionLayer
-        interactive={action == "filter"}
+        interactive={action.kind == "filter"}
         neighbourhood={gj}
         {onClickIntersection}
       />
@@ -372,12 +483,48 @@
       <AnimatePaths paths={allShortcuts} />
     {/if}
 
-    <ModalFilterLayer on:click={deleteFilter}>
-      <Popup openOn="hover">Click to delete</Popup>
+    <ModalFilterLayer
+      onClickModalFilter={deleteModalFilter}
+      onClickTurnRestriction={deleteTurnRestriction}
+    >
+      <div slot="modal-filter">
+        <Popup openOn="hover">Click to delete</Popup>
+      </div>
+      <div slot="turn-restriction">
+        <Popup openOn="hover">Click to delete</Popup>
+      </div>
     </ModalFilterLayer>
 
-    {#if action == "freehand-filters"}
+    {#if action.kind == "freehand-filters"}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
+    {/if}
+
+    {#if action.kind == "turn_restriction"}
+      <GeoJSON data={action.possible_targets || emptyGeojson()} generateId>
+        <LineLayer
+          {...layerId("turn-restriction-targets")}
+          manageHoverState
+          paint={{
+            "line-color": "yellow",
+            "line-opacity": hoverStateFilter(0.5, 1.0),
+            "line-width": roadLineWidth(1),
+          }}
+          on:click={createTurnRestriction}
+        >
+          <Popup openOn="hover" let:props>
+            <div>
+              <img
+                src={`${import.meta.env.BASE_URL}/filters/no_${props.kind}_turn.png`}
+                width="20"
+                alt="Add turn restriction"
+              />
+
+              Create a turn restriction from {action.from_road_name} to {props.name ||
+                "unnamed road"}
+            </div>
+          </Popup>
+        </LineLayer>
+      </GeoJSON>
     {/if}
   </div>
 </SplitComponent>

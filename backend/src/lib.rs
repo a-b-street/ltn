@@ -290,6 +290,37 @@ impl LTN {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = addTurnRestriction)]
+    pub fn add_turn_restriction(&mut self, from: usize, to: usize) -> Result<(), JsValue> {
+        self.map
+            .add_turn_restriction(RoadID(from), RoadID(to))
+            .map_err(err_to_js)?;
+        self.after_edit();
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = deleteTurnRestriction)]
+    pub fn delete_turn_restriction(
+        &mut self,
+        intersection: usize,
+        from: usize,
+        to: usize,
+    ) -> Result<(), JsValue> {
+        self.map
+            .delete_turn_restriction(IntersectionID(intersection), RoadID(from), RoadID(to))
+            .map_err(err_to_js)?;
+        self.after_edit();
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = getTurnRestrictionTargets)]
+    pub fn get_turn_restriction_targets_wasm(&self, road: usize) -> Result<String, JsValue> {
+        Ok(
+            serde_json::to_string(&self.map.get_turn_restriction_targets(RoadID(road)))
+                .map_err(err_to_js)?,
+        )
+    }
+
     #[wasm_bindgen(js_name = toggleTravelFlow)]
     pub fn toggle_travel_flow(&mut self, road: usize) {
         self.map.toggle_travel_flow(RoadID(road));
@@ -420,7 +451,10 @@ impl LTN {
                 .iter()
                 .map(|i| {
                     let mut f = self.map.mercator.to_wgs84_gj(&i.point);
-                    f.set_property("has_turn_restrictions", !i.turn_restrictions.is_empty());
+                    f.set_property(
+                        "has_turn_restrictions",
+                        !self.map.turn_restrictions[i.id.0].is_empty(),
+                    );
                     f.set_property("intersection_id", i.id.0);
                     f.set_property("osm", i.node.to_string());
                     f

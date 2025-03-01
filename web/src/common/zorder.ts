@@ -90,6 +90,7 @@ const layerZorder = [
   "cells",
   "interior-roads-outlines",
   "interior-roads",
+  "turn-restriction-targets",
   "debug-intersections",
   "debug-movements-outline",
   "debug-movements-fill",

@@ -36,6 +36,7 @@ pub trait RouterInput {
     }
     fn travel_flow(&self, r: RoadID) -> TravelFlow;
     fn diagonal_filter(&self, i: IntersectionID) -> Option<&DiagonalFilter>;
+    fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)>;
 }
 
 impl Router {
@@ -282,8 +283,7 @@ mod tests {
         // ```
         let mut map = load_osm_xml("simple_four_way_intersection");
 
-        map.intersections[1].turn_restrictions =
-            vec![(r(1), r(3)), (r(3), r(0)), (r(0), r(2)), (r(2), r(1))];
+        map.turn_restrictions[1] = vec![(r(1), r(3)), (r(3), r(0)), (r(0), r(2)), (r(2), r(1))];
         map.rebuild_router(1.1);
 
         let Route {

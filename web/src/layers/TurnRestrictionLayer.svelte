@@ -1,9 +1,18 @@
 <script lang="ts">
   import type { Feature, Geometry } from "geojson";
-  import { GeoJSON, LineLayer, SymbolLayer } from "svelte-maplibre";
+  import {
+    GeoJSON,
+    LineLayer,
+    SymbolLayer,
+    type LayerClickInfo,
+  } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
+
+  export let onClickTurnRestriction: (
+    e: CustomEvent<LayerClickInfo>,
+  ) => void = () => {};
 
   let hoveredIcon: Feature | null = null;
   $: showArrow =
@@ -48,7 +57,10 @@
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
     bind:hovered={hoveredIcon}
-  />
+    on:click={onClickTurnRestriction}
+  >
+    <slot />
+  </SymbolLayer>
 </GeoJSON>
 
 <GeoJSON data={showArrow}>
