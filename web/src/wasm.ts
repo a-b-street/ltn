@@ -299,6 +299,7 @@ export interface RenderNeighbourhoodOutput {
         LineString,
         {
           kind: "interior_road";
+          is_perimeter: boolean;
           shortcuts: number;
           travel_flow: "forwards" | "backwards" | "both";
           travel_flow_edited: boolean;

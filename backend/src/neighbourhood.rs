@@ -346,6 +346,7 @@ impl Neighbourhood {
             let road = map.get_r(r);
             let mut f = road.to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
+            f.set_property("is_perimeter", self.perimeter_roads.contains(&r));
             f.set_property(
                 "shortcuts",
                 derived

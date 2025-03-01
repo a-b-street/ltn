@@ -90,7 +90,7 @@
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
-    "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
+    "line-color": ["case", ["get", "is_perimeter"], "black", roadLineColor($roadStyle, gj.maxShortcuts)],
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{
