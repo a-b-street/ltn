@@ -44,7 +44,7 @@ impl MapModel {
                     let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
 
                     // Place at the end of the 'from' road
-                    let pt = from.pt_near_intersection(offset, i.id);
+                    let pt = from.stacked_icon_position(offset, i.id);
 
                     // Rotate the icon based on the 'from' road's angle only, but make sure that road
                     // points at the intersection
@@ -141,7 +141,7 @@ impl MapModel {
             .iter()
             .map(|r| {
                 let road = self.get_r(*r);
-                let road_pt = self.get_r(*r).pt_near_intersection(0, intersection.id);
+                let road_pt = self.get_r(*r).pt_near_intersection(intersection.id);
                 (
                     road.id,
                     euclidean_bearing(road_pt.into(), intersection.point.into()),
@@ -168,8 +168,8 @@ impl MapModel {
 
 fn render_arrow(i: IntersectionID, offset1: usize, road1: &Road, road2: &Road) -> Polygon {
     let line = Line::new(
-        road1.pt_near_intersection(offset1, i),
-        road2.pt_near_intersection(0, i),
+        road1.stacked_icon_position(offset1, i),
+        road2.stacked_icon_position(0, i),
     );
     let thickness = 2.0;
     let double_ended = false;
@@ -180,32 +180,44 @@ impl Intersection {
     /// Returns the absolute bearing of (road1 pointing to the intersection, road2 pointing away
     /// from the intersection)
     pub fn bearing_of_roads(&self, road1: &Road, road2: &Road) -> (f64, f64) {
-        // TODO Calculate the two absolute bearings in an easier way? Why rely on
-        // pt_near_intersection?
         (
             euclidean_bearing(
-                road1.pt_near_intersection(0, self.id).into(),
+                road1.pt_near_intersection(self.id).into(),
                 self.point.into(),
             ),
             euclidean_bearing(
                 self.point.into(),
-                road2.pt_near_intersection(0, self.id).into(),
+                road2.pt_near_intersection(self.id).into(),
             ),
         )
     }
 }
 
 impl Road {
-    fn pt_near_intersection(&self, offset: usize, i: IntersectionID) -> Point {
-        // If the road is long enough, offset from the intersection this much
-        let distance_away = 5.0 * (1 + offset) as f64;
+    /// Place icons along the road starting at the intersection (for offset 0) and moving away.
+    /// Short roads with high offsets may overlap.
+    fn stacked_icon_position(&self, offset: usize, i: IntersectionID) -> Point {
+        let meters_away = 5.0 * (1 + offset) as f64;
+        self.pt_from_intersection(meters_away, i)
+    }
+
+    /// A point on the road close to the intersection, for calculating bearing
+    fn pt_near_intersection(&self, i: IntersectionID) -> Point {
+        // This is an arbitrary threshold, could probably be smaller
+        let meters_away = 5.0;
+        self.pt_from_intersection(meters_away, i)
+    }
+
+    /// Returns a point on the road this far away from the intersection. If the road is too short,
+    /// clamps at the other end of the road.
+    fn pt_from_intersection(&self, meters_away: f64, i: IntersectionID) -> Point {
         let len = Euclidean.length(&self.linestring);
 
-        if len > distance_away {
+        if len > meters_away {
             let pct = if self.src_i == i {
-                distance_away / len
+                meters_away / len
             } else {
-                1.0 - (distance_away / len)
+                1.0 - (meters_away / len)
             };
             return self.linestring.line_interpolate_point(pct).unwrap();
         }
