@@ -175,10 +175,14 @@ impl LTN {
         name: String,
         neighborhood_feature: JsValue,
     ) -> Result<(), JsValue> {
+        info!("hi, got raw thing");
         let mut feature: Feature = serde_wasm_bindgen::from_value(neighborhood_feature)?;
         feature.set_property("name", name.clone());
+        info!("ok got a gj feature, {feature:?}");
+
         let neighbourhood_definition =
             NeighbourhoodDefinition::from_feature(feature, &self.map).map_err(err_to_js)?;
+        info!("didnt make it here");
         let boundary =
             NeighbourhoodBoundary::new(neighbourhood_definition, self.map.context_data.as_ref());
         self.map.boundaries.insert(name, boundary);

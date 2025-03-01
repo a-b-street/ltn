@@ -36,6 +36,7 @@
     if ($waypoints.length >= 3) {
       try {
         let feature = calculateArea($waypoints);
+        console.log(JSON.stringify(feature));
         $backend!.setNeighbourhoodBoundary(name, feature);
         autosave();
         $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
