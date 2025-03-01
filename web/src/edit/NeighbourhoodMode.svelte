@@ -158,7 +158,7 @@
       $backend!.addTurnRestriction(action.from_road_id, to);
       $mutationCounter++;
     }
-    action = { kind: "filter" };
+    action = startTurnRestrictionAction();
   }
 
   function deleteModalFilter(e: CustomEvent<LayerClickInfo>) {
