@@ -97,22 +97,22 @@ impl MapModel {
         // TODO Account for one-ways
         for i in [from.src_i, from.dst_i] {
             let intersection = self.get_i(i);
-            for r in &intersection.roads {
-                if *r == from.id {
+            for to_r in &intersection.roads {
+                if *to_r == from.id {
                     continue;
                 }
                 // If there's already a TR between these two, skip it.
-                if self.turn_restrictions[i.0].contains(&(from.id, *r)) {
+                if self.turn_restrictions[i.0].contains(&(from.id, *to_r)) {
                     continue;
                 }
 
-                let to = self.get_r(*r);
+                let to = self.get_r(*to_r);
 
                 let (abs_bearing_1, abs_bearing_2) = intersection.bearing_of_roads(from, to);
                 let kind = classify_relative_bearing(abs_bearing_1, abs_bearing_2);
 
                 let mut f = self.mercator.to_wgs84_gj(&to.linestring);
-                f.set_property("road", r.0);
+                f.set_property("road", to_r.0);
                 f.set_property("kind", kind);
                 if let Some(name) = to.tags.get("name") {
                     f.set_property("name", name.clone());
