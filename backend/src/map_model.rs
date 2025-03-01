@@ -471,10 +471,9 @@ impl MapModel {
                 self.travel_flows.insert(r, dir);
                 Command::SetTravelFlow(r, prev)
             }
-            Command::SetTurnRestrictions(i, restrictions) => {
-                let prev = std::mem::take(&mut self.turn_restrictions[i.0]);
-                self.turn_restrictions[i.0] = restrictions;
-                Command::SetTurnRestrictions(i, prev)
+            Command::SetTurnRestrictions(i, mut restrictions) => {
+                std::mem::swap(&mut self.turn_restrictions[i.0], &mut restrictions);
+                Command::SetTurnRestrictions(i, restrictions)
             }
             Command::Multiple(list) => {
                 let undo_list = list.into_iter().map(|cmd| self.do_edit(cmd)).collect();
