@@ -31,13 +31,22 @@
     mode,
     projectName,
   } from "./stores";
+  import type { GeneratedBoundaryFeature } from "./wasm";
 
-  let gj = $backend!.renderAutoBoundaries();
+  let generatedBoundaries = $backend!.generatedBoundaries();
   let minArea = 0;
   let removeNonRoad = true;
   let selectedPrioritization: Prioritization = "none";
 
-  function add(e: CustomEvent<LayerClickInfo>) {
+  function clickedBoundary(e: CustomEvent<LayerClickInfo>) {
+    // this isn't quite right - there's no .waypoint field. I was expect: `waypoints: []`
+    let feature: GeneratedBoundaryFeature =
+      generatedBoundaries.features[e.detail.features[0].id as number];
+    console.log("clicked feature", feature);
+    createNeighbourhood(feature);
+  }
+
+  function createNeighbourhood(selectedBoundary: GeneratedBoundaryFeature) {
     let name = pickNeighbourhoodName(
       $backend!,
       "What do you want to name the neighbourhood?",
@@ -52,7 +61,7 @@
         // Omit waypoints and lazily fill them out.
         properties: {},
         // Trust generateId to make IDs in order
-        geometry: gj.features[e.detail.features[0].id as number].geometry,
+        geometry: selectedBoundary.geometry,
       };
       $backend!.setNeighbourhoodBoundary(name, feature);
       autosave();
@@ -71,7 +80,7 @@
   function download() {
     downloadGeneratedFile(
       "auto_boundaries.geojson",
-      JSON.stringify(gj, null, "  "),
+      JSON.stringify(generatedBoundaries, null, "  "),
     );
   }
 
@@ -184,7 +193,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={gj} generateId>
+    <GeoJSON data={generatedBoundaries} generateId>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={makeFilter(minArea, removeNonRoad)}
@@ -194,7 +203,7 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        on:click={add}
+        on:click={clickedBoundary}
       >
         <Popup openOn="hover" let:props>
           {#if selectedPrioritization == "none" || selectedPrioritization == "area"}

@@ -7,7 +7,7 @@ use i_overlay::float::slice::FloatSlice;
 use serde::{Deserialize, Serialize};
 
 impl MapModel {
-    pub fn render_auto_boundaries(&self) -> FeatureCollection {
+    pub fn generated_boundaries(&self) -> FeatureCollection {
         let mut features = Vec::new();
         let mut severances = Vec::new();
         let mut road_severances = Vec::new();

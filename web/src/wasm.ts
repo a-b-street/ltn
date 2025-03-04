@@ -28,6 +28,18 @@ export type NeighbourhoodBoundaryFeature = Feature<
   }
 >;
 
+export type GeneratedBoundaryFeature = Feature<
+  Polygon,
+  {
+    touches_big_road: boolean;
+    touches_railway: boolean;
+    touches_waterway: boolean;
+    area_km2: number;
+    simd: number;
+    number_stats19_collisions: number;
+  }
+>;
+
 export class Backend {
   inner: LTN;
 
@@ -104,8 +116,11 @@ export class Backend {
     return gj;
   }
 
-  renderAutoBoundaries(): FeatureCollection {
-    return JSON.parse(this.inner.renderAutoBoundaries());
+  generatedBoundaries(): FeatureCollection<
+    GeneratedBoundaryFeature["geometry"],
+    GeneratedBoundaryFeature["properties"]
+  > {
+    return JSON.parse(this.inner.generatedBoundaries());
   }
 
   setNeighbourhoodBoundary(name: string, input: Feature) {

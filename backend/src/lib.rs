@@ -163,9 +163,9 @@ impl LTN {
         )
     }
 
-    #[wasm_bindgen(js_name = renderAutoBoundaries)]
-    pub fn render_auto_boundaries(&self) -> Result<String, JsValue> {
-        Ok(serde_json::to_string(&self.map.render_auto_boundaries()).map_err(err_to_js)?)
+    #[wasm_bindgen(js_name = generatedBoundaries)]
+    pub fn generated_boundaries(&self) -> Result<String, JsValue> {
+        Ok(serde_json::to_string(&self.map.generated_boundaries()).map_err(err_to_js)?)
     }
 
     /// `input`: GeoJson Feature w/ Polygon Geometry
