@@ -14,6 +14,7 @@ pub use self::neighbourhood::{Neighbourhood, NeighbourhoodBoundary, Neighbourhoo
 use self::render_cells::RenderCells;
 pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
+use crate::auto_boundaries::GeneratedBoundary;
 use geo::{Coord, LineString};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
@@ -166,6 +167,25 @@ impl LTN {
     #[wasm_bindgen(js_name = generatedBoundaries)]
     pub fn generated_boundaries(&self) -> Result<String, JsValue> {
         Ok(serde_json::to_string(&self.map.generated_boundaries()).map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = generateMergedBoundary)]
+    pub fn generate_merged_boundary(
+        &self,
+        boundaries_to_merge: JsValue,
+    ) -> Result<String, JsValue> {
+        let feature_collection: FeatureCollection =
+            serde_wasm_bindgen::from_value(boundaries_to_merge)?;
+        let generated_boundaries: Vec<GeneratedBoundary> = feature_collection
+            .features
+            .into_iter()
+            .map(|feature| GeneratedBoundary::from_feature(feature, &self.map).map_err(err_to_js))
+            .collect::<Result<Vec<GeneratedBoundary>, JsValue>>()?;
+        let merged_boundary = self
+            .map
+            .generate_merged_boundary(&generated_boundaries)
+            .map_err(err_to_js)?;
+        Ok(serde_json::to_string(&merged_boundary.to_feature(&self.map)).map_err(err_to_js)?)
     }
 
     /// `input`: GeoJson Feature w/ Polygon Geometry

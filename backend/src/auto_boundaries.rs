@@ -1,5 +1,7 @@
 use crate::boundary_stats::BoundaryStats;
-use crate::MapModel;
+use crate::geo_helpers::make_polygon_valid;
+use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
+use anyhow::Result;
 use geo::{Coord, Intersects, LineString, Polygon};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
@@ -69,6 +71,37 @@ impl MapModel {
             foreign_members: None,
         }
     }
+
+    pub fn generate_merged_boundary(
+        &self,
+        boundaries_to_merge: &[GeneratedBoundary],
+    ) -> Result<NeighbourhoodBoundary> {
+        let mut merged = geo::unary_union(
+            boundaries_to_merge
+                .iter()
+                .map(|boundary| &boundary.geometry),
+        );
+
+        let Some(geometry) = merged.0.pop() else {
+            debug_assert!(false, "Empty boundaries shouldn't be possible");
+            bail!("Empty boundary");
+        };
+
+        if !merged.0.is_empty() {
+            bail!("All included boundaries must be adjacent");
+        }
+
+        let definition = NeighbourhoodDefinition {
+            geometry,
+            name: "".to_string(),
+            waypoints: None,
+        };
+
+        Ok(NeighbourhoodBoundary::new(
+            definition,
+            self.context_data.as_ref(),
+        ))
+    }
 }
 
 /// The static data that defines where exactly a neighbourhood is.
@@ -93,6 +126,12 @@ impl GeneratedBoundary {
         let mut projected = self.clone();
         map.mercator.to_wgs84_in_place(&mut projected.geometry);
         geojson::ser::to_feature(projected).expect("should have no unserializable fields")
+    }
+    pub fn from_feature(feature: Feature, map: &MapModel) -> anyhow::Result<Self> {
+        let mut unprojected: Self = geojson::de::from_feature(feature)?;
+        map.mercator.to_mercator_in_place(&mut unprojected.geometry);
+        unprojected.geometry = make_polygon_valid(&unprojected.geometry);
+        Ok(unprojected)
     }
 }
 
