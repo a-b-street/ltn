@@ -123,6 +123,16 @@ export class Backend {
     return JSON.parse(this.inner.generatedBoundaries());
   }
 
+  generateMergedBoundary(
+    toMerge: FeatureCollection<
+      GeneratedBoundaryFeature["geometry"],
+      GeneratedBoundaryFeature["properties"]
+    >,
+  ): GeneratedBoundaryFeature {
+    let serializedMergedBoundary = this.inner.generateMergedBoundary(toMerge);
+    return JSON.parse(serializedMergedBoundary);
+  }
+
   setNeighbourhoodBoundary(name: string, input: Feature) {
     this.inner.setNeighbourhoodBoundary(name, input);
   }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { CircleX } from "lucide-svelte";
   import type {
     DataDrivenPropertyValueSpecification,
     ExpressionSpecification,
@@ -10,7 +11,7 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { downloadGeneratedFile } from "svelte-utils";
+  import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -37,13 +38,46 @@
   let minArea = 0;
   let removeNonRoad = true;
   let selectedPrioritization: Prioritization = "none";
+  let selectedBoundary: GeneratedBoundaryFeature | null = null;
+  let selectedBoundaries: Map<number, GeneratedBoundaryFeature> = new Map();
 
   function clickedBoundary(e: CustomEvent<LayerClickInfo>) {
-    // this isn't quite right - there's no .waypoint field. I was expect: `waypoints: []`
+    // Trust generateId to make IDs in order
+    let featureId = e.detail.features[0].id as number;
     let feature: GeneratedBoundaryFeature =
-      generatedBoundaries.features[e.detail.features[0].id as number];
-    console.log("clicked feature", feature);
-    createNeighbourhood(feature);
+      generatedBoundaries.features[featureId];
+
+    let newBoundaries = new Map(selectedBoundaries);
+
+    // toggle
+    if (newBoundaries.has(featureId)) {
+      newBoundaries.delete(featureId);
+    } else {
+      newBoundaries.set(featureId, feature);
+    }
+
+    if (newBoundaries.size === 0) {
+      selectedBoundary = null;
+      selectedBoundaries = newBoundaries;
+    } else if (newBoundaries.size === 1) {
+      selectedBoundary = newBoundaries.values().next().value!;
+      selectedBoundaries = newBoundaries;
+    } else {
+      // Aggregate the selected boundaries
+      let featureCollection = {
+        type: "FeatureCollection" as const,
+        features: Array.from(newBoundaries.values()),
+      };
+      try {
+        selectedBoundary = $backend!.generateMergedBoundary(featureCollection);
+        selectedBoundaries = newBoundaries;
+      } catch (error) {
+        console.log(`error merging boundaries: ${error}`);
+        window.alert(
+          `Sorry, the boundaries you selected cannot be merged.\nError: ${error}`,
+        );
+      }
+    }
   }
 
   function createNeighbourhood(selectedBoundary: GeneratedBoundaryFeature) {
@@ -60,7 +94,6 @@
         type: "Feature" as const,
         // Omit waypoints and lazily fill them out.
         properties: {},
-        // Trust generateId to make IDs in order
         geometry: selectedBoundary.geometry,
       };
       $backend!.setNeighbourhoodBoundary(name, feature);
@@ -160,13 +193,6 @@
 
   <div slot="sidebar">
     <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
-
-    <p>
-      Click an area to use it as the boundary for your neighbourhood. These
-      particular boundaries are suggested by finding roads, railways, and water
-      that form severances.
-    </p>
-
     {#if $projectName.startsWith("ltn_cnt/")}
       <h3>Prioritization</h3>
       <p>Compare metrics across candidate neighbourhoods.</p>
@@ -176,6 +202,71 @@
     {#if selectedPrioritization == "none"}
       <p>The colors are arbitrary, just to distinguish better.</p>
     {/if}
+
+    <hr />
+
+    <div>
+      <h3>1. Choose area</h3>
+      <div style="border: dashed black 2px; padding: 8px">
+        {#if selectedBoundary}
+          <div style="display: flex; justify-content: space-between;">
+            <b>Your Neighbourhood Overall</b>
+            <!--REVIEW: good place for a name input field? -->
+            <button
+              class="icon-btn destructive"
+              aria-label="Clear selection"
+              on:click={() => {
+                selectedBoundary = null;
+                selectedBoundaries.clear();
+                selectedBoundaries = selectedBoundaries;
+              }}
+            >
+              <CircleX />
+            </button>
+          </div>
+
+          <table>
+            <tr>
+              <th>Area</th>
+              <td>
+                {selectedBoundary.properties.area_km2.toFixed(1)} km²
+              </td>
+            </tr>
+            <tr>
+              <th>SIMD</th>
+              <td>{selectedBoundary.properties.simd.toFixed(1)}%</td>
+            </tr>
+            <tr>
+              <th>Collision Density</th>
+              <td>
+                {(
+                  selectedBoundary.properties.number_stats19_collisions /
+                  selectedBoundary.properties.area_km2
+                ).toFixed(1)} / km²
+              </td>
+            </tr>
+          </table>
+        {:else}
+          <p>Choose an area to use as the boundary for your neighbourhood.</p>
+          <p>
+            These particular boundaries are suggested by finding roads,
+            railways, and water that form severances.
+          </p>
+        {/if}
+        {#if selectedBoundary}
+          <h3>2. Add to area</h3>
+          <p>Choose any adjacent areas you'd like to add to your boundary.</p>
+
+          <h3>3. Finished?</h3>
+          <p>When you're done, click "Confirm".</p>
+          <button
+            on:click={() => createNeighbourhood(notNull(selectedBoundary))}
+          >
+            Confirm Boundary
+          </button>
+        {/if}
+      </div>
+    </div>
 
     <hr />
 
@@ -193,6 +284,32 @@
   </div>
 
   <div slot="map">
+    {#if selectedBoundary}
+      <GeoJSON
+        data={{
+          type: "FeatureCollection",
+          features: [selectedBoundary],
+        }}
+        generateId
+      >
+        <LineLayer
+          {...layerId("neighbourhood-boundaries-selected-outline", false)}
+          paint={{
+            "line-color": "black",
+            "line-width": 4,
+            "line-dasharray": [2, 2],
+          }}
+        />
+        <LineLayer
+          {...layerId("neighbourhood-boundaries-selected-outline-base", false)}
+          paint={{
+            "line-color": "white",
+            "line-width": 8,
+            "line-opacity": 0.7,
+          }}
+        />
+      </GeoJSON>
+    {/if}
     <GeoJSON data={generatedBoundaries} generateId>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
@@ -213,11 +330,8 @@
             <b>SIMD:</b>
             Less deprived than {props.simd.toFixed(1)}% of data zones.
           {:else if selectedPrioritization == "stats19"}
-            <b>
-              Density of pedestrian and cyclist collisions (collisions per
-              square kilometer):
-            </b>
-            {(props.number_stats19_collisions / props.area_km2).toFixed(1)}
+            <b>Pedestrian and cyclist collisions:</b>
+            {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
           {/if}
         </Popup>
       </FillLayer>

@@ -326,11 +326,8 @@
             <b>SIMD:</b>
             Less deprived than {props.simd.toFixed(1)}% of data zones.
           {:else if selectedPrioritization == "stats19"}
-            <b>
-              Density of pedestrian and cyclist collisions (collisions per
-              square kilometer):
-            </b>
-            {(props.number_stats19_collisions / props.area_km2).toFixed(1)}
+            <b>Pedestrian and cyclist collisions:</b>
+            {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
           {/if}
         </Popup>
       </FillLayer>

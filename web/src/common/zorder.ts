@@ -76,13 +76,15 @@ let dataviz = (x: string) => x;
 const layerZorder = [
   streets(dataviz("Background")),
 
-  // Ferry line starts at zoom 6, so these won't be visible before that -- but
-  // that's fine; a boundary is too small to see before zoom 6 anyway
   "neighbourhood-boundaries",
 
+  // Ferry line starts at zoom 6, so these won't be visible before that -- but
+  // that's fine; a boundary is too small to see before zoom 6 anyway
   streets("Ferry line"),
 
   "neighbourhood-boundaries-outline",
+  "neighbourhood-boundaries-selected-outline-base",
+  "neighbourhood-boundaries-selected-outline",
 
   "debug-borders",
   "debug-filters",

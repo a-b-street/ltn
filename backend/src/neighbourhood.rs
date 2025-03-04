@@ -87,17 +87,17 @@ impl NeighbourhoodDefinition {
         let props = feature
             .properties
             .as_mut()
-            .expect("NeighbourhoodBoundary always has properties");
+            .expect("NeighbourhoodDefinition always has properties");
         props.insert("kind".to_string(), "boundary".into());
         feature
     }
 
     pub fn from_feature(feature: Feature, map: &MapModel) -> Result<Self> {
-        let mut neighbourhood_boundary: Self = geojson::de::from_feature(feature)?;
+        let mut neighbourhood_definition: Self = geojson::de::from_feature(feature)?;
         map.mercator
-            .to_mercator_in_place(&mut neighbourhood_boundary.geometry);
-        neighbourhood_boundary.geometry = make_polygon_valid(&neighbourhood_boundary.geometry);
-        Ok(neighbourhood_boundary)
+            .to_mercator_in_place(&mut neighbourhood_definition.geometry);
+        neighbourhood_definition.geometry = make_polygon_valid(&neighbourhood_definition.geometry);
+        Ok(neighbourhood_definition)
     }
 }
 
