@@ -114,5 +114,5 @@ pub struct PopulationZone {
 
 pub struct PreparedPopulationZone {
     pub population_zone: PopulationZone,
-    pub prepared_geometry: PreparedGeometry<'static>,
+    pub prepared_geometry: PreparedGeometry<'static, MultiPolygon>,
 }
