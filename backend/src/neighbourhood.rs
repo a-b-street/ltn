@@ -482,10 +482,10 @@ enum LineInPolygon {
 }
 
 // NOTE: polygon must be `valid` (no spikes!) to get reasonable results
-fn line_in_polygon(
+fn line_in_polygon<'a>(
     linestring: &LineString,
     polygon: &Polygon,
-    prepared_polygon: &PreparedGeometry,
+    prepared_polygon: &PreparedGeometry<'a, &'a Polygon>,
 ) -> LineInPolygon {
     let perimeter_likelihood = perimeter_likelihood(&linestring, polygon);
     // This is an arbitrary threshold - we could tune it if we're getting false positives/negatives

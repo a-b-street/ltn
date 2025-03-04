@@ -18,7 +18,8 @@ impl StudyArea {
         println!("Read {} study area boundaries", study_areas.len());
         Ok(study_areas)
     }
-    pub fn read_all_prepared_from_file() -> Result<Vec<(PreparedGeometry<'static>, Self)>> {
+    pub fn read_all_prepared_from_file(
+    ) -> Result<Vec<(PreparedGeometry<'static, MultiPolygon>, Self)>> {
         let iter = Self::read_all_from_file()?.into_iter().map(|study_area| {
             (
                 PreparedGeometry::from(study_area.geometry.clone()),

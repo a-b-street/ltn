@@ -91,7 +91,8 @@ impl PopulationZoneInput {
         Ok(population_zones)
     }
 
-    fn read_all_prepared_from_file() -> Result<Vec<(PreparedGeometry<'static>, Self)>> {
+    fn read_all_prepared_from_file() -> Result<Vec<(PreparedGeometry<'static, MultiPolygon>, Self)>>
+    {
         let iter = Self::read_all_from_file()?
             .into_iter()
             .map(|population_zone| {
