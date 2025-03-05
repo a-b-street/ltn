@@ -1,7 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
-use geo::{Coord, LineInterpolatePoint, LineString, MultiPolygon, PreparedGeometry};
+use geo::line_measures::InterpolatableLine;
+use geo::{Coord, Euclidean, LineString, MultiPolygon, PreparedGeometry};
 use osm_reader::{NodeID, OsmID, RelationID, WayID};
 use petgraph::graphmap::UnGraphMap;
 use rstar::{primitives::GeomWithData, RTree};
@@ -360,7 +361,7 @@ fn apply_existing_filters(
             let pt = map
                 .get_r(r)
                 .linestring
-                .line_interpolate_point(percent)
+                .point_at_ratio_from_start(&Euclidean, percent)
                 .unwrap();
             map.add_modal_filter(pt.into(), Some(vec![r]), filter);
         }

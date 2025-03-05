@@ -1,5 +1,6 @@
 use anyhow::Result;
-use geo::{Euclidean, Length, Line, LineInterpolatePoint, Point, Polygon};
+use geo::line_measures::InterpolatableLine;
+use geo::{Euclidean, Line, Point, Polygon};
 use geojson::GeoJson;
 use itertools::Itertools;
 
@@ -211,20 +212,15 @@ impl Road {
     /// Returns a point on the road this far away from the intersection. If the road is too short,
     /// clamps at the other end of the road.
     fn pt_from_intersection(&self, meters_away: f64, i: IntersectionID) -> Point {
-        let len = Euclidean.length(&self.linestring);
-
-        if len > meters_away {
-            let pct = if self.src_i == i {
-                meters_away / len
-            } else {
-                1.0 - (meters_away / len)
-            };
-            return self.linestring.line_interpolate_point(pct).unwrap();
+        if self.src_i == i {
+            self.linestring
+                .point_at_distance_from_start(&Euclidean, meters_away)
+                .unwrap()
+        } else {
+            self.linestring
+                .point_at_distance_from_end(&Euclidean, meters_away)
+                .unwrap()
         }
-
-        // If not, just take the other endpoint
-        let pct = if self.src_i == i { 1.0 } else { 0.0 };
-        self.linestring.line_interpolate_point(pct).unwrap()
     }
 }
 

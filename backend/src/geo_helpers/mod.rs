@@ -1,10 +1,10 @@
 mod slice_nearest_boundary;
 pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 
+use geo::line_measures::InterpolatableLine;
 use geo::{
     BooleanOps, BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
-    LineInterpolatePoint, LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point,
-    Polygon, Rect, Validation,
+    LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Rect, Validation,
 };
 use rstar::AABB;
 use utils::LineSplit;
@@ -71,7 +71,7 @@ pub fn clip_linestring_to_polygon(linestring: &LineString, polygon: &Polygon) ->
                 continue;
             };
             // Is this piece inside the polygon or not? Check the midpoint
-            if let Some(midpt) = split.line_interpolate_point(0.5) {
+            if let Some(midpt) = split.point_at_ratio_from_start(&Euclidean, 0.5) {
                 if polygon.contains(&midpt) {
                     results.push(split);
                 }
