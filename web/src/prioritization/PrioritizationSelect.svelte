@@ -2,11 +2,13 @@
   import { SequentialLegend } from "svelte-utils";
   import {
     areaLimits,
+    bucketize,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
     stats19Limits,
   } from "../common/colors";
+  import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
   import { projectName } from "../stores";
   import type { Prioritization } from "./index";
 
@@ -47,13 +49,20 @@
   <select id="prioritization-selection" bind:value={selectedPrioritization}>
     <option value="none">None</option>
     <option value="area">Area (km²)</option>
-    <option value="simd">Fake SIMD (percentile)</option>
+    <option value="simd">SIMD</option>
     <option value="stats19">Collisions</option>
   </select>
 </div>
 
 {#if selectedPrioritization == "simd"}
-  <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
+  <SequentialLegendBucketed
+    colorScale={simdColorScale}
+    buckets={bucketize(simdLimits)}
+  />
+  <div style="display: flex; justify-content: space-between;">
+    <span>More deprived</span>
+    <span>Less deprived</span>
+  </div>
 {:else if selectedPrioritization == "area"}
   <SequentialLegend colorScale={simdColorScale} limits={areaLimits} />
 {:else if selectedPrioritization == "stats19"}
