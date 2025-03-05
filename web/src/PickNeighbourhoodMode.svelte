@@ -244,8 +244,8 @@
             </span>
           {:else if selectedPrioritization == "simd"}
             <span>
-              <b>SIMD (percentile):</b>
-              {simd.toFixed(1)}
+              <b>SIMD:</b>
+              Less deprived than {simd.toFixed(1)}% of data zones.
             </span>
           {/if}
         </li>
@@ -323,8 +323,8 @@
             <b>Area:</b>
             {props.area_km2.toFixed(1)} km²
           {:else if selectedPrioritization == "simd"}
-            <b>Fake SIMD:</b>
-            {props.simd.toFixed(1)}
+            <b>SIMD:</b>
+            Less deprived than {props.simd.toFixed(1)}% of data zones.
           {:else if selectedPrioritization == "stats19"}
             <b>
               Density of pedestrian and cyclist collisions (collisions per

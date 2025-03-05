@@ -8,8 +8,9 @@
   import { SequentialLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { layerId } from "../common";
-  import { simdColorScale, simdLimits } from "../common/colors";
+  import { bucketize, simdColorScale, simdLimits } from "../common/colors";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
+  import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
   import { assetUrl } from "../stores";
 
   let showSIMD = false;
@@ -22,8 +23,14 @@
 
 <ContextLayerButton label="SIMD" bind:show={showSIMD}>
   <div slot="legend">
-    <SequentialLegend colorScale={simdColorScale} limits={simdLimits} />
-    <p>Darker colours are more deprived</p>
+    <SequentialLegendBucketed
+      colorScale={simdColorScale}
+      buckets={bucketize(simdLimits)}
+    />
+    <div style="display: flex; justify-content: space-between;">
+      <span>More deprived</span>
+      <span>Less deprived</span>
+    </div>
   </div>
 
   <p slot="help">
@@ -78,8 +85,8 @@
       <p>
         Data zone {props.id}
         has {props.population.toLocaleString()}
-        people, and a SIMD rank of {props.imd_rank}, putting it in the {props.imd_percentile}
-        percentile.
+        people, and a SIMD rank of {props.imd_rank}, making it less deprived
+        than {props.imd_percentile}% of data zones.
       </p>
     </Popup>
   </FillLayer>
