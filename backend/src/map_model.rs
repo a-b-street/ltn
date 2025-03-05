@@ -9,7 +9,7 @@ use crate::route::RouterInput;
 use crate::{od::DemandModel, Router};
 use anyhow::Result;
 use geo::{
-    Closest, ClosestPoint, Coord, Distance, Euclidean, Length, LineInterpolatePoint,
+    line_measures::InterpolatableLine, Closest, ClosestPoint, Coord, Distance, Euclidean, Length,
     LineLocatePoint, LineString, MultiPolygon, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
@@ -511,7 +511,7 @@ impl MapModel {
             let road = self.get_r(*r);
             let pt = road
                 .linestring
-                .line_interpolate_point(filter.percent_along)
+                .point_at_ratio_from_start(&Euclidean, filter.percent_along)
                 .unwrap();
             let angle = limit_angle(angle_of_pt_on_line(&road.linestring, pt.into()) + 90.0);
             let mut f = self.mercator.to_wgs84_gj(&pt);
@@ -558,7 +558,7 @@ impl MapModel {
             let pt = self
                 .get_r(*r)
                 .linestring
-                .line_interpolate_point(filter.percent_along)
+                .point_at_ratio_from_start(&Euclidean, filter.percent_along)
                 .unwrap();
             let mut f = self.mercator.to_wgs84_gj(&pt);
             f.set_property("kind", "deleted_existing_modal_filter");
@@ -891,7 +891,11 @@ impl MapModel {
         let mut highest_time_ratio: f64 = 1.0;
         for r in from {
             let road = self.get_r(r);
-            let pt1 = road.linestring.line_interpolate_point(0.5).unwrap().into();
+            let pt1 = road
+                .linestring
+                .point_at_ratio_from_start(&Euclidean, 0.5)
+                .unwrap()
+                .into();
 
             // TODO How to handle missing one or both routes missing?
             if let (Some(before), Some(after)) = (
