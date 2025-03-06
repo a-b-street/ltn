@@ -17,30 +17,22 @@
 
   let gj: FeatureCollection<
     Polygon | MultiPolygon,
-    { kind: "LAD" | "REGION"; name: string }
+    { kind: "LAD"; name: string }
   > = {
     type: "FeatureCollection" as const,
     features: [],
   };
   let ladNames: string[] = [];
-  let regionNames: string[] = [];
-  let kind = "LAD";
 
   onMount(async () => {
     let resp = await fetch(boundariesUrl);
     gj = await resp.json();
 
     for (let f of gj.features) {
-      if (f.properties.kind == "LAD") {
-        ladNames.push(f.properties.name);
-      } else {
-        regionNames.push(f.properties.name);
-      }
+      ladNames.push(f.properties.name);
     }
     ladNames.sort();
-    regionNames.sort();
     ladNames = ladNames;
-    regionNames = regionNames;
   });
 
   function onClick(e: CustomEvent<LayerClickInfo>) {
@@ -110,30 +102,11 @@
   <div class="pico left">
     <h2>Connected Neighbourhoods Tool</h2>
 
-    <fieldset>
-      <label>
-        <input type="radio" value="LAD" bind:group={kind} />
-        Local Authority Districts
-      </label>
-      <label>
-        <input type="radio" value="REGION" bind:group={kind} />
-        Regions
-      </label>
-    </fieldset>
-
     <p>Choose a boundary below or on the map to begin sketching:</p>
     <ul style="columns: 3">
-      {#if kind == "LAD"}
-        {#each ladNames as name}
-          <li><Link on:click={() => newFile(`LAD_${name}`)}>{name}</Link></li>
-        {/each}
-      {:else}
-        {#each regionNames as name}
-          <li>
-            <Link on:click={() => newFile(`REGION_${name}`)}>{name}</Link>
-          </li>
-        {/each}
-      {/if}
+      {#each ladNames as name}
+        <li><Link on:click={() => newFile(`LAD_${name}`)}>{name}</Link></li>
+      {/each}
     </ul>
 
     <hr />
@@ -178,7 +151,6 @@
       >
         <GeoJSON data={gj} generateId>
           <FillLayer
-            filter={["==", ["get", "kind"], kind]}
             paint={{
               "fill-color": "rgb(200, 100, 240)",
               "fill-outline-color": "rgb(200, 100, 240)",
@@ -195,7 +167,6 @@
           </FillLayer>
 
           <LineLayer
-            filter={["==", ["get", "kind"], kind]}
             paint={{
               "line-color": "rgb(200, 100, 240)",
               "line-width": 2.5,
