@@ -144,13 +144,16 @@ fn split_polygon(polygon: Polygon, linestrings: &Vec<LineString>) -> Vec<Polygon
 
     let splitters: Vec<_> = linestrings.iter().map(to_i_overlay_contour).collect();
     let shapes = shape.slice_by(&splitters, FillRule::NonZero);
-    shapes.into_iter().map(to_geo_polygon).collect()
-}
 
-fn to_geo_polygon(rings: Vec<Vec<[f64; 2]>>) -> Polygon {
-    let mut interiors: Vec<LineString> = rings.into_iter().map(to_geo_linestring).collect();
-    let exterior = interiors.remove(0);
-    Polygon::new(exterior, interiors)
+    shapes
+        .into_iter()
+        .map(|rings| {
+            let exterior = rings.into_iter().next().expect("shapes must be non-empty");
+            let exterior_line_string = to_geo_linestring(exterior);
+            // We ignore any interiors
+            Polygon::new(exterior_line_string, vec![])
+        })
+        .collect()
 }
 
 fn to_geo_linestring(pts: Vec<[f64; 2]>) -> LineString {
