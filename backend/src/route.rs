@@ -210,7 +210,7 @@ impl Route {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::osm_tests::load_osm_xml;
+    use crate::{osm_tests::load_osm_xml, FilterKind};
 
     fn r(road_id: usize) -> RoadID {
         RoadID(road_id)
@@ -233,12 +233,24 @@ mod tests {
         //               |
         //              i0
         // ```
-        let map = load_osm_xml("simple_four_way_intersection");
+        let mut map = load_osm_xml("simple_four_way_intersection");
         let Route { steps } = map.router_before.route_from_roads(r(3), r(2)).unwrap();
         assert_eq!(
             steps,
             vec![(r(3), Direction::Backwards), (r(2), Direction::Backwards)]
         );
+
+        // Filter r2
+        map.add_modal_filter(
+            map.get_r(r(2)).linestring.0[0],
+            Some(vec![r(2)]),
+            FilterKind::NoEntry,
+        );
+        map.rebuild_router(1.0);
+        let router_after = map.router_after.as_ref().unwrap();
+        // A route starting or ending there should fail
+        assert!(router_after.route_from_roads(r(2), r(3)).is_none());
+        assert!(router_after.route_from_roads(r(3), r(2)).is_none());
     }
 
     #[test]

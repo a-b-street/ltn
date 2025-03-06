@@ -158,6 +158,9 @@ impl Intersection {
             if to_road.id == from_road.id {
                 return None;
             }
+            if router_input.has_modal_filter(to_road.id) {
+                return None;
+            }
             if router_input
                 .turn_restrictions(self.id)
                 .contains(&(from_r, to_road.id))
