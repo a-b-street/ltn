@@ -28,7 +28,7 @@ export let densityLimits = [0, 4700, 13000, 33000, 94000, 1980000];
 export let demandColorScale = commonQuintileColorScale.toReversed();
 
 export let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];
-export let areaColorScale = commonQuintileColorScale;
+export let areaColorScale = commonQuintileColorScale.toReversed();
 
 export let stats19Limits = [0, 1.0, 10.0, 50.0, 100.0, 1000.0];
 export let stats19ColorScale = commonQuintileColorScale.toReversed();
