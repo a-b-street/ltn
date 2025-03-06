@@ -308,7 +308,6 @@
           type: "FeatureCollection",
           features: [selectedBoundary],
         }}
-        generateId
       >
         <LineLayer
           {...layerId("neighbourhood-boundaries-selected-outline", false)}
