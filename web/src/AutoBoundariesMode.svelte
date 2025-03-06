@@ -17,7 +17,10 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
   import {
+    areaColorScale,
     areaLimits,
+    densityColorScale,
+    densityLimits,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
@@ -150,8 +153,13 @@
         "orange",
         "black",
       ] as DataDrivenPropertyValueSpecification<string>,
+      area: makeRamp(["get", "area_km2"], areaLimits, areaColorScale),
+      density: makeRamp(
+        ["/", ["get", "population"], ["get", "area_km2"]],
+        densityLimits,
+        densityColorScale,
+      ),
       simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
-      area: makeRamp(["get", "area_km2"], areaLimits, simdColorScale),
       stats19: makeRamp(
         ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
         stats19Limits,
@@ -165,8 +173,9 @@
   ): DataDrivenPropertyValueSpecification<number> {
     return {
       none: hoverStateFilter(0.3, 0.5),
-      simd: hoverStateFilter(0.7, 0.9),
       area: hoverStateFilter(0.7, 0.9),
+      density: hoverStateFilter(0.7, 0.9),
+      simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
     }[selectedPrioritization];
   }
@@ -233,11 +242,20 @@
               </td>
             </tr>
             <tr>
+              <th>Population density</th>
+              <td>
+                {Math.round(
+                  selectedBoundary.properties.population /
+                    selectedBoundary.properties.area_km2,
+                ).toLocaleString()} people / km²
+              </td>
+            </tr>
+            <tr>
               <th>SIMD</th>
               <td>{selectedBoundary.properties.simd.toFixed(1)}%</td>
             </tr>
             <tr>
-              <th>Collision Density</th>
+              <th>Collision density</th>
               <td>
                 {(
                   selectedBoundary.properties.number_stats19_collisions /
@@ -326,6 +344,10 @@
           {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
             <b>Area:</b>
             {props.area_km2.toFixed(1)} km²
+          {:else if selectedPrioritization == "density"}
+            <b>Population density:</b>
+            {Math.round(props.population / props.area_km2).toLocaleString()} people
+            / km²
           {:else if selectedPrioritization == "simd"}
             <b>SIMD:</b>
             Less deprived than {props.simd.toFixed(1)}% of data zones.
