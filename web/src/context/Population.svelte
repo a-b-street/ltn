@@ -8,17 +8,19 @@
   import { SequentialLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
   import { layerId } from "../common";
-  import { bucketize, simdColorScale, simdLimits } from "../common/colors";
+  import {
+    bucketize,
+    densityColorScale,
+    densityLimits,
+    simdColorScale,
+    simdLimits,
+  } from "../common/colors";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
   import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
   import { assetUrl } from "../stores";
 
   let showSIMD = false;
   let showDensity = false;
-
-  let densityColorScale = simdColorScale.toReversed();
-  // Use the same (slightly rounded) buckets as https://www.ons.gov.uk/census/maps/choropleth/population/population-density/population-density/persons-per-square-kilometre. TODO Adapt for Scotland.
-  let densityLimits = [0, 4700, 13000, 33000, 94000, 1980000];
 </script>
 
 <ContextLayerButton label="SIMD" bind:show={showSIMD}>
@@ -48,7 +50,10 @@
 <ContextLayerButton label="Population density" bind:show={showDensity}>
   <div slot="legend">
     <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
-    <p>Darker colours are denser</p>
+    <div style="display: flex; justify-content: space-between;">
+      <span>Less less</span>
+      <span>More dense</span>
+    </div>
   </div>
 
   <p slot="help">

@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use anyhow::Result;
 use geo::line_measures::InterpolatableLine;
-use geo::{Coord, Euclidean, LineString, MultiPolygon, PreparedGeometry};
+use geo::{Coord, Euclidean, LineString, MultiPolygon};
 use osm_reader::{NodeID, OsmID, RelationID, WayID};
 use petgraph::graphmap::UnGraphMap;
 use rstar::{primitives::GeomWithData, RTree};
@@ -11,7 +11,7 @@ use utils::{
     Tags,
 };
 
-use crate::boundary_stats::{ContextData, PreparedContextData, PreparedPopulationZone};
+use crate::boundary_stats::ContextData;
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -142,26 +142,16 @@ pub fn create_from_osm(
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
 
-    let context_data = context_data_wgs84.map(|context_data_wgs84| PreparedContextData {
-        population_zones: context_data_wgs84
-            .population_zones
-            .into_iter()
-            .map(|mut population_zone| {
-                graph
-                    .mercator
-                    .to_mercator_in_place(&mut population_zone.geometry);
-
-                PreparedPopulationZone {
-                    prepared_geometry: PreparedGeometry::from(population_zone.geometry.clone()),
-                    population_zone,
-                }
-            })
-            .collect(),
-        stats19_collisions: context_data_wgs84
-            .stats19_collisions
-            .into_iter()
-            .map(|pt| graph.mercator.to_mercator(&pt))
-            .collect(),
+    let context_data = context_data_wgs84.map(|mut context_data_wgs84| {
+        for population_zone in &mut context_data_wgs84.population_zones {
+            graph
+                .mercator
+                .to_mercator_in_place(&mut population_zone.geometry)
+        }
+        for stats19_collision in &mut context_data_wgs84.stats19_collisions {
+            graph.mercator.to_mercator_in_place(stats19_collision)
+        }
+        context_data_wgs84.into_prepared()
     });
 
     // Add in a bit

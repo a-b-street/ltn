@@ -25,6 +25,7 @@ export type NeighbourhoodBoundaryFeature = Feature<
     area_km2: number;
     simd: number;
     number_stats19_collisions: number;
+    population: number;
   }
 >;
 
@@ -35,6 +36,7 @@ export type GeneratedBoundaryFeature = Feature<
     touches_railway: boolean;
     touches_waterway: boolean;
     area_km2: number;
+    population: number;
     simd: number;
     number_stats19_collisions: number;
   }
