@@ -64,7 +64,7 @@
   <SequentialLegend colorScale={areaColorScale} limits={areaLimits} />
 {:else if selectedPrioritization == "density"}
   <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
-  <div style="display: flex; justify-content: space-between;">
+  <div class="sub-labels">
     <span>Less less</span>
     <span>More dense</span>
   </div>
@@ -73,10 +73,18 @@
     colorScale={simdColorScale}
     buckets={bucketize(simdLimits)}
   />
-  <div style="display: flex; justify-content: space-between;">
+  <div class="sub-labels">
     <span>More deprived</span>
     <span>Less deprived</span>
   </div>
 {:else if selectedPrioritization == "stats19"}
   <SequentialLegend colorScale={stats19ColorScale} limits={stats19Limits} />
+  <div style="text-align: center;">collisions / km²</div>
 {/if}
+
+<style>
+  .sub-labels {
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
