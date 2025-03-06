@@ -217,7 +217,7 @@
   <div slot="sidebar">
     <h3 style="padding: 4px 8px; margin-bottom: 0">Neighbourhoods</h3>
     <ul class="neighbourhood-list">
-      {#each neighbourhoods.features as { properties: { name, area_km2, simd } }}
+      {#each neighbourhoods.features as { properties: { name } }}
         <li
           on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
           on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
@@ -246,17 +246,6 @@
               </button>
             </span>
           </span>
-          {#if selectedPrioritization == "area"}
-            <span>
-              <b>Area:</b>
-              {area_km2.toFixed(1)} km²
-            </span>
-          {:else if selectedPrioritization == "simd"}
-            <span>
-              <b>SIMD:</b>
-              Less deprived than {simd.toFixed(1)}% of data zones.
-            </span>
-          {/if}
         </li>
       {/each}
       <li>
@@ -328,10 +317,7 @@
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
 
-          {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
-            <b>Area:</b>
-            {props.area_km2.toFixed(1)} km²
-          {:else if selectedPrioritization == "density"}
+          {#if selectedPrioritization == "density"}
             <b>Population density:</b>
             {Math.round(props.population / props.area_km2).toLocaleString()} people
             / km²
