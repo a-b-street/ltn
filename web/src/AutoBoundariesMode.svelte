@@ -339,22 +339,21 @@
         hoverCursor="pointer"
         on:click={clickedBoundary}
       >
-        <Popup openOn="hover" let:props>
-          {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
-            <b>Area:</b>
-            {props.area_km2.toFixed(1)} km²
-          {:else if selectedPrioritization == "density"}
-            <b>Population density:</b>
-            {Math.round(props.population / props.area_km2).toLocaleString()} people
-            / km²
-          {:else if selectedPrioritization == "simd"}
-            <b>SIMD:</b>
-            Less deprived than {props.simd.toFixed(1)}% of data zones.
-          {:else if selectedPrioritization == "stats19"}
-            <b>Pedestrian and cyclist collisions:</b>
-            {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
-          {/if}
-        </Popup>
+        {#if selectedPrioritization != "simd"}
+          <Popup openOn="hover" let:props>
+            {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
+              <b>Area:</b>
+              {props.area_km2.toFixed(1)} km²
+            {:else if selectedPrioritization == "density"}
+              <b>Population density:</b>
+              {Math.round(props.population / props.area_km2).toLocaleString()} people
+              / km²
+            {:else if selectedPrioritization == "stats19"}
+              <b>Pedestrian and cyclist collisions:</b>
+              {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
+            {/if}
+          </Popup>
+        {/if}
       </FillLayer>
 
       <LineLayer
