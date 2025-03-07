@@ -31,9 +31,9 @@
   import {
     autosave,
     backend,
+    currentProjectKey,
     editPerimeterRoads,
     mode,
-    projectName,
   } from "./stores";
   import type { GeneratedBoundaryFeature } from "./wasm";
 
@@ -202,7 +202,7 @@
 
   <div slot="sidebar">
     <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
-    {#if $projectName.startsWith("ltn_cnt/")}
+    {#if $currentProjectKey.startsWith("ltn_cnt/")}
       <h3>Prioritization</h3>
       <p>Compare metrics across candidate neighbourhoods.</p>
       <PrioritizationSelect bind:selectedPrioritization />

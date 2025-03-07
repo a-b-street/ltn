@@ -10,9 +10,9 @@
     assetUrl,
     autosave,
     backend,
+    currentProjectKey,
     map,
     mode,
-    projectName,
   } from "../stores";
   import { Backend } from "../wasm";
   import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
@@ -37,7 +37,7 @@
         e.detail.boundary,
         undefined,
       );
-      $projectName = `ltn_${newProjectName}`;
+      $currentProjectKey = `ltn_${newProjectName}`;
       afterProjectLoaded();
       // No savefile to load. Create it immediately with just the boundary
       autosave();

@@ -9,10 +9,10 @@ import { routeTool } from "../common/draw_area/stores";
 import {
   assetUrl,
   backend,
+  currentProjectKey,
   map,
   mode,
   one_destination,
-  projectName,
   route_pt_a,
   route_pt_b,
 } from "../stores";
@@ -46,8 +46,7 @@ export async function createNewProject(
 }
 
 export async function loadFromLocalStorage(key: string) {
-  // REVIEW: rename this to "projectKey" or something - it's more than just the projectName.
-  projectName.set(key);
+  currentProjectKey.set(key);
   try {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
@@ -72,7 +71,7 @@ export async function loadFromLocalStorage(key: string) {
     afterProjectLoaded();
   } catch (err) {
     window.alert(`Couldn't open project: ${err}`);
-    projectName.set("");
+    currentProjectKey.set("");
   }
 }
 
@@ -162,7 +161,7 @@ export function afterProjectLoaded() {
 
   // Update the URL
   let url = new URL(window.location.href);
-  url.searchParams.set("project", get(projectName));
+  url.searchParams.set("project", get(currentProjectKey));
   window.history.replaceState(null, "", url.toString());
 }
 

@@ -61,7 +61,7 @@ export type Mode =
 export let map: Writable<Map | null> = writable(null);
 
 // The exact key in local storage
-export let projectName: Writable<string> = writable("");
+export let currentProjectKey: Writable<string> = writable("");
 // False until user activates
 export let showAbout: Writable<boolean> = writable(false);
 
@@ -85,7 +85,7 @@ export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
 export let thickRoadsForShortcuts = writable(false);
 
 export function autosave() {
-  let key = get(projectName);
+  let key = get(currentProjectKey);
   if (!key) {
     window.alert("Autosave failed; no projectName set?!");
   }

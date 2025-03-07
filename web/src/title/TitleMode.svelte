@@ -7,7 +7,7 @@
   import CntChooseArea from "../CntChooseArea.svelte";
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
-  import { backend, map, mode, projectName } from "../stores";
+  import { backend, currentProjectKey, map, mode } from "../stores";
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
@@ -20,7 +20,7 @@
   {
     $backend = null;
     $routeTool = null;
-    $projectName = "";
+    $currentProjectKey = "";
 
     if (firstLoad) {
       let params = new URLSearchParams(window.location.search);

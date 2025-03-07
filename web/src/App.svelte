@@ -43,11 +43,11 @@
   import Settings from "./Settings.svelte";
   import {
     backend,
+    currentProjectKey,
     map as mapStore,
     maptilerApiKey,
     maptilerBasemap,
     mode,
-    projectName,
     showAbout,
     useLocalVite,
   } from "./stores";
@@ -215,7 +215,7 @@
           <NavigationControl />
           <ScaleControl />
           <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
-          {#if $projectName.startsWith("ltn_cnt/")}
+          {#if $currentProjectKey.startsWith("ltn_cnt/")}
             <ContextualLayers />
           {/if}
 

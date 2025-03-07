@@ -28,9 +28,9 @@
   import {
     autosave,
     backend,
+    currentProjectKey,
     editPerimeterRoads,
     mode,
-    projectName,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
 
@@ -86,7 +86,7 @@
 
   function exportGJ() {
     downloadGeneratedFile(
-      $projectName + ".geojson",
+      $currentProjectKey + ".geojson",
       JSON.stringify($backend!.toSavefile()),
     );
   }
@@ -268,14 +268,14 @@
       </li>
     </ul>
 
-    {#if $projectName.startsWith("ltn_cnt/")}
+    {#if $currentProjectKey.startsWith("ltn_cnt/")}
       <h3>Prioritization</h3>
       <p>Compare metrics across your neighbourhoods.</p>
       <PrioritizationSelect bind:selectedPrioritization />
       <hr />
     {/if}
 
-    <p>Current project: {$projectName}</p>
+    <p>Current project: {$currentProjectKey}</p>
 
     <p>
       {edits.modalFilters} new modal filter(s) added

@@ -10,7 +10,7 @@
     stats19Limits,
   } from "../common/colors";
   import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
-  import { projectName } from "../stores";
+  import { currentProjectKey } from "../stores";
   import type { Prioritization } from "./index";
 
   export let selectedPrioritization: Prioritization;
@@ -29,7 +29,7 @@
     }
   }
 
-  if ($projectName.startsWith("ltn_cnt/")) {
+  if ($currentProjectKey.startsWith("ltn_cnt/")) {
     setSelectedPrioritizationFromURL();
   } else {
     selectedPrioritization = "none";
