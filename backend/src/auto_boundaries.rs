@@ -2,7 +2,8 @@ use crate::boundary_stats::BoundaryStats;
 use crate::geo_helpers::make_polygon_valid;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::{Coord, Intersects, LineString, Polygon};
+use geo::Geometry::MultiPolygon;
+use geo::{Area, Buffer, Coord, Intersects, LineString, Polygon};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
@@ -60,22 +61,42 @@ impl MapModel {
 
     pub fn generate_merged_boundary(
         &self,
-        boundaries_to_merge: &[GeneratedBoundary],
+        boundaries_to_merge: Vec<GeneratedBoundary>,
     ) -> Result<NeighbourhoodBoundary> {
-        let mut merged = geo::unary_union(
-            boundaries_to_merge
-                .iter()
-                .map(|boundary| &boundary.geometry),
-        );
+        let polygons = boundaries_to_merge
+            .into_iter()
+            .map(|b| b.geometry)
+            .collect();
+        let original_bounaries = MultiPolygon(polygons);
 
-        let Some(geometry) = merged.0.pop() else {
-            debug_assert!(false, "Empty boundaries shouldn't be possible");
-            bail!("Empty boundary");
+        // Merged boundaries must be adjacent, but it's important to allow a little slop,
+        // because our severance-based boundary generation can insert tiny slivers between
+        // neighbourhoods.
+        let adjacency_tolerance = 15.0;
+        // Note that buffering geometries will union them if the buffering results in overlap,
+        // no need for an explicit `unary_union` step.
+        let merged = original_bounaries.buffer(adjacency_tolerance);
+
+        let area_polygons = merged.0.into_iter().map(|p| (p.unsigned_area(), p));
+
+        // Buffering can leave floating artifacts.
+        // I haven't investigated why yet, but dealing with it is simple enough.
+        // i_overaly offers a relevant sounding `min_area` parameter, but it's not currently exposed
+        // by geo's buffer integration.
+        //
+        // For perspective, a 60m roundabout has an area around 1200m²
+        let buffering_artifact_threshold_m2 = 1000.;
+        let mut merged_boundaries: Vec<_> = area_polygons
+            .filter(|(area, _polygon)| *area > buffering_artifact_threshold_m2)
+            .collect();
+
+        let geometry = match merged_boundaries.len() {
+            0 => bail!("Empty boundary"),
+            1 => merged_boundaries.pop().expect("verified non-empty").1,
+            _ => {
+                bail!("All included boundaries must be adjacent");
+            }
         };
-
-        if !merged.0.is_empty() {
-            bail!("All included boundaries must be adjacent");
-        }
 
         let definition = NeighbourhoodDefinition {
             geometry,

@@ -64,11 +64,11 @@
     if (newBoundaries.size === 0) {
       selectedBoundary = null;
       selectedBoundaries = newBoundaries;
-    } else if (newBoundaries.size === 1) {
-      selectedBoundary = newBoundaries.values().next().value!;
-      selectedBoundaries = newBoundaries;
     } else {
       // Aggregate the selected boundaries
+      // Note: We "aggregate" even when there's only one selected boundary
+      // because the output is slightly buffered, and we don't want that to jitter
+      // when toggling between 1 and 2 selected boundaries.
       let featureCollection = {
         type: "FeatureCollection" as const,
         features: Array.from(newBoundaries.values()),
