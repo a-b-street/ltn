@@ -224,7 +224,7 @@ mod tests {
         assert_relative_eq!(boundary_stats.population, 60. + 6000.);
         assert_relative_eq!(boundary_stats.simd, 7.2 + 24.);
         assert_eq!(boundary_stats.number_stats19_collisions, 0);
-        assert_eq!(boundary_stats.pois, 0);
+        assert_eq!(boundary_stats.number_pois, 0);
     }
 }
 
