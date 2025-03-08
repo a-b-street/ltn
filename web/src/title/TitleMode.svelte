@@ -1,20 +1,17 @@
 <script lang="ts">
   import { Pencil, Trash2 } from "lucide-svelte";
-  import { getContext } from "svelte";
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import type { AppFocus } from "../App.svelte";
   import CntChooseArea from "../CntChooseArea.svelte";
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
-  import { backend, currentProjectKey, map, mode } from "../stores";
+  import { appFocus, backend, currentProjectKey, map, mode } from "../stores";
   import { loadFromLocalStorage } from "./loader";
 
   export let wasmReady: boolean;
   export let firstLoad: boolean;
 
   let loading = "";
-  let appFocus: AppFocus = getContext("appFocus");
 
   // When other modes reset here, they can't clear state without a race condition
   {
@@ -123,7 +120,7 @@
   </div>
   <div slot="sidebar">
     {#if $map && wasmReady}
-      {#if appFocus == "global"}
+      {#if $appFocus == "global"}
         <div>
           <Link on:click={() => ($mode = { mode: "new-project" })}>
             New project
@@ -166,7 +163,7 @@
           Load a project from a file
           <input bind:this={fileInput} on:change={loadFile} type="file" />
         </label>
-      {:else if appFocus == "cnt"}
+      {:else if $appFocus == "cnt"}
         <CntChooseArea {loadProject} bind:activityIndicatorText={loading} />
       {/if}
     {:else}

@@ -15,7 +15,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
-  import { backend, mode } from "./stores";
+  import { backend, mode, returnToChooseProject } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
   type State =
@@ -55,9 +55,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

@@ -5,7 +5,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, mode } from "./stores";
+  import { backend, mode, returnToChooseProject } from "./stores";
 
   export let road: Feature;
 
@@ -28,9 +28,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

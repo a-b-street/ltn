@@ -35,6 +35,7 @@
     map,
     mode,
     mutationCounter,
+    returnToChooseProject,
     roadStyle,
   } from "../stores";
   import type {
@@ -249,9 +250,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
