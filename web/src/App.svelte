@@ -123,7 +123,7 @@
 <div class="pico">
   <About />
 </div>
-<div class="app-focus-{appFocus}">
+<div class="app-focus-{$appFocusStore}">
   <Layout>
     <div slot="top" class="pico" style="display: flex">
       <button class="outline" on:click={() => ($showAbout = true)}>

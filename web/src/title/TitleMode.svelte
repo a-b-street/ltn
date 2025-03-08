@@ -3,7 +3,7 @@
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
-  import { Link } from "../common";
+  import { Link, stripPrefix, stripSuffix } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { appFocus, backend, currentProjectKey, map, mode } from "../stores";
   import { loadFromLocalStorage } from "./loader";
@@ -70,10 +70,28 @@
 
   let fileInput: HTMLInputElement;
   async function loadFile(e: Event) {
-    // TODO Be careful with overwriting stuff, leading ltn_, etc
-    let key = "ltn_" + fileInput.files![0].name;
-    loading = `Loading from file ${key}`;
-    window.localStorage.setItem(key, await fileInput.files![0].text());
+    let filename = fileInput.files![0].name;
+    loading = `Loading from file ${filename}`;
+
+    let contents = await fileInput.files![0].text();
+    let gj = JSON.parse(contents);
+    // Is this a CNT project or a regular one?
+    let key = "";
+    if (gj.study_area_name && gj.study_area_name.startsWith("LAD_")) {
+      let kind = "ltn_cnt";
+      // Parse the project name from the filename, best effort. The user may
+      // have renamed the file.
+      let projectName = stripSuffix(
+        stripPrefix(filename, `${kind}_${gj.study_area_name}_`),
+        ".geojson",
+      );
+      key = `${kind}/${gj.study_area_name}/${projectName}`;
+    } else {
+      let projectName = stripSuffix(stripPrefix(filename, "ltn_"), ".geojson");
+      key = `ltn_${projectName}`;
+    }
+    // TODO Be careful with overwriting files
+    window.localStorage.setItem(key, contents);
     projectList = getProjectList();
     await loadFromLocalStorage(key);
     loading = "";
