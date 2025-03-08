@@ -21,6 +21,7 @@ fn main() -> Result<()> {
         let mut context_data = ContextData {
             population_zones: Vec::new(),
             stats19_collisions: Vec::new(),
+            pois: Vec::new(),
         };
 
         for population_zone_input in &population_zone_inputs {

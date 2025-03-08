@@ -11,7 +11,7 @@ use utils::{
     Tags,
 };
 
-use crate::boundary_stats::ContextData;
+use crate::boundary_stats::{ContextData, POIKind, POI};
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -25,10 +25,11 @@ struct Osm {
     barrier_nodes: BTreeSet<NodeID>,
     // Only represent one case of restricted turns (from, to) on a particular node
     turn_restrictions: HashMap<NodeID, Vec<(WayID, WayID)>>,
+    pois: Vec<POI>,
 }
 
 impl OsmReader for Osm {
-    fn node(&mut self, id: NodeID, _: Coord, tags: Tags) {
+    fn node(&mut self, id: NodeID, pt: Coord, tags: Tags) {
         // Tuning these by hand for a few known areas.
         // https://wiki.openstreetmap.org/wiki/Key:barrier is proper reference.
         if let Some(kind) = tags.get("barrier") {
@@ -37,6 +38,8 @@ impl OsmReader for Osm {
                 self.barrier_nodes.insert(id);
             }
         }
+
+        self.pois.extend(get_poi(&tags, pt));
     }
 
     fn way(
@@ -61,6 +64,11 @@ impl OsmReader for Osm {
                 node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
             ));
         }
+
+        self.pois.extend(get_poi(
+            &tags,
+            node_mapping[node_ids.into_iter().next().unwrap()],
+        ));
     }
 
     fn relation(&mut self, _: RelationID, members: &Vec<(String, OsmID)>, tags: &Tags) {
@@ -143,13 +151,18 @@ pub fn create_from_osm(
     graph.compact_ids();
 
     let context_data = context_data_wgs84.map(|mut context_data_wgs84| {
+        context_data_wgs84.pois.extend(osm.pois);
+
         for population_zone in &mut context_data_wgs84.population_zones {
             graph
                 .mercator
-                .to_mercator_in_place(&mut population_zone.geometry)
+                .to_mercator_in_place(&mut population_zone.geometry);
         }
         for stats19_collision in &mut context_data_wgs84.stats19_collisions {
-            graph.mercator.to_mercator_in_place(stats19_collision)
+            graph.mercator.to_mercator_in_place(stats19_collision);
+        }
+        for poi in &mut context_data_wgs84.pois {
+            graph.mercator.to_mercator_in_place(&mut poi.point);
         }
         context_data_wgs84.into_prepared()
     });
@@ -480,4 +493,24 @@ fn nodes_to_edges(graph: &Graph, nodes: Vec<utils::osm2graph::IntersectionID>) -
         edges.extend(graph.intersections[&i].edges.clone());
     }
     edges
+}
+
+fn get_poi(tags: &Tags, point: Coord) -> Option<POI> {
+    if tags.is_any("shop", vec!["convenience", "grocery", "supermarket"]) {
+        return Some(POI {
+            point: point.into(),
+            kind: POIKind::Grocery,
+            name: tags.get("name").cloned(),
+        });
+    }
+
+    if tags.is_any("amenity", vec!["community_centre", "library"]) {
+        return Some(POI {
+            point: point.into(),
+            kind: POIKind::CommunityCenter,
+            name: tags.get("name").cloned(),
+        });
+    }
+
+    None
 }

@@ -1,17 +1,20 @@
 <script lang="ts">
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
-  import { QualitativeLegend } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
+  import { notNull, QualitativeLegend } from "svelte-utils";
+  import { constructMatchExpression, Popup } from "svelte-utils/map";
   import { layerId } from "../common";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
-  import { assetUrl } from "../stores";
+  import { assetUrl, backend } from "../stores";
 
   let show = false;
 
+  // https://colorbrewer2.org/#type=qualitative&scheme=Accent&n=5
   let colors = {
-    Schools: "#7fc97f",
-    GPs: "#beaed4",
-    Hospitals: "#fdc086",
+    School: "#7fc97f",
+    GP: "#beaed4",
+    Hospital: "#fdc086",
+    Grocery: "#386cb0",
+    CommunityCenter: "#ffff99",
   };
 </script>
 
@@ -42,6 +45,10 @@
     >
       hospitals
     </a>
+    . Other data is from
+    <a href="https://www.openstreetmap.org/about" target="_blank">
+      OpenStreetMap
+    </a>
     .
   </p>
 </ContextLayerButton>
@@ -50,7 +57,7 @@
   <CircleLayer
     {...layerId("context-gp-practices")}
     paint={{
-      "circle-color": colors.GPs,
+      "circle-color": colors.GP,
       "circle-radius": 10,
       "circle-stroke-color": "black",
       "circle-stroke-width": 1,
@@ -67,7 +74,7 @@
   <CircleLayer
     {...layerId("context-hospitals")}
     paint={{
-      "circle-color": colors.Hospitals,
+      "circle-color": colors.Hospital,
       "circle-radius": 10,
       "circle-stroke-color": "black",
       "circle-stroke-width": 1,
@@ -84,7 +91,7 @@
   <CircleLayer
     {...layerId("context-schools")}
     paint={{
-      "circle-color": colors.Schools,
+      "circle-color": colors.School,
       "circle-radius": 10,
       "circle-stroke-color": "black",
       "circle-stroke-width": 1,
@@ -95,6 +102,29 @@
   >
     <Popup openOn="hover" let:props>
       {props.name} with {props.pupils} pupils
+    </Popup>
+  </CircleLayer>
+</GeoJSON>
+
+<GeoJSON data={notNull($backend).getPOIs()} generateId>
+  <CircleLayer
+    {...layerId("context-pois")}
+    paint={{
+      "circle-color": constructMatchExpression(
+        ["get", "kind"],
+        colors,
+        "black",
+      ),
+      "circle-radius": 10,
+      "circle-stroke-color": "black",
+      "circle-stroke-width": 1,
+    }}
+    layout={{
+      visibility: show ? "visible" : "none",
+    }}
+  >
+    <Popup openOn="hover" let:props>
+      {props.name || `unnamed ${props.kind}`}
     </Popup>
   </CircleLayer>
 </GeoJSON>

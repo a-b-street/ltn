@@ -212,9 +212,6 @@
           <NavigationControl />
           <ScaleControl />
           <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
-          {#if $currentProjectKey.startsWith("ltn_cnt/")}
-            <ContextualLayers />
-          {/if}
 
           <div bind:this={mapDiv} />
 
@@ -224,6 +221,10 @@
             <NewProjectMode />
           {/if}
           {#if $backend}
+            {#if $currentProjectKey.startsWith("ltn_cnt/")}
+              <ContextualLayers />
+            {/if}
+
             <GeoJSON data={$backend.getInvertedBoundary()}>
               <FillLayer
                 {...layerId("boundary")}
