@@ -12,6 +12,7 @@
   import boundariesUrl from "../assets/cnt_boundaries.geojson?url";
   import { Link } from "./common";
   import { createNewProject } from "./title/loader";
+  import LoadSavedProject from "./title/LoadSavedProject.svelte";
 
   export let loadProject: (project: string) => void;
   export let activityIndicatorText: string;
@@ -115,6 +116,8 @@
     </div>
   {/each}
 </div>
+
+<LoadSavedProject bind:loading={activityIndicatorText} />
 
 <GeoJSON data={gj} generateId>
   <FillLayer
