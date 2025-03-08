@@ -1,5 +1,5 @@
 use anyhow::Result;
-use backend::boundary_stats::{ContextData, PopulationZone};
+use backend::boundary_stats::{ContextData, POIKind, PopulationZone, POI};
 use data_prep::StudyArea;
 use geo::{MultiPolygon, Point, PreparedGeometry, Relate};
 use serde::Deserialize;
@@ -14,6 +14,7 @@ fn main() -> Result<()> {
     let population_zone_inputs = PopulationZoneInput::read_all_prepared_from_file()?;
     println!("Time since start {:?}", start.elapsed());
     let stats19_collisions = Stats19Input::read_all_from_file()?;
+    let pois = InputPOI::read_all_from_files()?;
 
     for study_area in &study_areas {
         let study_area_start = Instant::now();
@@ -41,6 +42,12 @@ fn main() -> Result<()> {
         for pt in &stats19_collisions {
             if study_area.0.relate(&pt.geometry).is_contains() {
                 context_data.stats19_collisions.push(pt.geometry);
+            }
+        }
+
+        for poi in &pois {
+            if study_area.0.relate(&poi.point).is_contains() {
+                context_data.pois.push(poi.clone());
             }
         }
 
@@ -85,8 +92,7 @@ struct PopulationZoneInput {
 impl PopulationZoneInput {
     fn read_all_from_file() -> Result<Vec<Self>> {
         let population_zones = geojson::de::deserialize_feature_collection_str_to_vec(
-            &std::fs::read_to_string("tmp/population.geojson")
-                .expect("missing population.geojson - see get_reference_layers.sh"),
+            &fs_err::read_to_string("tmp/population.geojson")?,
         )?;
         println!("Read {} population zones", population_zones.len());
         Ok(population_zones)
@@ -116,8 +122,37 @@ struct Stats19Input {
 impl Stats19Input {
     fn read_all_from_file() -> Result<Vec<Self>> {
         Ok(geojson::de::deserialize_feature_collection_str_to_vec(
-            &std::fs::read_to_string("atip-data-prep/stats19/tmp/stats19_clipped.geojson")
-                .expect("missing stats19_clipped.geojson - see get_reference_layers.sh"),
+            &fs_err::read_to_string("atip-data-prep/stats19/tmp/stats19_clipped.geojson")?,
         )?)
+    }
+}
+
+#[derive(Deserialize)]
+struct InputPOI {
+    #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
+    pub geometry: Point,
+    pub name: Option<String>,
+}
+
+impl InputPOI {
+    fn read_all_from_files() -> Result<Vec<POI>> {
+        let mut pois = Vec::new();
+        for (path, kind) in [
+            ("tmp/gp_practices.geojson", POIKind::GP),
+            ("tmp/hospitals.geojson", POIKind::Hospital),
+            ("tmp/schools.geojson", POIKind::School),
+        ] {
+            let input: Vec<InputPOI> = geojson::de::deserialize_feature_collection_str_to_vec(
+                &fs_err::read_to_string(path)?,
+            )?;
+            for poi in input {
+                pois.push(POI {
+                    kind,
+                    point: poi.geometry,
+                    name: poi.name,
+                });
+            }
+        }
+        Ok(pois)
     }
 }

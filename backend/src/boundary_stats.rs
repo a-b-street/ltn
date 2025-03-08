@@ -10,6 +10,7 @@ pub struct BoundaryStats {
     pub population: f64,
     pub simd: f64,
     pub number_stats19_collisions: u32,
+    pub number_pois: u32,
 }
 
 impl BoundaryStats {
@@ -19,6 +20,7 @@ impl BoundaryStats {
 
         let mut simd = 0.0;
         let mut number_stats19_collisions = 0;
+        let mut number_pois = 0;
         let mut population = 0.0;
         if let Some(context_data) = context_data {
             let prepared_polygon = PreparedGeometry::from(polygon);
@@ -49,8 +51,10 @@ impl BoundaryStats {
                 }
             }
 
-            // Counting incidents in a given neighbourhood, we want to include incidents that happen
-            // *on* the perimeter road, not just the interior.
+            // When counting stats19 collisions in a given neighbourhood, we want to include
+            // collisions that happen *on* the perimeter road, not just the interior. Similarly,
+            // POIs roughly on the other side of the perimeter road are still relevant. An LTN is
+            // likely to receive some kind of attention to the perimeter road itself too.
             //
             // Our road LineString's are center-lines, so to count incidents *on* the perimeter,
             // conceptually we need a buffer at least half a road-width beyond our perimeter.
@@ -79,6 +83,11 @@ impl BoundaryStats {
                     number_stats19_collisions += 1;
                 }
             }
+            for pt in &context_data.pois {
+                if prepared_buffered_polygon.relate(pois.point).is_contains() {
+                    number_pois += 1;
+                }
+            }
         }
 
         Self {
@@ -86,6 +95,7 @@ impl BoundaryStats {
             population,
             simd,
             number_stats19_collisions,
+            number_pois,
         }
     }
 }
@@ -199,6 +209,7 @@ mod tests {
         let context_data = ContextData {
             population_zones: vec![zone_1, zone_2],
             stats19_collisions: vec![],
+            pois: vec![],
         }
         .into_prepared();
 
@@ -213,6 +224,7 @@ mod tests {
         assert_relative_eq!(boundary_stats.population, 60. + 6000.);
         assert_relative_eq!(boundary_stats.simd, 7.2 + 24.);
         assert_eq!(boundary_stats.number_stats19_collisions, 0);
+        assert_eq!(boundary_stats.pois, 0);
     }
 }
 
@@ -225,6 +237,9 @@ pub struct POI {
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum POIKind {
-    Grocery,
     CommunityCenter,
+    GP,
+    Grocery,
+    Hospital,
+    School,
 }
