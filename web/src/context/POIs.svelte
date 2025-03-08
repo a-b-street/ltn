@@ -53,59 +53,6 @@
   </p>
 </ContextLayerButton>
 
-<GeoJSON data={assetUrl("cnt_layers/gp_practices.geojson")} generateId>
-  <CircleLayer
-    {...layerId("context-gp-practices")}
-    paint={{
-      "circle-color": colors.GP,
-      "circle-radius": 10,
-      "circle-stroke-color": "black",
-      "circle-stroke-width": 1,
-    }}
-    layout={{
-      visibility: show ? "visible" : "none",
-    }}
-  >
-    <Popup openOn="hover" let:props>{props.name}</Popup>
-  </CircleLayer>
-</GeoJSON>
-
-<GeoJSON data={assetUrl("cnt_layers/hospitals.geojson")} generateId>
-  <CircleLayer
-    {...layerId("context-hospitals")}
-    paint={{
-      "circle-color": colors.Hospital,
-      "circle-radius": 10,
-      "circle-stroke-color": "black",
-      "circle-stroke-width": 1,
-    }}
-    layout={{
-      visibility: show ? "visible" : "none",
-    }}
-  >
-    <Popup openOn="hover" let:props>{props.name}</Popup>
-  </CircleLayer>
-</GeoJSON>
-
-<GeoJSON data={assetUrl("cnt_layers/schools.geojson")} generateId>
-  <CircleLayer
-    {...layerId("context-schools")}
-    paint={{
-      "circle-color": colors.School,
-      "circle-radius": 10,
-      "circle-stroke-color": "black",
-      "circle-stroke-width": 1,
-    }}
-    layout={{
-      visibility: show ? "visible" : "none",
-    }}
-  >
-    <Popup openOn="hover" let:props>
-      {props.name} with {props.pupils} pupils
-    </Popup>
-  </CircleLayer>
-</GeoJSON>
-
 <GeoJSON data={notNull($backend).getPOIs()} generateId>
   <CircleLayer
     {...layerId("context-pois")}

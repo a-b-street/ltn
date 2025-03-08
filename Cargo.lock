@@ -341,6 +341,7 @@ dependencies = [
  "backend",
  "bincode",
  "csv",
+ "fs-err",
  "geo",
  "geojson",
  "serde",
@@ -417,6 +418,15 @@ name = "float_next_after"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8bf7cc16383c4b8d58b9905a8509f02926ce3058053c056376248d958c9df1e8"
+
+[[package]]
+name = "fs-err"
+version = "3.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f89bda4c2a21204059a977ed3bfe746677dfd137b83c339e702b0ac91d482aa"
+dependencies = [
+ "autocfg",
+]
 
 [[package]]
 name = "geo"

@@ -14,7 +14,7 @@ function schools {
   # From https://www.data.gov.uk/dataset/9a6f9d86-9698-4a5d-a2c8-89f3b212c52c/scottish-school-roll-and-locations
   wget https://maps.gov.scot/ATOM/shapefiles/SG_SchoolRoll_2023.zip
   unzip SG_SchoolRoll_2023.zip
-  ogr2ogr $OUT/schools.geojson \
+  ogr2ogr tmp/schools.geojson \
           -t_srs EPSG:4326 \
           SG_SchoolRoll_2023/SG_SchoolRoll_2023.shp \
           -sql 'SELECT SchoolType AS type, SchoolName AS name, PupilRoll AS pupils FROM SG_SchoolRoll_2023'
@@ -23,21 +23,21 @@ function schools {
 
 function gp_and_hospitals {
   # Manually register and download GeoJSON from https://data.spatialhub.scot/dataset/gp_practices-is
-  ogr2ogr tmp/gp_practices.geojson \
+  ogr2ogr tmp/raw_gp_practices.geojson \
           -t_srs EPSG:4326 \
           $1 \
           -sql 'SELECT address AS name FROM "GP_Practices_-_Scotland"'
 
   # Manually register and download GeoJSON from https://data.spatialhub.scot/dataset/nhs_hospitals-is
-  ogr2ogr tmp/hospitals.geojson \
+  ogr2ogr tmp/raw_hospitals.geojson \
           -t_srs EPSG:4326 \
           $2 \
           -sql 'SELECT sitename AS name FROM "NHS_Hospitals_-_Scotland"'
 
   # The bboxes or something else included are breaking parsing, so clean these up
-  jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: { name: .properties.name } }] }' tmp/gp_practices.geojson > $OUT/gp_practices.geojson
+  jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: { name: .properties.name } }] }' tmp/raw_gp_practices.geojson > tmp/gp_practices.geojson
 
-  jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: { name: .properties.name } }] }' tmp/hospitals.geojson > $OUT/hospitals.geojson
+  jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: { name: .properties.name } }] }' tmp/raw_hospitals.geojson > tmp/hospitals.geojson
 }
 
 function cbd {
