@@ -7,6 +7,7 @@ import { get, writable } from "svelte/store";
 import { safeFetch } from "../common";
 import { routeTool } from "../common/draw_area/stores";
 import {
+  appFocus,
   assetUrl,
   backend,
   currentProjectKey,
@@ -47,12 +48,16 @@ export async function createNewProject(
 
 export async function loadFromLocalStorage(key: string) {
   currentProjectKey.set(key);
+  let isCnt = key.startsWith("ltn_cnt/");
+  // TODO Should we also change the URL?
+  appFocus.set(isCnt ? "cnt" : "global");
+
   try {
     let gj = JSON.parse(window.localStorage.getItem(key)!);
 
     console.time("get input files");
     let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
-      await getInputFiles(gj, key.startsWith("ltn_cnt/"));
+      await getInputFiles(gj, isCnt);
     console.timeEnd("get input files");
     console.time("load");
     backend.set(
