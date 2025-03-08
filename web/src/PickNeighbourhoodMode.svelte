@@ -29,6 +29,7 @@
     autosave,
     backend,
     currentProjectKey,
+    devMode,
     editPerimeterRoads,
     mode,
   } from "./stores";
@@ -200,16 +201,18 @@
             Predict impact
           </Link>
         </li>
-        <li>
-          <Link on:click={() => ($mode = { mode: "debug-intersections" })}>
-            Debug intersections
-          </Link>
-        </li>
-        <li>
-          <Link on:click={() => ($mode = { mode: "debug-demand" })}>
-            Debug demand
-          </Link>
-        </li>
+        {#if $devMode}
+          <li>
+            <Link on:click={() => ($mode = { mode: "debug-intersections" })}>
+              Debug intersections
+            </Link>
+          </li>
+          <li>
+            <Link on:click={() => ($mode = { mode: "debug-demand" })}>
+              Debug demand
+            </Link>
+          </li>
+        {/if}
       </ul>
     </nav>
   </div>
@@ -287,9 +290,11 @@
     <p>{edits.travelFlows} road segment direction(s) changed</p>
 
     <button on:click={exportGJ}>Export project to GeoJSON</button>
-    <button class="secondary" on:click={debugRouteSnapper}>
-      Debug route-snapper
-    </button>
+    {#if $devMode}
+      <button class="secondary" on:click={debugRouteSnapper}>
+        Debug route-snapper
+      </button>
+    {/if}
   </div>
 
   <div slot="map">

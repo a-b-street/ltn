@@ -30,6 +30,7 @@
     animateShortcuts,
     autosave,
     backend,
+    devMode,
     editPerimeterRoads,
     filterType,
     map,
@@ -304,11 +305,13 @@
             Change this boundary
           </Link>
         </li>
-        <li>
-          <Link on:click={() => ($mode = { mode: "debug-neighbourhood" })}>
-            Debug
-          </Link>
-        </li>
+        {#if $devMode}
+          <li>
+            <Link on:click={() => ($mode = { mode: "debug-neighbourhood" })}>
+              Debug
+            </Link>
+          </li>
+        {/if}
       </ul>
     </nav>
   </div>
