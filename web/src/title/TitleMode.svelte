@@ -3,10 +3,11 @@
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
-  import { Link, stripPrefix, stripSuffix } from "../common";
+  import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { appFocus, backend, currentProjectKey, map, mode } from "../stores";
   import { loadFromLocalStorage } from "./loader";
+  import LoadSavedProject from "./LoadSavedProject.svelte";
 
   export let wasmReady: boolean;
   export let firstLoad: boolean;
@@ -66,35 +67,6 @@
     out.sort((a, b) => a[0].localeCompare(b[0]));
     out.push(["custom", custom]);
     return out;
-  }
-
-  let fileInput: HTMLInputElement;
-  async function loadFile(e: Event) {
-    let filename = fileInput.files![0].name;
-    loading = `Loading from file ${filename}`;
-
-    let contents = await fileInput.files![0].text();
-    let gj = JSON.parse(contents);
-    // Is this a CNT project or a regular one?
-    let key = "";
-    if (gj.study_area_name && gj.study_area_name.startsWith("LAD_")) {
-      let kind = "ltn_cnt";
-      // Parse the project name from the filename, best effort. The user may
-      // have renamed the file.
-      let projectName = stripSuffix(
-        stripPrefix(filename, `${kind}_${gj.study_area_name}_`),
-        ".geojson",
-      );
-      key = `${kind}/${gj.study_area_name}/${projectName}`;
-    } else {
-      let projectName = stripSuffix(stripPrefix(filename, "ltn_"), ".geojson");
-      key = `ltn_${projectName}`;
-    }
-    // TODO Be careful with overwriting files
-    window.localStorage.setItem(key, contents);
-    projectList = getProjectList();
-    await loadFromLocalStorage(key);
-    loading = "";
   }
 
   function deleteProject(key: string) {
@@ -177,10 +149,7 @@
           {/each}
         </ul>
 
-        <label>
-          Load a project from a file
-          <input bind:this={fileInput} on:change={loadFile} type="file" />
-        </label>
+        <LoadSavedProject bind:loading />
       {:else if $appFocus == "cnt"}
         <CntChooseArea {loadProject} bind:activityIndicatorText={loading} />
       {/if}
