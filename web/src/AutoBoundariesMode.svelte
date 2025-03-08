@@ -31,9 +31,9 @@
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { PrioritizationSelect, type Prioritization } from "./prioritization";
   import {
+    appFocus,
     autosave,
     backend,
-    currentProjectKey,
     editPerimeterRoads,
     mode,
     returnToChooseProject,
@@ -209,7 +209,7 @@
 
   <div slot="sidebar">
     <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
-    {#if $currentProjectKey.startsWith("ltn_cnt/")}
+    {#if $appFocus == "cnt"}
       <h3>Prioritization</h3>
       <p>Compare metrics across candidate neighbourhoods.</p>
       <PrioritizationSelect bind:selectedPrioritization />
