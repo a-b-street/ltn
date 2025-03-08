@@ -69,7 +69,7 @@ impl OsmReader for Osm {
             &tags,
             // TODO If a POI is tagged on the building itself, ideally we'd use its centroid. But
             // an arbitrary point on the boundary is good enough.
-            node_mapping[node_ids.into_iter().next().unwrap()],
+            node_mapping[&node_ids[0]],
         ));
     }
 

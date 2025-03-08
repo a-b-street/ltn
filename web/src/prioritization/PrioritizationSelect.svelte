@@ -12,7 +12,7 @@
     stats19Limits,
   } from "../common/colors";
   import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
-  import { currentProjectKey } from "../stores";
+  import { appFocus } from "../stores";
   import type { Prioritization } from "./index";
 
   export let selectedPrioritization: Prioritization;
@@ -33,7 +33,7 @@
     }
   }
 
-  if ($currentProjectKey.startsWith("ltn_cnt/")) {
+  if ($appFocus == "cnt") {
     setSelectedPrioritizationFromURL();
   } else {
     selectedPrioritization = "none";

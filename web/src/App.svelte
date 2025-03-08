@@ -40,7 +40,6 @@
   import {
     appFocus as appFocusStore,
     backend,
-    currentProjectKey,
     map as mapStore,
     maptilerApiKey,
     maptilerBasemap,
@@ -222,7 +221,7 @@
           {/if}
 
           {#if $backend}
-            {#if $currentProjectKey.startsWith("ltn_cnt/")}
+            {#if $appFocusStore == "cnt"}
               <ContextualLayers />
             {/if}
 

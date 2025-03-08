@@ -28,6 +28,7 @@
   import { ModalFilterLayer } from "./layers";
   import { PrioritizationSelect, type Prioritization } from "./prioritization";
   import {
+    appFocus,
     autosave,
     backend,
     currentProjectKey,
@@ -275,7 +276,7 @@
       </li>
     </ul>
 
-    {#if $currentProjectKey.startsWith("ltn_cnt/")}
+    {#if $appFocus == "cnt"}
       <h3>Prioritization</h3>
       <p>Compare metrics across your neighbourhoods.</p>
       <PrioritizationSelect bind:selectedPrioritization />
