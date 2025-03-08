@@ -141,8 +141,7 @@ impl LTN {
             f.set_property("node_id", idx);
             features.push(f);
         }
-        let gj =
-            geojson::GeoJson::from(features.into_iter().collect::<geojson::FeatureCollection>());
+        let gj = GeoJson::from(features);
         Ok(serde_json::to_string(&gj).map_err(err_to_js)?)
     }
 
@@ -498,6 +497,21 @@ impl LTN {
             return Err(JsValue::from_str("no demand model"));
         };
         Ok(serde_json::to_string(&demand.to_gj(&self.map)).map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = getPOIs)]
+    pub fn get_pois(&self) -> Result<String, JsValue> {
+        let mut features = Vec::new();
+        if let Some(ref context_data) = self.map.context_data {
+            for poi in &context_data.pois {
+                let mut f = self.map.mercator.to_wgs84_gj(&poi.point);
+                f.set_property("name", poi.name.clone());
+                f.set_property("kind", serde_json::to_value(poi.kind).unwrap());
+                features.push(f);
+            }
+        }
+
+        Ok(serde_json::to_string(&GeoJson::from(features)).map_err(err_to_js)?)
     }
 
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to

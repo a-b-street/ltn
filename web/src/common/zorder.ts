@@ -129,6 +129,7 @@ const layerZorder = [
   "context-gp-practices",
   "context-hospitals",
   "context-schools",
+  "context-pois",
   "context-railway-stations",
   "context-stats19",
 

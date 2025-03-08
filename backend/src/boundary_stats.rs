@@ -96,6 +96,7 @@ impl BoundaryStats {
 pub struct ContextData {
     pub population_zones: Vec<PopulationZone>,
     pub stats19_collisions: Vec<Point>,
+    pub pois: Vec<POI>,
 }
 
 impl ContextData {
@@ -117,6 +118,7 @@ impl ContextData {
         PreparedContextData {
             population_zones,
             stats19_collisions: self.stats19_collisions,
+            pois: self.pois,
         }
     }
 }
@@ -125,6 +127,7 @@ impl ContextData {
 pub struct PreparedContextData {
     pub population_zones: Vec<PreparedPopulationZone>,
     pub stats19_collisions: Vec<Point>,
+    pub pois: Vec<POI>,
 }
 
 /// Note when we deserialize this entity it will be in WGS84, but we should immediately
@@ -211,4 +214,17 @@ mod tests {
         assert_relative_eq!(boundary_stats.simd, 7.2 + 24.);
         assert_eq!(boundary_stats.number_stats19_collisions, 0);
     }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct POI {
+    pub point: Point,
+    pub kind: POIKind,
+    pub name: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+pub enum POIKind {
+    Grocery,
+    CommunityCenter,
 }

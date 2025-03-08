@@ -301,6 +301,10 @@ export class Backend {
     }
     return gj;
   }
+
+  getPOIs(): FeatureCollection<Point, { name?: string; kind: string }> {
+    return JSON.parse(this.inner.getPOIs());
+  }
 }
 
 type TurnRestrictionKind =
