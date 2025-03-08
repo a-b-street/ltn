@@ -20,7 +20,7 @@ pub struct Path {
 
 impl Shortcuts {
     pub fn new(map: &MapModel, neighbourhood: &Neighbourhood) -> Self {
-        let router_input = neighbourhood.router_input(map);
+        let router_input = neighbourhood.shortcuts_router_input(map);
         let router = Router::new(&router_input, 1.0);
         let mut paths = Vec::new();
         let mut count_per_road = HashMap::new();

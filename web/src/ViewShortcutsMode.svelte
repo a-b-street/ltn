@@ -10,8 +10,8 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
-    InteriorRoadLayer,
     ModalFilterLayer,
+    NeighbourhoodRoadLayer,
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
@@ -109,18 +109,24 @@
       <OneWayLayer />
 
       {#if state.state == "neutral"}
-        <InteriorRoadLayer onClickLine={choseRoad}>
+        <NeighbourhoodRoadLayer onClickLine={choseRoad}>
           <div slot="line-popup">
             <Popup openOn="hover" let:props>
-              <p>
-                {props.shortcuts} shortcuts through {props.name ??
-                  "unnamed road"}
-              </p>
+              {#if props.kind == "interior_road"}
+                <p>
+                  {props.shortcuts} shortcuts through {props.name ??
+                    "unnamed road"}
+                </p>
+              {:else if props.kind == "primary_road"}
+                <p>
+                  Primary road: {props.name ?? "unnamed road"}
+                </p>
+              {/if}
             </Popup>
           </div>
-        </InteriorRoadLayer>
+        </NeighbourhoodRoadLayer>
       {:else if state.state == "chose-road"}
-        <InteriorRoadLayer interactive={false} />
+        <NeighbourhoodRoadLayer interactive={false} />
       {/if}
     </RenderNeighbourhood>
 

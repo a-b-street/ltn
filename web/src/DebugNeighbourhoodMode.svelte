@@ -18,7 +18,7 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
-    InteriorRoadLayer,
+    NeighbourhoodRoadLayer,
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
@@ -108,7 +108,7 @@
         </Popup>
       </CircleLayer>
 
-      <InteriorRoadLayer
+      <NeighbourhoodRoadLayer
         interactive
         onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
       >
@@ -117,7 +117,7 @@
             <PropertiesTable properties={props} />
           </Popup>
         </div>
-      </InteriorRoadLayer>
+      </NeighbourhoodRoadLayer>
     </RenderNeighbourhood>
 
     <ModalFilterLayer>

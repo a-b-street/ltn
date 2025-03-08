@@ -3,8 +3,9 @@ pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 
 use geo::line_measures::InterpolatableLine;
 use geo::{
-    BooleanOps, BoundingRect, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
-    LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Rect, Validation,
+    BooleanOps, BoundingRect, Buffer, Contains, Coord, Distance, Euclidean, Intersects, Length,
+    Line, LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Rect,
+    Validation,
 };
 use rstar::AABB;
 use utils::LineSplit;
@@ -92,6 +93,37 @@ pub fn buffer_aabb(aabb: AABB<Point>, buffer_meters: f64) -> AABB<Point> {
             aabb.upper().y() + buffer_meters,
         ),
     )
+}
+
+/// Buffers a polygon, returning the largest of the output Polygons
+///
+/// Buffering can leave floating artifacts.
+/// I haven't investigated why yet, but dealing with it is simple enough.
+/// i_overlay offers a relevant sounding `min_area` parameter, but it's not currently exposed
+/// by geo's buffer integration.
+pub fn buffer_polygon(polygon: &Polygon, distance: f64) -> anyhow::Result<Polygon> {
+    let merged = polygon.buffer(distance);
+
+    use geo::Area;
+    let area_polygons = merged.0.into_iter().map(|p| (p.unsigned_area(), p));
+
+    // Anything smaller than this should be considered an artifact and discarded.
+    //
+    // We may have to tweak this if we encounter errors with the current value, which is on the
+    // order of "house sized" - much smaller than any expected neighbourhood.
+    let buffering_artifact_threshold_m2 = 1000.;
+    let mut merged_boundaries: Vec<_> = area_polygons
+        .filter(|(area, _polygon)| *area > buffering_artifact_threshold_m2)
+        .collect();
+
+    let geometry = match merged_boundaries.len() {
+        0 => bail!("Empty boundary"),
+        1 => merged_boundaries.pop().expect("verified non-empty").1,
+        _ => {
+            bail!("All included boundaries must be adjacent");
+        }
+    };
+    Ok(geometry)
 }
 
 // TODO What in the generics is going on here...

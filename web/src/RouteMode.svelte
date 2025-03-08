@@ -13,8 +13,8 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
-    InteriorRoadLayer,
     ModalFilterLayer,
+    NeighbourhoodRoadLayer,
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
@@ -103,7 +103,7 @@
         <HighlightBoundaryLayer />
         <CellLayer />
         <OneWayLayer />
-        <InteriorRoadLayer interactive={false} />
+        <NeighbourhoodRoadLayer interactive={false} />
       </RenderNeighbourhood>
     {/if}
 

@@ -15,21 +15,7 @@ impl MapModel {
         let mut road_severances = Vec::new();
 
         for road in &self.roads {
-            if road.tags.is_any(
-                "highway",
-                vec![
-                    "motorway",
-                    "motorway_link",
-                    "trunk",
-                    "trunk_link",
-                    "primary",
-                    "primary_link",
-                    "secondary",
-                    "secondary_link",
-                    "tertiary",
-                    "tertiary_link",
-                ],
-            ) {
+            if road.is_severance() {
                 severances.push(road.linestring.clone());
                 road_severances.push(road.linestring.clone());
             }

@@ -20,8 +20,8 @@
   import {
     CellLayer,
     HighlightBoundaryLayer,
-    InteriorRoadLayer,
     ModalFilterLayer,
+    NeighbourhoodRoadLayer,
     OneWayLayer,
     RenderNeighbourhood,
   } from "../layers";
@@ -31,7 +31,6 @@
     autosave,
     backend,
     devMode,
-    editPerimeterRoads,
     filterType,
     map,
     mode,
@@ -109,14 +108,6 @@
     allShortcuts = $backend!.getAllShortcuts();
 
     autosave();
-  }
-
-  function recalculateNeighbourhoodDefinition() {
-    $backend!.setCurrentNeighbourhood(
-      boundary!.properties.name,
-      $editPerimeterRoads,
-    );
-    $mutationCounter++;
   }
 
   function onClickLine(f: Feature, pt: LngLat) {
@@ -384,15 +375,6 @@
       Animate shortcuts
     </label>
 
-    <label>
-      <input
-        type="checkbox"
-        bind:checked={$editPerimeterRoads}
-        on:change={recalculateNeighbourhoodDefinition}
-      />
-      Include perimeter roads
-    </label>
-
     <div style="border: 1px solid black; padding: 4px">
       <label>
         Draw roads:
@@ -446,7 +428,7 @@
       <CellLayer />
       <OneWayLayer />
 
-      <InteriorRoadLayer
+      <NeighbourhoodRoadLayer
         interactive={action.kind == "filter" ||
           action.kind == "oneway" ||
           (action.kind == "turn_restriction" && action.from_road_id == null)}
@@ -454,10 +436,18 @@
       >
         <div slot="line-popup">
           <Popup openOn="hover" let:props>
-            <p>
-              {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
-              ({Math.round(props.speed_mph)} mph)
-            </p>
+            {#if props.kind == "interior_road"}
+              <p>
+                {props.shortcuts} shortcuts through {props.name ??
+                  "unnamed road"}
+                ({Math.round(props.speed_mph)} mph)
+              </p>
+            {:else if props.kind == "primary_road"}
+              <p>
+                Primary road: {props.name ?? "unnamed road"}
+                ({Math.round(props.speed_mph)} mph)
+              </p>
+            {/if}
             {#if action.kind == "filter"}
               <div>
                 <img
@@ -474,7 +464,7 @@
             {/if}
           </Popup>
         </div>
-      </InteriorRoadLayer>
+      </NeighbourhoodRoadLayer>
       <EditableIntersectionLayer
         interactive={action.kind == "filter"}
         neighbourhood={gj}
