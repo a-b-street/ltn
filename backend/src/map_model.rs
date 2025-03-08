@@ -111,6 +111,28 @@ impl fmt::Debug for Road {
     }
 }
 
+impl Road {
+    pub fn is_severance(&self) -> bool {
+        // PERF: is_any/has_any should take a const slice, not an owned vec... though maybe
+        // the compiler is smart enough to optimize this.
+        self.tags.is_any(
+            "highway",
+            vec![
+                "motorway",
+                "motorway_link",
+                "trunk",
+                "trunk_link",
+                "primary",
+                "primary_link",
+                "secondary",
+                "secondary_link",
+                "tertiary",
+                "tertiary_link",
+            ],
+        )
+    }
+}
+
 /// Connection between `Road` (segments).
 #[derive(Debug, Clone)]
 pub struct Intersection {

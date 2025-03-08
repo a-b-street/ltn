@@ -151,8 +151,8 @@ export class Backend {
     this.inner.renameNeighbourhoodBoundary(oldName, newName);
   }
 
-  setCurrentNeighbourhood(name: string, editPerimeterRoads: boolean) {
-    this.inner.setCurrentNeighbourhood(name, editPerimeterRoads);
+  setCurrentNeighbourhood(name: string) {
+    this.inner.setCurrentNeighbourhood(name);
   }
 
   addModalFilter(pt: LngLat, kind: string) {

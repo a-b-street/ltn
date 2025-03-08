@@ -49,9 +49,7 @@ impl NeighbourhoodFixture {
 
         // Uncomment if you want to re-save the savefiles
         // std::fs::write(self.savefile_path(), map.to_savefile().to_string())?;
-
-        let edit_perimeter_roads = false;
-        let neighbourhood = Neighbourhood::new(&map, boundary, edit_perimeter_roads)?;
+        let neighbourhood = Neighbourhood::new(&map, boundary)?;
         Ok((neighbourhood, map))
     }
 

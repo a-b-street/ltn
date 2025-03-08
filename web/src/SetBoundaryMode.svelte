@@ -8,7 +8,6 @@
   import {
     autosave,
     backend,
-    editPerimeterRoads,
     map,
     mode,
     returnToChooseProject,
@@ -45,7 +44,7 @@
         let feature = calculateArea($waypoints);
         $backend!.setNeighbourhoodBoundary(name, feature);
         autosave();
-        $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+        $backend!.setCurrentNeighbourhood(name);
         $mode = {
           mode: "neighbourhood",
         };

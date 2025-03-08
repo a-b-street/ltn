@@ -34,7 +34,6 @@
     appFocus,
     autosave,
     backend,
-    editPerimeterRoads,
     mode,
     returnToChooseProject,
   } from "./stores";
@@ -104,7 +103,7 @@
       };
       $backend!.setNeighbourhoodBoundary(name, feature);
       autosave();
-      $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+      $backend!.setCurrentNeighbourhood(name);
       $mode = {
         mode: "neighbourhood",
       };

@@ -80,7 +80,8 @@
   {...layerId("interior-roads-outlines")}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
-    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
+    // REVIEW: the interior-roads-outline was previously not visible - was that intentional?
+    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 1),
     "line-color": "black",
   }}
 />
@@ -91,6 +92,36 @@
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
     "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
+    "line-opacity": hoverStateFilter(1.0, 0.5),
+  }}
+  layout={{
+    "line-sort-key": ["get", "shortcuts"],
+  }}
+  on:click={(e) =>
+    interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
+  manageHoverState={interactive}
+  hoverCursor={interactive ? "pointer" : undefined}
+>
+  {#if interactive}
+    <slot name="line-popup" />
+  {/if}
+</LineLayer>
+
+<LineLayer
+  {...layerId("primary-roads-outlines")}
+  filter={["==", ["get", "kind"], "primary_road"]}
+  paint={{
+    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 6),
+    "line-color": "black",
+  }}
+/>
+
+<LineLayer
+  {...layerId("primary-roads")}
+  filter={["==", ["get", "kind"], "primary_road"]}
+  paint={{
+    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),
+    "line-color": hoverStateFilter("white", "blue"),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{

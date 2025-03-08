@@ -1,12 +1,14 @@
 use std::collections::BTreeSet;
 
 use crate::geo_helpers::{
-    invert_feature_geometry_in_place, make_polygon_valid, SliceNearestFrechetBoundary,
+    buffer_polygon, invert_feature_geometry_in_place, make_polygon_valid,
+    SliceNearestFrechetBoundary,
 };
 use anyhow::Result;
-use geo::{Buffer, Euclidean, Length, Line, LineString, Polygon, PreparedGeometry, Relate};
+use geo::{
+    Euclidean, Length, Line, LineString, MultiLineString, Polygon, PreparedGeometry, Relate,
+};
 use geojson::{Feature, FeatureCollection};
-use i_overlay::mesh::style::{LineJoin, OutlineStyle};
 use serde::{Deserialize, Serialize};
 use web_time::Instant;
 
@@ -62,12 +64,9 @@ pub struct Neighbourhood {
     // Immutable once created
     pub interior_roads: BTreeSet<RoadID>,
     // Immutable once created
-    pub perimeter_roads: BTreeSet<RoadID>,
+    pub primary_roads: BTreeSet<RoadID>,
     pub editable_intersections: BTreeSet<IntersectionID>,
     pub border_intersections: BTreeSet<IntersectionID>,
-    /// If true, shortcuts across perimeter roads will be calculated, and the user can edit these
-    /// roads.
-    pub edit_perimeter_roads: bool,
     pub boundary: NeighbourhoodBoundary,
     // Updated after mutations
     derived: Option<DerivedNeighbourhoodState>,
@@ -134,39 +133,29 @@ impl NeighbourhoodBoundary {
 }
 
 impl Neighbourhood {
-    pub fn new(
-        map: &MapModel,
-        boundary: NeighbourhoodBoundary,
-        edit_perimeter_roads: bool,
-    ) -> Result<Self> {
+    pub fn new(map: &MapModel, boundary: NeighbourhoodBoundary) -> Result<Self> {
         let t1 = Instant::now();
-        let bbox = buffer_aabb(aabb(boundary.geometry()), 50.0);
-
-        let prepared_boundary = PreparedGeometry::from(boundary.geometry());
 
         let mut interior_roads = BTreeSet::new();
-        let mut perimeter_roads = BTreeSet::new();
+        let mut primary_roads = BTreeSet::new();
         debug!(
             "boundary_polygon: {boundary_polygon:?}",
             boundary_polygon = boundary.geometry()
         );
+        // Buffer just a bit to account for floating point precision - if we buffer too much
+        // we'll inadvertenly include roads beyond the boundary.
+        let bbox = buffer_aabb(aabb(boundary.geometry()), 1.0);
+        let buffered_boundary = buffer_polygon(boundary.geometry(), 1.0)?;
         for obj in map.closest_road.locate_in_envelope_intersecting(&bbox) {
-            let r = &map.roads[obj.data.0];
-            let result = line_in_polygon(&r.linestring, &boundary.geometry(), &prepared_boundary);
-            debug!(
-                "linestring {road_id}: {linestring:?}, way: {way_id}, result: {result:?}",
-                road_id = obj.data,
-                linestring = r.linestring,
-                way_id = r.way
-            );
-            match result {
-                LineInPolygon::Inside => {
-                    interior_roads.insert(r.id);
-                }
-                LineInPolygon::Perimeter => {
-                    perimeter_roads.insert(r.id);
-                }
-                LineInPolygon::Outside => {}
+            let road = &map.roads[obj.data.0];
+            if !is_road_mostly_inside(&road.linestring, &buffered_boundary) {
+                continue;
+            }
+
+            if road.is_severance() {
+                primary_roads.insert(road.id);
+            } else {
+                interior_roads.insert(road.id);
             }
         }
 
@@ -179,19 +168,22 @@ impl Neighbourhood {
         {
             let intersection = map.get_i(obj.data);
             let mut interior_connections = 0;
-            let mut perimeter_connections = 0;
+            let mut primary_connections = 0;
 
             for road_id in &intersection.roads {
-                if interior_roads.contains(&road_id) {
+                if primary_roads.contains(road_id) {
+                    primary_connections += 1;
+                } else if interior_roads.contains(road_id) {
                     interior_connections += 1;
-                } else if perimeter_roads.contains(&road_id) {
-                    perimeter_connections += 1;
                 }
             }
 
-            if interior_connections == 4 && perimeter_connections == 0 {
+            if interior_connections == 4 && primary_connections == 0 {
+                // only 4-way interior intersections are eligible for diagonal intersections
                 editable_intersections.insert(intersection.id);
-            } else if interior_connections > 0 && perimeter_connections > 0 {
+            } else if interior_connections > 0 && primary_connections > 0 {
+                // border intersections represent an "input" of traffic into the neighbourhood.
+                // so it must be connected to both primary and non-primary roads
                 border_intersections.insert(intersection.id);
             }
         }
@@ -200,11 +192,11 @@ impl Neighbourhood {
             bail!("No roads inside the boundary");
         }
 
-        if perimeter_roads.is_empty() {
-            // App breaks without perimeter roads: without perimeter roads, there's only one cell,
+        if primary_roads.is_empty() {
+            // App breaks without primary_roads: without primary roads, there's only one cell,
             // so it counts as disconnected (because it doesn't touch a border intersection), and
             // thus we can't calculate shortcuts through it without those intersections.
-            bail!("No perimeter roads");
+            bail!("No primary roads");
         }
 
         let t3 = Instant::now();
@@ -215,11 +207,10 @@ impl Neighbourhood {
 
         let mut n = Self {
             interior_roads,
-            perimeter_roads,
+            primary_roads,
             boundary,
             editable_intersections,
             border_intersections,
-            edit_perimeter_roads,
             derived: None,
         };
         n.after_edit(map);
@@ -251,31 +242,26 @@ impl Neighbourhood {
         &self.boundary.name()
     }
 
-    // PERF: return iter
     pub fn editable_roads(&self) -> Vec<RoadID> {
-        if self.edit_perimeter_roads {
-            self.interior_roads
-                .iter()
-                .chain(self.perimeter_roads.iter())
-                .cloned()
-                .collect()
-        } else {
-            self.interior_roads.iter().cloned().collect()
-        }
+        self.interior_roads
+            .iter()
+            .chain(self.primary_roads.iter())
+            .cloned()
+            .collect()
     }
 
-    pub fn router_input<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
-        struct NeighbourhoodRouterInput<'a> {
+    pub fn shortcuts_router_input<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
+        struct NeighbourhoodShortcutsRouterInput<'a> {
             pub(crate) map: &'a MapModel,
             pub(crate) neighbourhood: &'a Neighbourhood,
         }
 
-        impl RouterInput for NeighbourhoodRouterInput<'_> {
+        impl RouterInput for NeighbourhoodShortcutsRouterInput<'_> {
             fn roads_iter(&self) -> impl Iterator<Item = &Road> {
                 self.neighbourhood
-                    .editable_roads()
-                    .into_iter()
-                    .map(|r| self.map.get_r(r))
+                    .interior_roads
+                    .iter()
+                    .map(|r| self.map.get_r(*r))
             }
 
             fn get_r(&self, r: RoadID) -> &Road {
@@ -303,7 +289,7 @@ impl Neighbourhood {
             }
         }
 
-        NeighbourhoodRouterInput {
+        NeighbourhoodShortcutsRouterInput {
             map: &map,
             neighbourhood: &self,
         }
@@ -317,33 +303,35 @@ impl Neighbourhood {
         // Create a neighbourhood "mask" to highlight the editable neighbourhood
         {
             let mut neighbourhood_mask = self.boundary.clone();
-            // The boundary falls directly on the perimeter center line, so it's ambiguous if it
-            // includes the perimeter or not. Let's grow or shrink the boundary accordingly:
-            let buffer_offset = if self.edit_perimeter_roads {
-                10.0
-            } else {
-                // There are often short segments just inside the interior, e.g. parking lot driveways
-                // So we don't want to encroach too far with the masking.
-                -5.0
-            };
-            let mut buffered = neighbourhood_mask.definition.geometry.buffer_with_style(
-                OutlineStyle::new(buffer_offset).line_join(LineJoin::Round(0.1)),
-            );
-            neighbourhood_mask.definition.geometry = if buffered.0.len() == 1 {
-                buffered.0.pop().expect("already checked len")
-            } else {
-                // A negative buffer could sever pathological geometries into two Polygons
-                // We don't support that, and just fall back to the unbuffered boundary.
-                warn!("Buffered boundary with {} polygons", buffered.0.len());
-                neighbourhood_mask.definition.geometry
-            };
+            neighbourhood_mask.definition.geometry = buffer_polygon(self.boundary.geometry(), 10.0)
+                .expect("valid neighbourhood buffering");
             let mut boundary_feature = neighbourhood_mask.to_feature(map);
             invert_feature_geometry_in_place(&mut boundary_feature);
             features.push(boundary_feature);
         }
 
-        for r in self.editable_roads() {
-            let road = map.get_r(r);
+        for r in &self.primary_roads {
+            let road = map.get_r(*r);
+            let mut f = road.to_gj(&map.mercator);
+            f.set_property("kind", "primary_road");
+            f.set_property("travel_flow", map.travel_flows[&r].to_string());
+            f.set_property(
+                "travel_flow_edited",
+                map.travel_flows[&r] != TravelFlow::from_osm(&road.tags),
+            );
+            f.set_property(
+                "edited",
+                map.travel_flows[&r] != TravelFlow::from_osm(&road.tags)
+                    || map.modal_filters.get(&r) != map.original_modal_filters.get(&r),
+            );
+            f.set_property("road", r.0);
+            if let Some(color) = derived.render_cells.colors_per_road.get(&r) {
+                f.set_property("cell_color", *color);
+            }
+            features.push(f)
+        }
+        for r in &self.interior_roads {
+            let road = map.get_r(*r);
             let mut f = road.to_gj(&map.mercator);
             f.set_property("kind", "interior_road");
             f.set_property(
@@ -481,6 +469,9 @@ enum LineInPolygon {
     Outside,
 }
 
+// We currently don't have a purpose for classifying roads as "perimeter", but I feel like it might
+// return, so I don't want to delete this just yet.
+#[allow(unused)]
 // NOTE: polygon must be `valid` (no spikes!) to get reasonable results
 fn line_in_polygon<'a>(
     linestring: &LineString,
@@ -536,6 +527,15 @@ fn perimeter_likelihood(line_string: &LineString, boundary: &Polygon) -> f64 {
     let metric = (-frechet_distance).exp();
     debug!("perimeter_likelihood: {metric}");
     metric
+}
+
+fn is_road_mostly_inside(line_string: &LineString, polygon: &Polygon) -> bool {
+    let clipped = {
+        let fragments = clip_linestring_to_polygon(line_string, polygon);
+        MultiLineString(fragments)
+    };
+    let ratio_inside = Euclidean.length(&clipped) / Euclidean.length(line_string);
+    ratio_inside > 0.99
 }
 
 #[cfg(test)]

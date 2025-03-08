@@ -33,7 +33,6 @@
     backend,
     currentProjectKey,
     devMode,
-    editPerimeterRoads,
     mode,
     returnToChooseProject,
   } from "./stores";
@@ -48,7 +47,7 @@
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
 
   function pickNeighbourhood(name: string) {
-    $backend!.setCurrentNeighbourhood(name, $editPerimeterRoads);
+    $backend!.setCurrentNeighbourhood(name);
     $mode = { mode: "neighbourhood" };
   }
 

@@ -217,11 +217,7 @@ impl LTN {
     }
 
     #[wasm_bindgen(js_name = setCurrentNeighbourhood)]
-    pub fn set_current_neighbourhood(
-        &mut self,
-        name: String,
-        edit_perimeter_roads: bool,
-    ) -> Result<(), JsValue> {
+    pub fn set_current_neighbourhood(&mut self, name: String) -> Result<(), JsValue> {
         let boundary = self.map.boundaries.get(&name).unwrap();
 
         // Are we still editing the same neighbourhood, just switching edit_perimeter_roads?
@@ -230,10 +226,8 @@ impl LTN {
             .as_ref()
             .map(|n| n.name() == name)
             .unwrap_or(false);
-        self.neighbourhood = Some(
-            Neighbourhood::new(&self.map, boundary.clone(), edit_perimeter_roads)
-                .map_err(err_to_js)?,
-        );
+        self.neighbourhood =
+            Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
 
         // Undoing edits in another neighbourhood doesn't make sense
         if !editing_same {
