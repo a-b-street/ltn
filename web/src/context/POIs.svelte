@@ -1,10 +1,10 @@
 <script lang="ts">
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
-  import { notNull, QualitativeLegend } from "svelte-utils";
+  import { QualitativeLegend } from "svelte-utils";
   import { constructMatchExpression, Popup } from "svelte-utils/map";
   import { layerId } from "../common";
   import ContextLayerButton from "../common/ContextLayerButton.svelte";
-  import { assetUrl, backend } from "../stores";
+  import { backend } from "../stores";
 
   let show = false;
 
@@ -53,25 +53,27 @@
   </p>
 </ContextLayerButton>
 
-<GeoJSON data={notNull($backend).getPOIs()} generateId>
-  <CircleLayer
-    {...layerId("context-pois")}
-    paint={{
-      "circle-color": constructMatchExpression(
-        ["get", "kind"],
-        colors,
-        "black",
-      ),
-      "circle-radius": 10,
-      "circle-stroke-color": "black",
-      "circle-stroke-width": 1,
-    }}
-    layout={{
-      visibility: show ? "visible" : "none",
-    }}
-  >
-    <Popup openOn="hover" let:props>
-      {props.name || `unnamed ${props.kind}`}
-    </Popup>
-  </CircleLayer>
-</GeoJSON>
+{#if $backend}
+  <GeoJSON data={$backend.getPOIs()} generateId>
+    <CircleLayer
+      {...layerId("context-pois")}
+      paint={{
+        "circle-color": constructMatchExpression(
+          ["get", "kind"],
+          colors,
+          "black",
+        ),
+        "circle-radius": 10,
+        "circle-stroke-color": "black",
+        "circle-stroke-width": 1,
+      }}
+      layout={{
+        visibility: show ? "visible" : "none",
+      }}
+    >
+      <Popup openOn="hover" let:props>
+        {props.name || `unnamed ${props.kind}`}
+      </Popup>
+    </CircleLayer>
+  </GeoJSON>
+{/if}

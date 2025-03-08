@@ -17,6 +17,8 @@
     areaLimits,
     densityColorScale,
     densityLimits,
+    poiColorScale,
+    poiLimits,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
@@ -136,6 +138,11 @@
         stats19Limits,
         stats19ColorScale,
       ),
+      pois: makeRamp(
+        ["/", ["get", "number_pois"], ["get", "area_km2"]],
+        poiLimits,
+        poiColorScale,
+      ),
     }[selectedPrioritization];
     return [
       "case",
@@ -155,6 +162,7 @@
       density: hoverStateFilter(0.7, 0.9),
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
+      pois: hoverStateFilter(0.7, 0.9),
     }[selectedPrioritization];
   }
 </script>
@@ -323,6 +331,9 @@
           {:else if selectedPrioritization == "stats19"}
             <b>Pedestrian and cyclist collisions:</b>
             {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
+          {:else if selectedPrioritization == "pois"}
+            <b>Points of interest:</b>
+            {(props.number_pois / props.area_km2).toFixed(1)} / km²
           {/if}
         </Popup>
       </FillLayer>

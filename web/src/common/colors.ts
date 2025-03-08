@@ -33,6 +33,9 @@ export let areaColorScale = commonQuintileColorScale.toReversed();
 export let stats19Limits = [0, 1.0, 10.0, 50.0, 100.0, 1000.0];
 export let stats19ColorScale = commonQuintileColorScale.toReversed();
 
+export let poiLimits = [0, 1.0, 10.0, 50.0, 100.0, 1000.0];
+export let poiColorScale = commonQuintileColorScale.toReversed();
+
 export function bucketize(limits: number[]) {
   let buckets = [];
   for (let i = 1; i < limits.length; i++) {

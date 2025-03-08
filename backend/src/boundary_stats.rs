@@ -83,8 +83,8 @@ impl BoundaryStats {
                     number_stats19_collisions += 1;
                 }
             }
-            for pt in &context_data.pois {
-                if prepared_buffered_polygon.relate(pois.point).is_contains() {
+            for poi in &context_data.pois {
+                if prepared_buffered_polygon.relate(&poi.point).is_contains() {
                     number_pois += 1;
                 }
             }
