@@ -1,5 +1,5 @@
 import type { Feature, Polygon } from "geojson";
-import { LngLat, type Map } from "maplibre-gl";
+import { LngLat, type LngLatBoundsLike, type Map } from "maplibre-gl";
 import { type AreaProps } from "route-snapper-ts";
 import { get, writable, type Writable } from "svelte/store";
 import type { Backend } from "./wasm";
@@ -65,6 +65,8 @@ export let currentProjectKey: Writable<string> = writable("");
 // False until user activates
 export let showAbout: Writable<boolean> = writable(false);
 
+export let appFocus: Writable<"global" | "cnt"> = writable("global");
+
 export let backend: Writable<Backend | null> = writable(null);
 export let route_pt_a: Writable<LngLat> = writable(new LngLat(0, 0));
 export let route_pt_b: Writable<LngLat> = writable(new LngLat(0, 0));
@@ -96,4 +98,14 @@ export let useLocalVite: Writable<boolean> = writable(false);
 
 export function assetUrl(path: string): string {
   return get(useLocalVite) ? `/${path}` : `https://assets.od2net.org/${path}`;
+}
+
+export function returnToChooseProject() {
+  mode.set({ mode: "title", firstLoad: false });
+
+  let bounds = [-180, -90, 180, 90] as LngLatBoundsLike;
+  if (get(appFocus) == "cnt") {
+    bounds = [-8.943, 54.631, -0.901, 59.489];
+  }
+  get(map)?.fitBounds(bounds, { duration: 500 });
 }

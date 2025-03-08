@@ -22,6 +22,7 @@
     backend,
     mainRoadPenalty,
     mode,
+    returnToChooseProject,
     route_pt_a,
     route_pt_b,
   } from "./stores";
@@ -43,9 +44,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

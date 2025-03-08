@@ -13,7 +13,7 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
   import { demandColorScale } from "./common/colors";
-  import { backend, mode } from "./stores";
+  import { backend, mode, returnToChooseProject } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
 
   let gj = emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>;
@@ -81,9 +81,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

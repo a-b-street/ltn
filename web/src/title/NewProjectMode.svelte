@@ -12,7 +12,7 @@
     backend,
     currentProjectKey,
     map,
-    mode,
+    returnToChooseProject,
   } from "../stores";
   import { Backend } from "../wasm";
   import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
@@ -74,9 +74,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>New project</li>
       </ul>

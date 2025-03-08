@@ -5,7 +5,14 @@
   import { gjPosition, Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
-  import { autosave, backend, editPerimeterRoads, map, mode } from "./stores";
+  import {
+    autosave,
+    backend,
+    editPerimeterRoads,
+    map,
+    mode,
+    returnToChooseProject,
+  } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;
@@ -70,9 +77,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

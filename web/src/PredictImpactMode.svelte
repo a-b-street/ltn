@@ -6,7 +6,7 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, mode } from "./stores";
+  import { backend, mode, returnToChooseProject } from "./stores";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
@@ -27,9 +27,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

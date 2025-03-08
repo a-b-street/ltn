@@ -154,7 +154,7 @@ export function afterProjectLoaded() {
       writable(0),
     ),
   );
-  get(map)!.fitBounds(get(backend)!.getBounds(), { animate: false });
+  get(map)!.fitBounds(get(backend)!.getBounds(), { duration: 500 });
   route_pt_a.set(randomPoint());
   route_pt_b.set(randomPoint());
   one_destination.set(randomPoint());

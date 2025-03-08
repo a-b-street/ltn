@@ -23,7 +23,7 @@
     RenderNeighbourhood,
   } from "./layers";
   import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
-  import { backend, mode } from "./stores";
+  import { backend, mode, returnToChooseProject } from "./stores";
 
   let intersection: DebugIntersection | null = null;
   type DebugIntersection = {
@@ -45,9 +45,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "title", firstLoad: false })}>
-            Choose project
-          </Link>
+          <Link on:click={returnToChooseProject}>Choose project</Link>
         </li>
         <li>
           <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>

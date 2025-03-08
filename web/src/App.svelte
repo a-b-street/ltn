@@ -1,7 +1,3 @@
-<script context="module" lang="ts">
-  export type AppFocus = "global" | "cnt";
-</script>
-
 <script lang="ts">
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
@@ -12,7 +8,7 @@
   import initLtn from "backend";
   import type { LngLatBoundsLike, Map, StyleSpecification } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
-  import { onMount, setContext } from "svelte";
+  import { onMount } from "svelte";
   import {
     FillLayer,
     GeoJSON,
@@ -42,6 +38,7 @@
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
   import Settings from "./Settings.svelte";
   import {
+    appFocus as appFocusStore,
     backend,
     currentProjectKey,
     map as mapStore,
@@ -54,6 +51,9 @@
   import NewProjectMode from "./title/NewProjectMode.svelte";
   import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
+
+  export let appFocus: "global" | "cnt" = "global";
+  appFocusStore.set(appFocus);
 
   let wasmReady = false;
   onMount(async () => {
@@ -95,9 +95,6 @@
     mapDiv.innerHTML = "";
     mapDiv.appendChild($mapContents);
   }
-
-  export let appFocus: AppFocus = "global";
-  setContext("appFocus", appFocus);
 
   let initialBounds: LngLatBoundsLike | undefined = undefined;
   if (appFocus == "cnt") {
