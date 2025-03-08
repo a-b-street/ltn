@@ -22,10 +22,12 @@ export type NeighbourhoodBoundaryFeature = Feature<
   {
     name: string;
     waypoints: Waypoint[];
+
     area_km2: number;
+    population: number;
     simd: number;
     number_stats19_collisions: number;
-    population: number;
+    number_pois: number;
   }
 >;
 
@@ -35,10 +37,12 @@ export type GeneratedBoundaryFeature = Feature<
     touches_big_road: boolean;
     touches_railway: boolean;
     touches_waterway: boolean;
+
     area_km2: number;
     population: number;
     simd: number;
     number_stats19_collisions: number;
+    number_pois: number;
   }
 >;
 

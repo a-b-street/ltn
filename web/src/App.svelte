@@ -220,6 +220,7 @@
           {:else if $mode.mode == "new-project"}
             <NewProjectMode />
           {/if}
+
           {#if $backend}
             {#if $currentProjectKey.startsWith("ltn_cnt/")}
               <ContextualLayers />

@@ -4,6 +4,8 @@
     bucketize,
     densityColorScale,
     densityLimits,
+    poiColorScale,
+    poiLimits,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
@@ -26,6 +28,8 @@
       selectedPrioritization = "simd";
     } else if (currentURLParam == "stats19") {
       selectedPrioritization = "stats19";
+    } else if (currentURLParam == "pois") {
+      selectedPrioritization = "pois";
     }
   }
 
@@ -52,6 +56,7 @@
     <option value="density">Density</option>
     <option value="stats19">Collisions</option>
     <option value="simd">SIMD</option>
+    <option value="pois">Points of interest</option>
   </select>
 </div>
 
@@ -73,6 +78,9 @@
 {:else if selectedPrioritization == "stats19"}
   <SequentialLegend colorScale={stats19ColorScale} limits={stats19Limits} />
   <div style="text-align: center;">collisions / km²</div>
+{:else if selectedPrioritization == "pois"}
+  <SequentialLegend colorScale={poiColorScale} limits={poiLimits} />
+  <div style="text-align: center;">POIs / km²</div>
 {/if}
 
 <style>
