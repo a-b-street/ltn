@@ -2,8 +2,7 @@
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { QualitativeLegend, SequentialLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
-  import { layerId, roadLineWidth } from "../common";
-  import ContextLayerButton from "../common/ContextLayerButton.svelte";
+  import { ContextLayerButton, layerId, roadLineWidth } from "../common";
   import { assetUrl } from "../stores";
 
   // The NPT project bundles together a few layers into one pmtiles file, all

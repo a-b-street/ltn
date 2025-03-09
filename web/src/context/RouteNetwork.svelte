@@ -5,8 +5,7 @@
   } from "maplibre-gl";
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { layerId } from "../common";
-  import ContextLayerButton from "../common/ContextLayerButton.svelte";
+  import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
   let show = false;
