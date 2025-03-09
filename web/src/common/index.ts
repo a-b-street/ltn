@@ -4,11 +4,13 @@ import type {
 } from "maplibre-gl";
 
 export { default as BasemapPicker } from "./BasemapPicker.svelte";
+export { default as ContextLayerButton } from "./ContextLayerButton.svelte";
 export { default as DisableInteractiveLayers } from "./DisableInteractiveLayers.svelte";
 export { default as DotMarker } from "./DotMarker.svelte";
 export { default as HelpButton } from "./HelpButton.svelte";
 export { default as Link } from "./Link.svelte";
 export { default as PrevNext } from "./PrevNext.svelte";
+export { default as SequentialLegendBucketed } from "./SequentialLegendBucketed.svelte";
 export { default as StreetView } from "./StreetView.svelte";
 export { layerId } from "./zorder";
 

@@ -10,10 +10,18 @@
   export let road: Feature;
 
   // TODO Weird to modify the input like this?
-  road.properties!.kind = "focus";
+  let props = road.properties!;
+  props.kind = "focus";
 
-  let routes = $backend!.getImpactsOnRoad(road.properties!.id);
+  let routes = $backend!.getImpactsOnRoad(props.id);
   let idx = 0;
+
+  if (routes.length == 0) {
+    window.alert(
+      "No routes over this road change. (This is a bug in progress of being fixed.)",
+    );
+    $mode = { mode: "predict-impact" };
+  }
 
   function gj(idx: number): FeatureCollection {
     return {
@@ -45,59 +53,64 @@
       Pick a different road
     </Link>
 
-    <PrevNext list={routes} bind:idx />
-
     <p>
-      <span style="color: red">Route before</span>
-      ,
-      <span style="color: blue">route after</span>
+      {props.before.toLocaleString()} routes cross here
+      <span style:color="red">before your changes</span>
+      , and {props.after.toLocaleString()}
+      <span style:color="blue">after your changes</span>
+      . That's
+      {Math.round((100 * props.after) / props.before)}% of the original traffic.
     </p>
+
+    <PrevNext list={routes} bind:idx />
   </div>
 
   <div slot="map">
-    <GeoJSON data={gj(idx)}>
-      <LineLayer
-        {...layerId("predict-impact")}
-        paint={{
-          "line-width": constructMatchExpression(
-            ["get", "kind"],
-            {
-              focus: 8,
-            },
-            5,
-          ),
-          "line-color": constructMatchExpression(
-            ["get", "kind"],
-            {
-              focus: "black",
-              before: "red",
-              after: "blue",
-            },
-            "cyan",
-          ),
-          "line-opacity": constructMatchExpression(
-            ["get", "kind"],
-            {
-              focus: 1.0,
-            },
-            0.5,
-          ),
-        }}
-      />
-    </GeoJSON>
+    {#if routes.length > 0}
+      <GeoJSON data={gj(idx)}>
+        <LineLayer
+          {...layerId("predict-impact")}
+          paint={{
+            "line-width": constructMatchExpression(
+              ["get", "kind"],
+              {
+                focus: 8,
+              },
+              5,
+            ),
+            "line-color": constructMatchExpression(
+              ["get", "kind"],
+              {
+                focus: "black",
+                before: "red",
+                after: "blue",
+              },
+              "cyan",
+            ),
+            "line-opacity": constructMatchExpression(
+              ["get", "kind"],
+              {
+                focus: 1.0,
+              },
+              0.5,
+            ),
+          }}
+        />
+      </GeoJSON>
 
-    <DotMarker lngLat={gjPosition(routes[idx][0].geometry.coordinates[0])}>
-      A
-    </DotMarker>
-    <DotMarker
-      lngLat={gjPosition(
-        routes[idx][0].geometry.coordinates[
-          routes[idx][0].geometry.coordinates.length - 1
-        ],
-      )}
-    >
-      B
-    </DotMarker>
+      <DotMarker lngLat={gjPosition(routes[idx][0].geometry.coordinates[0])}>
+        A
+      </DotMarker>
+      <DotMarker
+        lngLat={gjPosition(
+          routes[idx][0].geometry.coordinates[
+            routes[idx][0].geometry.coordinates.length - 1
+          ],
+        )}
+      >
+        B
+      </DotMarker>
+    {/if}
 
     <ModalFilterLayer />
   </div>

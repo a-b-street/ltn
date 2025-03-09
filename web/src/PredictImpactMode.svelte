@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { layerId, Link, SequentialLegendBucketed } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, mode, returnToChooseProject } from "./stores";
 
@@ -12,7 +12,8 @@
   // The middle color white doesn't matter; the source data will filter out unchanged roads
   let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
 
-  let data = $backend!.predictImpact();
+  let impactGj = $backend!.predictImpact();
+  let neighbourhoods = $backend!.getAllNeighbourhoods();
 
   let minRoadWidth = 3;
   let maxRoadWidth = 10;
@@ -54,12 +55,44 @@
     </p>
     <p>
       Thicker roads have more traffic after edits, relative to the max count for
-      any road: {data.max_count.toLocaleString()}
+      any road: {impactGj.max_count.toLocaleString()}
     </p>
+
+    <SequentialLegendBucketed
+      colorScale={divergingScale}
+      buckets={["0%", "50%", "same", "150%", "200%"]}
+    />
   </div>
 
   <div slot="map">
-    <GeoJSON {data} generateId>
+    <GeoJSON data={neighbourhoods}>
+      <FillLayer
+        {...layerId("neighbourhood-boundaries", false)}
+        filter={["==", ["get", "kind"], "boundary"]}
+        paint={{
+          "fill-color": "grey",
+          "fill-opacity": 0.5,
+        }}
+      />
+    </GeoJSON>
+
+    <GeoJSON data={impactGj} generateId>
+      <LineLayer
+        {...layerId("predict-impact-outline")}
+        paint={{
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["get", "after"],
+            0,
+            1.5 * minRoadWidth,
+            impactGj.max_count,
+            1.5 * maxRoadWidth,
+          ],
+          "line-color": "black",
+        }}
+      />
+
       <LineLayer
         {...layerId("predict-impact")}
         paint={{
@@ -69,7 +102,7 @@
             ["get", "after"],
             0,
             minRoadWidth,
-            data.max_count,
+            impactGj.max_count,
             maxRoadWidth,
           ],
           "line-color": [

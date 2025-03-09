@@ -7,7 +7,11 @@
   } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { layerId } from "../common";
+  import {
+    ContextLayerButton,
+    layerId,
+    SequentialLegendBucketed,
+  } from "../common";
   import {
     bucketize,
     densityColorScale,
@@ -15,8 +19,6 @@
     simdColorScale,
     simdLimits,
   } from "../common/colors";
-  import ContextLayerButton from "../common/ContextLayerButton.svelte";
-  import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
   import { assetUrl } from "../stores";
 
   let showSIMD = false;
