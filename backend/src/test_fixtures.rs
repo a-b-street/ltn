@@ -123,6 +123,15 @@ impl NeighbourhoodFixture {
         })
     }
 
+    pub fn bench_sample_size(&self) -> usize {
+        if self.study_area_name == Self::STRASBOURG.study_area_name {
+            // Strasbourg is big and slow, so we bench it fewer times
+            10
+        } else {
+            100
+        }
+    }
+
     pub fn savefile(&self) -> Result<FeatureCollection> {
         let savefile: FeatureCollection = std::fs::read_to_string(self.savefile_path())?.parse()?;
         Ok(savefile)

@@ -10,12 +10,9 @@ fn benchmark_build_neighbourhood(c: &mut Criterion) {
     ] {
         let (neighbourhood_boundary, map) = neighbourhood.neighbourhood_params().unwrap();
         let edit_perimeter_roads = false;
-        c.bench_function(
-            &format!(
-                "build neighbourhood: {name}",
-                name = neighbourhood.savefile_name
-            ),
-            |b| {
+        c.benchmark_group(neighbourhood.savefile_name)
+            .sample_size(neighbourhood.bench_sample_size())
+            .bench_function("build neighbourhood", |b| {
                 b.iter(|| {
                     let neighbourhood = Neighbourhood::new(
                         &map,
@@ -25,8 +22,7 @@ fn benchmark_build_neighbourhood(c: &mut Criterion) {
                     .unwrap();
                     black_box(neighbourhood);
                 });
-            },
-        );
+            });
     }
 }
 
