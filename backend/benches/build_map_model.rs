@@ -9,18 +9,14 @@ fn benchmark_build_map_model(c: &mut Criterion) {
     ] {
         // Do the file i/o (reading OSM.xml) outside of the bench loop
         let map_model_builder = neighbourhood.map_model_builder().unwrap();
-        c.bench_function(
-            &format!(
-                "build map_model: {name}",
-                name = neighbourhood.study_area_name
-            ),
-            |b| {
+        c.benchmark_group(neighbourhood.savefile_name)
+            .sample_size(neighbourhood.bench_sample_size())
+            .bench_function("build map_model", |b| {
                 b.iter(|| {
                     let map_model = map_model_builder().unwrap();
                     black_box(map_model);
                 });
-            },
-        );
+            });
     }
 }
 
