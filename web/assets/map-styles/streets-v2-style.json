@@ -1792,7 +1792,7 @@
         "visibility": "visible"
       },
       "paint": {
-        "line-color": "hsl(28,72%,69%)",
+        "line-color": "hsl(0,0%,20%)",
         "line-opacity": 1,
         "line-width": [
           "interpolate",
@@ -2336,11 +2336,6 @@
               "class"
             ],
             [
-              "secondary",
-              "tertiary"
-            ],
-            1.5,
-            [
               "minor",
               "service",
               "track"
@@ -2355,14 +2350,6 @@
               "get",
               "class"
             ],
-            [
-              "secondary"
-            ],
-            4,
-            [
-              "tertiary"
-            ],
-            3,
             [
               "minor",
               "service",
@@ -2379,14 +2366,6 @@
               "class"
             ],
             [
-              "secondary"
-            ],
-            7,
-            [
-              "tertiary"
-            ],
-            6,
-            [
               "minor",
               "service",
               "track"
@@ -2401,14 +2380,6 @@
               "get",
               "class"
             ],
-            [
-              "secondary"
-            ],
-            24,
-            [
-              "tertiary"
-            ],
-            24,
             [
               "minor",
               "service",
@@ -2441,6 +2412,13 @@
           "pier",
           "primary",
           "primary_construction",
+          "primary_link",
+          "trunk",
+          "trunk_link",
+          "secondary",
+          "secondary_link",
+          "tertiary",
+          "tertiary_link",
           "rail",
           "secondary_construction",
           "service_construction",
@@ -2560,7 +2538,13 @@
           "in",
           "class",
           "primary",
-          "trunk"
+          "primary_link",
+          "trunk",
+          "trunk_link",
+          "secondary",
+          "secondary_link",
+          "tertiary",
+          "tertiary_link"
         ]
       ]
     },
