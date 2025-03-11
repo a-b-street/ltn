@@ -12,7 +12,8 @@
   }}
   paint={{
     "fill-color": ["get", "color"],
-    "fill-opacity": 0.8,
+    "fill-opacity": 0.5,
+    "fill-outline-color": "hsla(0, 0%, 0%, 0.3)",
   }}
 />
 
