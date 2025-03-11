@@ -80,7 +80,6 @@
   {...layerId("interior-roads-outlines")}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
-    // REVIEW: the interior-roads-outline was previously not visible - was that intentional?
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 1),
     "line-color": "black",
   }}
