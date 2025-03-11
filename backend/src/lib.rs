@@ -182,7 +182,7 @@ impl LTN {
             .collect::<Result<Vec<GeneratedBoundary>, JsValue>>()?;
         let merged_boundary = self
             .map
-            .generate_merged_boundary(&generated_boundaries)
+            .generate_merged_boundary(generated_boundaries)
             .map_err(err_to_js)?;
         Ok(serde_json::to_string(&merged_boundary.to_feature(&self.map)).map_err(err_to_js)?)
     }
