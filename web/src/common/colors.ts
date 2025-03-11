@@ -22,8 +22,15 @@ export let simdColorScale = commonQuintileColorScale;
 export let simdLimits = [0, 20, 40, 60, 80, 100];
 
 export let densityColorScale = commonQuintileColorScale.toReversed();
-// Use the same (slightly rounded) buckets as https://www.ons.gov.uk/census/maps/choropleth/population/population-density/population-density/persons-per-square-kilometre. TODO Adapt for Scotland.
-export let densityLimits = [0, 4700, 13000, 33000, 94000, 1980000];
+
+// To get raw quintiles, run:
+//
+//     cd data_prep/scotland && cargo run --bin density_buckets
+//     > Raw limits for Scotland density (/ km²): [0, 1324, 2940, 4247, 5858, 52389]
+//
+// Slightly round those raw numbers:
+export let densityLimits = [0, 1_300, 3_000, 4_200, 5_900, 52_000]
+
 
 export let demandColorScale = commonQuintileColorScale.toReversed();
 
