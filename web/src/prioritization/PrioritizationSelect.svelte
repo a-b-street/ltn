@@ -1,5 +1,6 @@
 <script lang="ts">
   import { SequentialLegend } from "svelte-utils";
+  import { SequentialLegendBucketed } from "../common";
   import {
     bucketize,
     densityColorScale,
@@ -11,7 +12,6 @@
     stats19ColorScale,
     stats19Limits,
   } from "../common/colors";
-  import SequentialLegendBucketed from "../common/SequentialLegendBucketed.svelte";
   import { appFocus } from "../stores";
   import type { Prioritization } from "./index";
 

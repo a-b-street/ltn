@@ -2,8 +2,7 @@
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
   import { QualitativeLegend } from "svelte-utils";
   import { constructMatchExpression, Popup } from "svelte-utils/map";
-  import { layerId } from "../common";
-  import ContextLayerButton from "../common/ContextLayerButton.svelte";
+  import { ContextLayerButton, layerId } from "../common";
   import { backend } from "../stores";
 
   let show = false;

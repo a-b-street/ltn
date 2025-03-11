@@ -1,6 +1,6 @@
 <script lang="ts">
   export let colorScale: string[];
-  export let buckets: number[];
+  export let buckets: any[];
   export let decimalPlaces = 0;
 </script>
 

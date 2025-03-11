@@ -1,7 +1,6 @@
 <script lang="ts">
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
-  import { layerId, roadLineWidth } from "../common";
-  import ContextLayerButton from "../common/ContextLayerButton.svelte";
+  import { ContextLayerButton, layerId, roadLineWidth } from "../common";
   import { assetUrl } from "../stores";
 
   let show = false;
