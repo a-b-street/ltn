@@ -3131,18 +3131,18 @@
         "visibility": "visible"
       },
       "paint": {
-        "fill-color": "hsl(30,6%,73%)",
-        "fill-opacity": 0.3,
+        "fill-color": "hsla(30, 6%, 50%)",
+        "fill-opacity": 0.4,
         "fill-outline-color": {
           "base": 1,
           "stops": [
             [
               13,
-              "hsla(35, 6%, 79%, 0.3)"
+              "hsla(35, 6%, 50%, 0.2)"
             ],
             [
               14,
-              "hsl(35, 6%, 79%)"
+              "hsla(35, 6%, 50%, 1.0)"
             ]
           ]
         }
