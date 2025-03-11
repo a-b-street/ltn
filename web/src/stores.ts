@@ -9,6 +9,7 @@ import { type AreaProps } from "route-snapper-ts";
 import { get, writable, type Writable } from "svelte/store";
 import type { Backend } from "./wasm";
 
+// NOTE: our maptiler apiKey is baked into the customized assets/map-styles/, so if we rotate keys, we'll need to update that file too.
 export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
 
 export type Mode =

@@ -24,6 +24,7 @@
     sidebarContents,
     topContents,
   } from "svelte-utils/top_bar_layout";
+  import streetsMapStyleUrl from "../assets/map-styles/streets-v2-style.json?url";
   import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import DebugDemandMode from "./DebugDemandMode.svelte";
@@ -102,20 +103,13 @@
   async function getStyle(
     basemap: string,
   ): Promise<StyleSpecification | string> {
-    if (basemap != "streets-v2") {
+    // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
+    // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
+    if (basemap == "streets-v2") {
+      return streetsMapStyleUrl;
+    } else {
       return `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
     }
-
-    // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting. Remove it, and make the regular buildings layer display at high zoom instead.
-    let resp = await fetch(
-      `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`,
-    );
-    let json = await resp.json();
-
-    json.layers = json.layers.filter((l: any) => l.id != "Building 3D");
-    delete json.layers.find((l: any) => l.id == "Building")!.maxzoom;
-
-    return json;
   }
 </script>
 
