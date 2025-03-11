@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
@@ -20,11 +21,12 @@
   } from "./layers";
   import {
     backend,
+    ensurePointInVisibleBounds,
     mainRoadPenalty,
     mode,
     returnToChooseProject,
-    route_pt_a,
-    route_pt_b,
+    routePtA,
+    routePtB,
   } from "./stores";
 
   export let prevMode:
@@ -32,7 +34,15 @@
     | "neighbourhood"
     | "impact-one-destination";
 
-  $: gj = $backend!.compareRoute($route_pt_a, $route_pt_b, $mainRoadPenalty);
+  $: gj = $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty);
+
+  onMount(() => {
+    // There seems to be a race with the Marker component, so we wait just a bit before updating.
+    setTimeout(() => {
+      ensurePointInVisibleBounds(routePtA);
+      ensurePointInVisibleBounds(routePtB);
+    }, 10);
+  });
 
   function back() {
     $mode = { mode: prevMode };
@@ -126,7 +136,7 @@
       />
     </GeoJSON>
 
-    <DotMarker bind:lngLat={$route_pt_a} draggable>A</DotMarker>
-    <DotMarker bind:lngLat={$route_pt_b} draggable>B</DotMarker>
+    <DotMarker bind:lngLat={$routePtA} draggable>A</DotMarker>
+    <DotMarker bind:lngLat={$routePtB} draggable>B</DotMarker>
   </div>
 </SplitComponent>

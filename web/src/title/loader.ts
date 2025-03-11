@@ -1,5 +1,4 @@
 import type { Feature, Polygon } from "geojson";
-import { LngLat } from "maplibre-gl";
 import { RouteTool } from "route-snapper-ts";
 import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
@@ -13,9 +12,6 @@ import {
   currentProjectKey,
   map,
   mode,
-  one_destination,
-  route_pt_a,
-  route_pt_b,
 } from "../stores";
 import { Backend } from "../wasm";
 
@@ -160,19 +156,9 @@ export function afterProjectLoaded() {
     ),
   );
   get(map)!.fitBounds(get(backend)!.getBounds(), { duration: 500 });
-  route_pt_a.set(randomPoint());
-  route_pt_b.set(randomPoint());
-  one_destination.set(randomPoint());
 
   // Update the URL
   let url = new URL(window.location.href);
   url.searchParams.set("project", get(currentProjectKey));
   window.history.replaceState(null, "", url.toString());
-}
-
-function randomPoint(): LngLat {
-  let bounds = get(backend)!.getBounds();
-  let lng = bounds[0] + Math.random() * (bounds[2] - bounds[0]);
-  let lat = bounds[1] + Math.random() * (bounds[3] - bounds[1]);
-  return new LngLat(lng, lat);
 }
