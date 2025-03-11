@@ -3127,7 +3127,6 @@
       "source": "maptiler_planet",
       "source-layer": "building",
       "minzoom": 13,
-      "maxzoom": 15,
       "layout": {
         "visibility": "visible"
       },
@@ -3149,33 +3148,6 @@
         }
       },
       "metadata": {}
-    },
-    {
-      "id": "Building 3D",
-      "type": "fill-extrusion",
-      "source": "maptiler_planet",
-      "source-layer": "building",
-      "minzoom": 15,
-      "layout": {
-        "visibility": "visible"
-      },
-      "paint": {
-        "fill-extrusion-base": {
-          "property": "render_min_height",
-          "type": "identity"
-        },
-        "fill-extrusion-color": "hsl(44,14%,79%)",
-        "fill-extrusion-height": {
-          "property": "render_height",
-          "type": "identity"
-        },
-        "fill-extrusion-opacity": 0.4
-      },
-      "metadata": {},
-      "filter": [
-        "!has",
-        "hide_3d"
-      ]
     },
     {
       "id": "Aqueduct outline",
