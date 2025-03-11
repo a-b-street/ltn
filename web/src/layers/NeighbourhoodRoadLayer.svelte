@@ -120,7 +120,7 @@
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),
-    "line-color": hoverStateFilter("white", "blue"),
+    "line-color": hoverStateFilter("gray", "blue"),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{
