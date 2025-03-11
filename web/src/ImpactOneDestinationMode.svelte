@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
   import { LngLat, type MapMouseEvent } from "maplibre-gl";
+  import { onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer, MapEvents } from "svelte-maplibre";
   import {
     constructMatchExpression,
@@ -19,22 +20,32 @@
   import { ModalFilterLayer, RenderNeighbourhood } from "./layers";
   import {
     backend,
+    ensurePointInVisibleBounds,
     mode,
-    one_destination,
+    oneDestination,
     returnToChooseProject,
-    route_pt_a,
-    route_pt_b,
+    routePtA,
+    routePtB,
   } from "./stores";
 
   function back() {
     $mode = { mode: "neighbourhood" };
   }
 
-  $: perRoadGj = $backend!.impactToOneDestination($one_destination);
+  $: perRoadGj = $backend!.impactToOneDestination($oneDestination);
 
   let hovered: Feature | null = null;
 
   $: routeGj = previewRoutes(hovered);
+
+  onMount(() => {
+    // There seems to be a race with the Marker component, so we wait just a bit before updating.
+    setTimeout(() => {
+      if ($oneDestination) {
+        ensurePointInVisibleBounds(oneDestination);
+      }
+    }, 10);
+  });
 
   function previewRoutes(hovered: Feature | null): FeatureCollection {
     if (!hovered) {
@@ -42,20 +53,20 @@
     }
     return $backend!.compareRoute(
       new LngLat(hovered.properties!.pt1_x, hovered.properties!.pt1_y),
-      $one_destination,
+      $oneDestination,
       1.0,
     );
   }
 
   function compareRoute(f: Feature) {
-    $route_pt_a = new LngLat(f.properties!.pt1_x, f.properties!.pt1_y);
-    $route_pt_b = $one_destination;
+    $routePtA = new LngLat(f.properties!.pt1_x, f.properties!.pt1_y);
+    $routePtB = $oneDestination;
     $mode = { mode: "route", prevMode: "impact-one-destination" };
   }
 
   function onRightClick(e: CustomEvent<MapMouseEvent>) {
     // Move the first marker, for convenience
-    $one_destination = e.detail.lngLat;
+    $oneDestination = e.detail.lngLat;
   }
 </script>
 
@@ -158,6 +169,6 @@
 
     <ModalFilterLayer />
 
-    <DotMarker bind:lngLat={$one_destination} draggable>X</DotMarker>
+    <DotMarker bind:lngLat={$oneDestination} draggable>X</DotMarker>
   </div>
 </SplitComponent>

@@ -1,5 +1,10 @@
 import type { Feature, Polygon } from "geojson";
-import { LngLat, type LngLatBoundsLike, type Map } from "maplibre-gl";
+import {
+  LngLat,
+  LngLatBounds,
+  type LngLatBoundsLike,
+  type Map,
+} from "maplibre-gl";
 import { type AreaProps } from "route-snapper-ts";
 import { get, writable, type Writable } from "svelte/store";
 import type { Backend } from "./wasm";
@@ -68,9 +73,9 @@ export let showAbout: Writable<boolean> = writable(false);
 export let appFocus: Writable<"global" | "cnt"> = writable("global");
 
 export let backend: Writable<Backend | null> = writable(null);
-export let route_pt_a: Writable<LngLat> = writable(new LngLat(0, 0));
-export let route_pt_b: Writable<LngLat> = writable(new LngLat(0, 0));
-export let one_destination: Writable<LngLat> = writable(new LngLat(0, 0));
+export let routePtA: Writable<LngLat> = writable(new LngLat(0, 0));
+export let routePtB: Writable<LngLat> = writable(new LngLat(0, 0));
+export let oneDestination: Writable<LngLat> = writable(new LngLat(0, 0));
 export let mainRoadPenalty: Writable<number> = writable(1.0);
 // A way for different components to know when internal app state has changed
 // and they might need to rerender
@@ -109,4 +114,26 @@ export function returnToChooseProject() {
     bounds = [-8.943, 54.631, -0.901, 59.489];
   }
   get(map)?.fitBounds(bounds, { duration: 500 });
+}
+
+export function ensurePointInVisibleBounds(point: Writable<LngLat>) {
+  function randomPoint(bounds: LngLatBounds): LngLat {
+    const width = bounds.getEast() - bounds.getWest();
+    let lng = bounds.getWest() + Math.random() * width;
+
+    const height = bounds.getNorth() - bounds.getSouth();
+    let lat = bounds.getSouth() + Math.random() * height;
+
+    return new LngLat(lng, lat);
+  }
+
+  const bounds: LngLatBounds | undefined = get(map)?.getBounds();
+  if (!bounds) {
+    console.assert(false, "missing map bounds");
+    return;
+  }
+
+  if (!bounds.contains(get(point))) {
+    point.set(randomPoint(bounds));
+  }
 }
