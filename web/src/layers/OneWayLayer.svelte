@@ -10,7 +10,7 @@
   {...layerId("one-ways")}
   filter={[
     "all",
-    ["in", ["get", "kind"], ["literal", ["interior_road", "primary_road"]]],
+    ["in", ["get", "kind"], ["literal", ["interior_road", "main_road"]]],
     ["!=", ["get", "travel_flow"], "both"],
   ]}
   layout={{

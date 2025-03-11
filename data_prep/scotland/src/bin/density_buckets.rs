@@ -16,13 +16,19 @@ fn main() {
     let limits: Vec<_> = (0..=buckets)
         .map(|bucket| {
             let limit_idx = bucket * bucket_width;
-            population_zones[limit_idx]
-                .density_per_km2()
-                .round() as u64
+            population_zones[limit_idx].density_per_km2().round() as u64
         })
         .collect();
 
-    println!("most_dense: {}", population_zones.iter().rev().next().unwrap().density_per_km2());
+    println!(
+        "most_dense: {}",
+        population_zones
+            .iter()
+            .rev()
+            .next()
+            .unwrap()
+            .density_per_km2()
+    );
     // > Raw limits for Scotland density (/ km²): [0, 1324, 2940, 4247, 5858, 52389]
     println!("Raw limits for Scotland density (/ km²): {limits:?}");
 }

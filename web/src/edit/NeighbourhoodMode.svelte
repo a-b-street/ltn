@@ -442,9 +442,9 @@
                   "unnamed road"}
                 ({Math.round(props.speed_mph)} mph)
               </p>
-            {:else if props.kind == "primary_road"}
+            {:else if props.kind == "main_road"}
               <p>
-                Primary road: {props.name ?? "unnamed road"}
+                Main road: {props.name ?? "unnamed road"}
                 ({Math.round(props.speed_mph)} mph)
               </p>
             {/if}

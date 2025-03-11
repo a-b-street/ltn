@@ -78,8 +78,8 @@
     {:else if state.state == "chose-road"}
       <p>
         This shows all possible shortcuts crossing the blue road you've chosen.
-        A shortcut is defined as a route starting and ending on primary roads,
-        then cutting through smaller streets. It might not actually be
+        A shortcut is defined as a route starting and ending on main (busy)
+        roads, then cutting through smaller streets. It might not actually be
         considered a "good shortcut" in practice -- this tool doesn't know any
         real traffic patterns; it's just looking for any possible path. This
         view lets you understand the limits of this assumption.
@@ -117,9 +117,9 @@
                   {props.shortcuts} shortcuts through {props.name ??
                     "unnamed road"}
                 </p>
-              {:else if props.kind == "primary_road"}
+              {:else if props.kind == "main_road"}
                 <p>
-                  Primary road: {props.name ?? "unnamed road"}
+                  Main road: {props.name ?? "unnamed road"}
                 </p>
               {/if}
             </Popup>

@@ -64,7 +64,7 @@ pub struct Neighbourhood {
     // Immutable once created
     pub interior_roads: BTreeSet<RoadID>,
     // Immutable once created
-    pub primary_roads: BTreeSet<RoadID>,
+    pub main_roads: BTreeSet<RoadID>,
     pub editable_intersections: BTreeSet<IntersectionID>,
     pub border_intersections: BTreeSet<IntersectionID>,
     pub boundary: NeighbourhoodBoundary,
@@ -137,7 +137,7 @@ impl Neighbourhood {
         let t1 = Instant::now();
 
         let mut interior_roads = BTreeSet::new();
-        let mut primary_roads = BTreeSet::new();
+        let mut main_roads = BTreeSet::new();
         debug!(
             "boundary_polygon: {boundary_polygon:?}",
             boundary_polygon = boundary.geometry()
@@ -153,7 +153,7 @@ impl Neighbourhood {
             }
 
             if road.is_severance() {
-                primary_roads.insert(road.id);
+                main_roads.insert(road.id);
             } else {
                 interior_roads.insert(road.id);
             }
@@ -168,22 +168,22 @@ impl Neighbourhood {
         {
             let intersection = map.get_i(obj.data);
             let mut interior_connections = 0;
-            let mut primary_connections = 0;
+            let mut main_road_connections = 0;
 
             for road_id in &intersection.roads {
-                if primary_roads.contains(road_id) {
-                    primary_connections += 1;
+                if main_roads.contains(road_id) {
+                    main_road_connections += 1;
                 } else if interior_roads.contains(road_id) {
                     interior_connections += 1;
                 }
             }
 
-            if interior_connections == 4 && primary_connections == 0 {
+            if interior_connections == 4 && main_road_connections == 0 {
                 // only 4-way interior intersections are eligible for diagonal intersections
                 editable_intersections.insert(intersection.id);
-            } else if interior_connections > 0 && primary_connections > 0 {
+            } else if interior_connections > 0 && main_road_connections > 0 {
                 // border intersections represent an "input" of traffic into the neighbourhood.
-                // so it must be connected to both primary and non-primary roads
+                // so it must be connected to both main and interior roads
                 border_intersections.insert(intersection.id);
             }
         }
@@ -192,11 +192,11 @@ impl Neighbourhood {
             bail!("No roads inside the boundary");
         }
 
-        if primary_roads.is_empty() {
-            // App breaks without primary_roads: without primary roads, there's only one cell,
+        if main_roads.is_empty() {
+            // App breaks without main roads: without main roads, there's only one cell,
             // so it counts as disconnected (because it doesn't touch a border intersection), and
             // thus we can't calculate shortcuts through it without those intersections.
-            bail!("No primary roads");
+            bail!("No main roads");
         }
 
         let t3 = Instant::now();
@@ -207,7 +207,7 @@ impl Neighbourhood {
 
         let mut n = Self {
             interior_roads,
-            primary_roads,
+            main_roads,
             boundary,
             editable_intersections,
             border_intersections,
@@ -245,7 +245,7 @@ impl Neighbourhood {
     pub fn editable_roads(&self) -> Vec<RoadID> {
         self.interior_roads
             .iter()
-            .chain(self.primary_roads.iter())
+            .chain(self.main_roads.iter())
             .cloned()
             .collect()
     }
@@ -310,10 +310,10 @@ impl Neighbourhood {
             features.push(boundary_feature);
         }
 
-        for r in &self.primary_roads {
+        for r in &self.main_roads {
             let road = map.get_r(*r);
             let mut f = road.to_gj(&map.mercator);
-            f.set_property("kind", "primary_road");
+            f.set_property("kind", "main_road");
             f.set_property("travel_flow", map.travel_flows[&r].to_string());
             f.set_property(
                 "travel_flow_edited",

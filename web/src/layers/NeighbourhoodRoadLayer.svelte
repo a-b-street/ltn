@@ -107,8 +107,8 @@
 </LineLayer>
 
 <LineLayer
-  {...layerId("primary-roads-outlines")}
-  filter={["==", ["get", "kind"], "primary_road"]}
+  {...layerId("main-roads-outlines")}
+  filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 6),
     "line-color": "black",
@@ -116,8 +116,8 @@
 />
 
 <LineLayer
-  {...layerId("primary-roads")}
-  filter={["==", ["get", "kind"], "primary_road"]}
+  {...layerId("main-roads")}
+  filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),
     "line-color": hoverStateFilter("white", "blue"),
