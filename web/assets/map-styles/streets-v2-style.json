@@ -2463,7 +2463,7 @@
         "visibility": "visible"
       },
       "paint": {
-        "line-color": "hsl(48,100%,83%)",
+        "line-color": "hsl(0, 0%, 50%)",
         "line-width": [
           "interpolate",
           [
@@ -2576,7 +2576,7 @@
         "visibility": "visible"
       },
       "paint": {
-        "line-color": "hsl(35,100%,76%)",
+        "line-color": "hsl(0, 0%, 50%)",
         "line-width": [
           "interpolate",
           [
