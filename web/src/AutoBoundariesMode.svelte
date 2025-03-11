@@ -108,10 +108,7 @@
         mode: "neighbourhood",
       };
     } catch (err) {
-      console.log("error when setting auto-generated neighborhood", err);
-      window.alert(
-        "Sorry, an error occurred. You may need to refresh the page for the application to continue working.",
-      );
+      window.alert(`Sorry, this boundary is invalid: ${err}`);
     }
   }
 
