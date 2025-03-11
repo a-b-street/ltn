@@ -62,6 +62,11 @@
       {Math.round((100 * props.after) / props.before)}% of the original traffic.
     </p>
 
+    <p>
+      Note: The routes are currently sampled, to speed things up. This one
+      sample route may represent many trips between the same points.
+    </p>
+
     <PrevNext list={routes} bind:idx />
   </div>
 

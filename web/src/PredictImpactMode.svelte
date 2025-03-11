@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { SequentialLegend } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, SequentialLegendBucketed } from "./common";
+  import { layerId, Link } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, mode, returnToChooseProject } from "./stores";
 
@@ -58,9 +59,9 @@
       any road: {impactGj.max_count.toLocaleString()}
     </p>
 
-    <SequentialLegendBucketed
+    <SequentialLegend
       colorScale={divergingScale}
-      buckets={["0%", "50%", "same", "150%", "200%"]}
+      limits={["0%", "50%", "same", "150%", "200%"]}
     />
   </div>
 
