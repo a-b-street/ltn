@@ -151,8 +151,8 @@
 
   .study-area-project-list li {
     list-style-type: none;
-    margin-left: 1em;
     margin: 0;
+    margin-left: 1em;
     padding-top: 4px;
     padding-bottom: 4px;
   }
