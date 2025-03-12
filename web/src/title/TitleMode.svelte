@@ -82,32 +82,30 @@
         <h2>Your projects</h2>
         <div class="project-list">
           {#each projectList as [study_area_name, projects]}
-            <h3 class="study-area">{study_area_name ?? "custom area"}</h3>
-            <ul class="study-area-project-list">
+            <h3 class="study-area-name">{study_area_name ?? "custom area"}</h3>
+            <ul class="navigable-list">
               {#each projects as { projectId, projectName }}
-                <li>
-                  <span
-                    style="display: flex; gap: 16px; justify-content: space-between;"
-                  >
+                <li class="actionable-cell">
+                  <h3>
                     <Link on:click={() => loadProject(projectId)}>
                       {projectName}
                     </Link>
-                    <span style="display: flex; gap: 16px;">
-                      <button
-                        class="outline icon-btn"
-                        aria-label="Rename project"
-                        on:click={() => renameProject(projectId)}
-                      >
-                        <Pencil color="black" />
-                      </button>
-                      <button
-                        class="icon-btn destructive"
-                        aria-label="Delete project"
-                        on:click={() => deleteProject(projectId)}
-                      >
-                        <Trash2 color="white" />
-                      </button>
-                    </span>
+                  </h3>
+                  <span class="actions">
+                    <button
+                      class="outline icon-btn"
+                      aria-label="Rename project"
+                      on:click={() => renameProject(projectId)}
+                    >
+                      <Pencil color="black" />
+                    </button>
+                    <button
+                      class="icon-btn destructive"
+                      aria-label="Delete project"
+                      on:click={() => deleteProject(projectId)}
+                    >
+                      <Trash2 color="white" />
+                    </button>
                   </span>
                 </li>
               {/each}
@@ -132,32 +130,13 @@
 </SplitComponent>
 
 <style>
-  h2 {
-    font-size: 32px;
-  }
-
-  .project-list h3.study-area {
-    font-size: 20px;
-    padding: 4px;
-    margin: 4px 0;
+  .study-area-name {
     border-bottom: 1px solid #444;
   }
-
-  .study-area-project-list {
-    padding: 0 8px 0 4px;
-    margin: 0;
-    margin-bottom: 16px;
+  .project-list {
+    margin-top: 18px;
   }
-
-  .study-area-project-list li {
-    list-style-type: none;
-    margin: 0;
-    margin-left: 1em;
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  .study-area-project-list li:not(:last-child) {
-    border-bottom: 1px solid #ddd;
+  .project-list li {
+    padding-left: 1em;
   }
 </style>

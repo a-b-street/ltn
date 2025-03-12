@@ -225,36 +225,31 @@
   </div>
 
   <div slot="sidebar">
-    <h3 style="padding: 4px 8px; margin-bottom: 0">Neighbourhoods</h3>
-    <ul class="neighbourhood-list">
+    <h2>Neighbourhoods</h2>
+    <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
         <li
           on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
           on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
+          class="actionable-cell"
           class:highlighted={hoveredMapFeature?.properties.name == name}
         >
-          <span style="display: flex; justify-content: space-between;">
-            <span class="neighbourhood-name">
-              <Link on:click={() => pickNeighbourhood(name)}>
-                {name}
-              </Link>
-            </span>
-            <span style="display: flex; gap: 16px;">
-              <button
-                class="outline icon-btn"
-                aria-label="Rename neighbourhood"
-                on:click={() => renameNeighbourhood(name)}
-              >
-                <Pencil color="black" />
-              </button>
-              <button
-                class="icon-btn destructive"
-                aria-label="Delete neighbourhood"
-                on:click={() => deleteNeighbourhood(name)}
-              >
-                <Trash2 color="white" />
-              </button>
-            </span>
+          <h3><Link on:click={() => pickNeighbourhood(name)}>{name}</Link></h3>
+          <span class="actions">
+            <button
+              class="outline icon-btn"
+              aria-label="Rename neighbourhood"
+              on:click={() => renameNeighbourhood(name)}
+            >
+              <Pencil color="black" />
+            </button>
+            <button
+              class="icon-btn destructive"
+              aria-label="Delete neighbourhood"
+              on:click={() => deleteNeighbourhood(name)}
+            >
+              <Trash2 color="white" />
+            </button>
           </span>
         </li>
       {/each}
@@ -349,28 +344,7 @@
 </SplitComponent>
 
 <style>
-  ul.neighbourhood-list {
-    padding: 0px;
-  }
-
-  ul.neighbourhood-list > li {
-    list-style: none;
-    margin: 0;
-    padding: 16px 8px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: leading;
-    width: 100%;
-    border-bottom: solid #ddd 1px;
-  }
-
-  ul.neighbourhood-list > li.highlighted {
+  li.highlighted {
     background-color: #f0fcaa;
-  }
-
-  ul.neighbourhood-list .neighbourhood-name {
-    font-weight: bold;
-    font-size: 1.2em;
   }
 </style>
