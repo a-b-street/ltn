@@ -261,6 +261,7 @@ impl Neighbourhood {
                 self.neighbourhood
                     .interior_roads
                     .iter()
+                    .chain(self.neighbourhood.main_roads.iter())
                     .map(|r| self.map.get_r(*r))
             }
 
