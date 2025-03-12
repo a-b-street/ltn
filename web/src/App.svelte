@@ -328,4 +328,66 @@
     font-weight: bold;
     text-decoration: underline;
   }
+
+  /**
+  * Gloal Typography
+  */
+
+  :global(.left .pico h1) {
+    font-size: 36px;
+    margin: 0 0 10px 0;
+  }
+
+  :global(.left .pico h2) {
+    font-size: 28px;
+    margin: 0 0 8px 0;
+  }
+
+  :global(.left .pico h3) {
+    font-size: 22px;
+    margin: 0 0 6px 0;
+  }
+
+  :global(.left .pico h4) {
+    font-size: 18px;
+    margin: 0 0 4px 0;
+  }
+
+  /**
+  * List navigation re-used for neighbourhood and project list
+  */
+  :global(.left .pico .navigable-list h1),
+  :global(.left .pico .navigable-list h2),
+  :global(.left .pico .navigable-list h3),
+  :global(.left .pico .navigable-list h4) {
+    padding: 0;
+    margin: 0;
+  }
+
+  :global(ul.navigable-list) {
+    padding: 0;
+    margin-bottom: 16px;
+  }
+
+  :global(.navigable-list > li) {
+    list-style: none;
+    margin: 0;
+    padding: 8px 8px;
+  }
+
+  :global(.navigable-list > li:not(:last-child)) {
+    border-bottom: solid #ddd 1px;
+  }
+
+  :global(.left .pico .navigable-list .actionable-cell) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  :global(.left .pico .navigable-list .actionable-cell .actions) {
+    display: flex;
+    gap: 16px;
+  }
 </style>
