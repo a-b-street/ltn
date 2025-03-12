@@ -96,8 +96,8 @@
   {/each}
 </ul>
 
+<!-- 
 <hr />
-
 <p>Or continue with a previously opened file:</p>
 
 <div style="columns: 2">
@@ -115,9 +115,9 @@
       {/each}
     </div>
   {/each}
-</div>
-
-<LoadSavedProject bind:loading={activityIndicatorText} />
+</div> 
+<LoadSavedProject bind:loading={activityIndicatorText} /> 
+-->
 
 <GeoJSON data={gj} generateId>
   <FillLayer

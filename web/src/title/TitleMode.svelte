@@ -112,49 +112,51 @@
   </div>
   <div slot="sidebar">
     {#if $map && wasmReady}
-      {#if $appFocus == "global"}
-        <div>
-          <Link on:click={() => ($mode = { mode: "new-project" })}>
-            New project
-          </Link>
+        <h2>Your Projects</h2>
+        <div class="project-list">
+          {#each projectList as [study_area_name, projects]}
+            <h3 class="study-area">{study_area_name ?? "custom area"}</h3>
+            <ul class="study-area-project-list">
+              {#each projects as project}
+                <li>
+                  <span
+                    style="display: flex; gap: 16px; justify-content: space-between;"
+                  >
+                    <Link on:click={() => loadProject(project)}>
+                      {project.slice("ltn_".length)}
+                    </Link>
+                    <span style="display: flex; gap: 16px;">
+                      <button
+                        class="outline icon-btn"
+                        aria-label="Rename project"
+                        on:click={() => renameProject(project)}
+                      >
+                        <Pencil color="black" />
+                      </button>
+                      <button
+                        class="icon-btn destructive"
+                        aria-label="Delete project"
+                        on:click={() => deleteProject(project)}
+                      >
+                        <Trash2 color="white" />
+                      </button>
+                    </span>
+                  </span>
+                </li>
+              {/each}
+            </ul>
+          {/each}
         </div>
 
-        <p>Load a saved project:</p>
-        <ul>
-          {#each projectList as [study_area_name, projects]}
-            <u>{study_area_name ?? "custom area"}</u>
-            {#each projects as project}
-              <li>
-                <span style="display: flex; justify-content: space-between;">
-                  <Link on:click={() => loadProject(project)}>
-                    {project.slice("ltn_".length)}
-                  </Link>
-                  <span style="display: flex; gap: 16px;">
-                    <button
-                      class="outline icon-btn"
-                      aria-label="Rename project"
-                      on:click={() => renameProject(project)}
-                    >
-                      <Pencil color="black" />
-                    </button>
-                    <button
-                      class="icon-btn destructive"
-                      aria-label="Delete project"
-                      on:click={() => deleteProject(project)}
-                    >
-                      <Trash2 color="white" />
-                    </button>
-                  </span>
-                </span>
-              </li>
-            {/each}
-          {/each}
-        </ul>
-
-        <LoadSavedProject bind:loading />
+      <h2>Add a new project</h2>
+      {#if $appFocus == "global"}
+        <button on:click={() => ($mode = { mode: "new-project" })}>
+          New project
+        </button>
       {:else if $appFocus == "cnt"}
         <CntChooseArea {loadProject} bind:activityIndicatorText={loading} />
       {/if}
+      <LoadSavedProject bind:loading />
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
@@ -162,12 +164,26 @@
 </SplitComponent>
 
 <style>
-  /* app specificity to override existing rule for .left  */
-  :global(#app .app-focus-cnt .left) {
-    width: 35%;
+  h2 {
+    font-size: 32px;
   }
-  /* app specificity to override existing rule for .left  */
-  :global(#app .app-focus-cnt .main) {
-    width: 65%;
+
+  .project-list h3.study-area {
+    font-size: 20px;
+    padding: 4px;
+    margin: 4px 0;
+    border-bottom: 1px solid #444;
+  }
+
+  .study-area-project-list {
+    list-style-type: none;
+    padding: 0 8px 0 4px;
+    margin: 0;
+    margin-bottom: 16px;
+  }
+
+  .study-area-project-list li {
+    padding: 4px;
+    border-bottom: 1px solid #ddd;
   }
 </style>
