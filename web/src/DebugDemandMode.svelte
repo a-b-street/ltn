@@ -7,11 +7,10 @@
     hoverStateFilter,
     LineLayer,
   } from "svelte-maplibre";
-  import { SequentialLegend } from "svelte-utils";
   import { emptyGeojson, makeRamp } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
+  import { layerId, Link, SequentialLegend } from "./common";
   import { demandColorScale } from "./common/colors";
   import { backend, mode, returnToChooseProject } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
@@ -36,17 +35,14 @@
   function getLimitsAndColor(
     hoveredId: number | null,
     showTo: boolean,
-  ): [string[], DataDrivenPropertyValueSpecification<string>] {
+  ): [number[], DataDrivenPropertyValueSpecification<string>] {
     if (hoveredId == null) {
       let key: "sum_from" | "sum_to" = showTo ? "sum_to" : "sum_from";
 
       let max = Math.max(...gj.features.map((f) => f.properties[key]));
       let limits = maxIntoBuckets(max);
 
-      return [
-        limits.map((l) => l.toLocaleString()),
-        makeRamp(["get", key], limits, demandColorScale),
-      ];
+      return [limits, makeRamp(["get", key], limits, demandColorScale)];
     } else {
       // The GJ has nested arrays with the counts, but MapLibre stringifies
       // these properties, so we can't use them for styling. Instead we
@@ -62,7 +58,7 @@
       let limits = maxIntoBuckets(max);
 
       return [
-        limits.map((l) => l.toLocaleString()),
+        limits,
         makeRamp(["at", ["id"], ["literal", counts]], limits, demandColorScale),
       ];
     }
@@ -108,7 +104,7 @@
       Trips {showTo ? "from" : "to"}
       {hoveredId == null ? "each zone" : "this zone"}:
     </p>
-    <SequentialLegend colorScale={demandColorScale} {limits} />
+    <SequentialLegend colorScale={demandColorScale} labels={{ limits }} />
 
     <hr />
 

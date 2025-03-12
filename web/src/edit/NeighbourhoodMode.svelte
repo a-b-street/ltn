@@ -9,12 +9,18 @@
     MapEvents,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull, SequentialLegend } from "svelte-utils";
+  import { notNull } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import onewayArrowUrl from "../../assets/arrow.png?url";
   import AnimatePaths from "../AnimatePaths.svelte";
-  import { HelpButton, layerId, Link, roadLineWidth } from "../common";
+  import {
+    HelpButton,
+    layerId,
+    Link,
+    roadLineWidth,
+    SequentialLegend,
+  } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
   import type { Intersection } from "../common/Intersection";
   import {
@@ -386,7 +392,10 @@
         </select>
       </label>
       {#if $roadStyle == "speeds"}
-        <SequentialLegend colorScale={speedColorScale} limits={speedLimits} />
+        <SequentialLegend
+          colorScale={speedColorScale}
+          labels={{ limits: speedLimits }}
+        />
       {/if}
     </div>
 

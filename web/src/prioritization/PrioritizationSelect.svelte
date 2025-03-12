@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { SequentialLegend } from "svelte-utils";
-  import { SequentialLegendBucketed } from "../common";
+  import { SequentialLegend } from "../common";
   import {
     bucketize,
     densityColorScale,
@@ -61,26 +60,32 @@
 </div>
 
 {#if selectedPrioritization == "density"}
-  <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
+  <SequentialLegend
+    colorScale={densityColorScale}
+    labels={{ limits: densityLimits }}
+  />
   <div class="sub-labels">
     <span>Less dense</span>
     <span>people / km²</span>
     <span>More dense</span>
   </div>
 {:else if selectedPrioritization == "simd"}
-  <SequentialLegendBucketed
+  <SequentialLegend
     colorScale={simdColorScale}
-    buckets={bucketize(simdLimits)}
+    labels={{ buckets: bucketize(simdLimits) }}
   />
   <div class="sub-labels">
     <span>More deprived</span>
     <span>Less deprived</span>
   </div>
 {:else if selectedPrioritization == "stats19"}
-  <SequentialLegend colorScale={stats19ColorScale} limits={stats19Limits} />
+  <SequentialLegend
+    colorScale={stats19ColorScale}
+    labels={{ limits: stats19Limits }}
+  />
   <div style="text-align: center;">collisions / km²</div>
 {:else if selectedPrioritization == "pois"}
-  <SequentialLegend colorScale={poiColorScale} limits={poiLimits} />
+  <SequentialLegend colorScale={poiColorScale} labels={{ limits: poiLimits }} />
   <div style="text-align: center;">POIs / km²</div>
 {/if}
 

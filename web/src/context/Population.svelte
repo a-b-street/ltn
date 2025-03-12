@@ -5,13 +5,8 @@
     LineLayer,
     VectorTileSource,
   } from "svelte-maplibre";
-  import { SequentialLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import {
-    ContextLayerButton,
-    layerId,
-    SequentialLegendBucketed,
-  } from "../common";
+  import { ContextLayerButton, layerId, SequentialLegend } from "../common";
   import {
     bucketize,
     densityColorScale,
@@ -27,9 +22,9 @@
 
 <ContextLayerButton label="SIMD" bind:show={showSIMD}>
   <div slot="legend">
-    <SequentialLegendBucketed
+    <SequentialLegend
       colorScale={simdColorScale}
-      buckets={bucketize(simdLimits)}
+      labels={{ buckets: bucketize(simdLimits) }}
     />
     <div style="display: flex; justify-content: space-between;">
       <span>More deprived</span>
@@ -51,7 +46,10 @@
 
 <ContextLayerButton label="Population density" bind:show={showDensity}>
   <div slot="legend">
-    <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
+    <SequentialLegend
+      colorScale={densityColorScale}
+      labels={{ limits: densityLimits }}
+    />
     <div style="display: flex; justify-content: space-between;">
       <span>Less dense</span>
       <span>people / km²</span>
