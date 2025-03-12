@@ -151,6 +151,9 @@ export function getProjectList(
   for (let i = 0; i < window.localStorage.length; i++) {
     let key = window.localStorage.key(i)!;
     if (key.startsWith("ltn_cnt/")) {
+      if (appFocus != "cnt") {
+        continue;
+      }
       try {
         console.log("key", key);
         let [_, studyAreaId, projectName] = key.split("/");
