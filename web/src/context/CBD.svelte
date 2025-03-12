@@ -1,8 +1,13 @@
 <script lang="ts">
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
-  import { QualitativeLegend, SequentialLegend } from "svelte-utils";
+  import { QualitativeLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
-  import { ContextLayerButton, layerId, roadLineWidth } from "../common";
+  import {
+    ContextLayerButton,
+    layerId,
+    roadLineWidth,
+    SequentialLegend,
+  } from "../common";
   import { assetUrl } from "../stores";
 
   // The NPT project bundles together a few layers into one pmtiles file, all
@@ -36,7 +41,10 @@
 
 <ContextLayerButton bind:show={showTraffic} label="Traffic">
   <div slot="legend">
-    <SequentialLegend colorScale={traffic.colorScale} limits={traffic.limits} />
+    <SequentialLegend
+      colorScale={traffic.colorScale}
+      labels={{ limits: traffic.limits }}
+    />
   </div>
 
   <p slot="help">
