@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use geo::{Euclidean, Length, LineString};
-use geojson::Feature;
-
 use crate::map_model::Direction;
 use crate::route::Router;
 use crate::{MapModel, Neighbourhood, RoadID};
+use geo::{Euclidean, Length, LineString};
+use geojson::Feature;
 
 pub struct Shortcuts {
     pub paths: Vec<Path>,
@@ -27,8 +26,8 @@ impl Shortcuts {
         for start_i in &neighbourhood.border_intersections {
             let start_intersection = map.get_i(*start_i);
             for start_r in &start_intersection.roads {
-                // It's not a "shortcut" unless it cuts through the interior.
-                if !neighbourhood.interior_roads.contains(start_r) {
+                // It's not a "shortcut" unless it starts outside the interior and cuts through the interior.
+                if !neighbourhood.main_roads.contains(start_r) {
                     continue;
                 }
                 for end_i in &neighbourhood.border_intersections {
@@ -36,16 +35,48 @@ impl Shortcuts {
                         continue;
                     }
                     let end_intersection = map.get_i(*end_i);
-                    for end_r in &end_intersection.roads {
-                        // It's not a "shortcut" unless it cuts through the interior.
-                        if !neighbourhood.interior_roads.contains(end_r) {
+                    'next_road: for end_r in &end_intersection.roads {
+                        // It's not a "shortcut" unless it ends outside the interior after cutting through.
+                        if !neighbourhood.main_roads.contains(end_r) {
                             continue;
                         }
+
                         let Some(route) = router.route_from_roads(*start_r, *end_r) else {
                             continue;
                         };
+
                         let mut shortcut_length = 0.0;
-                        for (r, _direction) in &route.steps {
+
+                        let interior_steps = {
+                            let mut steps = route.steps.iter();
+                            let first_step = steps.next().expect("route can't be empty");
+                            let first_road = map.get_r(first_step.0);
+                            shortcut_length += Euclidean.length(&first_road.linestring);
+                            let mut steps_reversed = steps.rev();
+                            let Some(final_step) = steps_reversed.next() else {
+                                continue;
+                            };
+                            let final_road = map.get_r(final_step.0);
+                            shortcut_length += Euclidean.length(&final_road.linestring);
+
+                            // re-reverse back to the original ordering, but without first and final steps
+                            steps_reversed.rev()
+                        };
+
+                        for (r, _direction) in interior_steps {
+                            // For the purpose of counting unique shortcuts, only the first and
+                            // final steps should be on main roads.
+                            //
+                            // If we've left the interior, only the portion inside the interior counts
+                            // as distinct plausible shortcut.
+                            //
+                            // If a route leaves and re-enters the interior through another border
+                            // intersection, then that route will be counted as two distinct
+                            // shortcuts.
+                            if neighbourhood.main_roads.contains(&r) {
+                                break 'next_road;
+                            }
+
                             let road = map.get_r(*r);
                             *count_per_road.entry(road.id).or_insert(0) += 1;
                             shortcut_length += Euclidean.length(&road.linestring);
