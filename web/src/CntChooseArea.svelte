@@ -85,7 +85,7 @@
     on:click={onClick}
   >
     <Popup openOn="hover" let:props>
-      <p>{props.name}</p>
+      <p>Click to start a new project in {props.name}</p>
     </Popup>
   </FillLayer>
 
