@@ -259,6 +259,15 @@
 </div>
 
 <style>
+  :global(#app .left) {
+    width: 35%;
+    min-width: 400px;
+    max-width: 700px;
+  }
+  :global(#app .main) {
+    width: 65%;
+  }
+
   :global(.pico .icon-btn.destructive),
   :global(.icon-btn.destructive) {
     background-color: #dc2626;
