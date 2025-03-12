@@ -65,7 +65,9 @@
 
     let out = [...perArea.entries()];
     out.sort((a, b) => a[0].localeCompare(b[0]));
-    out.push(["custom", custom]);
+    if (custom.length > 0) {
+      out.push(["", custom]);
+    }
     return out;
   }
 
