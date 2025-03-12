@@ -53,7 +53,8 @@
   <div slot="legend">
     <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
     <div style="display: flex; justify-content: space-between;">
-      <span>Less less</span>
+      <span>Less dense</span>
+      <span>people / km²</span>
       <span>More dense</span>
     </div>
   </div>

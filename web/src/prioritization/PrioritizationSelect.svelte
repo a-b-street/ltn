@@ -63,7 +63,8 @@
 {#if selectedPrioritization == "density"}
   <SequentialLegend colorScale={densityColorScale} limits={densityLimits} />
   <div class="sub-labels">
-    <span>Less less</span>
+    <span>Less dense</span>
+    <span>people / km²</span>
     <span>More dense</span>
   </div>
 {:else if selectedPrioritization == "simd"}
