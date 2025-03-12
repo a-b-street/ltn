@@ -78,43 +78,45 @@
   </div>
   <div slot="sidebar">
     {#if $map && wasmReady}
-      <h2>Your Projects</h2>
-      <div class="project-list">
-        {#each projectList as [study_area_name, projects]}
-          <h3 class="study-area">{study_area_name ?? "custom area"}</h3>
-          <ul class="study-area-project-list">
-            {#each projects as { projectId, projectName }}
-              <li>
-                <span
-                  style="display: flex; gap: 16px; justify-content: space-between;"
-                >
-                  <Link on:click={() => loadProject(projectId)}>
-                    {projectName}
-                  </Link>
-                  <span style="display: flex; gap: 16px;">
-                    <button
-                      class="outline icon-btn"
-                      aria-label="Rename project"
-                      on:click={() => renameProject(projectId)}
-                    >
-                      <Pencil color="black" />
-                    </button>
-                    <button
-                      class="icon-btn destructive"
-                      aria-label="Delete project"
-                      on:click={() => deleteProject(projectId)}
-                    >
-                      <Trash2 color="white" />
-                    </button>
+      {#if projectList.length > 0}
+        <h2>Your projects</h2>
+        <div class="project-list">
+          {#each projectList as [study_area_name, projects]}
+            <h3 class="study-area">{study_area_name ?? "custom area"}</h3>
+            <ul class="study-area-project-list">
+              {#each projects as { projectId, projectName }}
+                <li>
+                  <span
+                    style="display: flex; gap: 16px; justify-content: space-between;"
+                  >
+                    <Link on:click={() => loadProject(projectId)}>
+                      {projectName}
+                    </Link>
+                    <span style="display: flex; gap: 16px;">
+                      <button
+                        class="outline icon-btn"
+                        aria-label="Rename project"
+                        on:click={() => renameProject(projectId)}
+                      >
+                        <Pencil color="black" />
+                      </button>
+                      <button
+                        class="icon-btn destructive"
+                        aria-label="Delete project"
+                        on:click={() => deleteProject(projectId)}
+                      >
+                        <Trash2 color="white" />
+                      </button>
+                    </span>
                   </span>
-                </span>
-              </li>
-            {/each}
-          </ul>
-        {/each}
-      </div>
+                </li>
+              {/each}
+            </ul>
+          {/each}
+        </div>
+      {/if}
 
-      <h2>Add a new project</h2>
+      <h2>Start a new project</h2>
       {#if $appFocus == "global"}
         <button on:click={() => ($mode = { mode: "new-project" })}>
           New project
@@ -142,14 +144,20 @@
   }
 
   .study-area-project-list {
-    list-style-type: none;
     padding: 0 8px 0 4px;
     margin: 0;
     margin-bottom: 16px;
   }
 
   .study-area-project-list li {
-    padding: 4px;
+    list-style-type: none;
+    margin-left: 1em;
+    margin: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .study-area-project-list li:not(:last-child) {
     border-bottom: 1px solid #ddd;
   }
 </style>
