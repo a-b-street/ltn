@@ -141,6 +141,58 @@ async function getInputFiles(
   }
 }
 
+// Returns a list, grouped and sorted by the optional study_area_name, with
+// custom cases at the end
+export function getProjectList(
+  appFocus: "cnt" | "global",
+): Array<[string, { projectId: string; projectName: string }[]]> {
+  let studyAreas = new Map();
+  let custom = [];
+  for (let i = 0; i < window.localStorage.length; i++) {
+    let key = window.localStorage.key(i)!;
+    if (key.startsWith("ltn_cnt/")) {
+      try {
+        console.log("key", key);
+        let [_, studyAreaId, projectName] = key.split("/");
+        let studyAreaName = studyAreaId.split("LAD_")[1];
+        if (!studyAreas.has(studyAreaName)) {
+          studyAreas.set(studyAreaName, []);
+        }
+        studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
+      } catch (err) {
+        console.log(`error loading cnt project: ${key}`, err);
+      }
+    } else if (key.startsWith("ltn_")) {
+      if (appFocus != "global") {
+        continue;
+      }
+      let studyAreaName = "";
+      try {
+        let gj = JSON.parse(window.localStorage.getItem(key)!);
+        studyAreaName = gj.study_area_name;
+      } catch (err) {
+        console.log(`error loading cnt project: ${key}`, err);
+      }
+      if (studyAreaName && studyAreaName.length > 0) {
+        if (!studyAreas.has(studyAreaName)) {
+          studyAreas.set(studyAreaName, []);
+        }
+        let projectName = key.split("ltn_")[1];
+        studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
+      } else {
+        custom.push(key);
+      }
+    }
+  }
+
+  let out = [...studyAreas.entries()];
+  out.sort((a, b) => a[0].localeCompare(b[0]));
+  if (custom.length > 0) {
+    out.push(["", custom]);
+  }
+  return out;
+}
+
 export function afterProjectLoaded() {
   mode.set({
     mode: "pick-neighbourhood",
