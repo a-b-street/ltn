@@ -6,7 +6,12 @@
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { makeRamp } from "svelte-utils/map";
   import { layerId, roadLineWidth } from "../common";
-  import { speedColorScale, speedLimits, Style } from "../common/colors";
+  import {
+    signGreen,
+    speedColorScale,
+    speedLimits,
+    Style,
+  } from "../common/colors";
   import { roadStyle, thickRoadsForShortcuts } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
@@ -24,7 +29,7 @@
       return ["get", "color"];
     }
     if (style == "edits") {
-      return ["case", ["get", "edited"], "grey", "white"];
+      return ["case", ["get", "edited"], signGreen, "white"];
     }
     if (style == "speeds") {
       return makeRamp(

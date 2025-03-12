@@ -50,6 +50,9 @@ export function bucketize(limits: number[]) {
   return buckets;
 }
 
+// Like the background of the bike/walk sign
+export const signGreen = "#0C793A";
+
 export const Style = {
   mapFeature: {
     hover: {
