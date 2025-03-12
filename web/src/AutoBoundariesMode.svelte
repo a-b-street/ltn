@@ -222,8 +222,7 @@
       <div style="border: dashed black 2px; padding: 8px">
         {#if selectedBoundary}
           <div style="display: flex; justify-content: space-between;">
-            <b>Your Neighbourhood Overall</b>
-            <!--REVIEW: good place for a name input field? -->
+            <b>Your neighbourhood overall</b>
             <button
               class="icon-btn destructive"
               aria-label="Clear selection"
@@ -244,37 +243,39 @@
                 {selectedBoundary.properties.area_km2.toFixed(1)} km²
               </td>
             </tr>
-            <tr>
-              <th>Population density</th>
-              <td>
-                {Math.round(
-                  selectedBoundary.properties.population /
-                    selectedBoundary.properties.area_km2,
-                ).toLocaleString()} people / km²
-              </td>
-            </tr>
-            <tr>
-              <th>SIMD</th>
-              <td>{selectedBoundary.properties.simd.toFixed(1)}%</td>
-            </tr>
-            <tr>
-              <th>Collision density</th>
-              <td>
-                {(
-                  selectedBoundary.properties.number_stats19_collisions /
-                  selectedBoundary.properties.area_km2
-                ).toFixed(1)} / km²
-              </td>
-            </tr>
-            <tr>
-              <th>POI density</th>
-              <td>
-                {(
-                  selectedBoundary.properties.number_pois /
-                  selectedBoundary.properties.area_km2
-                ).toFixed(1)} / km²
-              </td>
-            </tr>
+            {#if $appFocus == "cnt"}
+              <tr>
+                <th>Population density</th>
+                <td>
+                  {Math.round(
+                    selectedBoundary.properties.population /
+                      selectedBoundary.properties.area_km2,
+                  ).toLocaleString()} people / km²
+                </td>
+              </tr>
+              <tr>
+                <th>SIMD</th>
+                <td>{selectedBoundary.properties.simd.toFixed(1)}%</td>
+              </tr>
+              <tr>
+                <th>Collision density</th>
+                <td>
+                  {(
+                    selectedBoundary.properties.number_stats19_collisions /
+                    selectedBoundary.properties.area_km2
+                  ).toFixed(1)} / km²
+                </td>
+              </tr>
+              <tr>
+                <th>POI density</th>
+                <td>
+                  {(
+                    selectedBoundary.properties.number_pois /
+                    selectedBoundary.properties.area_km2
+                  ).toFixed(1)} / km²
+                </td>
+              </tr>
+            {/if}
           </table>
         {:else}
           <p>Choose an area to use as the boundary for your neighbourhood.</p>
