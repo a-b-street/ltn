@@ -35,6 +35,6 @@
 </script>
 
 <label>
-  Load a project from a file
+  <strong>Load a project from a file</strong>
   <input bind:this={fileInput} on:change={loadFile} type="file" />
 </label>
