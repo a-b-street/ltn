@@ -155,7 +155,6 @@ export function getProjectList(
         continue;
       }
       try {
-        console.log("key", key);
         let [_, studyAreaId, projectName] = key.split("/");
         let studyAreaName = studyAreaId.split("LAD_")[1];
         if (!studyAreas.has(studyAreaName)) {
