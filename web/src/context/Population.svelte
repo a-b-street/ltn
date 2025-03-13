@@ -6,9 +6,16 @@
     VectorTileSource,
   } from "svelte-maplibre";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { ContextLayerButton, layerId, SequentialLegend } from "../common";
+  import {
+    ContextLayerButton,
+    layerId,
+    prettyPrintPercent,
+    SequentialLegend,
+  } from "../common";
   import {
     bucketize,
+    carOwnershipColorScale,
+    carOwnershipLimits,
     densityColorScale,
     densityLimits,
     simdColorScale,
@@ -18,6 +25,7 @@
 
   let showSIMD = false;
   let showDensity = false;
+  let showCarOwnership = false;
 </script>
 
 <ContextLayerButton label="SIMD" bind:show={showSIMD}>
@@ -68,6 +76,24 @@
   </p>
 </ContextLayerButton>
 
+<ContextLayerButton label="Car ownership" bind:show={showCarOwnership}>
+  <div slot="legend">
+    <SequentialLegend
+      colorScale={carOwnershipColorScale}
+      labels={{ limits: carOwnershipLimits.map((number) => `${number}%`) }}
+    />
+    <div style="display: flex; justify-content: space-between;">
+      <span style="text-align: center; width: 100%">
+        Households with at least one car or van
+      </span>
+    </div>
+  </div>
+
+  <p slot="help">
+    Show households from the Scottish census with at least one car.
+  </p>
+</ContextLayerButton>
+
 <VectorTileSource
   url={`pmtiles://${assetUrl("cnt_layers/population.pmtiles")}`}
 >
@@ -93,6 +119,42 @@
         has {props.population.toLocaleString()}
         people, and a SIMD rank of {props.imd_rank}, making it less deprived
         than {props.imd_percentile}% of data zones.
+      </p>
+    </Popup>
+  </FillLayer>
+
+  <FillLayer
+    {...layerId("context-population-car-ownership")}
+    sourceLayer="population"
+    manageHoverState
+    paint={{
+      "fill-color": makeRamp(
+        [
+          "*",
+          100,
+          [
+            "/",
+            ["get", "households_with_cars_or_vans"],
+            ["get", "total_households"],
+          ],
+        ],
+        carOwnershipLimits,
+        carOwnershipColorScale,
+      ),
+      "fill-opacity": hoverStateFilter(0.7, 0.9),
+    }}
+    layout={{
+      visibility: showCarOwnership ? "visible" : "none",
+    }}
+  >
+    <Popup openOn="hover" let:props>
+      <p>
+        In data zone {props.id}
+        {prettyPrintPercent(
+          props.households_with_cars_or_vans,
+          props.total_households,
+        )} of approximately {props.total_households.toLocaleString()}
+        households have at least one car or van.
       </p>
     </Popup>
   </FillLayer>
@@ -129,7 +191,8 @@
     sourceLayer="population"
     paint={{ "line-color": "black", "line-width": 1 }}
     layout={{
-      visibility: showSIMD || showDensity ? "visible" : "none",
+      visibility:
+        showSIMD || showDensity || showCarOwnership ? "visible" : "none",
     }}
   />
 </VectorTileSource>

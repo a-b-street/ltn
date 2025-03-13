@@ -121,6 +121,7 @@ const layerZorder = [
   "one-ways",
 
   // Contextual layers cover up most things
+  "context-population-car-ownership",
   "context-simd",
   "context-population-density",
   "context-population-outline",

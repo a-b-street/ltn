@@ -11,6 +11,8 @@ pub struct BoundaryStats {
     pub simd: f64,
     pub number_stats19_collisions: u32,
     pub number_pois: u32,
+    pub total_households: u32,
+    pub households_with_cars_or_vans: u32,
 }
 
 impl BoundaryStats {
@@ -21,6 +23,8 @@ impl BoundaryStats {
         let mut simd = 0.0;
         let mut number_stats19_collisions = 0;
         let mut number_pois = 0;
+        let mut total_households = 0.0;
+        let mut households_with_cars_or_vans = 0.0;
         let mut population = 0.0;
         if let Some(context_data) = context_data {
             let prepared_polygon = PreparedGeometry::from(polygon);
@@ -48,6 +52,11 @@ impl BoundaryStats {
                         overlap_area / population_zone.prepared_geometry.geometry().unsigned_area();
                     population += ratio_in_population_zone
                         * population_zone.population_zone.population as f64;
+
+                    total_households += ratio_in_population_zone
+                        * population_zone.population_zone.total_households as f64;
+                    households_with_cars_or_vans += ratio_in_population_zone
+                        * population_zone.population_zone.households_with_cars_or_vans as f64;
                 }
             }
 
@@ -96,6 +105,8 @@ impl BoundaryStats {
             simd,
             number_stats19_collisions,
             number_pois,
+            total_households: total_households.round() as u32,
+            households_with_cars_or_vans: households_with_cars_or_vans.round() as u32,
         }
     }
 }
@@ -157,8 +168,11 @@ pub struct PopulationZone {
 
     // "population": 894,
     pub population: u32,
+
     // "area": 4388802.1221970674
     // (unused - though maybe we would find it helpful for pre-computing density or to save the cost of calculating area live)
+    pub total_households: u32,
+    pub households_with_cars_or_vans: u32,
 }
 
 pub struct PreparedPopulationZone {
@@ -198,12 +212,16 @@ mod tests {
             geometry: a,
             imd_percentile: 12,
             population: 100,
+            total_households: 10,
+            households_with_cars_or_vans: 9,
         };
 
         let zone_2 = PopulationZone {
             geometry: b,
             imd_percentile: 60,
             population: 10000,
+            total_households: 990,
+            households_with_cars_or_vans: 99,
         };
 
         let context_data = ContextData {
@@ -225,6 +243,8 @@ mod tests {
         assert_relative_eq!(boundary_stats.simd, 7.2 + 24.);
         assert_eq!(boundary_stats.number_stats19_collisions, 0);
         assert_eq!(boundary_stats.number_pois, 0);
+        assert_eq!(boundary_stats.total_households, 600);
+        assert_eq!(boundary_stats.households_with_cars_or_vans, 65);
     }
 }
 

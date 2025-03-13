@@ -12,24 +12,16 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link } from "./common";
-  import {
-    areaColorScale,
-    areaLimits,
-    densityColorScale,
-    densityLimits,
-    poiColorScale,
-    poiLimits,
-    simdColorScale,
-    simdLimits,
-    stats19ColorScale,
-    stats19Limits,
-  } from "./common/colors";
+  import { layerId, Link, prettyPrintPercent } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
-  import { PrioritizationSelect, type Prioritization } from "./prioritization";
+  import {
+    prioritizationFillColor,
+    PrioritizationSelect,
+    type Prioritization,
+  } from "./prioritization";
   import {
     appFocus,
     autosave,
@@ -136,40 +128,23 @@
   function fillColor(
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<string> {
-    return {
-      none: [
-        "match",
-        ["%", ["id"], 5],
-        0,
-        "blue",
-        1,
-        "yellow",
-        2,
-        "green",
-        3,
-        "purple",
-        4,
-        "orange",
-        "black",
-      ] as DataDrivenPropertyValueSpecification<string>,
-      area: makeRamp(["get", "area_km2"], areaLimits, areaColorScale),
-      density: makeRamp(
-        ["/", ["get", "population"], ["get", "area_km2"]],
-        densityLimits,
-        densityColorScale,
-      ),
-      simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
-      stats19: makeRamp(
-        ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
-        stats19Limits,
-        stats19ColorScale,
-      ),
-      pois: makeRamp(
-        ["/", ["get", "number_pois"], ["get", "area_km2"]],
-        poiLimits,
-        poiColorScale,
-      ),
-    }[selectedPrioritization];
+    let noneColor = [
+      "match",
+      ["%", ["id"], 5],
+      0,
+      "blue",
+      1,
+      "yellow",
+      2,
+      "green",
+      3,
+      "purple",
+      4,
+      "orange",
+      "black",
+    ] as DataDrivenPropertyValueSpecification<string>;
+
+    return prioritizationFillColor({ none: noneColor }, selectedPrioritization);
   }
 
   function fillOpacity(
@@ -178,10 +153,11 @@
     return {
       none: hoverStateFilter(0.3, 0.5),
       area: hoverStateFilter(0.7, 0.9),
+      car_ownership: hoverStateFilter(0.7, 0.9),
       density: hoverStateFilter(0.7, 0.9),
+      pois: hoverStateFilter(0.7, 0.9),
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
-      pois: hoverStateFilter(0.7, 0.9),
     }[selectedPrioritization];
   }
 </script>
@@ -264,6 +240,15 @@
                     selectedBoundary.properties.number_stats19_collisions /
                     selectedBoundary.properties.area_km2
                   ).toFixed(1)} / km²
+                </td>
+              </tr>
+              <tr>
+                <th>Car ownership</th>
+                <td>
+                  {prettyPrintPercent(
+                    selectedBoundary.properties.households_with_cars_or_vans,
+                    selectedBoundary.properties.total_households,
+                  )} of households
                 </td>
               </tr>
               <tr>
@@ -357,15 +342,26 @@
             {#if selectedPrioritization == "none"}
               <b>Area:</b>
               {props.area_km2.toFixed(1)} km²
+            {:else if selectedPrioritization == "car_ownership"}
+              <b>Car or van ownership</b>
+              <br />
+              {prettyPrintPercent(
+                props.households_with_cars_or_vans,
+                props.total_households,
+              )} of approximately {props.total_households.toLocaleString()}
+              households have at least one car or van.
             {:else if selectedPrioritization == "density"}
-              <b>Population density:</b>
+              <b>Population density</b>
+              <br />
               {Math.round(props.population / props.area_km2).toLocaleString()} people
               / km²
             {:else if selectedPrioritization == "stats19"}
-              <b>Pedestrian and cyclist collisions:</b>
+              <b>Pedestrian and cyclist collisions</b>
+              <br />
               {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
             {:else if selectedPrioritization == "pois"}
-              <b>Points of interest:</b>
+              <b>Points of interest</b>
+              <br />
               {(props.number_pois / props.area_km2).toFixed(1)} / km²
             {/if}
           </Popup>

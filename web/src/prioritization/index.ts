@@ -1,3 +1,65 @@
+import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
+import { makeRamp } from "svelte-utils/map";
+import {
+  areaColorScale,
+  areaLimits,
+  carOwnershipColorScale,
+  carOwnershipLimits,
+  densityColorScale,
+  densityLimits,
+  poiColorScale,
+  poiLimits,
+  simdColorScale,
+  simdLimits,
+  stats19ColorScale,
+  stats19Limits,
+} from "../common/colors";
+
 export { default as PrioritizationSelect } from "./PrioritizationSelect.svelte";
 
-export type Prioritization = "none" | "simd" | "stats19" | "density" | "pois";
+export type Prioritization =
+  | "none"
+  | "car_ownership"
+  | "density"
+  | "pois"
+  | "simd"
+  | "stats19";
+
+export function prioritizationFillColor(
+  noneColor: { none: DataDrivenPropertyValueSpecification<string> },
+  selectedPrioritization: Prioritization,
+): DataDrivenPropertyValueSpecification<string> {
+  return {
+    none: noneColor.none,
+    area: makeRamp(["get", "area_km2"], areaLimits, areaColorScale),
+    car_ownership: makeRamp(
+      [
+        "*",
+        100,
+        [
+          "/",
+          ["get", "households_with_cars_or_vans"],
+          ["get", "total_households"],
+        ],
+      ],
+      carOwnershipLimits,
+      carOwnershipColorScale,
+    ),
+    density: makeRamp(
+      ["/", ["get", "population"], ["get", "area_km2"]],
+      densityLimits,
+      densityColorScale,
+    ),
+    pois: makeRamp(
+      ["/", ["get", "number_pois"], ["get", "area_km2"]],
+      poiLimits,
+      poiColorScale,
+    ),
+    simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
+    stats19: makeRamp(
+      ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
+      stats19Limits,
+      stats19ColorScale,
+    ),
+  }[selectedPrioritization];
+}

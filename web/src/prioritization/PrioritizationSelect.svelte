@@ -2,6 +2,8 @@
   import { SequentialLegend } from "../common";
   import {
     bucketize,
+    carOwnershipColorScale,
+    carOwnershipLimits,
     densityColorScale,
     densityLimits,
     poiColorScale,
@@ -29,6 +31,8 @@
       selectedPrioritization = "stats19";
     } else if (currentURLParam == "pois") {
       selectedPrioritization = "pois";
+    } else if (currentURLParam == "car_ownership") {
+      selectedPrioritization = "car_ownership";
     }
   }
 
@@ -56,6 +60,7 @@
     <option value="stats19">Collisions</option>
     <option value="simd">SIMD</option>
     <option value="pois">Points of interest</option>
+    <option value="car_ownership">Car ownership</option>
   </select>
 </div>
 
@@ -68,6 +73,16 @@
     <span>Less dense</span>
     <span>people / km²</span>
     <span>More dense</span>
+  </div>
+{:else if selectedPrioritization == "car_ownership"}
+  <SequentialLegend
+    colorScale={carOwnershipColorScale}
+    labels={{ limits: carOwnershipLimits.map((number) => `${number}%`) }}
+  />
+  <div style="display: flex; justify-content: space-between;">
+    <span style="text-align: center; width: 100%">
+      Households with at least one car or van
+    </span>
   </div>
 {:else if selectedPrioritization == "simd"}
   <SequentialLegend
