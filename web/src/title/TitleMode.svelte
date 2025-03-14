@@ -6,12 +6,7 @@
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { appFocus, backend, currentProjectKey, map, mode } from "../stores";
-  import {
-    listProjects,
-    loadProject,
-    removeProject,
-    renameProject,
-  } from "./loader";
+  import { projectStorage } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
   export let wasmReady: boolean;
@@ -39,12 +34,12 @@
     }
   }
 
-  let projectList = listProjects($appFocus);
+  let projectList = projectStorage.listProjects($appFocus);
 
   function deleteProjectPrompt(key: string) {
     if (window.confirm(`Really delete project ${key}? You can't undo this.`)) {
-      removeProject(key);
-      projectList = listProjects($appFocus);
+      projectStorage.removeProject(key);
+      projectList = projectStorage.listProjects($appFocus);
     }
   }
 
@@ -56,14 +51,14 @@
         newName = `ltn_${newName}`;
       }
 
-      renameProject(key, newName);
-      projectList = listProjects($appFocus);
+      projectStorage.renameProject(key, newName);
+      projectList = projectStorage.listProjects($appFocus);
     }
   }
 
   async function loadProjectPrompt(key: string) {
     loading = `Loading project ${key}`;
-    await loadProject(key);
+    await projectStorage.loadProject(key);
     loading = "";
   }
 </script>
@@ -89,7 +84,7 @@
               {#each projects as { projectId, projectName }}
                 <li class="actionable-cell">
                   <h3>
-                    <Link on:click={() => loadProject(projectId)}>
+                    <Link on:click={() => loadProjectPrompt(projectId)}>
                       {projectName}
                     </Link>
                   </h3>

@@ -15,58 +15,186 @@ import {
 } from "../stores";
 import { Backend } from "../wasm";
 
-// Returns whether the project name is already taken, otherwise the project is created.
-export async function createNewProject(
-  kind: "ltn_cnt" | "ltn",
-  studyAreaName: string,
-  projectName: string,
-): Promise<boolean> {
-  console.assert(studyAreaName != "");
-  console.assert(projectName != "");
+class ProjectStorage {
+  // Returns whether the project name is already taken, otherwise the project is created.
+  async createNewProject(
+    kind: "ltn_cnt" | "ltn",
+    studyAreaName: string,
+    projectName: string,
+  ): Promise<boolean> {
+    console.assert(studyAreaName != "");
+    console.assert(projectName != "");
 
-  let key = `${kind}/${studyAreaName}/${projectName}`;
+    let key = `${kind}/${studyAreaName}/${projectName}`;
 
-  if (window.localStorage.getItem(key)) {
-    return false;
+    if (window.localStorage.getItem(key)) {
+      return false;
+    }
+
+    this.createEmptyProject(key, studyAreaName);
+    await this.loadProject(key);
+    return true;
   }
 
-  createEmptyProject(key, studyAreaName);
-  await loadProject(key);
-  return true;
+  async loadProject(key: string) {
+    currentProjectKey.set(key);
+    let isCnt = key.startsWith("ltn_cnt/");
+    // TODO Should we also change the URL?
+    appFocus.set(isCnt ? "cnt" : "global");
+
+    try {
+      let gj = JSON.parse(window.localStorage.getItem(key)!);
+
+      console.time("get input files");
+      let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
+        await getInputFiles(gj, isCnt);
+      console.timeEnd("get input files");
+      console.time("load");
+      backend.set(
+        new Backend(
+          new Uint8Array(osmBuffer),
+          demandBuffer ? new Uint8Array(demandBuffer) : undefined,
+          contextDataBuffer ? new Uint8Array(contextDataBuffer) : undefined,
+          boundary,
+          gj.study_area_name || undefined,
+        ),
+      );
+      // TODO Rename savefile -> project? Or combine this call with the constructor?
+      get(backend)!.loadSavefile(gj);
+      console.timeEnd("load");
+
+      afterProjectLoaded();
+    } catch (err) {
+      window.alert(`Couldn't open project: ${err}`);
+      currentProjectKey.set("");
+    }
+  }
+
+  // Returns a list, grouped and sorted by the optional study_area_name, with
+  // custom cases at the end
+  listProjects(
+    appFocus: "cnt" | "global",
+  ): Array<[string | undefined, { projectId: string; projectName: string }[]]> {
+    let studyAreas = new Map();
+    let custom = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      let key = window.localStorage.key(i)!;
+      if (key.startsWith("ltn_cnt/")) {
+        if (appFocus != "cnt") {
+          continue;
+        }
+        try {
+          let [_, studyAreaId, projectName] = key.split("/");
+          let studyAreaName = studyAreaId.split("LAD_")[1];
+          if (!studyAreas.has(studyAreaName)) {
+            studyAreas.set(studyAreaName, []);
+          }
+          studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
+        } catch (err) {
+          console.log(`error loading cnt project: ${key}`, err);
+        }
+      } else if (key.startsWith("ltn_")) {
+        if (appFocus != "global") {
+          continue;
+        }
+        let projectName = key.split("ltn_")[1];
+        let studyAreaName = "";
+        try {
+          let gj = JSON.parse(window.localStorage.getItem(key)!);
+          studyAreaName = gj.study_area_name;
+        } catch (err) {
+          console.log(`error loading cnt project: ${key}`, err);
+        }
+        if (studyAreaName && studyAreaName.length > 0) {
+          if (!studyAreas.has(studyAreaName)) {
+            studyAreas.set(studyAreaName, []);
+          }
+          studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
+        } else {
+          custom.push({ projectId: key, projectName });
+        }
+      }
+    }
+
+    let out = [...studyAreas.entries()];
+    out.sort((a, b) => a[0].localeCompare(b[0]));
+    if (custom.length > 0) {
+      out.push([undefined, custom]);
+    }
+    return out;
+  }
+
+  createEmptyProject(key: string, studyAreaName: string) {
+    if (!key) {
+      throw new Error("Cannot create project: no key specified");
+    }
+
+    const projectData = {
+      type: "FeatureCollection",
+      features: [],
+      study_area_name: studyAreaName,
+    };
+
+    window.localStorage.setItem(key, JSON.stringify(projectData));
+  }
+
+  saveProject(key: string, projectData: string) {
+    if (!key) {
+      throw new Error("Cannot save project: no key specified");
+    }
+
+    window.localStorage.setItem(key, projectData);
+  }
+
+  removeProject(key: string) {
+    if (!key) {
+      throw new Error("Cannot remove project: no key specified");
+    }
+
+    if (window.localStorage.getItem(key) == null) {
+      console.warn(`Trying to remove a project that doesn't exist: ${key}`);
+    }
+
+    window.localStorage.removeItem(key);
+  }
+
+  renameProject(oldKey: string, newKey: string) {
+    if (!oldKey || !newKey) {
+      throw new Error("Cannot rename project: keys must be specified");
+    }
+
+    const projectData = window.localStorage.getItem(oldKey);
+    if (!projectData) {
+      throw new Error(`Project ${oldKey} not found`);
+    }
+
+    this.saveProject(newKey, projectData);
+    this.removeProject(oldKey);
+  }
 }
 
-export async function loadProject(key: string) {
-  currentProjectKey.set(key);
-  let isCnt = key.startsWith("ltn_cnt/");
-  // TODO Should we also change the URL?
-  appFocus.set(isCnt ? "cnt" : "global");
+export const projectStorage = new ProjectStorage();
 
-  try {
-    let gj = JSON.parse(window.localStorage.getItem(key)!);
+export function afterProjectLoaded() {
+  mode.set({
+    mode: "pick-neighbourhood",
+  });
+  // The stores are unused; the WASM API is used directly. This TS wrapper is unused.
+  routeTool.set(
+    new RouteTool(
+      get(map)!,
+      get(backend)!.toRouteSnapper(),
+      writable(emptyGeojson()),
+      writable(true),
+      writable(0),
+    ),
+  );
+  get(map)!.fitBounds(get(backend)!.getBounds(), { duration: 500 });
 
-    console.time("get input files");
-    let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
-      await getInputFiles(gj, isCnt);
-    console.timeEnd("get input files");
-    console.time("load");
-    backend.set(
-      new Backend(
-        new Uint8Array(osmBuffer),
-        demandBuffer ? new Uint8Array(demandBuffer) : undefined,
-        contextDataBuffer ? new Uint8Array(contextDataBuffer) : undefined,
-        boundary,
-        gj.study_area_name || undefined,
-      ),
-    );
-    // TODO Rename savefile -> project? Or combine this call with the constructor?
-    get(backend)!.loadSavefile(gj);
-    console.timeEnd("load");
-
-    afterProjectLoaded();
-  } catch (err) {
-    window.alert(`Couldn't open project: ${err}`);
-    currentProjectKey.set("");
-  }
+  // Update the URL
+  let url = new URL(window.location.href);
+  url.searchParams.set("project", get(currentProjectKey));
+  window.history.replaceState(null, "", url.toString());
 }
 
 // Returns OSM input, optional demand model input, and the boundary polygon,
@@ -132,128 +260,4 @@ async function getInputFiles(
     let osmBuffer = await resp.arrayBuffer();
     return { osmBuffer, boundary };
   }
-}
-
-// Returns a list, grouped and sorted by the optional study_area_name, with
-// custom cases at the end
-export function listProjects(
-  appFocus: "cnt" | "global",
-): Array<[string | undefined, { projectId: string; projectName: string }[]]> {
-  let studyAreas = new Map();
-  let custom = [];
-  for (let i = 0; i < window.localStorage.length; i++) {
-    let key = window.localStorage.key(i)!;
-    if (key.startsWith("ltn_cnt/")) {
-      if (appFocus != "cnt") {
-        continue;
-      }
-      try {
-        let [_, studyAreaId, projectName] = key.split("/");
-        let studyAreaName = studyAreaId.split("LAD_")[1];
-        if (!studyAreas.has(studyAreaName)) {
-          studyAreas.set(studyAreaName, []);
-        }
-        studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
-      } catch (err) {
-        console.log(`error loading cnt project: ${key}`, err);
-      }
-    } else if (key.startsWith("ltn_")) {
-      if (appFocus != "global") {
-        continue;
-      }
-      let projectName = key.split("ltn_")[1];
-      let studyAreaName = "";
-      try {
-        let gj = JSON.parse(window.localStorage.getItem(key)!);
-        studyAreaName = gj.study_area_name;
-      } catch (err) {
-        console.log(`error loading cnt project: ${key}`, err);
-      }
-      if (studyAreaName && studyAreaName.length > 0) {
-        if (!studyAreas.has(studyAreaName)) {
-          studyAreas.set(studyAreaName, []);
-        }
-        studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
-      } else {
-        custom.push({ projectId: key, projectName });
-      }
-    }
-  }
-
-  let out = [...studyAreas.entries()];
-  out.sort((a, b) => a[0].localeCompare(b[0]));
-  if (custom.length > 0) {
-    out.push([undefined, custom]);
-  }
-  return out;
-}
-
-export function createEmptyProject(key: string, studyAreaName: string) {
-  if (!key) {
-    throw new Error("Cannot create project: no key specified");
-  }
-
-  const projectData = {
-    type: "FeatureCollection",
-    features: [],
-    study_area_name: studyAreaName,
-  };
-
-  window.localStorage.setItem(key, JSON.stringify(projectData));
-}
-
-export function saveProject(key: string, projectData: string) {
-  if (!key) {
-    throw new Error("Cannot save project: no key specified");
-  }
-
-  window.localStorage.setItem(key, projectData);
-}
-
-export function removeProject(key: string) {
-  if (!key) {
-    throw new Error("Cannot remove project: no key specified");
-  }
-
-  if (window.localStorage.getItem(key) == null) {
-    console.warn(`Trying to remove a project that doesn't exist: ${key}`);
-  }
-
-  window.localStorage.removeItem(key);
-}
-
-export function renameProject(oldKey: string, newKey: string) {
-  if (!oldKey || !newKey) {
-    throw new Error("Cannot rename project: keys must be specified");
-  }
-
-  const projectData = window.localStorage.getItem(oldKey);
-  if (!projectData) {
-    throw new Error(`Project ${oldKey} not found`);
-  }
-
-  saveProject(newKey, projectData);
-  removeProject(oldKey);
-}
-
-export function afterProjectLoaded() {
-  mode.set({
-    mode: "pick-neighbourhood",
-  });
-  // The stores are unused; the WASM API is used directly. This TS wrapper is unused.
-  routeTool.set(
-    new RouteTool(
-      get(map)!,
-      get(backend)!.toRouteSnapper(),
-      writable(emptyGeojson()),
-      writable(true),
-      writable(0),
-    ),
-  );
-  get(map)!.fitBounds(get(backend)!.getBounds(), { duration: 500 });
-
-  // Update the URL
-  let url = new URL(window.location.href);
-  url.searchParams.set("project", get(currentProjectKey));
-  window.history.replaceState(null, "", url.toString());
 }
