@@ -154,7 +154,7 @@ function _car_ownership() {
   # We could omit it and put it in the readme, but maybe it's nice here for consistency with the other sources.
   cat <<EOS
 🚗 Manually download car ownership CSV (buckle up, it's a wild ride!)
-  1. go to https://www.scotlandscensus.gov.uk
+  1. go to https://www.scotlandscensus.gov.uk/search-the-census#/topics
   2. search for "UV405" that's the "Car or van availability" table
   3. choose "Data Zone 2011" area
   4. download the results as CSV (~48k records)
