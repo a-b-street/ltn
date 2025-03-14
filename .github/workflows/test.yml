@@ -22,6 +22,10 @@ jobs:
       - name: Download test inputs
         run: bin/download-local-test-data.sh
 
-      - name: Run tests
+      - name: Run rust tests
         run: |
           cargo test --release
+
+      - name: Run web tests
+        run: cd web && npm ci && npm test
+
