@@ -17,7 +17,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: target
-          key: cargo-test-${{ hashFiles('backend/Cargo.lock') }}
+          key: cargo-test-${{ hashFiles('Cargo.lock') }}
 
       - name: Download test inputs
         run: bin/download-local-test-data.sh
@@ -43,8 +43,8 @@ jobs:
       - name: Cache WASM build
         uses: actions/cache@v3
         with:
-          path: backend/target
-          key: cargo-wasm-test-${{ hashFiles('backend/Cargo.lock') }}
+          path: target
+          key: cargo-wasm-test-${{ hashFiles('Cargo.lock') }}
 
       - name: Build wasm
         run: |
