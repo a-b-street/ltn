@@ -646,17 +646,6 @@ impl MapModel {
         let mut f = Feature::from(Geometry::from(&self.boundary_wgs84));
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
-
-        gj.foreign_members = Some(
-            // The features are elements within the study area, we store properties of the
-            // StudyArea itself as foreign members.
-            serde_json::json!({
-                "study_area_name": self.study_area_name,
-            })
-            .as_object()
-            .unwrap()
-            .clone(),
-        );
         gj
     }
 
