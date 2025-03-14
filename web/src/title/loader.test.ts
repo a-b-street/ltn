@@ -1,11 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  createEmptyProject,
-  listProjects,
-  removeProject,
-  renameProject,
-  saveProject,
-} from "./loader";
+import { projectStorage } from "./loader";
 
 // Helper function to mock localStorage with predefined data
 function mockLocalStorage(mockData = {}) {
@@ -67,7 +61,7 @@ describe("Project listing and saving functionality", () => {
         ltn_other_key: { ignore: "me" },
       });
 
-      const result = listProjects("cnt");
+      const result = projectStorage.listProjects("cnt");
 
       expect(result).toHaveLength(2); // Two study areas
 
@@ -94,7 +88,7 @@ describe("Project listing and saving functionality", () => {
         },
       });
 
-      const result = listProjects("cnt");
+      const result = projectStorage.listProjects("cnt");
       expect(result).toHaveLength(1);
       expect(result[0][0]).toBe("Edinburgh");
     });
@@ -126,7 +120,7 @@ describe("Project listing and saving functionality", () => {
         },
       });
 
-      const studyAreas = listProjects("global");
+      const studyAreas = projectStorage.listProjects("global");
       expect(studyAreas).toHaveLength(3);
 
       expect(studyAreas[0]).toEqual([
@@ -151,8 +145,8 @@ describe("Project listing and saving functionality", () => {
 
     it("should handle empty localStorage", () => {
       mockLocalStorage({}); // Empty localStorage
-      expect(listProjects("cnt")).toHaveLength(0);
-      expect(listProjects("global")).toHaveLength(0);
+      expect(projectStorage.listProjects("cnt")).toHaveLength(0);
+      expect(projectStorage.listProjects("global")).toHaveLength(0);
     });
   });
 
@@ -160,7 +154,7 @@ describe("Project listing and saving functionality", () => {
     it("should create an empty project with study area name", () => {
       const { storage } = mockLocalStorage({});
 
-      createEmptyProject("test-project", "TestArea");
+      projectStorage.createEmptyProject("test-project", "TestArea");
 
       expect(storage["test-project"]).toBe(
         JSON.stringify({
@@ -173,7 +167,7 @@ describe("Project listing and saving functionality", () => {
 
     it("should throw an error when key is empty", () => {
       mockLocalStorage({});
-      expect(() => createEmptyProject("", "TestArea")).toThrow(
+      expect(() => projectStorage.createEmptyProject("", "TestArea")).toThrow(
         "Cannot create project: no key specified",
       );
     });
@@ -188,14 +182,14 @@ describe("Project listing and saving functionality", () => {
         study_area_name: "TestArea",
       });
 
-      saveProject("test-project", projectData);
+      projectStorage.saveProject("test-project", projectData);
 
       expect(storage["test-project"]).toBe(projectData);
     });
 
     it("should throw an error when key is empty", () => {
       mockLocalStorage({});
-      expect(() => saveProject("", "{}")).toThrow(
+      expect(() => projectStorage.saveProject("", "{}")).toThrow(
         "Cannot save project: no key specified",
       );
     });
@@ -210,21 +204,21 @@ describe("Project listing and saving functionality", () => {
         },
       });
 
-      expect(listProjects("cnt")).toHaveLength(1);
-      removeProject("ltn_cnt/Foo/Bar");
-      expect(listProjects("cnt")).toHaveLength(0);
+      expect(projectStorage.listProjects("cnt")).toHaveLength(1);
+      projectStorage.removeProject("ltn_cnt/Foo/Bar");
+      expect(projectStorage.listProjects("cnt")).toHaveLength(0);
     });
 
     it("should throw error when key is empty", () => {
       mockLocalStorage({});
-      expect(() => removeProject("")).toThrow(
+      expect(() => projectStorage.removeProject("")).toThrow(
         "Cannot remove project: no key specified",
       );
     });
 
     it("should not throw error when project doesn't exist", () => {
       mockLocalStorage({}); // Empty localStorage
-      expect(() => removeProject("nonexistent")).not.toThrow();
+      expect(() => projectStorage.removeProject("nonexistent")).not.toThrow();
     });
   });
 
@@ -240,7 +234,7 @@ describe("Project listing and saving functionality", () => {
 
       const oldData = storage["old-key"];
 
-      renameProject("old-key", "new-key");
+      projectStorage.renameProject("old-key", "new-key");
 
       expect(storage["new-key"]).toBe(oldData);
       expect(storage["old-key"]).toBeUndefined();
@@ -248,23 +242,23 @@ describe("Project listing and saving functionality", () => {
 
     it("should throw error when old key is empty", () => {
       mockLocalStorage({});
-      expect(() => renameProject("", "new-key")).toThrow(
+      expect(() => projectStorage.renameProject("", "new-key")).toThrow(
         "Cannot rename project: keys must be specified",
       );
     });
 
     it("should throw error when new key is empty", () => {
       mockLocalStorage({});
-      expect(() => renameProject("old-key", "")).toThrow(
+      expect(() => projectStorage.renameProject("old-key", "")).toThrow(
         "Cannot rename project: keys must be specified",
       );
     });
 
     it("should throw error when project doesn't exist", () => {
       mockLocalStorage({}); // Empty localStorage
-      expect(() => renameProject("nonexistent", "new-key")).toThrow(
-        "Project nonexistent not found",
-      );
+      expect(() =>
+        projectStorage.renameProject("nonexistent", "new-key"),
+      ).toThrow("Project nonexistent not found");
     });
   });
 });

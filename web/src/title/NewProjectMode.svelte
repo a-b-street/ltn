@@ -15,11 +15,7 @@
     saveCurrentProject,
   } from "../stores";
   import { Backend } from "../wasm";
-  import {
-    afterProjectLoaded,
-    createEmptyProject,
-    loadProject,
-  } from "./loader";
+  import { afterProjectLoaded, projectStorage } from "./loader";
 
   let newProjectName = "";
   let example = "";
@@ -59,9 +55,9 @@
     // REIVEW: can we change to be like this to align with ltn_cnt project keys?
     //let key = `ltn/${example}/${newProjectName}`;
     let key = `ltn_${newProjectName}`;
-    createEmptyProject(key, example);
+    projectStorage.createEmptyProject(key, example);
     loading = `Loading pre-clipped OSM area ${example}`;
-    await loadProject(key);
+    await projectStorage.loadProject(key);
     loading = "";
   }
 </script>

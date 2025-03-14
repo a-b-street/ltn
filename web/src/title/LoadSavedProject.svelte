@@ -1,6 +1,6 @@
 <script lang="ts">
   import { stripPrefix, stripSuffix } from "../common";
-  import { loadProject, saveProject } from "./loader";
+  import { projectStorage } from "./loader";
 
   export let loading: string;
 
@@ -28,8 +28,8 @@
       key = `ltn_${projectName}`;
     }
     // TODO Be careful with overwriting files
-    saveProject(key, contents);
-    await loadProject(key);
+    projectStorage.saveProject(key, contents);
+    await projectStorage.loadProject(key);
     loading = "";
   }
 </script>

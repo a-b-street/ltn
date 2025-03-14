@@ -7,7 +7,7 @@ import {
 } from "maplibre-gl";
 import { type AreaProps } from "route-snapper-ts";
 import { get, writable, type Writable } from "svelte/store";
-import { saveProject } from "./title/loader";
+import { projectStorage } from "./title/loader";
 import type { Backend } from "./wasm";
 
 // NOTE: our maptiler apiKey is baked into the customized assets/map-styles/, so if we rotate keys, we'll need to update that file too.
@@ -96,7 +96,7 @@ export let thickRoadsForShortcuts = writable(false);
 export function saveCurrentProject() {
   const key = get(currentProjectKey);
   try {
-    saveProject(key, JSON.stringify(get(backend)!.toSavefile()));
+    projectStorage.saveProject(key, JSON.stringify(get(backend)!.toSavefile()));
   } catch (err) {
     window.alert(`${err}`);
   }
