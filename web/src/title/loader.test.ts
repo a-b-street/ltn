@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getProjectList } from "./loader";
+import {
+  createEmptyProject,
+  listProjects,
+  removeProject,
+  renameProject,
+  saveProject,
+} from "./loader";
 
 // Helper function to mock localStorage with predefined data
 function mockLocalStorage(mockData = {}) {
@@ -13,29 +19,34 @@ function mockLocalStorage(mockData = {}) {
     // mock localStorage API's that we use
     value: {
       getItem: vi.fn((key) => storage[key] || null),
-      setItem: vi.fn(),
-      removeItem: vi.fn(),
+      setItem: vi.fn((key, value) => {
+        storage[key] = value;
+      }),
+      removeItem: vi.fn((key) => {
+        delete storage[key];
+      }),
       clear: vi.fn(),
       key: vi.fn((index) => Object.keys(storage)[index] || null),
-      length: Object.keys(storage).length,
+      get length() {
+        return Object.keys(storage).length;
+      },
     },
     writable: true,
   });
 
-  return window.localStorage;
+  return { storage, localStorage: window.localStorage };
 }
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mockLocalStorage(); // Initialize with empty storage
 });
 
 afterEach(() => {
   vi.resetAllMocks();
 });
 
-describe("Project listing functionality", () => {
-  describe("getProjectList", () => {
+describe("Project listing and saving functionality", () => {
+  describe("listProjects", () => {
     it("should group CNT projects by study area", () => {
       mockLocalStorage({
         "ltn_cnt/LAD_Edinburgh/project1": {
@@ -56,7 +67,7 @@ describe("Project listing functionality", () => {
         ltn_other_key: { ignore: "me" },
       });
 
-      const result = getProjectList("cnt");
+      const result = listProjects("cnt");
 
       expect(result).toHaveLength(2); // Two study areas
 
@@ -83,7 +94,7 @@ describe("Project listing functionality", () => {
         },
       });
 
-      const result = getProjectList("cnt");
+      const result = listProjects("cnt");
       expect(result).toHaveLength(1);
       expect(result[0][0]).toBe("Edinburgh");
     });
@@ -115,7 +126,7 @@ describe("Project listing functionality", () => {
         },
       });
 
-      const studyAreas = getProjectList("global");
+      const studyAreas = listProjects("global");
       expect(studyAreas).toHaveLength(3);
 
       expect(studyAreas[0]).toEqual([
@@ -140,8 +151,120 @@ describe("Project listing functionality", () => {
 
     it("should handle empty localStorage", () => {
       mockLocalStorage({}); // Empty localStorage
-      expect(getProjectList("cnt")).toHaveLength(0);
-      expect(getProjectList("global")).toHaveLength(0);
+      expect(listProjects("cnt")).toHaveLength(0);
+      expect(listProjects("global")).toHaveLength(0);
+    });
+  });
+
+  describe("createEmptyProject", () => {
+    it("should create an empty project with study area name", () => {
+      const { storage } = mockLocalStorage({});
+
+      createEmptyProject("test-project", "TestArea");
+
+      expect(storage["test-project"]).toBe(
+        JSON.stringify({
+          type: "FeatureCollection",
+          features: [],
+          study_area_name: "TestArea",
+        }),
+      );
+    });
+
+    it("should throw an error when key is empty", () => {
+      mockLocalStorage({});
+      expect(() => createEmptyProject("", "TestArea")).toThrow(
+        "Cannot create project: no key specified",
+      );
+    });
+  });
+
+  describe("saveProject", () => {
+    it("should save a string project to localStorage", () => {
+      const { storage } = mockLocalStorage({});
+      const projectData = JSON.stringify({
+        type: "FeatureCollection",
+        features: [],
+        study_area_name: "TestArea",
+      });
+
+      saveProject("test-project", projectData);
+
+      expect(storage["test-project"]).toBe(projectData);
+    });
+
+    it("should throw an error when key is empty", () => {
+      mockLocalStorage({});
+      expect(() => saveProject("", "{}")).toThrow(
+        "Cannot save project: no key specified",
+      );
+    });
+  });
+
+  describe("removeProject", () => {
+    it("should remove a project from localStorage", () => {
+      mockLocalStorage({
+        "ltn_cnt/Foo/Bar": {
+          type: "FeatureCollection",
+          features: [],
+        },
+      });
+
+      expect(listProjects("cnt")).toHaveLength(1);
+      removeProject("ltn_cnt/Foo/Bar");
+      expect(listProjects("cnt")).toHaveLength(0);
+    });
+
+    it("should throw error when key is empty", () => {
+      mockLocalStorage({});
+      expect(() => removeProject("")).toThrow(
+        "Cannot remove project: no key specified",
+      );
+    });
+
+    it("should not throw error when project doesn't exist", () => {
+      mockLocalStorage({}); // Empty localStorage
+      expect(() => removeProject("nonexistent")).not.toThrow();
+    });
+  });
+
+  describe("renameProject", () => {
+    it("should rename a project by saving under new key and removing old one", () => {
+      const { storage } = mockLocalStorage({
+        "old-key": {
+          type: "FeatureCollection",
+          features: [],
+          study_area_name: "TestArea",
+        },
+      });
+
+      const oldData = storage["old-key"];
+
+      renameProject("old-key", "new-key");
+
+      expect(storage["new-key"]).toBe(oldData);
+      expect(storage["old-key"]).toBeUndefined();
+    });
+
+    it("should throw error when old key is empty", () => {
+      mockLocalStorage({});
+      expect(() => renameProject("", "new-key")).toThrow(
+        "Cannot rename project: keys must be specified",
+      );
+    });
+
+    it("should throw error when new key is empty", () => {
+      mockLocalStorage({});
+      expect(() => renameProject("old-key", "")).toThrow(
+        "Cannot rename project: keys must be specified",
+      );
+    });
+
+    it("should throw error when project doesn't exist", () => {
+      mockLocalStorage({}); // Empty localStorage
+      expect(() => renameProject("nonexistent", "new-key")).toThrow(
+        "Project nonexistent not found",
+      );
     });
   });
 });

@@ -6,7 +6,12 @@
   import { Link } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { appFocus, backend, currentProjectKey, map, mode } from "../stores";
-  import { getProjectList, loadFromLocalStorage } from "./loader";
+  import {
+    listProjects,
+    loadProject,
+    removeProject,
+    renameProject,
+  } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
   export let wasmReady: boolean;
@@ -22,10 +27,9 @@
 
     if (firstLoad) {
       let params = new URLSearchParams(window.location.search);
-      let loadProject = params.get("project");
-      if (loadProject) {
-        loading = `Loading project ${loadProject}`;
-        loadFromLocalStorage(loadProject);
+      let projectKey = params.get("project");
+      if (projectKey) {
+        loadProjectPrompt(projectKey);
       }
     } else {
       // Update the URL
@@ -35,16 +39,16 @@
     }
   }
 
-  let projectList = getProjectList($appFocus);
+  let projectList = listProjects($appFocus);
 
-  function deleteProject(key: string) {
+  function deleteProjectPrompt(key: string) {
     if (window.confirm(`Really delete project ${key}? You can't undo this.`)) {
-      window.localStorage.removeItem(key);
-      projectList = getProjectList($appFocus);
+      removeProject(key);
+      projectList = listProjects($appFocus);
     }
   }
 
-  function renameProject(key: string) {
+  function renameProjectPrompt(key: string) {
     let newName = window.prompt(`Rename project ${key} to what?`, key);
     if (newName) {
       // TODO Again, hide leading ltn_?
@@ -52,16 +56,14 @@
         newName = `ltn_${newName}`;
       }
 
-      let gj = window.localStorage.getItem(key)!;
-      window.localStorage.setItem(newName, gj);
-      window.localStorage.removeItem(key);
-      projectList = getProjectList($appFocus);
+      renameProject(key, newName);
+      projectList = listProjects($appFocus);
     }
   }
 
-  async function loadProject(key: string) {
+  async function loadProjectPrompt(key: string) {
     loading = `Loading project ${key}`;
-    await loadFromLocalStorage(key);
+    await loadProject(key);
     loading = "";
   }
 </script>
@@ -95,14 +97,14 @@
                     <button
                       class="outline icon-btn"
                       aria-label="Rename project"
-                      on:click={() => renameProject(projectId)}
+                      on:click={() => renameProjectPrompt(projectId)}
                     >
                       <Pencil color="black" />
                     </button>
                     <button
                       class="icon-btn destructive"
                       aria-label="Delete project"
-                      on:click={() => deleteProject(projectId)}
+                      on:click={() => deleteProjectPrompt(projectId)}
                     >
                       <Trash2 color="white" />
                     </button>

@@ -6,11 +6,11 @@
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { calculateArea, waypoints } from "./common/draw_area/stores";
   import {
-    autosave,
     backend,
     map,
     mode,
     returnToChooseProject,
+    saveCurrentProject,
   } from "./stores";
 
   export let name: string;
@@ -43,7 +43,7 @@
       try {
         let feature = calculateArea($waypoints);
         $backend!.setNeighbourhoodBoundary(name, feature);
-        autosave();
+        saveCurrentProject();
         $backend!.setCurrentNeighbourhood(name);
         $mode = {
           mode: "neighbourhood",
