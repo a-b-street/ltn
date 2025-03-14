@@ -34,7 +34,6 @@
   import EditableIntersectionLayer from "../layers/EditableIntersectionLayer.svelte";
   import {
     animateShortcuts,
-    autosave,
     backend,
     devMode,
     filterType,
@@ -43,6 +42,7 @@
     mutationCounter,
     returnToChooseProject,
     roadStyle,
+    saveCurrentProject,
   } from "../stores";
   import type {
     NeighbourhoodBoundaryFeature,
@@ -113,7 +113,7 @@
 
     allShortcuts = $backend!.getAllShortcuts();
 
-    autosave();
+    saveCurrentProject();
   }
 
   function onClickLine(f: Feature, pt: LngLat) {

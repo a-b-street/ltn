@@ -30,19 +30,12 @@ export async function createNewProject(
     return false;
   }
 
-  window.localStorage.setItem(
-    key,
-    JSON.stringify({
-      type: "FeatureCollection",
-      features: [],
-      study_area_name: studyAreaName,
-    }),
-  );
-  await loadFromLocalStorage(key);
+  createEmptyProject(key, studyAreaName);
+  await loadProject(key);
   return true;
 }
 
-export async function loadFromLocalStorage(key: string) {
+export async function loadProject(key: string) {
   currentProjectKey.set(key);
   let isCnt = key.startsWith("ltn_cnt/");
   // TODO Should we also change the URL?
@@ -143,7 +136,7 @@ async function getInputFiles(
 
 // Returns a list, grouped and sorted by the optional study_area_name, with
 // custom cases at the end
-export function getProjectList(
+export function listProjects(
   appFocus: "cnt" | "global",
 ): Array<[string | undefined, { projectId: string; projectName: string }[]]> {
   let studyAreas = new Map();
@@ -193,6 +186,54 @@ export function getProjectList(
     out.push([undefined, custom]);
   }
   return out;
+}
+
+export function createEmptyProject(key: string, studyAreaName: string) {
+  if (!key) {
+    throw new Error("Cannot create project: no key specified");
+  }
+
+  const projectData = {
+    type: "FeatureCollection",
+    features: [],
+    study_area_name: studyAreaName,
+  };
+
+  window.localStorage.setItem(key, JSON.stringify(projectData));
+}
+
+export function saveProject(key: string, projectData: string) {
+  if (!key) {
+    throw new Error("Cannot save project: no key specified");
+  }
+
+  window.localStorage.setItem(key, projectData);
+}
+
+export function removeProject(key: string) {
+  if (!key) {
+    throw new Error("Cannot remove project: no key specified");
+  }
+
+  if (window.localStorage.getItem(key) == null) {
+    console.warn(`Trying to remove a project that doesn't exist: ${key}`);
+  }
+
+  window.localStorage.removeItem(key);
+}
+
+export function renameProject(oldKey: string, newKey: string) {
+  if (!oldKey || !newKey) {
+    throw new Error("Cannot rename project: keys must be specified");
+  }
+
+  const projectData = window.localStorage.getItem(oldKey);
+  if (!projectData) {
+    throw new Error(`Project ${oldKey} not found`);
+  }
+
+  saveProject(newKey, projectData);
+  removeProject(oldKey);
 }
 
 export function afterProjectLoaded() {

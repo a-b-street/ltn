@@ -8,14 +8,18 @@
   import { Link, safeFetch } from "../common";
   import {
     assetUrl,
-    autosave,
     backend,
     currentProjectKey,
     map,
     returnToChooseProject,
+    saveCurrentProject,
   } from "../stores";
   import { Backend } from "../wasm";
-  import { afterProjectLoaded, loadFromLocalStorage } from "./loader";
+  import {
+    afterProjectLoaded,
+    createEmptyProject,
+    loadProject,
+  } from "./loader";
 
   let newProjectName = "";
   let example = "";
@@ -40,7 +44,7 @@
       $currentProjectKey = `ltn_${newProjectName}`;
       afterProjectLoaded();
       // No savefile to load. Create it immediately with just the boundary
-      autosave();
+      saveCurrentProject();
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
@@ -55,16 +59,9 @@
     // REIVEW: can we change to be like this to align with ltn_cnt project keys?
     //let key = `ltn/${example}/${newProjectName}`;
     let key = `ltn_${newProjectName}`;
-    window.localStorage.setItem(
-      key,
-      JSON.stringify({
-        type: "FeatureCollection",
-        features: [],
-        study_area_name: example,
-      }),
-    );
+    createEmptyProject(key, example);
     loading = `Loading pre-clipped OSM area ${example}`;
-    await loadFromLocalStorage(key);
+    await loadProject(key);
     loading = "";
   }
 </script>
