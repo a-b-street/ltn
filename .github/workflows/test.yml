@@ -16,7 +16,7 @@ jobs:
       - name: Cache build
         uses: actions/cache@v4
         with:
-          path: backend/target
+          path: target
           key: cargo-test-${{ hashFiles('backend/Cargo.lock') }}
 
       - name: Download test inputs
@@ -39,6 +39,12 @@ jobs:
 
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
+      
+      - name: Cache WASM build
+        uses: actions/cache@v3
+        with:
+          path: backend/target
+          key: cargo-wasm-test-${{ hashFiles('backend/Cargo.lock') }}
 
       - name: Build wasm
         run: |
