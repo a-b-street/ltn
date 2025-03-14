@@ -39,6 +39,8 @@ export type GeneratedBoundaryFeature = Feature<
     touches_waterway: boolean;
 
     area_km2: number;
+    households_with_cars_or_vans: number;
+    total_households: number;
     population: number;
     simd: number;
     number_stats19_collisions: number;

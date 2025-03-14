@@ -57,6 +57,14 @@ export function prettyPrintTime(seconds: number): string {
   return `${minutes}m${leftover}s`;
 }
 
+export function prettyPrintPercent(part: number, total: number): string {
+  if (total === 0) {
+    return "0%";
+  }
+  let percent = Math.round((part / total) * 100);
+  return `${percent}%`;
+}
+
 /**
  * Create a zoom-independent distance.
  *

@@ -36,7 +36,7 @@ pub struct PopulationZoneInput {
     pub geometry: PreparedGeometry<'static, MultiPolygon>,
 
     // "id": "S01006506",
-    // (unused)
+    pub id: String,
 
     // "imd_rank": 4691,
     // (unused)

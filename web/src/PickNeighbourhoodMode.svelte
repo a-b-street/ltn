@@ -9,24 +9,16 @@
     JoinedData,
   } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId, Link } from "./common";
-  import {
-    areaColorScale,
-    areaLimits,
-    densityColorScale,
-    densityLimits,
-    poiColorScale,
-    poiLimits,
-    simdColorScale,
-    simdLimits,
-    stats19ColorScale,
-    stats19Limits,
-  } from "./common/colors";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
-  import { PrioritizationSelect, type Prioritization } from "./prioritization";
+  import {
+    prioritizationFillColor,
+    PrioritizationSelect,
+    type Prioritization,
+  } from "./prioritization";
   import {
     appFocus,
     autosave,
@@ -125,26 +117,11 @@
   function fillColor(
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<string> {
-    let color = {
-      none: "black",
-      area: makeRamp(["get", "area_km2"], areaLimits, areaColorScale),
-      density: makeRamp(
-        ["/", ["get", "population"], ["get", "area_km2"]],
-        densityLimits,
-        densityColorScale,
-      ),
-      simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
-      stats19: makeRamp(
-        ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
-        stats19Limits,
-        stats19ColorScale,
-      ),
-      pois: makeRamp(
-        ["/", ["get", "number_pois"], ["get", "area_km2"]],
-        poiLimits,
-        poiColorScale,
-      ),
-    }[selectedPrioritization];
+    let color = prioritizationFillColor(
+      { none: "black" },
+      selectedPrioritization,
+    );
+
     return [
       "case",
       ["==", ["feature-state", "highlight"], "yes"],
@@ -164,6 +141,7 @@
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
       pois: hoverStateFilter(0.7, 0.9),
+      car_ownership: hoverStateFilter(0.7, 0.9),
     }[selectedPrioritization];
   }
 </script>

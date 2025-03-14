@@ -2,6 +2,7 @@
 target/
 node_modules/
 data_prep/scotland/tmp
+data_prep/scotland/input
 data_prep/scotland/demand
 data_prep/scotland/out_layers
 data_prep/scotland/prioritization
