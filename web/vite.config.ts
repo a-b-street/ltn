@@ -13,5 +13,14 @@ export default defineConfig({
       },
     },
   },
-  plugins: [svelte(), wasmPack(["../backend"], ["route-snapper"])]
+  plugins: [
+    // disable hot module reloading during test runs
+    svelte({ hot: !process.env.VITEST }),
+    wasmPack(["../backend"], ["route-snapper"])
+  ],
+  // @ts-ignore - The works, but type checking fails. Not sure why.
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+  }
 })

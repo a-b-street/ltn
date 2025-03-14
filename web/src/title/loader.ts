@@ -145,7 +145,7 @@ async function getInputFiles(
 // custom cases at the end
 export function getProjectList(
   appFocus: "cnt" | "global",
-): Array<[string, { projectId: string; projectName: string }[]]> {
+): Array<[string | undefined, { projectId: string; projectName: string }[]]> {
   let studyAreas = new Map();
   let custom = [];
   for (let i = 0; i < window.localStorage.length; i++) {
@@ -168,6 +168,7 @@ export function getProjectList(
       if (appFocus != "global") {
         continue;
       }
+      let projectName = key.split("ltn_")[1];
       let studyAreaName = "";
       try {
         let gj = JSON.parse(window.localStorage.getItem(key)!);
@@ -179,10 +180,9 @@ export function getProjectList(
         if (!studyAreas.has(studyAreaName)) {
           studyAreas.set(studyAreaName, []);
         }
-        let projectName = key.split("ltn_")[1];
         studyAreas.get(studyAreaName)!.push({ projectId: key, projectName });
       } else {
-        custom.push(key);
+        custom.push({ projectId: key, projectName });
       }
     }
   }
@@ -190,7 +190,7 @@ export function getProjectList(
   let out = [...studyAreas.entries()];
   out.sort((a, b) => a[0].localeCompare(b[0]));
   if (custom.length > 0) {
-    out.push(["", custom]);
+    out.push([undefined, custom]);
   }
   return out;
 }

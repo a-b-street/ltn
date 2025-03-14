@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  rust-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,12 +16,43 @@ jobs:
       - name: Cache build
         uses: actions/cache@v4
         with:
-          path: backend/target
-          key: cargo-test-${{ hashFiles('backend/Cargo.lock') }}
+          path: target
+          key: cargo-test-${{ hashFiles('Cargo.lock') }}
 
       - name: Download test inputs
         run: bin/download-local-test-data.sh
 
-      - name: Run tests
+      - name: Run rust tests
         run: |
           cargo test --release
+
+  web-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+      
+      - name: Cache WASM build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: cargo-wasm-test-${{ hashFiles('Cargo.lock') }}
+
+      - name: Build wasm
+        run: |
+          cd web
+          npm ci
+          npm run wasm
+
+      - name: Run web tests
+        run: |
+          cd web
+          npm test
