@@ -10,8 +10,9 @@
   } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
   import boundariesUrl from "../assets/cnt_boundaries.geojson?url";
-  import { Link } from "./common";
-  import { projectStorage } from "./title/loader";
+  import { Link, prettyPrintStudyAreaName } from "./common";
+  import { projectStorage } from "./stores";
+  import { loadProject } from "./title/loader";
 
   export let activityIndicatorText: string;
 
@@ -46,25 +47,25 @@
     while (!created) {
       projectName =
         window.prompt(
-          `Please pick a project name to create in ${studyAreaName}`,
+          `Please pick a project name to create in ${prettyPrintStudyAreaName(studyAreaName)}`,
           projectName,
         ) || "";
       if (projectName == "") {
         // If the user leaves this blank or presses cancel, stop prompting them.
         return;
       }
-      activityIndicatorText = `Loading pre-clipped OSM area ${studyAreaName}`;
-      created = await projectStorage.createNewProject(
-        "ltn_cnt",
-        studyAreaName,
-        projectName,
-      );
-      activityIndicatorText = "";
-      if (!created) {
-        window.alert(
-          `The project name ${projectName} is already used; please pick another`,
+      activityIndicatorText = `Loading pre-clipped OSM area ${prettyPrintStudyAreaName(studyAreaName)}`;
+      try {
+        let projectID = $projectStorage.createNewProject(
+          projectName,
+          studyAreaName,
         );
+        await loadProject(projectID);
+        created = true;
+      } catch (e) {
+        window.alert(e);
       }
+      activityIndicatorText = "";
     }
   }
 </script>

@@ -7,7 +7,12 @@ import {
 } from "maplibre-gl";
 import { type AreaProps } from "route-snapper-ts";
 import { get, writable, type Writable } from "svelte/store";
-import { projectStorage } from "./title/loader";
+import {
+  Database,
+  ProjectStorage,
+  type ProjectID,
+  type ProjectSummary,
+} from "./common/ProjectStorage";
 import type { Backend } from "./wasm";
 
 // NOTE: our maptiler apiKey is baked into the customized assets/map-styles/, so if we rotate keys, we'll need to update that file too.
@@ -67,12 +72,32 @@ export type Mode =
 
 export let map: Writable<Map | null> = writable(null);
 
-// The exact key in local storage
-export let currentProjectKey: Writable<string> = writable("");
+export let appFocus: Writable<"global" | "cnt"> = writable("global");
+// The id of the project currently being worked on
+export let currentProjectID: Writable<ProjectID | undefined> =
+  writable(undefined);
+
+export let currentProject: Writable<ProjectSummary | undefined> =
+  writable(undefined);
+currentProjectID.subscribe((projectID) => {
+  if (projectID) {
+    const project = get(projectStorage).getProject(projectID);
+    currentProject.set(project.projectSummary);
+  } else {
+    currentProject.set(undefined);
+  }
+});
+
+let database = new Database();
+export let projectStorage: Writable<ProjectStorage> = writable(
+  database.projectStorage(get(appFocus)),
+);
+appFocus.subscribe((focus) => {
+  projectStorage.set(database.projectStorage(focus));
+});
+
 // False until user activates
 export let showAbout: Writable<boolean> = writable(false);
-
-export let appFocus: Writable<"global" | "cnt"> = writable("global");
 
 export let backend: Writable<Backend | null> = writable(null);
 export let routePtA: Writable<LngLat> = writable(new LngLat(0, 0));
@@ -94,9 +119,9 @@ export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
 export let thickRoadsForShortcuts = writable(false);
 
 export function saveCurrentProject() {
-  const key = get(currentProjectKey);
+  const projectID = get(currentProjectID)!;
   try {
-    projectStorage.saveProject(key, JSON.stringify(get(backend)!.toSavefile()));
+    get(projectStorage).saveProject(projectID, get(backend)!.toSavefile());
   } catch (err) {
     window.alert(`${err}`);
   }

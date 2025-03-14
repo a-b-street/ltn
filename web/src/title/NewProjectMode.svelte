@@ -9,13 +9,12 @@
   import {
     assetUrl,
     backend,
-    currentProjectKey,
     map,
+    projectStorage,
     returnToChooseProject,
-    saveCurrentProject,
   } from "../stores";
   import { Backend } from "../wasm";
-  import { afterProjectLoaded, projectStorage } from "./loader";
+  import { loadProject } from "./loader";
 
   let newProjectName = "";
   let example = "";
@@ -37,10 +36,13 @@
         e.detail.boundary,
         undefined,
       );
-      $currentProjectKey = `ltn_${newProjectName}`;
-      afterProjectLoaded();
-      // No savefile to load. Create it immediately with just the boundary
-      saveCurrentProject();
+
+      const projectID = $projectStorage.createNewProject(
+        newProjectName,
+        undefined,
+      );
+      $projectStorage.saveProject(projectID, $backend.toSavefile());
+      loadProject(projectID);
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
@@ -52,12 +54,9 @@
       return;
     }
 
-    // REIVEW: can we change to be like this to align with ltn_cnt project keys?
-    //let key = `ltn/${example}/${newProjectName}`;
-    let key = `ltn_${newProjectName}`;
-    projectStorage.createEmptyProject(key, example);
+    let projectID = $projectStorage.createNewProject(newProjectName, example);
     loading = `Loading pre-clipped OSM area ${example}`;
-    await projectStorage.loadProject(key);
+    await loadProject(projectID);
     loading = "";
   }
 </script>
