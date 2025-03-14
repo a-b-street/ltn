@@ -26,6 +26,12 @@ jobs:
         run: |
           cargo test --release
 
-      - name: Run web tests
-        run: cd web && npm ci && npm test
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
 
+      - name: Build wasm and run tests
+        run: |
+          cd web
+          npm ci
+          npm run wasm
+          npm test
