@@ -239,10 +239,7 @@ export class Backend {
     pt1: LngLat,
     pt2: LngLat,
     mainRoadPenalty: number,
-  ): FeatureCollection<
-    LineString,
-    { kind: "before" | "after"; distance: number; time: number }
-  > {
+  ): CompareRoute {
     return JSON.parse(
       this.inner.compareRoute(
         pt1.lng,
@@ -391,6 +388,11 @@ export interface RenderNeighbourhoodOutput {
 export type AllShortcuts = FeatureCollection<
   LineString,
   { directness: number; length_meters: number }
+>;
+
+export type CompareRoute = FeatureCollection<
+  LineString,
+  { kind: "before" | "after"; distance: number; time: number }
 >;
 
 // Sets a 'color' property on any cell polygons. Idempotent.
