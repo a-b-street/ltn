@@ -6,7 +6,7 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link, SequentialLegend } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { backend, mode, onlyNewIcons, returnToChooseProject } from "./stores";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
@@ -62,6 +62,11 @@
       colorScale={divergingScale}
       labels={{ limits: ["0%", "50%", "same", "150%", "200%"] }}
     />
+
+    <label>
+      <input type="checkbox" bind:checked={$onlyNewIcons} />
+      Only show new modal filters and turn restrictions
+    </label>
   </div>
 
   <div slot="map">
@@ -140,6 +145,6 @@
       </LineLayer>
     </GeoJSON>
 
-    <ModalFilterLayer />
+    <ModalFilterLayer onlyNew={$onlyNewIcons} />
   </div>
 </SplitComponent>
