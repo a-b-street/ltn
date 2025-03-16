@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Feature, FeatureCollection } from "geojson";
+  import type { Feature } from "geojson";
   import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import { onMount } from "svelte";
   import { FillLayer, GeoJSON, LineLayer, MapEvents } from "svelte-maplibre";
@@ -27,6 +27,7 @@
     routePtA,
     routePtB,
   } from "./stores";
+  import type { CompareRoute } from "./wasm";
 
   function back() {
     $mode = { mode: "neighbourhood" };
@@ -37,6 +38,8 @@
   let hovered: Feature | null = null;
 
   $: routeGj = previewRoutes(hovered);
+  $: routeBefore = routeGj.features.find((f) => f.properties.kind == "before");
+  $: routeAfter = routeGj.features.find((f) => f.properties.kind == "after");
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.
@@ -47,9 +50,9 @@
     }, 10);
   });
 
-  function previewRoutes(hovered: Feature | null): FeatureCollection {
+  function previewRoutes(hovered: Feature | null): CompareRoute {
     if (!hovered) {
-      return emptyGeojson();
+      return emptyGeojson() as CompareRoute;
     }
     return $backend!.compareRoute(
       new LngLat(hovered.properties!.pt1_x, hovered.properties!.pt1_y),
@@ -99,7 +102,40 @@
       This shows the change in driving time to one destination from everywhere
       within the neighbourhood. Drag the pin around to change that destination.
     </p>
-    <p>Highest ratio is {perRoadGj.highest_time_ratio.toFixed(1)}</p>
+
+    <u style:color="red">Route before changes</u>
+    {#if routeBefore}
+      <p>
+        {prettyPrintDistance(routeBefore.properties.distance)}, {prettyPrintTime(
+          routeBefore.properties.time,
+        )}
+      </p>
+    {:else if routeAfter}
+      <p>
+        No possible route (
+        <i>This is usually a known software bug</i>
+        )
+      </p>
+    {:else}
+      <p>Hover on a road to compare</p>
+    {/if}
+
+    <u style:color="blue">Route after changes</u>
+    {#if routeAfter}
+      <p>
+        {prettyPrintDistance(routeAfter.properties.distance)}, {prettyPrintTime(
+          routeAfter.properties.time,
+        )}
+      </p>
+    {:else if routeBefore}
+      <p>
+        No possible route (
+        <i>This is usually a known software bug</i>
+        )
+      </p>
+    {:else}
+      <p>Hover on a road to compare</p>
+    {/if}
   </div>
 
   <div slot="map">
@@ -134,16 +170,6 @@
         bind:hovered
       >
         <Popup openOn="hover" let:props>
-          <p>
-            {prettyPrintDistance(props.distance_before)}, {prettyPrintTime(
-              props.time_before,
-            )} before
-          </p>
-          <p>
-            {prettyPrintDistance(props.distance_after)}, {prettyPrintTime(
-              props.time_after,
-            )} after
-          </p>
           <p>Time ratio: {(props.time_after / props.time_before).toFixed(1)}</p>
         </Popup>
       </LineLayer>

@@ -87,7 +87,11 @@
         )}
       </p>
     {:else}
-      <p>No possible route (<i>This is usually a known software bug</i>)</p>
+      <p>
+        No possible route (
+        <i>This is usually a known software bug</i>
+        )
+      </p>
     {/if}
 
     <u style:color="blue">Route after changes</u>
@@ -98,7 +102,11 @@
         )}
       </p>
     {:else}
-      <p>No possible route (<i>This is usually a known software bug</i>)</p>
+      <p>
+        No possible route (
+        <i>This is usually a known software bug</i>
+        )
+      </p>
     {/if}
 
     <label>
