@@ -83,24 +83,39 @@ impl Impact {
         }
     }
 
-    pub fn get_impacts_on_road(&self, map: &MapModel, road: RoadID) -> Vec<(Feature, Feature)> {
+    pub fn get_impacts_on_road(
+        &self,
+        map: &MapModel,
+        road: RoadID,
+    ) -> Vec<(Option<Feature>, Option<Feature>)> {
         let mut changed_paths = Vec::new();
 
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
         for (r1, r2, _) in &self.requests {
-            let Some(route1) = map.router_before.route_from_roads(*r1, *r2) else {
-                continue;
-            };
-            let Some(route2) = router_after.route_from_roads(*r1, *r2) else {
-                continue;
-            };
-            if route1.crosses_road(road) != route2.crosses_road(road) {
-                let mut f1 = map.mercator.to_wgs84_gj(&route1.to_linestring(map));
-                f1.set_property("kind", "before");
-                let mut f2 = map.mercator.to_wgs84_gj(&route2.to_linestring(map));
-                f2.set_property("kind", "after");
+            let route1 = map.router_before.route_from_roads(*r1, *r2);
+            let route2 = router_after.route_from_roads(*r1, *r2);
+            let crosses1 = route1
+                .as_ref()
+                .map(|route| route.crosses_road(road))
+                .unwrap_or(false);
+            let crosses2 = route2
+                .as_ref()
+                .map(|route| route.crosses_road(road))
+                .unwrap_or(false);
+
+            if crosses1 != crosses2 {
+                let f1 = route1.map(|route| {
+                    let mut f = map.mercator.to_wgs84_gj(&route.to_linestring(map));
+                    f.set_property("kind", "before");
+                    f
+                });
+                let f2 = route2.map(|route| {
+                    let mut f = map.mercator.to_wgs84_gj(&route.to_linestring(map));
+                    f.set_property("kind", "after");
+                    f
+                });
                 changed_paths.push((f1, f2));
             }
         }

@@ -276,8 +276,8 @@ export class Backend {
     road: number,
   ): Array<
     [
-      Feature<LineString, { kind: "before" }>,
-      Feature<LineString, { kind: "after" }>,
+      Feature<LineString, { kind: "before" }> | null,
+      Feature<LineString, { kind: "after" }> | null,
     ]
   > {
     return JSON.parse(this.inner.getImpactsOnRoad(road));

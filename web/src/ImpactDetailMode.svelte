@@ -3,6 +3,7 @@
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import BackButton from "./BackButton.svelte";
   import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, mode, returnToChooseProject } from "./stores";
@@ -26,8 +27,23 @@
   function gj(idx: number): FeatureCollection {
     return {
       type: "FeatureCollection" as const,
-      features: [routes[idx][0], routes[idx][1], road],
+      features: [routes[idx][0], routes[idx][1], road].filter((f) => f != null),
     };
+  }
+
+  function startPos(idx: number): [number, number] {
+    if (routes[idx][0] != null) {
+      return gjPosition(routes[idx][0].geometry.coordinates[0]);
+    }
+    return gjPosition(routes[idx][1]!.geometry.coordinates[0]);
+  }
+
+  function endPos(idx: number): [number, number] {
+    let pts =
+      routes[idx][0] != null
+        ? routes[idx][0].geometry.coordinates
+        : routes[idx][1]!.geometry.coordinates;
+    return gjPosition(pts[pts.length - 1]);
   }
 </script>
 
@@ -49,9 +65,7 @@
   </div>
 
   <div slot="sidebar">
-    <Link on:click={() => ($mode = { mode: "predict-impact" })}>
-      Pick a different road
-    </Link>
+    <BackButton on:click={() => ($mode = { mode: "predict-impact" })} />
 
     <p>
       {props.before.toLocaleString()} routes cross here
@@ -68,6 +82,19 @@
     </p>
 
     <PrevNext list={routes} bind:idx />
+
+    {#if routes[idx][0] == null}
+      <p style:color="red">
+        No possible route before changes (
+        <i>This is usually a known software bug</i>
+      </p>
+    {/if}
+    {#if routes[idx][1] == null}
+      <p style:color="blue">
+        No possible route after changes (
+        <i>This is usually a known software bug</i>
+      </p>
+    {/if}
   </div>
 
   <div slot="map">
@@ -103,18 +130,8 @@
         />
       </GeoJSON>
 
-      <DotMarker lngLat={gjPosition(routes[idx][0].geometry.coordinates[0])}>
-        A
-      </DotMarker>
-      <DotMarker
-        lngLat={gjPosition(
-          routes[idx][0].geometry.coordinates[
-            routes[idx][0].geometry.coordinates.length - 1
-          ],
-        )}
-      >
-        B
-      </DotMarker>
+      <DotMarker lngLat={startPos(idx)}>A</DotMarker>
+      <DotMarker lngLat={endPos(idx)}>B</DotMarker>
     {/if}
 
     <ModalFilterLayer />
