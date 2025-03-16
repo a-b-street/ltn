@@ -10,6 +10,7 @@
   import { layerId } from "../common";
   import { backend, mutationCounter } from "../stores";
 
+  export let onlyNew: boolean;
   export let onClickTurnRestriction: (
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
@@ -47,6 +48,7 @@
   <SymbolLayer
     {...layerId("turn-restrictions")}
     minzoom={13}
+    filter={onlyNew ? ["get", "edited"] : undefined}
     layout={{
       "icon-image": ["concat", "no_", ["get", "kind"], "_turn"],
       "icon-rotate": ["get", "icon_angle"],

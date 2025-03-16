@@ -7,6 +7,7 @@
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
+  export let onlyNew = false;
   export let onClickModalFilter: (
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
@@ -23,7 +24,11 @@
 <GeoJSON data={gj} generateId>
   <SymbolLayer
     {...layerId("modal-filters")}
-    filter={["!=", ["get", "filter_kind"], "diagonal_filter"]}
+    filter={[
+      "all",
+      ["!=", ["get", "filter_kind"], "diagonal_filter"],
+      onlyNew ? ["get", "edited"] : ["literal", true],
+    ]}
     {minzoom}
     layout={{
       "icon-image": ["get", "filter_kind"],
@@ -52,6 +57,6 @@
   />
 </GeoJSON>
 
-<TurnRestrictionLayer {onClickTurnRestriction}>
+<TurnRestrictionLayer {onlyNew} {onClickTurnRestriction}>
   <slot name="turn-restriction" />
 </TurnRestrictionLayer>
