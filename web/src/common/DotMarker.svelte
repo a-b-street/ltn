@@ -25,7 +25,7 @@
     justify-content: center;
     align-items: center;
 
-    background-color: grey;
+    background-color: orange;
     font-weight: bold;
   }
 </style>

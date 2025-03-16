@@ -35,6 +35,8 @@
     | "impact-one-destination";
 
   $: gj = $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty);
+  $: routeBefore = gj.features.find((f) => f.properties.kind == "before");
+  $: routeAfter = gj.features.find((f) => f.properties.kind == "after");
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.
@@ -76,19 +78,27 @@
     <BackButton on:click={back} />
 
     <p>Drag markers for a route</p>
-    {#if gj.features.length == 2}
+
+    <u style:color="red">Route before changes</u>
+    {#if routeBefore}
       <p>
-        <span style="color: red">Route before</span>
-        : {prettyPrintDistance(gj.features[0].properties.distance)}, {prettyPrintTime(
-          gj.features[0].properties.time,
+        {prettyPrintDistance(routeBefore.properties.distance)}, {prettyPrintTime(
+          routeBefore.properties.time,
         )}
       </p>
+    {:else}
+      <p>No possible route (<i>This is usually a known software bug</i>)</p>
+    {/if}
+
+    <u style:color="blue">Route after changes</u>
+    {#if routeAfter}
       <p>
-        <span style="color: blue">Route after</span>
-        : {prettyPrintDistance(gj.features[1].properties.distance)}, {prettyPrintTime(
-          gj.features[1].properties.time,
+        {prettyPrintDistance(routeAfter.properties.distance)}, {prettyPrintTime(
+          routeAfter.properties.time,
         )}
       </p>
+    {:else}
+      <p>No possible route (<i>This is usually a known software bug</i>)</p>
     {/if}
 
     <label>
