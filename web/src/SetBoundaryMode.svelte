@@ -4,7 +4,7 @@
   import { notNull } from "svelte-utils";
   import { gjPosition, Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
-  import { calculateArea, waypoints } from "./common/draw_area/stores";
+  import { calculateArea, type Waypoint } from "./common/draw_area/stores";
   import {
     backend,
     map,
@@ -15,11 +15,12 @@
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps> | null;
+  let waypoints: Waypoint[] = [];
 
   if (existing) {
     if (existing.properties.waypoints) {
       // Transform into the correct format
-      $waypoints = existing.properties.waypoints.map((waypt) => {
+      waypoints = existing.properties.waypoints.map((waypt) => {
         return {
           point: [waypt.lon, waypt.lat],
           snapped: waypt.snapped,
@@ -32,16 +33,16 @@
       // Editing will be very painful in practice, but it won't break.
       // Note the second polygon ring is used, because the boundary is expressed as
       // "everywhere" minus a hole for the boundary, to achieve the fade-outside effect.
-      $waypoints = existing.geometry.coordinates[1].slice(1).map((point) => {
+      waypoints = existing.geometry.coordinates[1].slice(1).map((point) => {
         return { point: gjPosition(point), snapped: false };
       });
     }
   }
 
   function finish() {
-    if ($waypoints.length >= 3) {
+    if (waypoints.length >= 3) {
       try {
-        let feature = calculateArea($waypoints);
+        let feature = calculateArea(waypoints);
         $backend!.setNeighbourhoodBoundary(name, feature);
         saveCurrentProject();
         $backend!.setCurrentNeighbourhood(name);
@@ -68,7 +69,7 @@
   }
 </script>
 
-<AreaControls map={notNull($map)} {finish} {cancel}>
+<AreaControls map={notNull($map)} {finish} {cancel} bind:waypoints>
   <div slot="extra-top">
     <nav aria-label="breadcrumb">
       <ul>
