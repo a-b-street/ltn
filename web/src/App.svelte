@@ -25,7 +25,7 @@
     topContents,
   } from "svelte-utils/top_bar_layout";
   import streetsMapStyleUrl from "../assets/map-styles/streets-v2-style.json?url";
-  import AutoBoundariesMode from "./AutoBoundariesMode.svelte";
+  import AddNeighbourhoodMode from "./AddNeighbourhoodMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import DebugDemandMode from "./DebugDemandMode.svelte";
   import DebugIntersectionsMode from "./DebugIntersectionsMode.svelte";
@@ -229,8 +229,8 @@
               <PickNeighbourhoodMode />
             {:else if $mode.mode == "set-boundary"}
               <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
-            {:else if $mode.mode == "auto-boundaries"}
-              <AutoBoundariesMode />
+            {:else if $mode.mode == "add-neighbourhood"}
+              <AddNeighbourhoodMode />
             {:else if $mode.mode == "neighbourhood"}
               <NeighbourhoodMode />
             {:else if $mode.mode == "view-shortcuts"}
@@ -269,7 +269,8 @@
   }
 
   :global(.pico .icon-btn.destructive),
-  :global(.icon-btn.destructive) {
+  :global(.icon-btn.destructive),
+  :global(.pico button.destructive) {
     background-color: #dc2626;
   }
 
