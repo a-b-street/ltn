@@ -1,9 +1,7 @@
 use crate::boundary_stats::BoundaryStats;
-use crate::geo_helpers::make_polygon_valid;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::Geometry::MultiPolygon;
-use geo::{Area, Buffer, Coord, Intersects, LineString, Polygon};
+use geo::{Area, Buffer, Coord, Intersects, LineString, MultiPolygon, Polygon};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
@@ -61,13 +59,9 @@ impl MapModel {
 
     pub fn generate_merged_boundary(
         &self,
-        boundaries_to_merge: Vec<GeneratedBoundary>,
+        boundaries_to_merge: Vec<Polygon>,
     ) -> Result<NeighbourhoodBoundary> {
-        let polygons = boundaries_to_merge
-            .into_iter()
-            .map(|b| b.geometry)
-            .collect();
-        let original_bounaries = MultiPolygon(polygons);
+        let original_bounaries = MultiPolygon(boundaries_to_merge);
 
         // Merged boundaries must be adjacent, but it's important to allow a little slop,
         // because our severance-based boundary generation can insert tiny slivers between
@@ -133,12 +127,6 @@ impl GeneratedBoundary {
         let mut projected = self.clone();
         map.mercator.to_wgs84_in_place(&mut projected.geometry);
         geojson::ser::to_feature(projected).expect("should have no unserializable fields")
-    }
-    pub fn from_feature(feature: Feature, map: &MapModel) -> anyhow::Result<Self> {
-        let mut unprojected: Self = geojson::de::from_feature(feature)?;
-        map.mercator.to_mercator_in_place(&mut unprojected.geometry);
-        unprojected.geometry = make_polygon_valid(&unprojected.geometry);
-        Ok(unprojected)
     }
 }
 
