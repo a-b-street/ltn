@@ -1,9 +1,11 @@
 <script lang="ts">
+  import type { FeatureCollection } from "geojson";
   import { CircleX } from "lucide-svelte";
   import type {
     DataDrivenPropertyValueSpecification,
     ExpressionSpecification,
   } from "maplibre-gl";
+  import { onMount } from "svelte";
   import {
     FillLayer,
     GeoJSON,
@@ -11,8 +13,8 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
+  import { downloadGeneratedFile, Loading, notNull } from "svelte-utils";
+  import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, Link, prettyPrintPercent } from "./common";
@@ -31,7 +33,27 @@
   } from "./stores";
   import type { GeneratedBoundaryFeature } from "./wasm";
 
-  let generatedBoundaries = $backend!.generatedBoundaries();
+  let loading = "Generating severance boundaries...";
+  let generatedBoundaries: FeatureCollection<
+    GeneratedBoundaryFeature["geometry"],
+    GeneratedBoundaryFeature["properties"]
+  > = emptyGeojson() as any;
+
+  onMount(async () => {
+    // make sure the loading indicator has rendered
+    // NOTE: I thought this is what svelte.tick was for, but it doesn't work.
+    //  await tick();
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        // And then wait one more frame to be extra sure
+        requestAnimationFrame(resolve);
+      });
+    });
+
+    generatedBoundaries = $backend!.generatedBoundaries();
+    loading = "";
+  });
+
   let minArea = 0;
   let removeNonRoad = true;
   let selectedPrioritization: Prioritization = "none";
@@ -162,6 +184,7 @@
   }
 </script>
 
+<Loading {loading} />
 <SplitComponent>
   <div slot="top">
     <nav aria-label="breadcrumb">
