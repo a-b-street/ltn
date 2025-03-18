@@ -14,9 +14,9 @@ pub use self::neighbourhood::{Neighbourhood, NeighbourhoodBoundary, Neighbourhoo
 use self::render_cells::RenderCells;
 pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
-use crate::auto_boundaries::GeneratedBoundary;
+use crate::geo_helpers::make_polygon_valid;
 use crate::map_model::ProjectDetails;
-use geo::{Coord, LineString};
+use geo::{Coord, LineString, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
@@ -176,6 +176,7 @@ impl LTN {
         Ok(serde_json::to_string(&self.map.generated_boundaries()).map_err(err_to_js)?)
     }
 
+    /// `boundaries_to_merge`: FeatureCollection of Polygon geometries.
     #[wasm_bindgen(js_name = generateMergedBoundary)]
     pub fn generate_merged_boundary(
         &self,
@@ -183,14 +184,19 @@ impl LTN {
     ) -> Result<String, JsValue> {
         let feature_collection: FeatureCollection =
             serde_wasm_bindgen::from_value(boundaries_to_merge)?;
-        let generated_boundaries: Vec<GeneratedBoundary> = feature_collection
+        let polygons = feature_collection
             .features
             .into_iter()
-            .map(|feature| GeneratedBoundary::from_feature(feature, &self.map).map_err(err_to_js))
-            .collect::<Result<Vec<GeneratedBoundary>, JsValue>>()?;
+            .map(|feature| {
+                let mut polygon = Polygon::try_from(feature).map_err(err_to_js)?;
+                self.map.mercator.to_mercator_in_place(&mut polygon);
+                make_polygon_valid(&mut polygon);
+                Ok(polygon)
+            })
+            .collect::<Result<Vec<Polygon>, JsValue>>()?;
         let merged_boundary = self
             .map
-            .generate_merged_boundary(generated_boundaries)
+            .generate_merged_boundary(polygons)
             .map_err(err_to_js)?;
         Ok(serde_json::to_string(&merged_boundary.to_feature(&self.map)).map_err(err_to_js)?)
     }

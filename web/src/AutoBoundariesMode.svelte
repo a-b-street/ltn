@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FeatureCollection } from "geojson";
+  import type { Feature, FeatureCollection, Polygon } from "geojson";
   import { CircleX } from "lucide-svelte";
   import type {
     DataDrivenPropertyValueSpecification,

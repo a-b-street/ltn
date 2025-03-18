@@ -140,10 +140,7 @@ export class Backend {
   }
 
   generateMergedBoundary(
-    toMerge: FeatureCollection<
-      GeneratedBoundaryFeature["geometry"],
-      GeneratedBoundaryFeature["properties"]
-    >,
+    toMerge: FeatureCollection<Polygon>,
   ): GeneratedBoundaryFeature {
     let serializedMergedBoundary = this.inner.generateMergedBoundary(toMerge);
     return JSON.parse(serializedMergedBoundary);
