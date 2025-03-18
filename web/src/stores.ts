@@ -31,10 +31,10 @@ export type Mode =
   | {
       mode: "set-boundary";
       name: string;
-      existing: Feature<Polygon, AreaProps> | null;
+      existing: Feature<Polygon, AreaProps>;
     }
   | {
-      mode: "auto-boundaries";
+      mode: "add-neighbourhood";
     }
   | {
       mode: "neighbourhood";

@@ -70,17 +70,6 @@
     }
   }
 
-  function newBoundary() {
-    let name = pickNeighbourhoodName(
-      $backend!,
-      "What do you want to name the neighbourhood?",
-      "",
-    );
-    if (name) {
-      $mode = { mode: "set-boundary", name, existing: null };
-    }
-  }
-
   function exportGJ() {
     let projectID = $currentProjectID!;
     let project = $projectStorage.project(projectID);
@@ -235,22 +224,10 @@
         </li>
       {/each}
       <li>
-        Add a new neighbourhood:
-        <ul style="margin-bottom: 0; padding: 0;">
-          <!-- pico override -->
-          <li style="list-style: none;">
-            <Link on:click={newBoundary}>
-              <Pencil />
-              Draw a new boundary
-            </Link>
-          </li>
-          <li style="list-style: none;">
-            <Link on:click={() => ($mode = { mode: "auto-boundaries" })}>
-              <CirclePlus />
-              Use a generated boundary
-            </Link>
-          </li>
-        </ul>
+        <Link on:click={() => ($mode = { mode: "add-neighbourhood" })}>
+          <CirclePlus />
+          Add a new neighbourhood
+        </Link>
       </li>
     </ul>
 

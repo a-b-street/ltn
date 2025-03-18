@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FeatureCollection, GeoJSON as GeoJSONType } from "geojson";
+  import type { Feature, FeatureCollection, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { RouteTool } from "route-snapper-ts";
   import { onDestroy } from "svelte";
@@ -10,15 +10,42 @@
     MapEvents,
     Marker,
   } from "svelte-maplibre";
-  import { emptyGeojson } from "svelte-utils/map";
-  import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { HelpButton, layerId } from "../";
-  import { calculateArea, routeTool, type Waypoint } from "./stores";
+  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { layerId } from "../";
+  import { routeTool, type Waypoint } from "./stores";
 
   export let map: Map;
-  export let finish: () => void;
-  export let cancel: () => void;
   export let waypoints: Waypoint[];
+  export let drawnShapeOut: Feature<Polygon> | undefined = undefined;
+
+  function calculateArea(
+    routeTool: RouteTool,
+    waypoints: Waypoint[],
+  ): Feature<Polygon> {
+    if (waypoints.length < 3) {
+      return JSON.parse(routeTool.inner.calculateRoute(waypoints));
+    }
+
+    // Glue the end to the start
+    let copy = JSON.parse(JSON.stringify(waypoints));
+    copy.push(copy[0]);
+    let out = JSON.parse(routeTool.inner.calculateRoute(copy));
+    out.properties.waypoints.pop();
+    out.geometry.type = "Polygon";
+    out.geometry.coordinates = [out.geometry.coordinates];
+    return out;
+  }
+
+  $: {
+    try {
+      if ($routeTool) {
+        drawnShapeOut = calculateArea($routeTool, waypoints);
+      }
+    } catch (err) {
+      console.log("error drawing shape", err);
+      drawnShapeOut = undefined;
+    }
+  }
 
   onDestroy(() => {
     $routeTool?.stop();
@@ -69,13 +96,6 @@
     undoStates = [...undoStates, JSON.parse(JSON.stringify(waypoints))];
   }
 
-  function toggleSnap() {
-    snapMode = snapMode == "snap" ? "free" : "snap";
-    if (cursor) {
-      cursor.snapped = snapMode == "snap";
-    }
-  }
-
   function onMapClick(e: CustomEvent<MapMouseEvent>) {
     if (waypoints.length >= 3) {
       return;
@@ -107,18 +127,6 @@
     waypoints.splice(idx, 1);
     waypoints = waypoints;
     hoveringOnMarker = false;
-  }
-
-  function calculateGj(
-    routeTool: RouteTool | null,
-    waypoints: Waypoint[],
-  ): GeoJSONType {
-    try {
-      if (routeTool) {
-        return calculateArea(waypoints);
-      }
-    } catch (err) {}
-    return emptyGeojson();
   }
 
   function getPreview(
@@ -197,190 +205,116 @@
     draggingExtraNode = false;
   }
 
-  function keyDown(e: KeyboardEvent) {
-    let tag = (e.target as HTMLElement).tagName;
-    let formFocused = tag == "INPUT" || tag == "TEXTAREA";
-
-    if (e.key == "Enter" && !formFocused) {
-      e.stopPropagation();
-      if (waypoints.length >= 3) {
-        finish();
-      } else {
-        window.alert(
-          "You can't save this area unless it has at least three points. Press 'Cancel' to discard these changes.",
-        );
-      }
-    } else if (e.key == "Escape") {
-      e.stopPropagation();
-      if (waypoints.length >= 3) {
-        finish();
-      } else {
-        window.alert(
-          "You can't save this area unless it has at least three points. Press 'Cancel' to discard these changes.",
-        );
-      }
-    } else if (e.key == "s" && !formFocused) {
-      toggleSnap();
-    } else if (e.key == "z" && e.ctrlKey) {
-      e.stopPropagation();
-      undo();
-    }
-  }
-
   function startDraggingWaypoint() {
     captureUndoState();
     draggingMarker = true;
   }
 </script>
 
-<svelte:window on:keydown={keyDown} />
-
-<SplitComponent>
-  <div slot="top">
-    <slot name="extra-top" />
-  </div>
-
-  <div slot="sidebar">
-    <slot name="extra-sidebar" />
-
-    <div style="display: flex">
-      <button on:click={finish} disabled={waypoints.length < 3}>Finish</button>
-      <button class="secondary" on:click={cancel}>Cancel</button>
-      <HelpButton>
-        <ul>
-          <li>
-            <b>Click</b>
-            the map to add new points, until there are at least 3 points
-          </li>
-          <li>
-            <b>Click and drag</b>
-            any point to move it
-          </li>
-          <li>
-            <b>Click</b>
-            a waypoint to toggle snapping
-          </li>
-          <li>
-            <b>Right click</b>
-            a waypoint to delete it
-          </li>
-        </ul>
-
-        <p>Keyboard shortcuts:</p>
-        <ul>
-          <li>
-            <b>s</b>
-            to switch between snapping to roads and drawing anywhere
-          </li>
-          <li>
-            <b>Control+Z</b>
-            to undo your last change
-          </li>
-          <li>
-            <b>Enter</b>
-            or
-            <b>Escape</b>
-            to finish
-          </li>
-          <li>
-            From the main mode, <b>3</b>
-            to draw a new area
-          </li>
-        </ul>
-      </HelpButton>
-    </div>
-    <button class="secondary" disabled={undoStates.length == 0} on:click={undo}>
-      {#if undoStates.length == 0}
-        Undo
-      {:else}
-        Undo ({undoStates.length})
-      {/if}
-    </button>
-
-    {#if waypoints.length < 3}
-      <fieldset>
-        <label>
-          <input type="radio" value="snap" bind:group={snapMode} />
-          Snap to roads
-        </label>
-        <label>
-          <input type="radio" value="free" bind:group={snapMode} />
-          Draw anywhere
-        </label>
-      </fieldset>
-
-      <p>Click to add at least 3 points</p>
+<p>Click the map to add three points. Then adjust the points or add more.</p>
+<div style="display: flex; gap: 16px;">
+  <label>
+    <!-- REVIEW: Currently, after three points, route-snapper will try to draw an area, 
+       and whether any subsequent points should snap is based on that new points neighbors.
+       Instead, I think it would be simpler to always honor the snap mode set here.
+    -->
+    <input
+      disabled={waypoints.length >= 3}
+      type="checkbox"
+      value="snap"
+      bind:group={snapMode}
+    />
+    Snap boundary to roads
+  </label>
+  <button class="secondary" disabled={undoStates.length == 0} on:click={undo}>
+    {#if undoStates.length == 0}
+      Undo
     {:else}
-      <p>Drag to adjust. Click to toggle snapped. Right click to delete.</p>
+      Undo ({undoStates.length})
     {/if}
-  </div>
+  </button>
+</div>
 
-  <div slot="map">
-    <MapEvents on:click={onMapClick} on:mousemove={onMouseMove} />
+<MapEvents on:click={onMapClick} on:mousemove={onMouseMove} />
 
-    {#each extraNodes as node}
-      <Marker
-        draggable
-        bind:lngLat={node.point}
-        on:dragstart={() => addNode(node)}
-        on:drag={() => updateDrag(node)}
-        on:dragend={finalizeDrag}
-        on:click={() => {
-          addNode(node);
-          draggingExtraNode = false;
-        }}
-        zIndex={0}
-      >
-        <span
-          class="dot"
-          class:snapped-node={node.snapped}
-          class:free-node={!node.snapped}
-          class:hide={draggingExtraNode}
-        />
-      </Marker>
-    {/each}
+{#each extraNodes as node}
+  <Marker
+    draggable
+    bind:lngLat={node.point}
+    on:dragstart={() => addNode(node)}
+    on:drag={() => updateDrag(node)}
+    on:dragend={finalizeDrag}
+    on:click={() => {
+      addNode(node);
+      draggingExtraNode = false;
+    }}
+    zIndex={0}
+  >
+    <span
+      class="dot"
+      class:snapped-node={node.snapped}
+      class:free-node={!node.snapped}
+      class:hide={draggingExtraNode}
+    />
+  </Marker>
+{/each}
 
-    {#each waypoints as waypt, idx}
-      <Marker
-        draggable
-        bind:lngLat={waypt.point}
-        on:click={() => toggleSnapped(idx)}
-        on:contextmenu={() => removeWaypoint(idx)}
-        on:mouseenter={() => (hoveringOnMarker = true)}
-        on:mouseleave={() => (hoveringOnMarker = false)}
-        on:dragstart={startDraggingWaypoint}
-        on:dragend={() => (draggingMarker = false)}
-        zIndex={1}
-      >
-        <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
-      </Marker>
-    {/each}
+{#each waypoints as waypt, idx}
+  <Marker
+    draggable
+    bind:lngLat={waypt.point}
+    on:click={() => toggleSnapped(idx)}
+    on:contextmenu={() => removeWaypoint(idx)}
+    on:mouseenter={() => (hoveringOnMarker = true)}
+    on:mouseleave={() => (hoveringOnMarker = false)}
+    on:dragstart={startDraggingWaypoint}
+    on:dragend={() => (draggingMarker = false)}
+    zIndex={1}
+  >
+    <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
+    <Popup openOn="hover">
+      <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
+        <li>
+          <b>Click and drag</b>
+          to move
+        </li>
+        <li>
+          <b>Click</b>
+          to toggle snapping
+        </li>
+        <li>
+          <b>Right click</b>
+          to delete
+        </li>
+      </ul>
+    </Popup>
+  </Marker>
+{/each}
 
-    <GeoJSON data={calculateGj($routeTool, waypoints)} generateId>
-      <LineLayer
-        {...layerId("draw-area-lines")}
-        paint={{
-          "line-color": "black",
-          "line-width": 10,
-        }}
-      />
+<GeoJSON data={drawnShapeOut || emptyGeojson()} generateId>
+  <LineLayer
+    {...layerId("draw-area-lines")}
+    paint={{
+      "line-color": "black",
+      "line-width": 10,
+    }}
+  />
 
-      <FillLayer
-        {...layerId("draw-area-preview")}
-        paint={{ "fill-color": "grey", "fill-opacity": 0.5 }}
-      />
-    </GeoJSON>
+  <FillLayer
+    {...layerId("draw-area-area")}
+    paint={{ "fill-color": "grey", "fill-opacity": 0.5 }}
+  />
+</GeoJSON>
 
-    <GeoJSON data={previewGj}>
-      <LineLayer
-        paint={{
-          "line-color": "black",
-          "line-width": 3,
-        }}
-      />
-    </GeoJSON>
-  </div>
-</SplitComponent>
+<GeoJSON data={previewGj}>
+  <LineLayer
+    {...layerId("draw-area-lines-preview")}
+    paint={{
+      "line-color": "black",
+      "line-width": 3,
+    }}
+  />
+</GeoJSON>
 
 <style>
   .dot {

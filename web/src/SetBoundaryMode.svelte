@@ -2,9 +2,10 @@
   import type { Feature, Polygon } from "geojson";
   import type { AreaProps } from "route-snapper-ts";
   import { notNull } from "svelte-utils";
+  import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { gjPosition, Link } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
-  import { calculateArea, type Waypoint } from "./common/draw_area/stores";
+  import { type Waypoint } from "./common/draw_area/stores";
   import {
     backend,
     map,
@@ -14,36 +15,34 @@
   } from "./stores";
 
   export let name: string;
-  export let existing: Feature<Polygon, AreaProps> | null;
+  export let existing: Feature<Polygon, AreaProps>;
   let waypoints: Waypoint[] = [];
+  let drawnShape: Feature<Polygon>;
 
-  if (existing) {
-    if (existing.properties.waypoints) {
-      // Transform into the correct format
-      waypoints = existing.properties.waypoints.map((waypt) => {
-        return {
-          point: [waypt.lon, waypt.lat],
-          snapped: waypt.snapped,
-        };
-      });
-    } else {
-      // No stored waypoints -- this is either a boundary drawn with a very old
-      // version of this tool, or an auto-generated boundary. Just
-      // "backfill" by using the full geometry as freehand points.
-      // Editing will be very painful in practice, but it won't break.
-      // Note the second polygon ring is used, because the boundary is expressed as
-      // "everywhere" minus a hole for the boundary, to achieve the fade-outside effect.
-      waypoints = existing.geometry.coordinates[1].slice(1).map((point) => {
-        return { point: gjPosition(point), snapped: false };
-      });
-    }
+  if (existing.properties.waypoints) {
+    // Transform into the correct format
+    waypoints = existing.properties.waypoints.map((waypt) => {
+      return {
+        point: [waypt.lon, waypt.lat],
+        snapped: waypt.snapped,
+      };
+    });
+  } else {
+    // No stored waypoints -- this is either a boundary drawn with a very old
+    // version of this tool, or an auto-generated boundary. Just
+    // "backfill" by using the full geometry as freehand points.
+    // Editing will be very painful in practice, but it won't break.
+    // Note the second polygon ring is used, because the boundary is expressed as
+    // "everywhere" minus a hole for the boundary, to achieve the fade-outside effect.
+    waypoints = existing.geometry.coordinates[1].slice(1).map((point) => {
+      return { point: gjPosition(point), snapped: false };
+    });
   }
 
   function finish() {
-    if (waypoints.length >= 3) {
+    if (drawnShape) {
       try {
-        let feature = calculateArea(waypoints);
-        $backend!.setNeighbourhoodBoundary(name, feature);
+        $backend!.setNeighbourhoodBoundary(name, drawnShape);
         saveCurrentProject();
         $backend!.setCurrentNeighbourhood(name);
         $mode = {
@@ -57,20 +56,14 @@
   }
 
   function cancel() {
-    if (existing) {
-      $mode = {
-        mode: "neighbourhood",
-      };
-    } else {
-      $mode = {
-        mode: "pick-neighbourhood",
-      };
-    }
+    $mode = {
+      mode: "neighbourhood",
+    };
   }
 </script>
 
-<AreaControls map={notNull($map)} {finish} {cancel} bind:waypoints>
-  <div slot="extra-top">
+<SplitComponent>
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -81,21 +74,27 @@
             Pick neighbourhood
           </Link>
         </li>
-        {#if existing}
-          <li>
-            <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-              Editing
-            </Link>
-          </li>
-          <li>Changing neighbourhood boundary</li>
-        {:else}
-          <li>Creating new neighbourhood boundary</li>
-        {/if}
+        <li>
+          <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
+            Editing
+          </Link>
+        </li>
+        <li>Changing neighbourhood boundary</li>
       </ul>
     </nav>
   </div>
+  <div slot="sidebar">
+    <h1>Edit boundary</h1>
 
-  <div slot="extra-sidebar">
-    <h1>Draw your neighbourhood boundary for {name}</h1>
+    <AreaControls
+      map={notNull($map)}
+      bind:waypoints
+      bind:drawnShapeOut={drawnShape}
+    />
+
+    <div style="display: flex; gap: 16px;">
+      <button on:click={finish} disabled={waypoints.length < 3}>Finish</button>
+      <button class="secondary" on:click={cancel}>Cancel</button>
+    </div>
   </div>
-</AreaControls>
+</SplitComponent>

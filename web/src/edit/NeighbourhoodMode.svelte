@@ -295,7 +295,7 @@
               ($mode = {
                 mode: "set-boundary",
                 name: notNull(boundary).properties.name,
-                existing: boundary,
+                existing: notNull(boundary),
               })}
           >
             Change this boundary

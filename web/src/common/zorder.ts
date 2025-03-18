@@ -113,7 +113,8 @@ const layerZorder = [
   dataviz("Building"),
 
   "draw-area-lines",
-  "draw-area-preview",
+  "draw-area-area",
+  "draw-area-lines-preview",
 
   "debug-demand-fill",
   "debug-demand-outline",
