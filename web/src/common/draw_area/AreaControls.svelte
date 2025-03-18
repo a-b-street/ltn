@@ -13,14 +13,14 @@
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { HelpButton, layerId } from "../";
-  import { calculateArea, routeTool, waypoints, type Waypoint } from "./stores";
+  import { calculateArea, routeTool, type Waypoint } from "./stores";
 
   export let map: Map;
   export let finish: () => void;
   export let cancel: () => void;
+  export let waypoints: Waypoint[];
 
   onDestroy(() => {
-    $waypoints = [];
     $routeTool?.stop();
     map.getCanvas().style.cursor = "inherit";
   });
@@ -34,7 +34,8 @@
     snapped: boolean;
   }
   let extraNodes: ExtraNode[] = [];
-  $: updateExtraNodes($routeTool, $waypoints, draggingExtraNode);
+
+  $: updateExtraNodes($routeTool, waypoints, draggingExtraNode);
 
   let cursor: Waypoint | null = null;
   let hoveringOnMarker = false;
@@ -42,12 +43,12 @@
   let draggingExtraNode = false;
   $: previewGj = getPreview(
     $routeTool,
-    $waypoints,
+    waypoints,
     cursor,
     hoveringOnMarker || draggingMarker,
   );
 
-  $: updateCursor($waypoints);
+  $: updateCursor(waypoints);
   function updateCursor(waypoints: Waypoint[]) {
     let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
     map.getCanvas().style.cursor = cursor;
@@ -57,7 +58,7 @@
     let state = undoStates.pop();
     undoStates = undoStates;
     if (state) {
-      $waypoints = state;
+      waypoints = state;
     }
   }
 
@@ -65,7 +66,7 @@
     if (undoStates.length == 100) {
       undoStates.shift();
     }
-    undoStates = [...undoStates, JSON.parse(JSON.stringify($waypoints))];
+    undoStates = [...undoStates, JSON.parse(JSON.stringify(waypoints))];
   }
 
   function toggleSnap() {
@@ -76,17 +77,15 @@
   }
 
   function onMapClick(e: CustomEvent<MapMouseEvent>) {
-    if ($waypoints.length >= 3) {
+    if (waypoints.length >= 3) {
       return;
     }
     captureUndoState();
-    waypoints.update((w) => {
-      w.push({
-        point: e.detail.lngLat.toArray(),
-        snapped: snapMode == "snap",
-      });
-      return w;
+    waypoints.push({
+      point: e.detail.lngLat.toArray(),
+      snapped: snapMode == "snap",
     });
+    waypoints = waypoints;
   }
 
   function onMouseMove(e: CustomEvent<MapMouseEvent>) {
@@ -98,19 +97,15 @@
 
   function toggleSnapped(idx: number) {
     captureUndoState();
-    waypoints.update((w) => {
-      w[idx].snapped = !w[idx].snapped;
-      return w;
-    });
+    waypoints[idx].snapped = !waypoints[idx].snapped;
+    waypoints = waypoints;
   }
 
   function removeWaypoint(idx: number) {
     // TODO Context menu sometimes appears briefly; need to eat the event?
     captureUndoState();
-    waypoints.update((w) => {
-      w.splice(idx, 1);
-      return w;
-    });
+    waypoints.splice(idx, 1);
+    waypoints = waypoints;
     hoveringOnMarker = false;
   }
 
@@ -184,22 +179,18 @@
     // Turn an extra node into a waypoint. Capture state before the user drags
     // around the new waypoint.
     captureUndoState();
-    waypoints.update((w) => {
-      w.splice(node.insertIdx, 0, {
-        point: node.point,
-        snapped: node.snapped,
-      });
-      return w;
+    waypoints.splice(node.insertIdx, 0, {
+      point: node.point,
+      snapped: node.snapped,
     });
+    waypoints = waypoints;
     draggingExtraNode = true;
   }
 
   function updateDrag(node: ExtraNode) {
     // Don't constantly update undoStates
-    waypoints.update((w) => {
-      w[node.insertIdx].point = node.point;
-      return w;
-    });
+    waypoints[node.insertIdx].point = node.point;
+    waypoints = waypoints;
   }
 
   function finalizeDrag() {
@@ -212,7 +203,7 @@
 
     if (e.key == "Enter" && !formFocused) {
       e.stopPropagation();
-      if ($waypoints.length >= 3) {
+      if (waypoints.length >= 3) {
         finish();
       } else {
         window.alert(
@@ -221,7 +212,7 @@
       }
     } else if (e.key == "Escape") {
       e.stopPropagation();
-      if ($waypoints.length >= 3) {
+      if (waypoints.length >= 3) {
         finish();
       } else {
         window.alert(
@@ -253,7 +244,7 @@
     <slot name="extra-sidebar" />
 
     <div style="display: flex">
-      <button on:click={finish} disabled={$waypoints.length < 3}>Finish</button>
+      <button on:click={finish} disabled={waypoints.length < 3}>Finish</button>
       <button class="secondary" on:click={cancel}>Cancel</button>
       <HelpButton>
         <ul>
@@ -306,7 +297,7 @@
       {/if}
     </button>
 
-    {#if $waypoints.length < 3}
+    {#if waypoints.length < 3}
       <fieldset>
         <label>
           <input type="radio" value="snap" bind:group={snapMode} />
@@ -349,7 +340,7 @@
       </Marker>
     {/each}
 
-    {#each $waypoints as waypt, idx}
+    {#each waypoints as waypt, idx}
       <Marker
         draggable
         bind:lngLat={waypt.point}
@@ -365,7 +356,7 @@
       </Marker>
     {/each}
 
-    <GeoJSON data={calculateGj($routeTool, $waypoints)} generateId>
+    <GeoJSON data={calculateGj($routeTool, waypoints)} generateId>
       <LineLayer
         {...layerId("draw-area-lines")}
         paint={{

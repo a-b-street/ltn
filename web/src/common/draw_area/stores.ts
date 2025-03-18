@@ -9,8 +9,6 @@ export interface Waypoint {
   snapped: boolean;
 }
 
-export const waypoints: Writable<Waypoint[]> = writable([]);
-
 export function calculateArea(waypoints: Waypoint[]): Feature<Polygon> {
   // TODO Or just fail?
   if (waypoints.length < 3) {
