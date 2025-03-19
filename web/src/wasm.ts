@@ -11,6 +11,10 @@ import type { LngLat } from "maplibre-gl";
 import type { Waypoint } from "route-snapper-ts";
 import { sum } from "./common";
 import type { Intersection, IntersectionFeature } from "./common/Intersection";
+import type {
+  ProjectFeatureCollection,
+  StudyAreaName,
+} from "./common/ProjectStorage";
 
 // This is a thin TS wrapper around the auto-generated TS API. The TS
 // definitions here are trusted blindly, not checked. Little work should happen
@@ -56,14 +60,18 @@ export class Backend {
     demandInput: Uint8Array | undefined,
     contextDataInput: Uint8Array | undefined,
     boundary: Feature<Polygon>,
-    studyAreaName: string | undefined,
+    appFocus: "global" | "cnt",
+    studyAreaName: StudyAreaName,
+    projectName: string,
   ) {
     this.inner = new LTN(
       osmInput,
       demandInput || new Uint8Array(),
       contextDataInput || new Uint8Array(),
       boundary,
+      appFocus,
       studyAreaName,
+      projectName,
     );
   }
 
@@ -222,11 +230,11 @@ export class Backend {
     return JSON.parse(this.inner.getAllShortcuts());
   }
 
-  toSavefile(): FeatureCollection {
+  toSavefile(): ProjectFeatureCollection {
     return JSON.parse(this.inner.toSavefile());
   }
 
-  loadSavefile(gj: FeatureCollection) {
+  loadSavefile(gj: ProjectFeatureCollection) {
     this.inner.loadSavefile(gj);
   }
 

@@ -11,7 +11,6 @@ import {
   Database,
   ProjectStorage,
   type ProjectID,
-  type ProjectSummary,
 } from "./common/ProjectStorage";
 import type { Backend } from "./wasm";
 
@@ -77,18 +76,7 @@ export let appFocus: Writable<"global" | "cnt"> = writable("global");
 export let currentProjectID: Writable<ProjectID | undefined> =
   writable(undefined);
 
-export let currentProject: Writable<ProjectSummary | undefined> =
-  writable(undefined);
-currentProjectID.subscribe((projectID) => {
-  if (projectID) {
-    const project = get(projectStorage).getProject(projectID);
-    currentProject.set(project.projectSummary);
-  } else {
-    currentProject.set(undefined);
-  }
-});
-
-let database = new Database();
+export let database = new Database();
 export let projectStorage: Writable<ProjectStorage> = writable(
   database.projectStorage(get(appFocus)),
 );
@@ -123,7 +111,7 @@ export function saveCurrentProject() {
   try {
     get(projectStorage).saveProject(projectID, get(backend)!.toSavefile());
   } catch (err) {
-    window.alert(`${err}`);
+    window.alert(`Autosave failed: ${err}`);
   }
 }
 

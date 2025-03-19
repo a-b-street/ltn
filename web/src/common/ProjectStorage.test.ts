@@ -1,6 +1,10 @@
 import type { FeatureCollection } from "geojson";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Database, ProjectStorage } from "./ProjectStorage";
+import {
+  Database,
+  ProjectStorage,
+  type ProjectFeatureCollection,
+} from "./ProjectStorage";
 
 let projectStorage: ProjectStorage;
 
@@ -31,7 +35,6 @@ function mockLocalStorage(mockData = {}) {
     writable: true,
   });
   projectStorage = new Database().projectStorage("cnt");
-  projectStorage.reloadIndexForTesting();
 
   return { storage, localStorage: window.localStorage };
 }
@@ -46,13 +49,29 @@ afterEach(() => {
 });
 
 describe("ProjectStorage", () => {
-  describe("listProjects", () => {
-    it("should list projects from the index by study area", () => {
-      projectStorage.createNewProject("Project 1", "Edinburgh");
-      projectStorage.createNewProject("Project 2", "Glasgow");
-      projectStorage.createNewProject("Project 3", "Edinburgh");
+  describe("createEmptyProject", () => {
+    it("should save project data and update index if it's a known project", () => {
+      let { storage } = mockLocalStorage({});
+      let id = projectStorage.createEmptyProject("Project Name", "TestArea");
+      let key = projectStorage.projectKey(id);
+      let originalProject: ProjectFeatureCollection = JSON.parse(storage[key]);
+      expect(originalProject).toBeDefined();
+      expect(originalProject.features).toHaveLength(0);
+      originalProject.features.push("FakeFeature" as any);
+      projectStorage.saveProject(id, originalProject);
 
-      const result = projectStorage.listProjects();
+      let reloadedProject: FeatureCollection = JSON.parse(storage[key]);
+      expect(reloadedProject.features).toHaveLength(1);
+    });
+  });
+
+  describe("studyAreas", () => {
+    it("should list projects from the index by study area", () => {
+      projectStorage.createEmptyProject("Project 1", "Edinburgh");
+      projectStorage.createEmptyProject("Project 2", "Glasgow");
+      projectStorage.createEmptyProject("Project 3", "Edinburgh");
+
+      const result = projectStorage.studyAreaProjects();
       console.log(result);
       expect(result).toHaveLength(2); // Two study areas
 
@@ -71,31 +90,15 @@ describe("ProjectStorage", () => {
     });
 
     it("should return empty array when index is empty", () => {
-      const result = projectStorage.listProjects();
+      const result = projectStorage.studyAreaProjects();
       expect(result).toHaveLength(0);
-    });
-  });
-
-  describe("saveProject", () => {
-    it("should save project data and update index if it's a known project", () => {
-      let { storage } = mockLocalStorage({});
-      let id = projectStorage.createNewProject("Project Name", "TestArea");
-      let key = projectStorage.projectKey(id);
-      let originalProject: FeatureCollection = JSON.parse(storage[key]);
-      expect(originalProject).toBeDefined();
-      expect(originalProject.features).toHaveLength(0);
-      originalProject.features.push("FakeFeature" as any);
-      projectStorage.saveProject(id, originalProject);
-
-      let reloadedProject: FeatureCollection = JSON.parse(storage[key]);
-      expect(reloadedProject.features).toHaveLength(1);
     });
   });
 
   describe("removeProject", () => {
     it("should remove project and update index", () => {
       let { storage } = mockLocalStorage({});
-      let id = projectStorage.createNewProject("Project Name", "TestArea");
+      let id = projectStorage.createEmptyProject("Project Name", "TestArea");
       let key = projectStorage.projectKey(id);
       expect(storage[key]).toBeDefined();
 
@@ -112,7 +115,7 @@ describe("ProjectStorage", () => {
 
   describe("renameProject", () => {
     it("should rename a project by updating the projectSummary", () => {
-      let id = projectStorage.createNewProject("Original Name", "TestArea");
+      let id = projectStorage.createEmptyProject("Original Name", "TestArea");
       expect(projectStorage.projectName(id)).toBe("Original Name");
 
       projectStorage.renameProject(id, "New Name");
@@ -122,7 +125,22 @@ describe("ProjectStorage", () => {
     it("should throw error when project doesn't exist", () => {
       expect(() =>
         projectStorage.renameProject("ce-nest-pas-un-uuid", "New Name"),
-      ).toThrow("Project summary for ce-nest-pas-un-uuid not found");
+      ).toThrow("Cannot get project: no project found for ce-nest-pas-un-uuid");
+    });
+  });
+
+  describe("projectNameAlreadyExists", () => {
+    it("should return true if project name already exists", () => {
+      projectStorage.createEmptyProject("Existing Project", "TestArea");
+      expect(projectStorage.projectNameAlreadyExists("Existing Project")).toBe(
+        true,
+      );
+    });
+
+    it("should return false if project name does not exist", () => {
+      expect(
+        projectStorage.projectNameAlreadyExists("Nonexistent Project"),
+      ).toBe(false);
     });
   });
 });

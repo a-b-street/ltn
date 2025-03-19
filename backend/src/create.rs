@@ -12,6 +12,7 @@ use utils::{
 };
 
 use crate::boundary_stats::{ContextData, POIKind, POI};
+use crate::map_model::ProjectDetails;
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -143,7 +144,7 @@ impl OsmReader for Osm {
 pub fn create_from_osm(
     input_bytes: &[u8],
     boundary_wgs84: MultiPolygon,
-    study_area_name: Option<String>,
+    project_details: ProjectDetails,
     demand: Option<DemandModel>,
     context_data_wgs84: Option<ContextData>,
 ) -> Result<MapModel> {
@@ -226,7 +227,7 @@ pub fn create_from_osm(
         bus_routes_on_roads: osm.bus_routes_on_roads,
         mercator: graph.mercator,
         boundary_wgs84,
-        study_area_name,
+        project_details,
         closest_road,
         closest_intersection,
 

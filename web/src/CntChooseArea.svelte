@@ -56,7 +56,7 @@
       }
       activityIndicatorText = `Loading pre-clipped OSM area ${prettyPrintStudyAreaName(studyAreaName)}`;
       try {
-        let projectID = $projectStorage.createNewProject(
+        let projectID = $projectStorage.createEmptyProject(
           projectName,
           studyAreaName,
         );

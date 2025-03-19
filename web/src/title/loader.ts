@@ -1,12 +1,15 @@
-import type { Feature, FeatureCollection, Polygon } from "geojson";
+import type { Feature, Polygon } from "geojson";
 import { RouteTool } from "route-snapper-ts";
 import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
 import { get, writable } from "svelte/store";
-import { safeFetch, type ProjectID, type StudyAreaName } from "../common";
+import { safeFetch } from "../common";
 import { routeTool } from "../common/draw_area/stores";
 import {
-  appFocus,
+  type ProjectFeatureCollection,
+  type ProjectID,
+} from "../common/ProjectStorage";
+import {
   assetUrl,
   backend,
   currentProjectID,
@@ -20,12 +23,11 @@ import { Backend } from "../wasm";
  * Loads an existing project by its ID
  */
 export async function loadProject(projectID: ProjectID) {
-  let { projectSummary, features } = get(projectStorage).getProject(projectID);
-  let { studyAreaName } = projectSummary;
+  let project = get(projectStorage).project(projectID);
   try {
     console.time("get input files");
     let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
-      await getInputFiles(features, studyAreaName, get(appFocus) == "cnt");
+      await getInputFiles(project);
     console.timeEnd("get input files");
     console.time("load");
     backend.set(
@@ -34,45 +36,46 @@ export async function loadProject(projectID: ProjectID) {
         demandBuffer ? new Uint8Array(demandBuffer) : undefined,
         contextDataBuffer ? new Uint8Array(contextDataBuffer) : undefined,
         boundary,
-        studyAreaName,
+        project.app_focus,
+        project.study_area_name,
+        project.project_name,
       ),
     );
     // TODO Rename savefile -> project? Or combine this call with the constructor?
-    get(backend)!.loadSavefile(features);
+    get(backend)!.loadSavefile(project);
     currentProjectID.set(projectID);
     console.timeEnd("load");
     afterProjectLoaded(projectID);
   } catch (err) {
-    console.error("Couldn't load project", err);
     window.alert(`Couldn't open project: ${err}`);
+    currentProjectID.set(undefined);
   }
 }
 
 // Returns OSM input, optional demand model input, and the boundary polygon,
 // either from pre-hosted files or from Overpass.
-async function getInputFiles(
-  projectFeatureCollection: FeatureCollection,
-  studyAreaName: StudyAreaName,
-  isCnt: boolean,
-): Promise<{
+async function getInputFiles(project: ProjectFeatureCollection): Promise<{
   osmBuffer: ArrayBuffer;
   boundary: Feature<Polygon>;
   demandBuffer?: ArrayBuffer;
   contextDataBuffer?: ArrayBuffer;
 }> {
-  if (isCnt) {
+  if (project.app_focus == "cnt") {
     // CNT projects are stored in a different place
-    console.assert!(studyAreaName, "CNT projects must have a study area name");
-    let url1 = assetUrl(`cnt_osm/${studyAreaName}.osm.pbf`);
+    console.assert!(
+      project.study_area_name,
+      "CNT projects must have a study area name",
+    );
+    let url1 = assetUrl(`cnt_osm/${project.study_area_name}.osm.pbf`);
     console.log(`Grabbing ${url1}`);
     let resp1 = await safeFetch(url1);
     let osmBuffer = await resp1.arrayBuffer();
 
-    let url2 = assetUrl(`cnt_boundaries/${studyAreaName}.geojson`);
+    let url2 = assetUrl(`cnt_boundaries/${project.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
-    let url3 = assetUrl(`cnt_demand/demand_${studyAreaName}.bin`);
+    let url3 = assetUrl(`cnt_demand/demand_${project.study_area_name}.bin`);
     console.log(`Grabbing ${url3}`);
     let demandBuffer = undefined;
     try {
@@ -82,7 +85,9 @@ async function getInputFiles(
       console.log(`No demand model: ${err}`);
     }
 
-    let url4 = assetUrl(`cnt_prioritization/context_${studyAreaName}.bin`);
+    let url4 = assetUrl(
+      `cnt_prioritization/context_${project.study_area_name}.bin`,
+    );
     console.log(`Grabbing ${url4}`);
     let contextDataBuffer = undefined;
     try {
@@ -93,20 +98,20 @@ async function getInputFiles(
     }
 
     return { osmBuffer, boundary, demandBuffer, contextDataBuffer };
-  } else if (studyAreaName) {
-    let url1 = assetUrl(`severance_pbfs/${studyAreaName}.pbf`);
+  } else if (project.study_area_name) {
+    let url1 = assetUrl(`severance_pbfs/${project.study_area_name}.pbf`);
     console.log(`Grabbing ${url1}`);
     let resp1 = await safeFetch(url1);
     let osmBuffer = await resp1.arrayBuffer();
 
-    let url2 = assetUrl(`boundaries/${studyAreaName}.geojson`);
+    let url2 = assetUrl(`boundaries/${project.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
     return { osmBuffer, boundary };
   } else {
     console.log(`Grabbing from Overpass`);
-    let boundary = projectFeatureCollection.features.find(
+    let boundary = project.features.find(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
     ) as Feature<Polygon>;
     let resp = await safeFetch(overpassQueryForPolygon(boundary));

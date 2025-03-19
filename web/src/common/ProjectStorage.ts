@@ -1,17 +1,17 @@
-import type { FeatureCollection } from "geojson";
+import type { FeatureCollection, Polygon } from "geojson";
 
 export type ProjectID = ReturnType<(typeof crypto)["randomUUID"]>;
 export type StudyAreaName = string | undefined;
-export type ProjectSummary = {
-  projectName: string;
-  studyAreaName: StudyAreaName;
-  appFocus: "cnt" | "global";
-};
+export interface ProjectFeatureCollection extends FeatureCollection<Polygon> {
+  // Foreign Members
+  project_name: string;
+  study_area_name: StudyAreaName;
+  app_focus: "global" | "cnt";
+}
 
-type ProjectIndex = {
-  projects: Record<ProjectID, ProjectSummary>;
-};
-
+/**
+ * Handles migrating the local storage schema.
+ */
 export class Database {
   private rootKey = "ltn";
   private get schemaVersionKey() {
@@ -62,30 +62,34 @@ export class Database {
           appFocus,
           INTERNAL_METHOD_TOKEN,
         );
-        // seemingly none of this is running - is listProjects empty?
-        for (const [studyAreaName, projects] of schemaV0_listProjects(
+        for (const [studyAreaName, projects] of schemaV0_studyAreaProjects(
           appFocus,
         )) {
-          for (const { projectKey, projectName } of projects) {
-            let projectFeatures = window.localStorage.getItem(projectKey);
-            if (!projectFeatures) {
+          for (const {
+            projectKey: legacyProjectKey,
+            projectName,
+          } of projects) {
+            let serializedProject =
+              window.localStorage.getItem(legacyProjectKey);
+            if (!serializedProject) {
+              // I don't think this should happen. It's a bug if it does.
               console.warn(
-                `Project features not found for ${projectKey}, skipping migration`,
+                `Project features not found for ${legacyProjectKey}, skipping migration`,
               );
               continue;
             }
-
-            let id = projectStorage.createNewProject(
-              projectName,
-              studyAreaName,
-            );
+            let project = JSON.parse(serializedProject);
+            project.app_focus = appFocus;
+            project.study_area_name = studyAreaName;
+            project.project_name = projectName;
+            console.log(`migrating project ${legacyProjectKey}`);
+            let id = projectStorage.createProject(project);
             console.log(
-              `migrating project ${projectKey} to ${projectStorage.projectKey(id)}`,
+              `Successfully migrated project ${legacyProjectKey} to ${projectStorage.projectKey(id)}`,
             );
-            projectStorage.saveProject(id, JSON.parse(projectFeatures));
 
-            // Remove the old data
-            window.localStorage.removeItem(projectKey);
+            // Remove the legacy data
+            window.localStorage.removeItem(legacyProjectKey);
           }
         }
       }
@@ -105,12 +109,12 @@ export class Database {
 
 // Simulate "file private" or "module private" methods in TypeScript
 //
-// I want to ensure that ProjectStorage is only created through Storage.projectStorage
+// You can only get an instance of ProjectStorage via Database.projectStorage(),
+// to ensure that ProjectStorage is never accessed before the underlying storage has been migrated,
 const INTERNAL_METHOD_TOKEN = Symbol("internal_method_token");
 
 export class ProjectStorage {
   appFocus: "global" | "cnt";
-  index: ProjectIndex;
 
   /**
    * Don't call this method directly, use Database.projectStorage()
@@ -118,29 +122,10 @@ export class ProjectStorage {
   constructor(appFocus: "global" | "cnt", internalMethodToken: symbol) {
     if (internalMethodToken !== INTERNAL_METHOD_TOKEN) {
       throw new Error(
-        "ProjectStorage must be created via Storage.projectStorage()",
+        "ProjectStorage must be created via Database.projectStorage()",
       );
     }
     this.appFocus = appFocus;
-    this.index = {
-      projects: {},
-    };
-
-    window.addEventListener("storage", (e) => {
-      // Storage changed in another tab. Re-load index so that we're up to date.
-      // Otherwise, our `saves` could clobber data.
-      //
-      // Still, without transactions, this is potentially racey. e.g. if two
-      // tabs save at the exact same time.
-      if (e.key == this.indexKey) {
-        console.log("reloading index after remote write.");
-        this.loadIndex();
-      } else {
-        console.log("ignoring non-index storage event", e);
-      }
-    });
-    this.loadIndex();
-    this.loadIndex();
   }
 
   private get collectionKey() {
@@ -152,95 +137,67 @@ export class ProjectStorage {
    */
   projectKey(projectID: ProjectID): string {
     if (!projectID) {
-      throw new Error("Cannot get project key: no ID provided");
+      throw new Error("Cannot get project. ProjectID was blank/missing.");
     }
-    return `${this.collectionKey}/by-id/${projectID}`;
-  }
-
-  private get indexKey(): string {
-    return `${this.collectionKey}/index`;
-  }
-
-  // Normally you shouldn't need to call this, but the unit tests
-  // edit localStorage directly.
-  public reloadIndexForTesting() {
-    this.loadIndex();
-  }
-
-  private loadIndex() {
-    let indexString = window.localStorage.getItem(this.indexKey);
-    if (indexString) {
-      this.index = JSON.parse(indexString);
-    } else {
-      this.index = {
-        projects: {},
-      };
-    }
-  }
-
-  private saveIndex() {
-    window.localStorage.setItem(this.indexKey, JSON.stringify(this.index));
+    return `${this.collectionKey}/${projectID}`;
   }
 
   /**
    * @returns the project name or undefined if not found
    */
   projectName(projectID: ProjectID): string | undefined {
-    let projectSummary = this.index.projects[projectID];
-    if (!projectSummary) {
-      console.warn(`Project summary for ${projectID} not found`);
-      return undefined;
-    }
-    return projectSummary.projectName;
+    let project = this.project(projectID);
+    return project.project_name;
   }
 
   projectNameAlreadyExists(projectName: string): boolean {
-    return !!Object.values(this.index.projects).find(
-      (p) => p.projectName == projectName,
-    );
+    for (const [_projectID, project] of this.projects()) {
+      if (project.project_name == projectName) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
    * @throws if the project name already exists
    */
-  createNewProject(
+  createEmptyProject(
     projectName: string,
     studyAreaName: StudyAreaName,
   ): ProjectID {
-    if (this.projectNameAlreadyExists(projectName)) {
-      throw new Error(`Project name already taken: ${projectName}`);
-    }
-
-    const projectSummary: ProjectSummary = {
-      projectName,
-      studyAreaName,
-      appFocus: this.appFocus,
-    };
-
-    let projectID = crypto.randomUUID();
-    const project = {
+    const project: ProjectFeatureCollection = {
       type: "FeatureCollection" as const,
       features: [],
+      study_area_name: studyAreaName,
+      project_name: projectName,
+      app_focus: this.appFocus,
     };
-    this.index.projects[projectID] = projectSummary;
+    return this.createProject(project);
+  }
+
+  /**
+   * @throws if the project name already exists
+   */
+  createProject(project: ProjectFeatureCollection): ProjectID {
+    if (this.projectNameAlreadyExists(project.project_name)) {
+      throw new Error(`Project name already taken: ${project.project_name}`);
+    }
+    let projectID = crypto.randomUUID();
     this.saveProject(projectID, project);
-    this.saveIndex();
     return projectID;
   }
 
   /**
    * @returns An array of projects, grouped by study area name.
    */
-  listProjects(): Array<
+  studyAreaProjects(): Array<
     [StudyAreaName, Array<{ projectID: ProjectID; projectName: string }>]
   > {
     let projectsByStudyArea = new Map();
 
-    for (const [projectID, project] of Object.entries(this.index.projects)) {
-      if (project.appFocus != this.appFocus) {
-        continue;
-      }
-      const studyAreaName = project.studyAreaName;
+    for (const [projectID, project] of this.projects()) {
+      const studyAreaName = project.study_area_name;
 
       if (!projectsByStudyArea.has(studyAreaName)) {
         projectsByStudyArea.set(studyAreaName, []);
@@ -248,8 +205,15 @@ export class ProjectStorage {
 
       projectsByStudyArea.get(studyAreaName)!.push({
         projectID: projectID as ProjectID,
-        projectName: project.projectName,
+        projectName: project.project_name,
       });
+    }
+
+    // Sort the projects by name
+    for (const [_studyAreaName, projects] of projectsByStudyArea.entries()) {
+      projects.sort((a: { projectName: string }, b: { projectName: string }) =>
+        a.projectName.localeCompare(b.projectName),
+      );
     }
 
     return Array.from(projectsByStudyArea.entries()).sort((a, b) => {
@@ -259,34 +223,78 @@ export class ProjectStorage {
     });
   }
 
-  saveProject(projectID: ProjectID, project: FeatureCollection) {
-    if (!projectID) {
-      throw new Error("Cannot save project: no ID provided");
+  projectIDFromKey(key: string): ProjectID | undefined {
+    let match = key.match(/ltn\/projects\/([a-z0-9-]+)/);
+    if (!match) {
+      return undefined;
     }
-    console.assert(
-      this.index.projects[projectID],
-      `no index entry for projectID: ${projectID}`,
-    );
+    let projectID = match[1];
+    if (!projectID) {
+      return undefined;
+    }
+    return projectID as ProjectID;
+  }
+
+  projects(): Array<[ProjectID, ProjectFeatureCollection]> {
+    return this.globalAndCntProjectKeys()
+      .map((key) => {
+        let projectID = this.projectIDFromKey(key);
+        if (!projectID) {
+          throw new Error(
+            `Cannot get project: no projectID parsed from ${key}`,
+          );
+        }
+        let projectString = window.localStorage.getItem(key);
+        if (!projectString) {
+          throw new Error(`Cannot get project: no project found for ${key}`);
+        }
+        let project = JSON.parse(projectString);
+        if (project.app_focus != this.appFocus) {
+          return null;
+        }
+        let entry: [ProjectID, ProjectFeatureCollection] = [projectID, project];
+        return entry;
+      })
+      .filter((entry) => entry !== null);
+  }
+
+  private globalAndCntProjectKeys(): string[] {
+    const prefix = this.collectionKey;
+    let keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(prefix)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+
+  saveProject(projectID: ProjectID, project: ProjectFeatureCollection) {
     let key = this.projectKey(projectID);
+
+    if (!project.study_area_name) {
+      // unify null, undefined, etc.
+      delete project.study_area_name;
+    }
+
     window.localStorage.setItem(key, JSON.stringify(project));
   }
 
   removeProject(projectID: ProjectID) {
-    console.assert(this.index.projects[projectID]);
-    delete this.index.projects[projectID];
-    this.saveIndex();
-
     let key = this.projectKey(projectID);
     window.localStorage.removeItem(key);
   }
 
   renameProject(projectID: ProjectID, newName: string) {
-    let projectSummary = this.index.projects[projectID];
-    if (!projectSummary) {
-      throw new Error(`Project summary for ${projectID} not found`);
+    let project = this.project(projectID);
+    if (!project) {
+      throw new Error(
+        `Cannot rename project: no existing project found for ${projectID}`,
+      );
     }
-    if (projectSummary.projectName == newName) {
-      console.warn(`Project ${projectID} already has name ${newName}`);
+    if (project.project_name == newName) {
+      console.debug("Ignoring rename, since it's the same name.");
       return;
     }
     if (this.projectNameAlreadyExists(newName)) {
@@ -294,31 +302,29 @@ export class ProjectStorage {
         `Project name ${newName} already taken. Choose a different name.`,
       );
     }
-    this.index.projects[projectID].projectName = newName;
-    this.saveIndex();
+    project.project_name = newName;
+    this.saveProject(projectID, project);
   }
 
-  getProject(projectID: ProjectID): {
-    projectSummary: ProjectSummary;
-    features: FeatureCollection;
-  } {
+  project(projectID: ProjectID): ProjectFeatureCollection {
     let key = this.projectKey(projectID);
-    let projectSummary = this.index.projects[projectID];
-    if (!projectSummary) {
-      throw new Error(`Cannot get project: no summary found for ${projectID}`);
-    }
     let projectString = window.localStorage.getItem(key);
     if (!projectString) {
       throw new Error(`Cannot get project: no project found for ${projectID}`);
     }
-    let features = JSON.parse(projectString);
-    return { projectSummary, features };
+    let project = JSON.parse(projectString);
+    console.assert!(
+      project.study_area_name || project.app_focus != "cnt",
+      "missing study area name for cnt project",
+    );
+    console.assert!(project.project_name, "missing project name");
+    return project;
   }
 }
 
 // Returns a list, grouped and sorted by the optional studyAreaId, with
 // custom cases at the end
-function schemaV0_listProjects(
+function schemaV0_studyAreaProjects(
   appFocus: "cnt" | "global",
 ): Array<[StudyAreaName, { projectKey: string; projectName: string }[]]> {
   let studyAreas = new Map();

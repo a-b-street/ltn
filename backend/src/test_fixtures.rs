@@ -1,4 +1,5 @@
 use crate::boundary_stats::ContextData;
+use crate::map_model::ProjectDetails;
 use crate::neighbourhood::NeighbourhoodBoundary;
 use crate::{MapModel, Neighbourhood};
 use anyhow::{Context, Result};
@@ -111,10 +112,15 @@ impl NeighbourhoodFixture {
         Ok(move || {
             let demand = None;
             let context_data = self.context_data();
+            let project_details = ProjectDetails {
+                project_name: self.savefile_name.to_string(),
+                study_area_name: Some(study_area_name.to_string()),
+                app_focus: "global".to_string(),
+            };
             MapModel::new(
                 &input_bytes,
                 multi_polygon.clone(),
-                Some(study_area_name.to_string()),
+                project_details,
                 demand,
                 context_data,
             )

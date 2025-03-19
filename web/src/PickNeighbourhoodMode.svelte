@@ -22,7 +22,6 @@
   import {
     appFocus,
     backend,
-    currentProject,
     currentProjectID,
     devMode,
     mode,
@@ -84,12 +83,9 @@
 
   function exportGJ() {
     let projectID = $currentProjectID!;
-    let { projectSummary, features } = $projectStorage.getProject(projectID);
+    let project = $projectStorage.project(projectID);
     let dateFormatted = new Date().toISOString().split("T")[0];
-    let filename = `${projectSummary.projectName}-${dateFormatted}.geojson`;
-    // add summary as foreign member
-    let project = features as any;
-    project.projectSummary = projectSummary;
+    let filename = `${project.project_name}-${dateFormatted}.geojson`;
     downloadGeneratedFile(filename, JSON.stringify(project));
   }
 
@@ -209,7 +205,7 @@
   </div>
 
   <div slot="sidebar">
-    <h1>{notNull($currentProject).projectName}</h1>
+    <h1>{$projectStorage.projectName(notNull($currentProjectID))}</h1>
     <h2>Neighbourhoods</h2>
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}

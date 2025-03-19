@@ -25,7 +25,7 @@ pub struct MapModel {
     pub bus_routes_on_roads: HashMap<osm_reader::WayID, Vec<String>>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
-    pub study_area_name: Option<String>,
+    pub project_details: ProjectDetails,
     pub boundary_wgs84: MultiPolygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
     pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
@@ -216,19 +216,26 @@ impl Intersection {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProjectDetails {
+    pub app_focus: String,
+    pub study_area_name: Option<String>,
+    pub project_name: String,
+}
+
 impl MapModel {
     /// Call with bytes of an osm.pbf or osm.xml string
     pub fn new(
         input_bytes: &[u8],
         boundary_wgs84: MultiPolygon,
-        study_area_name: Option<String>,
+        project_details: ProjectDetails,
         demand: Option<DemandModel>,
         context_data: Option<ContextData>,
     ) -> Result<MapModel> {
         crate::create::create_from_osm(
             input_bytes,
             boundary_wgs84,
-            study_area_name,
+            project_details,
             demand,
             context_data,
         )
@@ -646,6 +653,15 @@ impl MapModel {
         let mut f = Feature::from(Geometry::from(&self.boundary_wgs84));
         f.set_property("kind", "study_area_boundary");
         gj.features.push(f);
+
+        gj.foreign_members = Some(
+            // The features are elements within the study area, we store properties of the
+            // project itself as foreign members.
+            serde_json::json!(&self.project_details)
+                .as_object()
+                .unwrap()
+                .to_owned(),
+        );
         gj
     }
 

@@ -3,8 +3,9 @@
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
-  import { Link, prettyPrintStudyAreaName, type ProjectID } from "../common";
+  import { Link, prettyPrintStudyAreaName } from "../common";
   import { routeTool } from "../common/draw_area/stores";
+  import { type ProjectID } from "../common/ProjectStorage";
   import {
     appFocus,
     backend,
@@ -29,9 +30,9 @@
 
     if (firstLoad) {
       let params = new URLSearchParams(window.location.search);
-      let projectKey = params.get("project");
-      if (projectKey) {
-        loadProjectFromURLParam(projectKey);
+      let projectID = params.get("project") as ProjectID;
+      if (projectID) {
+        loadProjectFromUrlParam(projectID);
       }
     } else {
       // Update the URL
@@ -41,7 +42,21 @@
     }
   }
 
-  let projectList = $projectStorage.listProjects();
+  let studyAreas = $projectStorage.studyAreaProjects();
+
+  function loadProjectFromUrlParam(projectIDParam: string) {
+    let projectID = projectIDParam as ProjectID;
+    try {
+      let projectName = $projectStorage.projectName(projectID);
+      if (!projectName) {
+        console.error(`Project ${projectID} from URL not found`);
+        return;
+      }
+      loadProjectPrompt(projectID, projectName);
+    } catch {
+      console.error(`Error trying to fetch project from URL: ${projectID}`);
+    }
+  }
 
   function deleteProject(projectID: ProjectID, projectName: string) {
     if (
@@ -50,7 +65,7 @@
       )
     ) {
       $projectStorage.removeProject(projectID);
-      projectList = $projectStorage.listProjects();
+      studyAreas = $projectStorage.studyAreaProjects();
     }
   }
 
@@ -65,18 +80,8 @@
       } catch (e) {
         window.alert(`Couldn't rename project: ${e}`);
       }
-      projectList = $projectStorage.listProjects();
+      studyAreas = $projectStorage.studyAreaProjects();
     }
-  }
-
-  async function loadProjectFromURLParam(projectIDParam: string) {
-    let projectID = projectIDParam as ProjectID;
-    let projectName = $projectStorage.projectName(projectID);
-    if (!projectName) {
-      console.error(`Project ${projectID} from URL not found`);
-      return;
-    }
-    loadProjectPrompt(projectID, projectName);
   }
 
   async function loadProjectPrompt(projectID: ProjectID, projectName: string) {
@@ -98,10 +103,10 @@
   </div>
   <div slot="sidebar">
     {#if $map && wasmReady}
-      {#if projectList.length > 0}
+      {#if studyAreas.length > 0}
         <h2>Your projects</h2>
         <div class="project-list">
-          {#each projectList as [studyAreaName, projects]}
+          {#each studyAreas as [studyAreaName, projects]}
             <h3 class="study-area-name">
               {prettyPrintStudyAreaName(studyAreaName)}
             </h3>

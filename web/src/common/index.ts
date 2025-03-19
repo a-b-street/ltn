@@ -4,7 +4,7 @@ import type {
 } from "maplibre-gl";
 import { get } from "svelte/store";
 import { appFocus } from "../stores";
-import type { StudyAreaName } from "./ProjectStorage";
+import { type StudyAreaName } from "./ProjectStorage";
 
 export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as ContextLayerButton } from "./ContextLayerButton.svelte";
@@ -16,11 +16,6 @@ export { default as PrevNext } from "./PrevNext.svelte";
 export { default as SequentialLegend } from "./SequentialLegend.svelte";
 export { default as StreetView } from "./StreetView.svelte";
 export { layerId } from "./zorder";
-export {
-  ProjectStorage,
-  type ProjectID,
-  type StudyAreaName,
-} from "./ProjectStorage";
 
 // TS fix for the imprecise geojson types
 export function gjPosition(pt: number[]): [number, number] {

@@ -15,6 +15,7 @@ use self::render_cells::RenderCells;
 pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
 use crate::auto_boundaries::GeneratedBoundary;
+use crate::map_model::ProjectDetails;
 use geo::{Coord, LineString};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
@@ -60,7 +61,9 @@ impl LTN {
         demand_bytes: &[u8],
         context_data_bytes: &[u8],
         boundary_input: JsValue,
+        app_focus: String,
         study_area_name: Option<String>,
+        project_name: String,
     ) -> Result<LTN, JsValue> {
         // Panics shouldn't happen, but if they do, console.log them.
         console_error_panic_hook::set_once();
@@ -89,10 +92,15 @@ impl LTN {
             None
         };
 
+        let project_details = ProjectDetails {
+            app_focus,
+            study_area_name,
+            project_name,
+        };
         let map = MapModel::new(
             input_bytes,
             multi_polygon,
-            study_area_name,
+            project_details,
             demand,
             context_data,
         )
