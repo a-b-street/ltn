@@ -7,6 +7,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { Link, safeFetch } from "../common";
   import {
+    appFocus,
     assetUrl,
     backend,
     map,
@@ -26,23 +27,24 @@
     exampleAreas = await resp.json();
   });
 
-  function gotXml(e: CustomEvent<{ xml: string; boundary: Feature<Polygon> }>) {
+  async function gotXml(
+    e: CustomEvent<{ xml: string; boundary: Feature<Polygon> }>,
+  ) {
     loading = "Loading OSM";
     try {
+      let studyAreaName = undefined;
       $backend = new Backend(
         new TextEncoder().encode(e.detail.xml),
         undefined,
         undefined,
         e.detail.boundary,
-        undefined,
+        $appFocus,
+        studyAreaName,
+        newProjectName,
       );
 
-      const projectID = $projectStorage.createNewProject(
-        newProjectName,
-        undefined,
-      );
-      $projectStorage.saveProject(projectID, $backend.toSavefile());
-      loadProject(projectID);
+      const projectID = $projectStorage.createProject($backend.toSavefile());
+      await loadProject(projectID);
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
@@ -54,7 +56,7 @@
       return;
     }
 
-    let projectID = $projectStorage.createNewProject(newProjectName, example);
+    let projectID = $projectStorage.createEmptyProject(newProjectName, example);
     loading = `Loading pre-clipped OSM area ${example}`;
     await loadProject(projectID);
     loading = "";

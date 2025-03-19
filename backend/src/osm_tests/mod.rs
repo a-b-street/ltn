@@ -1,6 +1,6 @@
-use geo::MultiPolygon;
-
+use crate::map_model::ProjectDetails;
 use crate::MapModel;
+use geo::MultiPolygon;
 
 #[test]
 fn test_deadend_with_barrier() {
@@ -37,11 +37,15 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
     let context_data = None;
     // No test cases need this
     let boundary_wgs84 = MultiPolygon::new(Vec::new());
-    let study_area_name = None;
+    let project_details = ProjectDetails {
+        project_name: "test-project".to_string(),
+        study_area_name: None,
+        app_focus: "global".to_string(),
+    };
     MapModel::new(
         &std::fs::read(path).unwrap(),
         boundary_wgs84,
-        study_area_name,
+        project_details,
         demand,
         context_data,
     )
