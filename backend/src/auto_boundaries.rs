@@ -70,10 +70,11 @@ impl MapModel {
         let adjacency_tolerance = 15.0;
         // Note that buffering geometries will union them if the buffering results in overlap,
         // no need for an explicit `unary_union` step.
-        let geometry = buffer_polygon(&original_boundaries, adjacency_tolerance)?;
-
+        let polygon = buffer_polygon(&original_boundaries, adjacency_tolerance)?;
+        let (exterior, _interiors) = polygon.into_inner();
+        let solid = Polygon::new(exterior, vec![]);
         let definition = NeighbourhoodDefinition {
-            geometry,
+            geometry: solid,
             name: "".to_string(),
             waypoints: None,
         };
