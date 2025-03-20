@@ -1,4 +1,4 @@
-import type { Feature, Polygon } from "geojson";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { RouteTool } from "route-snapper-ts";
 import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
@@ -55,7 +55,7 @@ export async function loadProject(projectID: ProjectID) {
 // either from pre-hosted files or from Overpass.
 async function getInputFiles(project: ProjectFeatureCollection): Promise<{
   osmBuffer: ArrayBuffer;
-  boundary: Feature<Polygon>;
+  boundary: Feature<Polygon | MultiPolygon>;
   demandBuffer?: ArrayBuffer;
   contextDataBuffer?: ArrayBuffer;
 }> {
@@ -112,7 +112,7 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     console.log(`Grabbing from Overpass`);
     let boundary = project.features.find(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
-    ) as Feature<Polygon>;
+    ) as Feature<Polygon | MultiPolygon>;
     let resp = await safeFetch(overpassQueryForPolygon(boundary));
     let osmBuffer = await resp.arrayBuffer();
     return { osmBuffer, boundary };

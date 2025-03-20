@@ -1,8 +1,9 @@
-import type { FeatureCollection, Polygon } from "geojson";
+import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
 
 export type ProjectID = ReturnType<(typeof crypto)["randomUUID"]>;
 export type StudyAreaName = string | undefined;
-export interface ProjectFeatureCollection extends FeatureCollection<Polygon> {
+export interface ProjectFeatureCollection
+  extends FeatureCollection<Polygon | MultiPolygon> {
   // Foreign Members
   project_name: string;
   study_area_name: StudyAreaName;
