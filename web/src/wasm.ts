@@ -39,8 +39,6 @@ export type GeneratedBoundaryFeature = Feature<
   Polygon,
   {
     touches_big_road: boolean;
-    touches_railway: boolean;
-    touches_waterway: boolean;
 
     area_km2: number;
     households_with_cars_or_vans: number;

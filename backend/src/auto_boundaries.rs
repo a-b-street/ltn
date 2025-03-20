@@ -35,15 +35,11 @@ impl MapModel {
         {
             // TODO This is expensive; could this info somehow be retained?
             let touches_big_road = boundary_touches_any(&polygon, &road_severances);
-            let touches_railway = boundary_touches_any(&polygon, &self.railways);
-            let touches_waterway = boundary_touches_any(&polygon, &self.waterways);
 
             let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
             let generated_boundary = GeneratedBoundary {
                 geometry: polygon,
                 touches_big_road,
-                touches_railway,
-                touches_waterway,
                 boundary_stats,
             };
 
@@ -116,8 +112,6 @@ pub struct GeneratedBoundary {
     )]
     pub geometry: Polygon,
     pub touches_big_road: bool,
-    pub touches_railway: bool,
-    pub touches_waterway: bool,
     #[serde(flatten)]
     pub boundary_stats: BoundaryStats,
 }
