@@ -349,7 +349,8 @@ function schemaV0_studyAreaProjects(
       if (appFocus != "global") {
         continue;
       }
-      let projectName = projectKey.split("ltn_")[1];
+      let parts = projectKey.split("ltn_");
+      let projectName = parts[parts.length - 1];
       let studyAreaName = "";
       try {
         let gj = JSON.parse(window.localStorage.getItem(projectKey)!);
