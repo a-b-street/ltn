@@ -270,6 +270,7 @@
     on:mouseleave={() => (hoveringOnMarker = false)}
     on:dragstart={startDraggingWaypoint}
     on:dragend={() => (draggingMarker = false)}
+    zIndex={1}
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
     <Popup openOn="hover" popupClass="edit-waypoint-popup">
@@ -369,5 +370,8 @@
     *    By adding this padding, there's a little gap between the marker and the popup, so the bottom popup clears while panning to the top point.
     */
     padding-bottom: 16px;
+
+    /* The markers have z-index 1, so the popup needs to be above them */
+    z-index: 2;
   }
 </style>
