@@ -287,51 +287,97 @@
         </button>
       </div>
       {#if addMode == "choose-area"}
-        <h3>1. Click an area to start your neighbourhood</h3>
-        <p>
-          These particular boundaries are suggested by finding roads, railways,
-          and water that form severances.
-        </p>
-        {#if neighbourhoodBoundary}
+        <div
+          class="step"
+          class:active={!neighbourhoodBoundary}
+          class:complete={neighbourhoodBoundary}
+        >
+          <h3>1. Click an area to start your neighbourhood</h3>
+          <p>
+            These particular boundaries are suggested by finding roads,
+            railways, and water that form severances.
+          </p>
+        </div>
+        <div
+          class="step"
+          class:active={neighbourhoodBoundary}
+          class:complete={selectedBoundaries.size > 1}
+        >
           <h3>2. Include additional areas</h3>
           <p>Click any adjacent areas you'd like to add to your boundary.</p>
-        {/if}
+        </div>
       {:else if addMode == "draw-area"}
-        <h3>1. Draw your neighbourhood</h3>
+        <div
+          class="step"
+          class:active={!neighbourhoodBoundary}
+          class:complete={neighbourhoodBoundary}
+        >
+          <h3>1. Draw your neighbourhood</h3>
+        </div>
         <AreaControls
           map={notNull($map)}
           bind:waypoints
           bind:drawnShapeOut={drawnShape}
         />
-        {#if neighbourhoodBoundary}
+        <div
+          class="step"
+          class:active={neighbourhoodBoundary}
+          class:complete={selectedBoundaries.size > 1}
+          style="margin-top: 16px;"
+        >
           <h3>2. Refine your boundary</h3>
           <p>
             Continue to add, delete, and move points until you're happy with
             your neighbourhood boundary. Don't worry, you can always adjust the
             boundary more later.
           </p>
-        {/if}
-      {/if}
-      {#if neighbourhoodBoundary}
-        <h3>3. Finished?</h3>
-        <p>When you're done, click "Create".</p>
-        <h3>Your neighbourhood overall</h3>
-        <NeighbourhoodBoundarySummary {neighbourhoodBoundary} />
-        <div style="display: flex; gap: 16px; justify-content: space-between;">
-          <button
-            on:click={() => createNeighbourhood(notNull(neighbourhoodBoundary))}
-          >
-            Create neighborhood
-          </button>
-          <button
-            class="destructive"
-            on:click={clearNeighbourhoodBoundary}
-            style="display: flex; gap: 8px; align-items: center;"
-          >
-            <Trash2 /> Start over
-          </button>
         </div>
       {/if}
+      <div class="step" class:active={neighbourhoodBoundary}>
+        <h3>3. Finished?</h3>
+        <p>When you're done, click "Create".</p>
+      </div>
+      <div
+        style="display: flex; gap: 16px; justify-content: space-between; margin-bottom: 16px;"
+      >
+        <button
+          on:click={() => createNeighbourhood(notNull(neighbourhoodBoundary))}
+          disabled={!neighbourhoodBoundary}
+        >
+          Create neighborhood
+        </button>
+        <button
+          class="destructive"
+          on:click={clearNeighbourhoodBoundary}
+          style="display: flex; gap: 8px; align-items: center;"
+          disabled={!(
+            neighbourhoodBoundary ||
+            (addMode == "draw-area" && waypoints.length > 0)
+          )}
+        >
+          <Trash2 /> Start over
+        </button>
+      </div>
+      <h3>Your neighbourhood overall</h3>
+      <div class="neighbourhood-boundary-summary">
+        {#if neighbourhoodBoundary}
+          <NeighbourhoodBoundarySummary {neighbourhoodBoundary} />
+        {:else}
+          <span style="text-align:center;">
+            {#if addMode == "choose-area"}
+              Empty so far. Click an area to get started.
+            {:else if addMode == "draw-area"}
+              {#if waypoints.length < 3}
+                Empty so far. Click the map to add points around your
+                neighborhood to get started.
+              {:else}
+                Not a valid shape yet — try dragging the points into a box
+                around your neighbourhood. Note the ordering of the points.
+              {/if}
+            {/if}
+          </span>
+        {/if}
+      </div>
     </div>
     <hr />
 
@@ -448,5 +494,28 @@
     background-color: white;
     color: black;
     border: solid green 1px;
+  }
+  .neighbourhood-boundary-summary {
+    border: dashed black 2px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  .step h3::before {
+    /* some content is necessary for the width to take effect. */
+    content: " ";
+    /* approximate width of widest emoji */
+    width: 24px;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .step.active h3::before {
+    content: "👉";
+  }
+  .step.complete h3::before {
+    content: "✅";
+  }
+  .step:not(.active) {
+    opacity: 0.5;
   }
 </style>
