@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { CircleX } from "lucide-svelte";
   import { prettyPrintPercent } from "../common";
   import { appFocus } from "../stores";
   import type { GeneratedBoundaryFeature } from "../wasm";
