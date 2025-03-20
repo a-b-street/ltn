@@ -59,7 +59,7 @@ export class Backend {
     osmInput: Uint8Array,
     demandInput: Uint8Array | undefined,
     contextDataInput: Uint8Array | undefined,
-    boundary: Feature<Polygon>,
+    boundary: Feature<Polygon | MultiPolygon>,
     appFocus: "global" | "cnt",
     studyAreaName: StudyAreaName,
     projectName: string,
