@@ -356,7 +356,7 @@ function schemaV0_studyAreaProjects(
         let gj = JSON.parse(window.localStorage.getItem(projectKey)!);
         studyAreaName = gj.study_area_name;
       } catch (err) {
-        console.log(`error loading cnt project: ${projectKey}`, err);
+        console.log(`error loading global project: ${projectKey}`, err);
       }
       if (studyAreaName && studyAreaName.length > 0) {
         if (!studyAreas.has(studyAreaName)) {
