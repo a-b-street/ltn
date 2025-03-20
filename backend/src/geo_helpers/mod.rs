@@ -101,29 +101,33 @@ pub fn buffer_aabb(aabb: AABB<Point>, buffer_meters: f64) -> AABB<Point> {
 /// I haven't investigated why yet, but dealing with it is simple enough.
 /// i_overlay offers a relevant sounding `min_area` parameter, but it's not currently exposed
 /// by geo's buffer integration.
-pub fn buffer_polygon(polygon: &Polygon, distance: f64) -> anyhow::Result<Polygon> {
-    let merged = polygon.buffer(distance);
+pub fn buffer_polygon(area: &impl Buffer<Scalar = f64>, distance: f64) -> anyhow::Result<Polygon> {
+    let merged = area.buffer(distance);
 
     use geo::Area;
     let area_polygons = merged.0.into_iter().map(|p| (p.unsigned_area(), p));
 
-    // Anything smaller than this should be considered an artifact and discarded.
+    // Buffering can leave floating artifacts.
     //
-    // We may have to tweak this if we encounter errors with the current value, which is on the
-    // order of "house sized" - much smaller than any expected neighbourhood.
+    // I haven't investigated why yet, but dealing with it is simple enough.
+    // i_overaly offers a relevant sounding `min_area` parameter, but it's not currently exposed
+    // by geo's buffer integration.
+    //
+    // For perspective, a 60m roundabout has an area around 1200m²
+    // We may have to tweak or parameterize this if we encounter errors with the current value.
     let buffering_artifact_threshold_m2 = 1000.;
     let mut merged_boundaries: Vec<_> = area_polygons
         .filter(|(area, _polygon)| *area > buffering_artifact_threshold_m2)
         .collect();
 
-    let geometry = match merged_boundaries.len() {
+    let polygon = match merged_boundaries.len() {
         0 => bail!("Empty boundary"),
         1 => merged_boundaries.pop().expect("verified non-empty").1,
         _ => {
             bail!("All included boundaries must be adjacent");
         }
     };
-    Ok(geometry)
+    Ok(polygon)
 }
 
 // TODO What in the generics is going on here...
