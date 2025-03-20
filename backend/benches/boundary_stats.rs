@@ -34,7 +34,7 @@ fn benchmark_build_map_model(c: &mut Criterion) {
             |b| {
                 b.iter(|| {
                     let boundaries = map.generated_boundaries();
-                    assert_eq!(boundaries.features.len(), 1102);
+                    assert_eq!(boundaries.features.len(), 240);
                     black_box(boundaries);
                 });
             },

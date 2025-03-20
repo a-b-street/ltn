@@ -113,7 +113,7 @@ pub fn buffer_polygon(area: &impl Buffer<Scalar = f64>, distance: f64) -> anyhow
     // i_overaly offers a relevant sounding `min_area` parameter, but it's not currently exposed
     // by geo's buffer integration.
     //
-    // For perspective, a 60m roundabout has an area around 1200m²
+    // For perspective, a 60m (interior) roundabout has an area around 2800m²
     // We may have to tweak or parameterize this if we encounter errors with the current value.
     let buffering_artifact_threshold_m2 = 1000.;
     let mut merged_boundaries: Vec<_> = area_polygons
