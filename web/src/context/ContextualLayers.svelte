@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Layers } from "lucide-svelte";
   import { Control } from "svelte-maplibre";
+  import { ContextLayerButton } from "../common";
+  import { showExistingFiltersAndTRs } from "../stores";
   import BusRoutes from "./BusRoutes.svelte";
   import CBD from "./CBD.svelte";
   import POIs from "./POIs.svelte";
@@ -38,6 +40,11 @@
       style:display={expand ? "flex" : "none"}
       style:background-color="#515f7A"
     >
+      <ContextLayerButton
+        label="Existing modal filters and turn restrictions"
+        bind:show={$showExistingFiltersAndTRs}
+      />
+
       <POIs />
       <Population />
       <RailwayStations />
