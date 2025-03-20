@@ -3,12 +3,15 @@ use backend::test_fixtures::NeighbourhoodFixture;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn benchmark_build_map_model(c: &mut Criterion) {
-    for fixture in [NeighbourhoodFixture::DUNDEE] {
+    for (fixture, expected_population_zones, expected_generated_boundaries) in [
+        (NeighbourhoodFixture::INVERNESS, 325, 9513),
+        (NeighbourhoodFixture::DUNDEE, 200, 240),
+    ] {
         // Do the file i/o (reading OSM.xml) outside of the bench loop
         let (neighbourhood, map) = fixture.neighbourhood_map().unwrap();
         assert_eq!(
             map.context_data.as_ref().unwrap().population_zones.len(),
-            200
+            expected_population_zones
         );
         c.bench_function(
             &format!(
@@ -26,19 +29,15 @@ fn benchmark_build_map_model(c: &mut Criterion) {
                 });
             },
         );
-        c.bench_function(
-            &format!(
-                "generate auto boundaries (and stats) for all of {study_area}",
-                study_area = fixture.study_area_name
-            ),
-            |b| {
+        c.benchmark_group(fixture.savefile_name)
+            .sample_size(fixture.bench_sample_size())
+            .bench_function("generate auto boundaries (and stats)", |b| {
                 b.iter(|| {
                     let boundaries = map.generated_boundaries();
-                    assert_eq!(boundaries.features.len(), 240);
+                    assert_eq!(boundaries.features.len(), expected_generated_boundaries);
                     black_box(boundaries);
                 });
-            },
-        );
+            });
     }
 }
 
