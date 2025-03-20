@@ -88,7 +88,7 @@ export let devMode: Writable<boolean> = writable(false);
 export let maptilerBasemap: Writable<string> = writable("streets-v2");
 export let filterType: Writable<string> = writable("walk_cycle_only");
 export let animateShortcuts = writable(false);
-export let onlyNewIcons = writable(false);
+export let showExistingFiltersAndTRs = writable(true);
 export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
   writable("shortcuts");
 export let thickRoadsForShortcuts = writable(false);

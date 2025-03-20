@@ -8,9 +8,12 @@
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
-  import { backend, mutationCounter } from "../stores";
+  import {
+    backend,
+    mutationCounter,
+    showExistingFiltersAndTRs,
+  } from "../stores";
 
-  export let onlyNew: boolean;
   export let onClickTurnRestriction: (
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
@@ -48,7 +51,7 @@
   <SymbolLayer
     {...layerId("turn-restrictions")}
     minzoom={13}
-    filter={onlyNew ? ["get", "edited"] : undefined}
+    filter={$showExistingFiltersAndTRs ? undefined : ["get", "edited"]}
     layout={{
       "icon-image": ["concat", "no_", ["get", "kind"], "_turn"],
       "icon-rotate": ["get", "icon_angle"],

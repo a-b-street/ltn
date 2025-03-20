@@ -2,12 +2,15 @@
   import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
-  import { backend, mutationCounter } from "../stores";
+  import {
+    backend,
+    mutationCounter,
+    showExistingFiltersAndTRs,
+  } from "../stores";
   // TODO Maybe make another component wrapping both modal filters and turn
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
-  export let onlyNew = false;
   export let onClickModalFilter: (
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
@@ -27,7 +30,7 @@
     filter={[
       "all",
       ["!=", ["get", "filter_kind"], "diagonal_filter"],
-      onlyNew ? ["get", "edited"] : ["literal", true],
+      $showExistingFiltersAndTRs ? ["literal", true] : ["get", "edited"],
     ]}
     {minzoom}
     layout={{
@@ -57,6 +60,6 @@
   />
 </GeoJSON>
 
-<TurnRestrictionLayer {onlyNew} {onClickTurnRestriction}>
+<TurnRestrictionLayer {onClickTurnRestriction}>
   <slot name="turn-restriction" />
 </TurnRestrictionLayer>
