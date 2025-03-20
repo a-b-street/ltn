@@ -11,26 +11,24 @@ use serde::{Deserialize, Serialize};
 impl MapModel {
     pub fn generated_boundaries(&self) -> FeatureCollection {
         let mut features = Vec::new();
-        let mut severances = Vec::new();
-
-        for road in &self.roads {
-            if road.is_severance() {
-                severances.push(road.linestring.clone());
-            }
-        }
-
-        for linestring in &self.railways {
-            severances.push(linestring.clone());
-        }
-
-        for linestring in &self.waterways {
-            severances.push(linestring.clone());
-        }
+        let severances = self
+            .roads
+            .iter()
+            .filter_map(|r| {
+                if r.is_severance() {
+                    Some(&r.linestring)
+                } else {
+                    None
+                }
+            })
+            .chain(self.railways.iter())
+            .chain(self.waterways.iter());
 
         let boundary_mercator = self.mercator.to_mercator(&self.boundary_wgs84);
+
         for polygon in boundary_mercator
             .into_iter()
-            .flat_map(|boundary_polygon| split_polygon(boundary_polygon, &severances))
+            .flat_map(|boundary_polygon| split_polygon(boundary_polygon, severances.clone()))
         {
             let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
             let generated_boundary = GeneratedBoundary {
@@ -99,13 +97,16 @@ impl GeneratedBoundary {
 }
 
 // TODO Revisit some of this; conversions are now in geo
-fn split_polygon(polygon: Polygon, linestrings: &Vec<LineString>) -> Vec<Polygon> {
+fn split_polygon<'a>(
+    polygon: Polygon,
+    severances: impl Iterator<Item = &'a LineString>,
+) -> Vec<Polygon> {
     let mut shape = to_i_overlay_contour(polygon.exterior());
 
     // geo Polygon's are explicitly closed LineStrings, but i_overlay Polygon's are not.
     shape.pop();
 
-    let splitters: Vec<_> = linestrings.iter().map(to_i_overlay_contour).collect();
+    let splitters: Vec<_> = severances.map(to_i_overlay_contour).collect();
     let shapes = shape.slice_by(&splitters, FillRule::NonZero);
 
     shapes
