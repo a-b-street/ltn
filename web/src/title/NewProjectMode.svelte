@@ -11,6 +11,7 @@
     assetUrl,
     backend,
     map,
+    mode,
     projectStorage,
     returnToChooseProject,
   } from "../stores";
@@ -45,6 +46,7 @@
 
       const projectID = $projectStorage.createProject($backend.toSavefile());
       await loadProject(projectID);
+      $mode = { mode: "add-neighbourhood" };
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);
     }
@@ -59,6 +61,7 @@
     let projectID = $projectStorage.createEmptyProject(newProjectName, example);
     loading = `Loading pre-clipped OSM area ${example}`;
     await loadProject(projectID);
+    $mode = { mode: "add-neighbourhood" };
     loading = "";
   }
 </script>

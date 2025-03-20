@@ -121,9 +121,6 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
 }
 
 function afterProjectLoaded(projectID: ProjectID) {
-  mode.set({
-    mode: "pick-neighbourhood",
-  });
   // The stores are unused; the WASM API is used directly. This TS wrapper is unused.
   routeTool.set(
     new RouteTool(
