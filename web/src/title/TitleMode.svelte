@@ -87,6 +87,7 @@
   async function loadProjectPrompt(projectID: ProjectID, projectName: string) {
     loading = `Loading project ${projectName}`;
     await loadProject(projectID);
+    $mode = { mode: "pick-neighbourhood" };
     loading = "";
   }
 </script>

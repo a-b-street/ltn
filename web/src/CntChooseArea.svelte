@@ -11,7 +11,7 @@
   import { Popup } from "svelte-utils/map";
   import boundariesUrl from "../assets/cnt_boundaries.geojson?url";
   import { Link, prettyPrintStudyAreaName } from "./common";
-  import { projectStorage } from "./stores";
+  import { mode, projectStorage } from "./stores";
   import { loadProject } from "./title/loader";
 
   export let activityIndicatorText: string;
@@ -61,6 +61,7 @@
           studyAreaName,
         );
         await loadProject(projectID);
+        $mode = { mode: "add-neighbourhood" };
         created = true;
       } catch (e) {
         window.alert(e);

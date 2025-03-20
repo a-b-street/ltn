@@ -1,7 +1,7 @@
 <script lang="ts">
   import { stripPrefix, stripSuffix } from "../common";
   import type { StudyAreaName } from "../common/ProjectStorage";
-  import { database } from "../stores";
+  import { database, mode } from "../stores";
   import { loadProject } from "./loader";
 
   export let loading: string;
@@ -74,6 +74,7 @@
 
     let projectID = projectStorage.createProject(gj);
     await loadProject(projectID);
+    $mode = { mode: "pick-neighbourhood" };
     loading = "";
   }
 </script>
