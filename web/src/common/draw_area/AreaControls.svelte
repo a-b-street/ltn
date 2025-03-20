@@ -9,8 +9,9 @@
     LineLayer,
     MapEvents,
     Marker,
+    Popup,
   } from "svelte-maplibre";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../";
   import { routeTool, type Waypoint } from "./stores";
 
@@ -269,10 +270,9 @@
     on:mouseleave={() => (hoveringOnMarker = false)}
     on:dragstart={startDraggingWaypoint}
     on:dragend={() => (draggingMarker = false)}
-    zIndex={1}
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
-    <Popup openOn="hover">
+    <Popup openOn="hover" popupClass="edit-waypoint-popup">
       <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
         <li>
           <b>Click and drag</b>
@@ -356,5 +356,18 @@
 
   .hide {
     visibility: hidden;
+  }
+
+  :global(.edit-waypoint-popup) {
+    /* This solves two problems: 
+    * 1. The popup is too close to the marker
+    * 2. The popup obscures other points, making it hard to click on them.
+    *    To explain further: The popup remains visible when hovering over the marker **or**, once visible, the popup itself. 
+    *    As generic behavior, that makes sense to facilitate clicking on any interactive content within the popup.
+    *    However, the .edit-waypoint-popup doesn't have any interactive content in it, so we don't need that.
+    *    More important, say you have two nearby points positioned vertically, you start with the bottom point, presenting it's popup which covers the top point.
+    *    By adding this padding, there's a little gap between the marker and the popup, so the bottom popup clears while panning to the top point.
+    */
+    padding-bottom: 16px;
   }
 </style>
