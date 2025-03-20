@@ -52,7 +52,7 @@
         console.error(`Project ${projectID} from URL not found`);
         return;
       }
-      loadProjectPrompt(projectID, projectName);
+      projectLoadingScreen(projectID, projectName);
     } catch {
       console.error(`Error trying to fetch project from URL: ${projectID}`);
     }
@@ -84,7 +84,10 @@
     }
   }
 
-  async function loadProjectPrompt(projectID: ProjectID, projectName: string) {
+  async function projectLoadingScreen(
+    projectID: ProjectID,
+    projectName: string,
+  ) {
     loading = `Loading project ${projectName}`;
     await loadProject(projectID);
     $mode = { mode: "pick-neighbourhood" };
@@ -116,7 +119,8 @@
                 <li class="actionable-cell">
                   <h3>
                     <Link
-                      on:click={() => loadProjectPrompt(projectID, projectName)}
+                      on:click={() =>
+                        projectLoadingScreen(projectID, projectName)}
                     >
                       {projectName}
                     </Link>
