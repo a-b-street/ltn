@@ -14,7 +14,6 @@ import {
   backend,
   currentProjectID,
   map,
-  mode,
   projectStorage,
 } from "../stores";
 import { Backend } from "../wasm";
