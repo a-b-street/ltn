@@ -38,6 +38,12 @@ impl NeighbourhoodFixture {
         savefile_name: "dundee",
         is_cnt: true,
     };
+    pub const INVERNESS: Self = Self {
+        study_area_name: "LAD_Highland",
+        neighbourhood_name: "Longman",
+        savefile_name: "inverness",
+        is_cnt: true,
+    };
 }
 
 impl NeighbourhoodFixture {
@@ -128,8 +134,10 @@ impl NeighbourhoodFixture {
     }
 
     pub fn bench_sample_size(&self) -> usize {
-        if self.study_area_name == Self::STRASBOURG.study_area_name {
-            // Strasbourg is big and slow, so we bench it fewer times
+        if self.study_area_name == Self::STRASBOURG.study_area_name
+            || self.study_area_name == Self::INVERNESS.study_area_name
+        {
+            // Some study areas are big and slow, so we bench them fewer times
             10
         } else {
             100
