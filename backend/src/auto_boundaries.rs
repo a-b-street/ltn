@@ -2,7 +2,7 @@ use crate::boundary_stats::BoundaryStats;
 use crate::geo_helpers::buffer_polygon;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::{Coord, Intersects, LineString, MultiPolygon, Polygon};
+use geo::{Coord, LineString, MultiPolygon, Polygon};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
@@ -12,12 +12,10 @@ impl MapModel {
     pub fn generated_boundaries(&self) -> FeatureCollection {
         let mut features = Vec::new();
         let mut severances = Vec::new();
-        let mut road_severances = Vec::new();
 
         for road in &self.roads {
             if road.is_severance() {
                 severances.push(road.linestring.clone());
-                road_severances.push(road.linestring.clone());
             }
         }
 
@@ -34,17 +32,9 @@ impl MapModel {
             .into_iter()
             .flat_map(|boundary_polygon| split_polygon(boundary_polygon, &severances))
         {
-            // TODO This is expensive; could this info somehow be retained?
-            let touches_big_road = boundary_touches_any(&polygon, &road_severances);
-            let touches_railway = boundary_touches_any(&polygon, &self.railways);
-            let touches_waterway = boundary_touches_any(&polygon, &self.waterways);
-
             let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
             let generated_boundary = GeneratedBoundary {
                 geometry: polygon,
-                touches_big_road,
-                touches_railway,
-                touches_waterway,
                 boundary_stats,
             };
 
@@ -96,9 +86,6 @@ pub struct GeneratedBoundary {
         deserialize_with = "geojson::de::deserialize_geometry"
     )]
     pub geometry: Polygon,
-    pub touches_big_road: bool,
-    pub touches_railway: bool,
-    pub touches_waterway: bool,
     #[serde(flatten)]
     pub boundary_stats: BoundaryStats,
 }
@@ -142,11 +129,4 @@ fn to_geo_linestring(pts: Vec<[f64; 2]>) -> LineString {
 
 fn to_i_overlay_contour(line_string: &LineString) -> Vec<[f64; 2]> {
     line_string.coords().map(|c| [c.x, c.y]).collect()
-}
-
-fn boundary_touches_any(polygon: &Polygon, linestrings: &Vec<LineString>) -> bool {
-    // TODO At least consider an rtree to prune!
-    linestrings
-        .iter()
-        .any(|ls| ls.intersects(polygon.exterior()))
 }
