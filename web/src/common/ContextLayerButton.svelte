@@ -10,7 +10,7 @@
   class="secondary"
   on:click={() => (show = !show)}
 >
-  <input type="checkbox" bind:checked={show} />
+  <input style="aspect-ratio: 1.0" type="checkbox" bind:checked={show} />
   {label}
   {#if $$slots.help}
     <HelpButton color="var(--pico-secondary-inverse)">
