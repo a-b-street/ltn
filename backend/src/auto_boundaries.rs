@@ -2,10 +2,11 @@ use crate::boundary_stats::BoundaryStats;
 use crate::geo_helpers::buffer_polygon;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::{Area, Coord, LineString, MultiPolygon, Polygon};
+use geo::{Area, BoundingRect, Coord, LineString, MultiPolygon, Polygon};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
+use rstar::RTree;
 use serde::{Deserialize, Serialize};
 
 impl MapModel {
@@ -25,11 +26,18 @@ impl MapModel {
             .chain(self.waterways.iter());
 
         let boundary_mercator = self.mercator.to_mercator(&self.boundary_wgs84);
+        let severance_rtree = RTree::bulk_load(severances.cloned().collect());
 
-        for polygon in boundary_mercator
-            .into_iter()
-            .flat_map(|boundary_polygon| split_polygon(boundary_polygon, severances.clone()))
-        {
+        for polygon in boundary_mercator.into_iter().flat_map(|boundary_polygon| {
+            let Some(envelope) = boundary_polygon.bounding_rect().map(|rect| {
+                rstar::AABB::from_corners(geo::Point(rect.min()), geo::Point(rect.max()))
+            }) else {
+                debug_assert!(false, "boundary polygon was unexpectedly empty");
+                return vec![];
+            };
+            let severance_candidates = severance_rtree.locate_in_envelope_intersecting(&envelope);
+            split_polygon(boundary_polygon, severance_candidates)
+        }) {
             let area_meters_2 = polygon.unsigned_area();
 
             // Discard small areas.
