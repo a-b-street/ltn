@@ -38,7 +38,7 @@ impl MapModel {
             let severance_candidates = severance_rtree.locate_in_envelope_intersecting(&envelope);
             split_polygon(boundary_polygon, severance_candidates)
         }) {
-            let area_meters_2 = polygon.unsigned_area();
+            let area_km_2 = polygon.unsigned_area() / 1000. / 1000.;
 
             // Discard small areas.
             //
@@ -47,8 +47,8 @@ impl MapModel {
             // In general, it's better to err on the side of a "too low", threshold, the downside of which is primarily the visual distraction of tiny irrelevant sliver areas.
             // Whereas having this number "too high" will potentially preclude more areas someone wants to choose.
             // .0025km (50m x 50m)
-            let min_area_meters = 2_500.0;
-            if area_meters_2 < min_area_meters {
+            let min_area_km_2 = 0.0025;
+            if area_km_2 < min_area_km_2 {
                 continue;
             }
             let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
