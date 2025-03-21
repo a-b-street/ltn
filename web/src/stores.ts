@@ -92,7 +92,6 @@ export let routePtA: Writable<LngLat> = writable(new LngLat(0, 0));
 export let routePtB: Writable<LngLat> = writable(new LngLat(0, 0));
 export let oneDestination: Writable<LngLat> = writable(new LngLat(0, 0));
 export let mainRoadPenalty: Writable<number> = writable(1.0);
-export let fastSample: Writable<boolean> = writable(true);
 // A way for different components to know when internal app state has changed
 // and they might need to rerender
 export let mutationCounter: Writable<number> = writable(1);
@@ -107,6 +106,10 @@ export let showExistingFiltersAndTRs = writable(true);
 export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
   writable("shortcuts");
 export let thickRoadsForShortcuts = writable(false);
+
+// Settings for impact prediction
+export let fastSample: Writable<boolean> = writable(true);
+export let minImpactCount: Writable<number> = writable(500);
 
 export function saveCurrentProject() {
   const projectID = get(currentProjectID)!;
