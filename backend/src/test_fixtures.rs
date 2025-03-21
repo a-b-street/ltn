@@ -1,6 +1,7 @@
 use crate::boundary_stats::ContextData;
 use crate::map_model::ProjectDetails;
 use crate::neighbourhood::NeighbourhoodBoundary;
+use crate::od::DemandModel;
 use crate::{MapModel, Neighbourhood};
 use anyhow::{Context, Result};
 use geojson::{Feature, FeatureCollection};
@@ -54,7 +55,7 @@ impl NeighbourhoodFixture {
         Ok((neighbourhood, map))
     }
 
-    pub fn pbf_path(&self) -> String {
+    fn pbf_path(&self) -> String {
         if self.is_cnt {
             format!("../web/public/cnt_osm/{}.osm.pbf", self.study_area_name)
         } else {
@@ -62,7 +63,7 @@ impl NeighbourhoodFixture {
         }
     }
 
-    pub fn boundary_path(&self) -> String {
+    fn boundary_path(&self) -> String {
         if self.is_cnt {
             format!(
                 "../web/public/cnt_boundaries/{}.geojson",
@@ -73,7 +74,7 @@ impl NeighbourhoodFixture {
         }
     }
 
-    pub fn context_data_path(&self) -> Option<String> {
+    fn context_data_path(&self) -> Option<String> {
         if self.is_cnt {
             Some(format!(
                 "../web/public/cnt_prioritization/context_{}.bin",
@@ -84,11 +85,26 @@ impl NeighbourhoodFixture {
         }
     }
 
-    pub fn context_data(&self) -> Option<ContextData> {
+    fn context_data(&self) -> Option<ContextData> {
+        if !self.is_cnt {
+            return None;
+        }
         let path = self.context_data_path()?;
         let context_data_bytes =
             std::fs::read(&path).expect(&format!("unable to read context_data: {path}"));
         Some(bincode::deserialize(&context_data_bytes).expect("unable to deserialize context_data"))
+    }
+
+    fn demand_data(&self) -> Option<DemandModel> {
+        if !self.is_cnt {
+            return None;
+        }
+        let path = format!(
+            "../web/public/cnt_demand/demand_{}.bin",
+            self.study_area_name
+        );
+        let bytes = std::fs::read(&path).expect(&format!("unable to read demand_data: {path}"));
+        Some(bincode::deserialize(&bytes).expect("unable to deserialize demand_data"))
     }
 
     pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
@@ -110,7 +126,7 @@ impl NeighbourhoodFixture {
             other => bail!("unexpected geometry type {other:?}"),
         };
         Ok(move || {
-            let demand = None;
+            let demand = self.demand_data();
             let context_data = self.context_data();
             let project_details = ProjectDetails {
                 project_name: self.savefile_name.to_string(),
@@ -141,7 +157,7 @@ impl NeighbourhoodFixture {
         Ok(savefile)
     }
 
-    pub fn savefile_path(&self) -> String {
+    fn savefile_path(&self) -> String {
         format!(
             "../tests/{savefile_name}.geojson",
             savefile_name = self.savefile_name
