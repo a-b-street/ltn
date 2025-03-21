@@ -265,23 +265,11 @@ export class Backend {
     return JSON.parse(this.inner.impactToOneDestination(pt.lng, pt.lat));
   }
 
-  predictImpact(
-    fastSample: boolean,
-  ): FeatureCollection<
-    LineString,
-    { id: number; before: number; after: number }
-  > & { max_count: number } {
+  predictImpact(fastSample: boolean): Impact {
     return JSON.parse(this.inner.predictImpact(fastSample));
   }
 
-  getImpactsOnRoad(
-    road: number,
-    fastSample: boolean,
-  ): Array<{
-    count: number;
-    before: Feature<LineString, { kind: "before" }> | null;
-    after: Feature<LineString, { kind: "after" }> | null;
-  }> {
+  getImpactsOnRoad(road: number, fastSample: boolean): ImpactOnRoad[] {
     return JSON.parse(this.inner.getImpactsOnRoad(road, fastSample)).map(
       (x: any) => {
         let [count, before, after] = x;
@@ -320,6 +308,17 @@ export class Backend {
   getPOIs(): FeatureCollection<Point, { name?: string; kind: string }> {
     return JSON.parse(this.inner.getPOIs());
   }
+}
+
+export type Impact = FeatureCollection<
+  LineString,
+  { id: number; before: number; after: number }
+> & { max_count: number };
+
+export interface ImpactOnRoad {
+  count: number;
+  before: Feature<LineString, { kind: "before" }> | null;
+  after: Feature<LineString, { kind: "after" }> | null;
 }
 
 type TurnRestrictionKind =

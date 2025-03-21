@@ -1,12 +1,15 @@
 <script lang="ts">
   import type { Feature, FeatureCollection } from "geojson";
+  import { onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { Loading } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, fastSample, mode, returnToChooseProject } from "./stores";
+  import type { ImpactOnRoad } from "./wasm";
 
   export let road: Feature;
 
@@ -14,15 +17,27 @@
   let props = road.properties!;
   props.kind = "focus";
 
-  let routes = $backend!.getImpactsOnRoad(props.id, $fastSample);
+  let routes: ImpactOnRoad[] = [];
   let idx = 0;
 
-  if (routes.length == 0) {
-    window.alert(
-      "No routes over this road change. (This is a bug in progress of being fixed.)",
-    );
-    $mode = { mode: "predict-impact" };
-  }
+  let loading = "Finding changes to this road";
+  onMount(async () => {
+    // Render the loading screen before starting the calculation. Unsure why Svelte tick() or one frame doesn't work.
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+
+    routes = $backend!.getImpactsOnRoad(props.id, $fastSample);
+    loading = "";
+    if (routes.length == 0) {
+      window.alert(
+        "No routes over this road change. (This is a bug in progress of being fixed.)",
+      );
+      $mode = { mode: "predict-impact" };
+    }
+  });
 
   function gj(idx: number): FeatureCollection {
     return {
@@ -48,6 +63,8 @@
     return gjPosition(pts[pts.length - 1]);
   }
 </script>
+
+<Loading {loading} />
 
 <SplitComponent>
   <div slot="top">
