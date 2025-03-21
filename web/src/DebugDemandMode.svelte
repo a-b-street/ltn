@@ -84,15 +84,17 @@
             Pick neighbourhood
           </Link>
         </li>
-        <li>Debug demand model</li>
+        <li>Explore origin/destination demand data</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
+    <BackButton on:click={() => ($mode = { mode: "predict-impact" })} />
 
-    <p>{gj.features.length.toLocaleString()} zones</p>
+    <!-- TODO Plumb through metadata about the sources used -->
+
+    <p>Trips begin and end in {gj.features.length.toLocaleString()} zones</p>
 
     <label>
       Trips from
