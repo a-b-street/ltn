@@ -436,27 +436,26 @@ impl LTN {
 
     /// Returns GJ with a LineString per road, with before/after counts
     #[wasm_bindgen(js_name = predictImpact)]
-    pub fn predict_impact(&mut self) -> Result<String, JsValue> {
+    pub fn predict_impact(&mut self, fast_sample: bool) -> Result<String, JsValue> {
         self.map.rebuild_router(1.0);
         let mut impact = self.map.impact.take().unwrap();
-        let out = impact.recalculate(&self.map);
+        let out = impact.recalculate(&self.map, fast_sample);
         self.map.impact = Some(impact);
         Ok(serde_json::to_string(&out).map_err(err_to_js)?)
     }
 
     /// Returns a JSON blob [{before, after}], with before and after being LineStrings
     #[wasm_bindgen(js_name = getImpactsOnRoad)]
-    pub fn get_impacts_on_road(&self, road: usize) -> Result<String, JsValue> {
+    pub fn get_impacts_on_road(&self, road: usize, fast_sample: bool) -> Result<String, JsValue> {
         // Shouldn't need to recalculate impact
-        Ok(serde_json::to_string(
-            &self
-                .map
-                .impact
-                .as_ref()
-                .unwrap()
-                .get_impacts_on_road(&self.map, RoadID(road)),
+        Ok(
+            serde_json::to_string(&self.map.impact.as_ref().unwrap().get_impacts_on_road(
+                &self.map,
+                RoadID(road),
+                fast_sample,
+            ))
+            .map_err(err_to_js)?,
         )
-        .map_err(err_to_js)?)
     }
 
     #[wasm_bindgen(js_name = getAllNeighbourhoods)]
