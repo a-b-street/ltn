@@ -86,9 +86,6 @@ impl NeighbourhoodFixture {
     }
 
     fn context_data(&self) -> Option<ContextData> {
-        if !self.is_cnt {
-            return None;
-        }
         let path = self.context_data_path()?;
         let context_data_bytes =
             std::fs::read(&path).expect(&format!("unable to read context_data: {path}"));

@@ -122,7 +122,7 @@
         {...layerId("predict-impact-outline")}
         filter={[
           ">=",
-          ["min", ["get", "before"], ["get", "after"]],
+          ["max", ["get", "before"], ["get", "after"]],
           $minImpactCount,
         ]}
         paint={{
@@ -143,7 +143,7 @@
         {...layerId("predict-impact")}
         filter={[
           ">=",
-          ["min", ["get", "before"], ["get", "after"]],
+          ["max", ["get", "before"], ["get", "after"]],
           $minImpactCount,
         ]}
         paint={{
