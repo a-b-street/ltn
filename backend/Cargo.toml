@@ -52,6 +52,10 @@ name = "build_neighbourhood"
 harness = false
 
 [[bench]]
+name = "impact"
+harness = false
+
+[[bench]]
 name = "router"
 harness = false
 
