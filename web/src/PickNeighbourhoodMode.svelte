@@ -183,11 +183,6 @@
               Debug intersections
             </Link>
           </li>
-          <li>
-            <Link on:click={() => ($mode = { mode: "debug-demand" })}>
-              Debug demand
-            </Link>
-          </li>
         {/if}
       </ul>
     </nav>

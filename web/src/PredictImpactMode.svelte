@@ -46,8 +46,11 @@
     <p>
       This mode estimates the impact of all your changes on traffic around the
       entire area. It's based on many assumptions and must be interpreted very
-      carefully.
+      carefully. <Link on:click={() => ($mode = { mode: "debug-demand" })}>
+        Explore the origin/destination demand data used
+      </Link>
     </p>
+
     <p>
       Red roads have increased traffic, and green roads have decreased. If
       hovering on a road doesn't show anything, there was no change there. Click
