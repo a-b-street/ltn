@@ -4,7 +4,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn benchmark_build_map_model(c: &mut Criterion) {
     for (fixture, expected_population_zones, expected_generated_boundaries) in [
-        (NeighbourhoodFixture::INVERNESS, 325, 9513),
+        (NeighbourhoodFixture::INVERNESS, 325, 8958),
         (NeighbourhoodFixture::DUNDEE, 200, 240),
     ] {
         // Do the file i/o (reading OSM.xml) outside of the bench loop
