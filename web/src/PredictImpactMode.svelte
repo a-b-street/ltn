@@ -6,7 +6,13 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link, SequentialLegend } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, fastSample, mode, returnToChooseProject } from "./stores";
+  import {
+    backend,
+    fastSample,
+    minImpactCount,
+    mode,
+    returnToChooseProject,
+  } from "./stores";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
@@ -65,6 +71,10 @@
       Thicker roads have more traffic after edits, relative to the max count for
       any road: {impactGj.max_count.toLocaleString()}
     </p>
+    <label>
+      Only show roads with at least this much traffic before or after
+      <input type="number" min={0} bind:value={$minImpactCount} />
+    </label>
 
     <SequentialLegend
       colorScale={divergingScale}
@@ -87,6 +97,11 @@
     <GeoJSON data={impactGj} generateId>
       <LineLayer
         {...layerId("predict-impact-outline")}
+        filter={[
+          ">=",
+          ["min", ["get", "before"], ["get", "after"]],
+          $minImpactCount,
+        ]}
         paint={{
           "line-width": [
             "interpolate",
@@ -103,6 +118,11 @@
 
       <LineLayer
         {...layerId("predict-impact")}
+        filter={[
+          ">=",
+          ["min", ["get", "before"], ["get", "after"]],
+          $minImpactCount,
+        ]}
         paint={{
           "line-width": [
             "interpolate",
