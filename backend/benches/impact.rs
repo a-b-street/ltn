@@ -14,14 +14,16 @@ fn benchmark_impact(c: &mut Criterion) {
             map.impact = Some(impact);
         }
 
-        c.bench_function("predict impact", |b| {
-            b.iter(|| {
-                let mut impact = map.impact.take().unwrap();
-                impact.invalidate_after_edits();
-                impact.recalculate(&map, fast_sample);
-                map.impact = Some(impact);
-            })
-        });
+        c.benchmark_group(fixture.savefile_name)
+            .sample_size(10)
+            .bench_function("predict impact", |b| {
+                b.iter(|| {
+                    let mut impact = map.impact.take().unwrap();
+                    impact.invalidate_after_edits();
+                    impact.recalculate(&map, fast_sample);
+                    map.impact = Some(impact);
+                })
+            });
     }
 }
 
