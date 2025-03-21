@@ -6,7 +6,7 @@
   import BackButton from "./BackButton.svelte";
   import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { backend, fastSample, mode, returnToChooseProject } from "./stores";
 
   export let road: Feature;
 
@@ -14,7 +14,7 @@
   let props = road.properties!;
   props.kind = "focus";
 
-  let routes = $backend!.getImpactsOnRoad(props.id);
+  let routes = $backend!.getImpactsOnRoad(props.id, $fastSample);
   let idx = 0;
 
   if (routes.length == 0) {
@@ -78,31 +78,33 @@
       {Math.round((100 * props.after) / props.before)}% of the original traffic.
     </p>
 
-    <PrevNext list={routes} bind:idx />
+    {#if routes.length > 0}
+      <PrevNext list={routes} bind:idx />
 
-    {#if routes[idx].count > 1}
-      <p>
-        The routes are currently sampled, to speed things up. This one sample
-        route represents {routes[idx].count.toLocaleString()} trips between the same
-        points.
-      </p>
-      <i>
-        Note: if these don't sum to the total above, that's likely a known
-        software bug
-      </i>
-    {/if}
+      {#if routes[idx].count > 1}
+        <p>
+          The routes are currently sampled, to speed things up. This one sample
+          route represents {routes[idx].count.toLocaleString()} trips between the
+          same points.
+        </p>
+        <i>
+          Note: if these don't sum to the total above, that's likely a known
+          software bug
+        </i>
+      {/if}
 
-    {#if routes[idx].before == null}
-      <p style:color="red">
-        No possible route before changes (
-        <i>This is usually a known software bug</i>
-      </p>
-    {/if}
-    {#if routes[idx].after == null}
-      <p style:color="blue">
-        No possible route after changes (
-        <i>This is usually a known software bug</i>
-      </p>
+      {#if routes[idx].before == null}
+        <p style:color="red">
+          No possible route before changes (
+          <i>This is usually a known software bug</i>
+        </p>
+      {/if}
+      {#if routes[idx].after == null}
+        <p style:color="blue">
+          No possible route after changes (
+          <i>This is usually a known software bug</i>
+        </p>
+      {/if}
     {/if}
   </div>
 

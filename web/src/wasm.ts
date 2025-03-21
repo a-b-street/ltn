@@ -265,22 +265,29 @@ export class Backend {
     return JSON.parse(this.inner.impactToOneDestination(pt.lng, pt.lat));
   }
 
-  predictImpact(): FeatureCollection<
+  predictImpact(
+    fastSample: boolean,
+  ): FeatureCollection<
     LineString,
     { id: number; before: number; after: number }
   > & { max_count: number } {
-    return JSON.parse(this.inner.predictImpact());
+    return JSON.parse(this.inner.predictImpact(fastSample));
   }
 
-  getImpactsOnRoad(road: number): Array<{
+  getImpactsOnRoad(
+    road: number,
+    fastSample: boolean,
+  ): Array<{
     count: number;
     before: Feature<LineString, { kind: "before" }> | null;
     after: Feature<LineString, { kind: "after" }> | null;
   }> {
-    return JSON.parse(this.inner.getImpactsOnRoad(road)).map((x: any) => {
-      let [count, before, after] = x;
-      return { count, before, after };
-    });
+    return JSON.parse(this.inner.getImpactsOnRoad(road, fastSample)).map(
+      (x: any) => {
+        let [count, before, after] = x;
+        return { count, before, after };
+      },
+    );
   }
 
   getAllNeighbourhoods(): FeatureCollection<

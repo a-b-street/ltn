@@ -31,22 +31,19 @@ impl DemandModel {
         }
     }
 
-    pub fn make_requests(&self, map: &MapModel) -> Vec<(RoadID, RoadID, usize)> {
+    pub fn make_requests(&self, map: &MapModel, fast_sample: bool) -> Vec<(RoadID, RoadID, usize)> {
         info!(
-            "Making requests from {} zones and {} desire lines",
+            "Making requests from {} zones and {} desire lines, sampling = {fast_sample}",
             self.zones.len(),
             self.desire_lines.len()
         );
-
-        // TODO Plumb through UI
-        // To speed up the impact calculation, how many specific requests per (zone1, zone2)? If
-        // true, just do one, but weight it by count.
-        let fast_sample = true;
 
         let mut rng = WyRand::new_seed(42);
         let mut requests = Vec::new();
 
         for (zone1, zone2, raw_count) in &self.desire_lines {
+            // To speed up the impact calculation, how many specific requests per (zone1, zone2)? If
+            // true, just do one, but weight it by count.
             let (iterations, trip_count) = if fast_sample {
                 (1, *raw_count)
             } else {

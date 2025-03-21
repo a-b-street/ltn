@@ -6,13 +6,13 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, Link, SequentialLegend } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { backend, fastSample, mode, returnToChooseProject } from "./stores";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
   let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
 
-  let impactGj = $backend!.predictImpact();
+  $: impactGj = $backend!.predictImpact($fastSample);
   let neighbourhoods = $backend!.getAllNeighbourhoods();
 
   let minRoadWidth = 3;
@@ -50,6 +50,11 @@
         Explore the origin/destination demand data used
       </Link>
     </p>
+
+    <label>
+      <input type="checkbox" bind:checked={$fastSample} />
+      Calculate quickly and less accurately
+    </label>
 
     <p>
       Red roads have increased traffic, and green roads have decreased. If

@@ -54,6 +54,7 @@ pub struct MapModel {
     // Every road is filled out
     pub travel_flows: BTreeMap<RoadID, TravelFlow>,
 
+    // Not optional, but wrapped for the borrow checker
     pub impact: Option<Impact>,
     pub demand: Option<DemandModel>,
 

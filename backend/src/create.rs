@@ -251,7 +251,7 @@ pub fn create_from_osm(
 
         travel_flows,
 
-        impact: None,
+        impact: Some(Impact::default()),
         demand: None,
 
         undo_stack: Vec::new(),
@@ -261,10 +261,7 @@ pub fn create_from_osm(
     };
     if let Some(mut demand) = demand {
         demand.finish_loading(&map.mercator);
-        map.impact = Some(Impact::new(&map, Some(&demand)));
         map.demand = Some(demand);
-    } else {
-        map.impact = Some(Impact::new(&map, None));
     }
 
     let graph = GraphSubset {

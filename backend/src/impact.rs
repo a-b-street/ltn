@@ -9,26 +9,22 @@ use crate::{od, MapModel, RoadID};
 /// see how traffic changes across roads in the whole map. This works by finding the best route
 /// before and after changes for every origin/destination "OD" pairs, then counting routes per
 /// road.
+#[derive(Default)]
 pub struct Impact {
     // (r1, r2, count) -- `count` identical trips from `r1` to `r2`
-    requests: Vec<(RoadID, RoadID, usize)>,
+    sampled_requests: Vec<(RoadID, RoadID, usize)>,
+    all_requests: Vec<(RoadID, RoadID, usize)>,
 
+    // Are the two sets of counts calculated with fast_sample or not?
+    last_fast_sample: bool,
     // TODO Can use Vec for perf
     counts_before: HashMap<RoadID, usize>,
     counts_after: HashMap<RoadID, usize>,
 }
 
 impl Impact {
-    /// Calculates `requests` only
-    pub fn new(map: &MapModel, demand: Option<&od::DemandModel>) -> Self {
-        Self {
-            requests: match demand {
-                Some(demand) => demand.make_requests(map),
-                None => od::synthetic_od_requests(map),
-            },
-            counts_before: HashMap::new(),
-            counts_after: HashMap::new(),
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn invalidate_after_edits(&mut self) {
@@ -37,19 +33,48 @@ impl Impact {
 
     /// Returns a feature per road, with `before` and `after` counts, and a `max_count` foreign
     /// member
-    pub fn recalculate(&mut self, map: &MapModel) -> FeatureCollection {
-        if self.counts_before.is_empty() {
-            info!("Calculating impacts before edits");
-            self.counts_before = map.router_before.od_to_counts(&self.requests);
+    pub fn recalculate(&mut self, map: &MapModel, fast_sample: bool) -> FeatureCollection {
+        // Which requests are we using?
+        let requests = if fast_sample {
+            if self.sampled_requests.is_empty() {
+                info!("Calculating a fast sample of requests");
+                self.sampled_requests = match &map.demand {
+                    Some(demand) => demand.make_requests(map, fast_sample),
+                    None => od::synthetic_od_requests(map),
+                };
+            }
+            &self.sampled_requests
+        } else {
+            if self.all_requests.is_empty() {
+                info!("Calculating all requests");
+                self.all_requests = match &map.demand {
+                    Some(demand) => demand.make_requests(map, fast_sample),
+                    None => od::synthetic_od_requests(map),
+                };
+            }
+            &self.all_requests
+        };
+
+        if self.counts_before.is_empty() || fast_sample != self.last_fast_sample {
+            info!(
+                "Calculating impacts before edits ({} requests)",
+                requests.len()
+            );
+            self.counts_before = map.router_before.od_to_counts(requests);
+            self.last_fast_sample = fast_sample;
         }
 
-        if self.counts_after.is_empty() {
-            info!("Calculating impacts after edits");
+        if self.counts_after.is_empty() || fast_sample != self.last_fast_sample {
+            info!(
+                "Calculating impacts after edits ({} requests)",
+                requests.len()
+            );
             self.counts_after = map
                 .router_after
                 .as_ref()
                 .expect("need to rebuild_router")
-                .od_to_counts(&self.requests);
+                .od_to_counts(requests);
+            self.last_fast_sample = fast_sample;
         }
 
         let mut features = Vec::new();
@@ -87,13 +112,20 @@ impl Impact {
         &self,
         map: &MapModel,
         road: RoadID,
+        fast_sample: bool,
     ) -> Vec<(usize, Option<Feature>, Option<Feature>)> {
+        let requests = if fast_sample {
+            &self.sampled_requests
+        } else {
+            &self.all_requests
+        };
+
         let mut changed_paths = Vec::new();
 
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
-        for (r1, r2, count) in &self.requests {
+        for (r1, r2, count) in requests {
             let route1 = map.router_before.route_from_roads(*r1, *r2);
             let route2 = router_after.route_from_roads(*r1, *r2);
             let crosses1 = route1
