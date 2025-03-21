@@ -87,13 +87,13 @@ impl Impact {
         &self,
         map: &MapModel,
         road: RoadID,
-    ) -> Vec<(Option<Feature>, Option<Feature>)> {
+    ) -> Vec<(usize, Option<Feature>, Option<Feature>)> {
         let mut changed_paths = Vec::new();
 
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
-        for (r1, r2, _) in &self.requests {
+        for (r1, r2, count) in &self.requests {
             let route1 = map.router_before.route_from_roads(*r1, *r2);
             let route2 = router_after.route_from_roads(*r1, *r2);
             let crosses1 = route1
@@ -116,7 +116,7 @@ impl Impact {
                     f.set_property("kind", "after");
                     f
                 });
-                changed_paths.push((f1, f2));
+                changed_paths.push((*count, f1, f2));
             }
         }
 
