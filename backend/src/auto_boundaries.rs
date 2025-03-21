@@ -59,6 +59,12 @@ impl MapModel {
             if area_km_2 < min_area_km_2 {
                 continue;
             }
+
+            let max_area_km_2 = 10.;
+            if area_km_2 > max_area_km_2 {
+                continue;
+            }
+
             let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
             let generated_boundary = GeneratedBoundary {
                 geometry: polygon,
