@@ -36,13 +36,21 @@ impl BoundaryStats {
             //                  than the computed simd will be:          sum = 85
             // TODO: maybe also introduce an overall RTree to get intersection candidates quickly
             for population_zone in &context_data.population_zones {
-                if population_zone
-                    .prepared_geometry
-                    .relate(&prepared_polygon)
-                    .is_intersects()
-                {
-                    let overlap = polygon.intersection(&population_zone.population_zone.geometry);
-                    let overlap_area = overlap.unsigned_area();
+                let de9im = population_zone.prepared_geometry.relate(&prepared_polygon);
+                if de9im.is_intersects() {
+                    let overlap_area = if de9im.is_within() {
+                        // population zone is entirely inside the boundary.
+                        population_zone.population_zone.geometry.unsigned_area()
+                    } else if de9im.is_contains() {
+                        // boundary is entirely inside the population zone
+                        area_meters
+                    } else {
+                        // only partial overlap
+                        let overlap =
+                            polygon.intersection(&population_zone.population_zone.geometry);
+                        overlap.unsigned_area()
+                    };
+
                     let ratio_in_boundary = overlap_area / area_meters;
                     simd +=
                         ratio_in_boundary * population_zone.population_zone.imd_percentile as f64;
