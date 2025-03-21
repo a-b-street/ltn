@@ -1,10 +1,7 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, Polygon } from "geojson";
   import { Trash2 } from "lucide-svelte";
-  import type {
-    DataDrivenPropertyValueSpecification,
-    ExpressionSpecification,
-  } from "maplibre-gl";
+  import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import { onMount } from "svelte";
   import {
     FillLayer,

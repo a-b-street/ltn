@@ -27,22 +27,24 @@
   function gj(idx: number): FeatureCollection {
     return {
       type: "FeatureCollection" as const,
-      features: [routes[idx][0], routes[idx][1], road].filter((f) => f != null),
+      features: [routes[idx].before, routes[idx].after, road].filter(
+        (f) => f != null,
+      ),
     };
   }
 
   function startPos(idx: number): [number, number] {
-    if (routes[idx][0] != null) {
-      return gjPosition(routes[idx][0].geometry.coordinates[0]);
+    if (routes[idx].before != null) {
+      return gjPosition(routes[idx].before.geometry.coordinates[0]);
     }
-    return gjPosition(routes[idx][1]!.geometry.coordinates[0]);
+    return gjPosition(routes[idx].after!.geometry.coordinates[0]);
   }
 
   function endPos(idx: number): [number, number] {
     let pts =
-      routes[idx][0] != null
-        ? routes[idx][0].geometry.coordinates
-        : routes[idx][1]!.geometry.coordinates;
+      routes[idx].before != null
+        ? routes[idx].before.geometry.coordinates
+        : routes[idx].after!.geometry.coordinates;
     return gjPosition(pts[pts.length - 1]);
   }
 </script>
@@ -76,20 +78,27 @@
       {Math.round((100 * props.after) / props.before)}% of the original traffic.
     </p>
 
-    <p>
-      Note: The routes are currently sampled, to speed things up. This one
-      sample route may represent many trips between the same points.
-    </p>
-
     <PrevNext list={routes} bind:idx />
 
-    {#if routes[idx][0] == null}
+    {#if routes[idx].count > 1}
+      <p>
+        The routes are currently sampled, to speed things up. This one sample
+        route represents {routes[idx].count.toLocaleString()} trips between the same
+        points.
+      </p>
+      <i>
+        Note: if these don't sum to the total above, that's likely a known
+        software bug
+      </i>
+    {/if}
+
+    {#if routes[idx].before == null}
       <p style:color="red">
         No possible route before changes (
         <i>This is usually a known software bug</i>
       </p>
     {/if}
-    {#if routes[idx][1] == null}
+    {#if routes[idx].after == null}
       <p style:color="blue">
         No possible route after changes (
         <i>This is usually a known software bug</i>
