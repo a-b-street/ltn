@@ -29,6 +29,14 @@ impl MapModel {
         let severance_rtree = RTree::bulk_load(severances.cloned().collect());
 
         for polygon in boundary_mercator.into_iter().flat_map(|boundary_polygon| {
+            let area_km_2 = boundary_polygon.unsigned_area() / 1000. / 1000.;
+            if area_km_2 < 16.0 {
+                info!("skipping small island: {area_km_2} km^2");
+                return vec![];
+            } else {
+                info!("Continuing with larger land mass: {area_km_2} km^2");
+            }
+
             let Some(envelope) = boundary_polygon.bounding_rect().map(|rect| {
                 rstar::AABB::from_corners(geo::Point(rect.min()), geo::Point(rect.max()))
             }) else {
