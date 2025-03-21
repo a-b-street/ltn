@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { Loading } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -13,12 +14,19 @@
     mode,
     returnToChooseProject,
   } from "./stores";
+  import type { Impact } from "./wasm";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
   let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
 
-  $: impactGj = $backend!.predictImpact($fastSample);
+  let loading = "";
+  let impactGj: Impact = {
+    type: "FeatureCollection" as const,
+    features: [],
+    max_count: 1,
+  };
+  $: recalculate($fastSample);
   let neighbourhoods = $backend!.getAllNeighbourhoods();
 
   let minRoadWidth = 3;
@@ -27,7 +35,22 @@
   function pickRoad(f: Feature) {
     $mode = { mode: "impact-detail", road: f };
   }
+
+  async function recalculate(fastSample: boolean) {
+    loading = "Calculating impact";
+    // Render the loading screen before starting the calculation. Unsure why Svelte tick() or one frame doesn't work.
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+
+    impactGj = $backend!.predictImpact(fastSample);
+    loading = "";
+  }
 </script>
+
+<Loading {loading} />
 
 <SplitComponent>
   <div slot="top">
