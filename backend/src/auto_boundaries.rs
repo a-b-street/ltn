@@ -2,7 +2,7 @@ use crate::boundary_stats::BoundaryStats;
 use crate::geo_helpers::buffer_polygon;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::{Area, BoundingRect, Coord, Intersects, LineString, MultiPolygon, Polygon, Relate};
+use geo::{Area, BoundingRect, Coord, LineString, MultiPolygon, Polygon, Relate};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
@@ -28,9 +28,8 @@ impl MapModel {
                 if let Some(context_data) = self.context_data.as_ref() {
                     context_data
                         .settlements
-                        .bounding_rect()
-                        .unwrap()
-                        .intersects(&line_string.bounding_rect().unwrap())
+                        .relate(*line_string)
+                        .is_intersects()
                 } else {
                     true
                 }
@@ -71,6 +70,13 @@ impl MapModel {
             // .0025km (50m x 50m)
             let min_area_km_2 = 0.0025;
             if area_km_2 < min_area_km_2 {
+                continue;
+            }
+
+            // Truly huge areas typically indicate "all the non-settlement" land - a negative left
+            // behind by removing all the rural areas.
+            let max_area_km2 = 50.0;
+            if area_km_2 > max_area_km2 {
                 continue;
             }
             if let Some(context_data) = self.context_data.as_ref() {
