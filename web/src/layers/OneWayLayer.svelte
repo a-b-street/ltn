@@ -24,6 +24,7 @@
   paint={{
     "icon-opacity": ["case", ["get", "travel_flow_edited"], 1.0, 0.5],
   }}
+  minzoom={13}
   interactive={false}
   hoverCursor="pointer"
 />

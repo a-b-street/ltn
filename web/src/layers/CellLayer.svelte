@@ -23,6 +23,7 @@
   paint={{
     "fill-color": ["get", "color"],
   }}
+  minzoom={14}
 />
 <LineLayer
   {...layerId("border-arrow-outlines")}
@@ -31,4 +32,5 @@
     "line-color": "black",
     "line-width": 2,
   }}
+  minzoom={14}
 />

@@ -148,6 +148,7 @@
           hash
           bind:map
           bounds={initialBounds}
+          maxZoom={19}
           on:error={(e) => {
             // @ts-expect-error ErrorEvent isn't exported
             console.log(e.detail.error);
