@@ -216,9 +216,7 @@
           {/if}
 
           {#if $backend}
-            {#if $appFocusStore == "cnt"}
-              <ContextualLayers />
-            {/if}
+            <ContextualLayers />
 
             <GeoJSON data={$backend.getInvertedBoundary()}>
               <FillLayer
