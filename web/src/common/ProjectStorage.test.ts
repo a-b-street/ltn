@@ -154,7 +154,7 @@ describe("Database", () => {
 
 describe("ProjectStorage", () => {
   describe("createEmptyProject", () => {
-    it("should save project data and update index if it's a known project", () => {
+    it("should save project data if it's a known project", () => {
       let { storage } = mockLocalStorage({});
       let id = projectStorage.createEmptyProject("Project Name", "TestArea");
       let key = projectStorage.projectKey(id);
@@ -170,7 +170,7 @@ describe("ProjectStorage", () => {
   });
 
   describe("studyAreas", () => {
-    it("should list projects from the index by study area", () => {
+    it("should list projects by study area", () => {
       projectStorage.createEmptyProject("Project 1", "Edinburgh");
       projectStorage.createEmptyProject("Project 2", "Glasgow");
       projectStorage.createEmptyProject("Project 3", "Edinburgh");
@@ -193,14 +193,14 @@ describe("ProjectStorage", () => {
       expect(glasgowProjects[0].projectName).toBe("Project 2");
     });
 
-    it("should return empty array when index is empty", () => {
+    it("should return empty array when storage is empty", () => {
       const result = projectStorage.studyAreaProjects();
       expect(result).toHaveLength(0);
     });
   });
 
   describe("removeProject", () => {
-    it("should remove project and update index", () => {
+    it("should remove project", () => {
       let { storage } = mockLocalStorage({});
       let id = projectStorage.createEmptyProject("Project Name", "TestArea");
       let key = projectStorage.projectKey(id);

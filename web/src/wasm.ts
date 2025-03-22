@@ -15,6 +15,7 @@ import type {
   ProjectFeatureCollection,
   StudyAreaName,
 } from "./common/ProjectStorage";
+import type { AppFocus } from "./stores";
 
 // This is a thin TS wrapper around the auto-generated TS API. The TS
 // definitions here are trusted blindly, not checked. Little work should happen
@@ -60,7 +61,7 @@ export class Backend {
     demandInput: Uint8Array | undefined,
     contextDataInput: Uint8Array | undefined,
     boundary: Feature<Polygon | MultiPolygon>,
-    appFocus: "global" | "cnt",
+    appFocus: AppFocus,
     studyAreaName: StudyAreaName,
     projectName: string,
   ) {

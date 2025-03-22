@@ -47,12 +47,13 @@
     mode,
     showAbout,
     useLocalVite,
+    type AppFocus,
   } from "./stores";
   import NewProjectMode from "./title/NewProjectMode.svelte";
   import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
 
-  export let appFocus: "global" | "cnt" = "global";
+  export let appFocus: AppFocus = "global";
   appFocusStore.set(appFocus);
 
   let wasmReady = false;
