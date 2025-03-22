@@ -27,14 +27,17 @@ impl MapModel {
 
         let boundary_mercator = self.mercator.to_mercator(&self.boundary_wgs84);
         let severance_rtree = RTree::bulk_load(severances.cloned().collect());
+        let multiple_boundary_polygons = boundary_mercator.0.len() > 1;
 
         for polygon in boundary_mercator.into_iter().flat_map(|boundary_polygon| {
-            let area_km_2 = boundary_polygon.unsigned_area() / 1000. / 1000.;
-            if area_km_2 < 16.0 {
-                info!("skipping small island: {area_km_2} km^2");
-                return vec![];
-            } else {
-                info!("Continuing with larger land mass: {area_km_2} km^2");
+            if multiple_boundary_polygons {
+                let area_km_2 = boundary_polygon.unsigned_area() / 1000. / 1000.;
+                if area_km_2 < 16.0 {
+                    info!("skipping small island: {area_km_2} km^2");
+                    return vec![];
+                } else {
+                    info!("Continuing with larger land mass: {area_km_2} km^2");
+                }
             }
 
             let Some(envelope) = boundary_polygon.bounding_rect().map(|rect| {
