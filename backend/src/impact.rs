@@ -61,7 +61,6 @@ impl Impact {
                 requests.len()
             );
             self.counts_before = map.router_before.od_to_counts(requests);
-            self.last_fast_sample = fast_sample;
         }
 
         if self.counts_after.is_empty() || fast_sample != self.last_fast_sample {
@@ -74,8 +73,8 @@ impl Impact {
                 .as_ref()
                 .expect("need to rebuild_router")
                 .od_to_counts(requests);
-            self.last_fast_sample = fast_sample;
         }
+        self.last_fast_sample = fast_sample;
 
         let mut features = Vec::new();
         let mut max_count = 0;
