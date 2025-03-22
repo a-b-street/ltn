@@ -48,6 +48,11 @@
     impactGj = $backend!.predictImpact(fastSample);
     loading = "";
   }
+
+  let fastSampleRadio = $fastSample ? "fast" : "accurate";
+  function updateFastSample() {
+    $fastSample = fastSampleRadio == "fast";
+  }
 </script>
 
 <Loading {loading} />
@@ -80,22 +85,35 @@
       </Link>
     </p>
 
-    <label>
-      <input type="checkbox" bind:checked={$fastSample} />
-      Calculate quickly and less accurately
-    </label>
+    <fieldset>
+      <label>
+        <input
+          type="radio"
+          value="fast"
+          bind:group={fastSampleRadio}
+          on:change={updateFastSample}
+        />
+        Calculate quickly
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="accurate"
+          bind:group={fastSampleRadio}
+          on:change={updateFastSample}
+        />
+        Calculate more accurately
+      </label>
+    </fieldset>
 
     <p>
-      Red roads have increased traffic, and green roads have decreased. If
-      hovering on a road doesn't show anything, there was no change there. Click
-      a road to see example routes through it that've changed.
-    </p>
-    <p>
-      Thicker roads have more traffic after edits, relative to the max count for
-      any road: {impactGj.max_count.toLocaleString()}
+      Red roads have increased traffic, and green roads have decreased. Thicker
+      roads have more traffic after edits. If hovering on a road doesn't show
+      anything, there was no change there. Click a road to see example routes
+      through it that've changed.
     </p>
     <label>
-      Only show roads with at least this much traffic before or after
+      Only show roads with at least this many daily trips before or after
       <input type="number" min={0} bind:value={$minImpactCount} />
     </label>
 
