@@ -92,7 +92,7 @@
 />
 
 <LineLayer
-  {...layerId("interior-roads")}
+  {...layerId("interior-roads", false)}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
@@ -124,7 +124,7 @@
 />
 
 <LineLayer
-  {...layerId("main-roads")}
+  {...layerId("main-roads", false)}
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),

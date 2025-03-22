@@ -216,8 +216,10 @@ pub fn create_from_osm(
     info!("Finalizing the map model");
 
     let mut travel_flows = BTreeMap::new();
+    let mut is_main_road = BTreeMap::new();
     for r in &roads {
         travel_flows.insert(r.id, TravelFlow::from_osm(&r.tags));
+        is_main_road.insert(r.id, r.is_severance());
     }
 
     let num_intersections = intersections.len();
@@ -250,6 +252,7 @@ pub fn create_from_osm(
             .collect(),
 
         travel_flows,
+        is_main_road,
 
         impact: Some(Impact::default()),
         demand: None,

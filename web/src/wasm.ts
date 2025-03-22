@@ -190,6 +190,10 @@ export class Backend {
     this.inner.toggleTravelFlow(road);
   }
 
+  toggleMainRoad(road: number) {
+    this.inner.toggleMainRoad(road);
+  }
+
   addTurnRestriction(from_road: number, to_road: number) {
     this.inner.addTurnRestriction(from_road, to_road);
   }

@@ -47,7 +47,6 @@ static START: Once = Once::new();
 #[wasm_bindgen]
 pub struct LTN {
     map: MapModel,
-    // TODO Stateful, synced with the UI. Weird?
     neighbourhood: Option<Neighbourhood>,
 }
 
@@ -352,6 +351,22 @@ impl LTN {
     pub fn toggle_travel_flow(&mut self, road: usize) {
         self.map.toggle_travel_flow(RoadID(road));
         self.after_edit();
+    }
+
+    #[wasm_bindgen(js_name = toggleMainRoad)]
+    pub fn toggle_main_road(&mut self, road: usize) -> Result<(), JsValue> {
+        self.map.toggle_main_road(RoadID(road));
+        self.after_edit();
+
+        let name = self
+            .neighbourhood
+            .as_ref()
+            .expect("toggle_main_road must be called while a neighbourhood is being edited")
+            .name();
+        let boundary = self.map.boundaries.get(name).unwrap();
+        self.neighbourhood =
+            Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
+        Ok(())
     }
 
     pub fn undo(&mut self) {

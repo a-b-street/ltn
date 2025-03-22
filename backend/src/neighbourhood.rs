@@ -152,7 +152,7 @@ impl Neighbourhood {
                 continue;
             }
 
-            if road.is_severance() {
+            if map.is_main_road[&road.id] {
                 main_roads.insert(road.id);
             } else {
                 interior_roads.insert(road.id);
