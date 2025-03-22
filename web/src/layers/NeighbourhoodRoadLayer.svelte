@@ -88,6 +88,7 @@
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 1),
     "line-color": "black",
   }}
+  minzoom={13}
 />
 
 <LineLayer
@@ -101,6 +102,7 @@
   layout={{
     "line-sort-key": ["get", "shortcuts"],
   }}
+  minzoom={13}
   on:click={(e) =>
     interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
   manageHoverState={interactive}
@@ -118,6 +120,7 @@
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 6),
     "line-color": "black",
   }}
+  minzoom={13}
 />
 
 <LineLayer
@@ -131,6 +134,7 @@
   layout={{
     "line-sort-key": ["get", "shortcuts"],
   }}
+  minzoom={13}
   on:click={(e) =>
     interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
   manageHoverState={interactive}

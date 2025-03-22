@@ -57,6 +57,7 @@
     "circle-stroke-opacity": 0.8,
     "circle-stroke-width": hoverStateFilter(0, 3),
   }}
+  minzoom={13}
   {interactive}
   manageHoverState
   hoverCursor="pointer"
