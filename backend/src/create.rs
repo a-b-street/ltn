@@ -155,19 +155,7 @@ pub fn create_from_osm(
 
     let context_data = context_data_wgs84.map(|mut context_data_wgs84| {
         context_data_wgs84.pois.extend(osm.pois);
-
-        for population_zone in &mut context_data_wgs84.population_zones {
-            graph
-                .mercator
-                .to_mercator_in_place(&mut population_zone.geometry);
-        }
-        for stats19_collision in &mut context_data_wgs84.stats19_collisions {
-            graph.mercator.to_mercator_in_place(stats19_collision);
-        }
-        for poi in &mut context_data_wgs84.pois {
-            graph.mercator.to_mercator_in_place(&mut poi.point);
-        }
-        context_data_wgs84.into_prepared()
+        context_data_wgs84.into_prepared(&graph.mercator)
     });
 
     // Add in a bit
