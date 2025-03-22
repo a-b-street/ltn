@@ -197,7 +197,8 @@
           on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
           on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
           class="actionable-cell"
-          class:highlighted={hoveredMapFeature?.properties.name == name}
+          class:highlighted={hoveredMapFeature?.properties.name == name ||
+            hoveredNeighbourhoodFromList == name}
         >
           <h3><Link on:click={() => pickNeighbourhood(name)}>{name}</Link></h3>
           <span class="actions">
