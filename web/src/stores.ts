@@ -69,9 +69,11 @@ export type Mode =
       mode: "debug-demand";
     };
 
+export type AppFocus = "global" | "cnt";
+
 export let map: Writable<Map | null> = writable(null);
 
-export let appFocus: Writable<"global" | "cnt"> = writable("global");
+export let appFocus: Writable<AppFocus> = writable("global");
 // The id of the project currently being worked on
 export let currentProjectID: Writable<ProjectID | undefined> =
   writable(undefined);

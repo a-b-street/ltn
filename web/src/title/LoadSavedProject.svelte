@@ -1,7 +1,7 @@
 <script lang="ts">
   import { stripPrefix, stripSuffix } from "../common";
   import type { StudyAreaName } from "../common/ProjectStorage";
-  import { database, mode } from "../stores";
+  import { database, mode, type AppFocus } from "../stores";
   import { loadProject } from "./loader";
 
   export let loading: string;
@@ -15,7 +15,7 @@
     let contents = await fileInput.files![0].text();
     let gj = JSON.parse(contents);
 
-    let appFocus: "global" | "cnt";
+    let appFocus: AppFocus;
     let studyAreaName: StudyAreaName;
     let projectName: string;
 

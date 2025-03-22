@@ -1,4 +1,5 @@
 import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
+import type { AppFocus } from "../stores";
 
 export type ProjectID = ReturnType<(typeof crypto)["randomUUID"]>;
 export type StudyAreaName = string | undefined;
@@ -7,7 +8,7 @@ export interface ProjectFeatureCollection
   // Foreign Members
   project_name: string;
   study_area_name: StudyAreaName;
-  app_focus: "global" | "cnt";
+  app_focus: AppFocus;
 }
 
 /**
@@ -58,7 +59,7 @@ export class Database {
         `Migrating storage from version ${this.storedSchemaVersion} to ${latestSchemaVersion}`,
       );
       for (const focus of ["cnt", "global"]) {
-        const appFocus = focus as "cnt" | "global";
+        const appFocus = focus as AppFocus;
         const projectStorage = new ProjectStorage(
           appFocus,
           INTERNAL_METHOD_TOKEN,
@@ -101,7 +102,7 @@ export class Database {
     );
   }
 
-  projectStorage(appFocus: "cnt" | "global") {
+  projectStorage(appFocus: AppFocus) {
     // important that this be done before projectStorage is returned
     this.ensureMigrated();
     return new ProjectStorage(appFocus, INTERNAL_METHOD_TOKEN);
@@ -115,12 +116,12 @@ export class Database {
 const INTERNAL_METHOD_TOKEN = Symbol("internal_method_token");
 
 export class ProjectStorage {
-  appFocus: "global" | "cnt";
+  appFocus: AppFocus;
 
   /**
    * Don't call this method directly, use Database.projectStorage()
    */
-  constructor(appFocus: "global" | "cnt", internalMethodToken: symbol) {
+  constructor(appFocus: AppFocus, internalMethodToken: symbol) {
     if (internalMethodToken !== INTERNAL_METHOD_TOKEN) {
       throw new Error(
         "ProjectStorage must be created via Database.projectStorage()",
@@ -326,7 +327,7 @@ export class ProjectStorage {
 // Returns a list, grouped and sorted by the optional studyAreaId, with
 // custom cases at the end
 function schemaV0_studyAreaProjects(
-  appFocus: "cnt" | "global",
+  appFocus: AppFocus,
 ): Array<[StudyAreaName, { projectKey: string; projectName: string }[]]> {
   let studyAreas = new Map();
   let custom = [];
