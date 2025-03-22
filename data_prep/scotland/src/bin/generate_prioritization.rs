@@ -1,7 +1,7 @@
 use anyhow::Result;
 use backend::boundary_stats::{ContextData, POIKind, PopulationZone, POI};
 use data_prep::{PopulationZoneInput, StudyArea};
-use geo::{Point, Relate};
+use geo::{MultiPolygon, Point, Relate};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -19,10 +19,13 @@ fn main() -> Result<()> {
     let stats19_collisions = Stats19Input::read_all_from_file()?;
     let pois = InputPOI::read_all_from_files()?;
 
+    let mut all_settlements = SettlementsInput::read_all_from_file()?;
+
     for study_area in &study_areas {
         let study_area_start = Instant::now();
         println!("Starting {}", study_area.1.name);
         let mut context_data = ContextData {
+            settlements: all_settlements.remove(&study_area.1.name).unwrap().geometry,
             population_zones: Vec::new(),
             stats19_collisions: Vec::new(),
             pois: Vec::new(),
@@ -192,5 +195,25 @@ impl CarOwnershipDataZone {
 
     fn households_with_cars_or_vans(&self) -> u32 {
         self.total_households - self.cars_0
+    }
+}
+
+#[derive(Deserialize)]
+struct SettlementsInput {
+    #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
+    geometry: MultiPolygon,
+    #[serde(rename = "name")]
+    study_area_name: String,
+}
+
+impl SettlementsInput {
+    fn read_all_from_file() -> Result<HashMap<String, Self>> {
+        let path = "tmp/lad_settlements.geojson";
+        let input: Vec<SettlementsInput> =
+            geojson::de::deserialize_feature_collection_str_to_vec(&fs_err::read_to_string(path)?)?;
+        Ok(input
+            .into_iter()
+            .map(|s| (s.study_area_name.clone(), s))
+            .collect())
     }
 }

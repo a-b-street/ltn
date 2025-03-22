@@ -1,6 +1,7 @@
 use geo::{Area, BooleanOps, Buffer, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
 use i_overlay::mesh::style::{LineJoin, OutlineStyle};
 use serde::{Deserialize, Serialize};
+use utils::Mercator;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct BoundaryStats {
@@ -123,13 +124,25 @@ impl BoundaryStats {
 /// boundary. This is directly serialized and deserialized.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ContextData {
+    pub settlements: MultiPolygon,
     pub population_zones: Vec<PopulationZone>,
     pub stats19_collisions: Vec<Point>,
     pub pois: Vec<POI>,
 }
 
 impl ContextData {
-    pub fn into_prepared(self) -> PreparedContextData {
+    pub fn into_prepared(mut self, mercator: &Mercator) -> PreparedContextData {
+        for population_zone in &mut self.population_zones {
+            mercator.to_mercator_in_place(&mut population_zone.geometry);
+        }
+        for stats19_collision in &mut self.stats19_collisions {
+            mercator.to_mercator_in_place(stats19_collision);
+        }
+        for poi in &mut self.pois {
+            mercator.to_mercator_in_place(&mut poi.point);
+        }
+        mercator.to_mercator_in_place(&mut self.settlements);
+
         let population_zones = self
             .population_zones
             .into_iter()
@@ -145,6 +158,7 @@ impl ContextData {
             .collect();
 
         PreparedContextData {
+            settlements: self.settlements.into(),
             population_zones,
             stats19_collisions: self.stats19_collisions,
             pois: self.pois,
@@ -154,6 +168,7 @@ impl ContextData {
 
 /// After deserializing `ContextData`, make it faster for `BoundaryStats` to query.
 pub struct PreparedContextData {
+    pub settlements: PreparedGeometry<'static, MultiPolygon>,
     pub population_zones: Vec<PreparedPopulationZone>,
     pub stats19_collisions: Vec<Point>,
     pub pois: Vec<POI>,
@@ -193,7 +208,7 @@ mod tests {
     use super::*;
     use approx::assert_relative_eq;
 
-    use geo::wkt;
+    use geo::{wkt, Rect};
 
     #[test]
     fn aggregation() {
@@ -214,7 +229,7 @@ mod tests {
         let b = wkt!(MULTIPOLYGON(((6. 0.,10. 0.,10. 5.,6. 5.))));
 
         // neighbourhood boundary covered by parts of `a` and `b`
-        let c = wkt!(POLYGON((0. 0.,10. 0.,10. 3.,0. 3.)));
+        let mut c = wkt!(POLYGON((0. 0.,10. 0.,10. 3.,0. 3.)));
 
         let zone_1 = PopulationZone {
             geometry: a,
@@ -232,12 +247,16 @@ mod tests {
             households_with_cars_or_vans: 99,
         };
 
+        let mercator = Mercator::from(Rect::new((0., 0.), (10., 10.))).unwrap();
         let context_data = ContextData {
+            settlements: wkt!(MULTIPOLYGON EMPTY),
             population_zones: vec![zone_1, zone_2],
             stats19_collisions: vec![],
             pois: vec![],
         }
-        .into_prepared();
+        .into_prepared(&mercator);
+
+        mercator.to_mercator_in_place(&mut c);
 
         // [backend/src/boundary_stats.rs:176:9] a.unsigned_area() = 30.0
         // [backend/src/boundary_stats.rs:177:9] b.unsigned_area() = 20.0
@@ -246,9 +265,9 @@ mod tests {
         // [backend/src/boundary_stats.rs:181:9] b.intersection(&c).unsigned_area() = 12.0
 
         let boundary_stats = BoundaryStats::new(&c, Some(&context_data));
-        assert_relative_eq!(boundary_stats.area_km2, 3e-5);
-        assert_relative_eq!(boundary_stats.population, 60. + 6000.);
-        assert_relative_eq!(boundary_stats.simd, 7.2 + 24.);
+        assert_relative_eq!(boundary_stats.area_km2, 370930., epsilon = 1.0);
+        assert_relative_eq!(boundary_stats.population, 60. + 6000., epsilon = 1e-5);
+        assert_relative_eq!(boundary_stats.simd, 7.2 + 24., epsilon = 1e-5);
         assert_eq!(boundary_stats.number_stats19_collisions, 0);
         assert_eq!(boundary_stats.number_pois, 0);
         assert_eq!(boundary_stats.total_households, 600);

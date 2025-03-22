@@ -2,7 +2,7 @@ use crate::boundary_stats::BoundaryStats;
 use crate::geo_helpers::buffer_polygon;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::{Area, BoundingRect, Coord, LineString, MultiPolygon, Polygon};
+use geo::{Area, BoundingRect, Coord, Intersects, LineString, MultiPolygon, Polygon, Relate};
 use geojson::{Feature, FeatureCollection};
 use i_overlay::core::fill_rule::FillRule;
 use i_overlay::float::slice::FloatSlice;
@@ -23,7 +23,18 @@ impl MapModel {
                 }
             })
             .chain(self.railways.iter())
-            .chain(self.waterways.iter());
+            .chain(self.waterways.iter())
+            .filter(|line_string| {
+                if let Some(context_data) = self.context_data.as_ref() {
+                    context_data
+                        .settlements
+                        .bounding_rect()
+                        .unwrap()
+                        .intersects(&line_string.bounding_rect().unwrap())
+                } else {
+                    true
+                }
+            });
 
         let boundary_mercator = self.mercator.to_mercator(&self.boundary_wgs84);
         let severance_rtree = RTree::bulk_load(severances.cloned().collect());
@@ -61,6 +72,15 @@ impl MapModel {
             let min_area_km_2 = 0.0025;
             if area_km_2 < min_area_km_2 {
                 continue;
+            }
+            if let Some(context_data) = self.context_data.as_ref() {
+                // PERF: We could prepare polygon here and pass that into BoundaryStats
+                // But it might actually be slower, since for many boundaries we'll on do this one
+                // calculation.
+                if context_data.settlements.relate(&polygon).is_disjoint() {
+                    info!("skipping unsettled area");
+                    continue;
+                }
             }
             let boundary_stats = BoundaryStats::new(&polygon, self.context_data.as_ref());
             let generated_boundary = GeneratedBoundary {
