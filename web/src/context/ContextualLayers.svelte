@@ -2,7 +2,7 @@
   import { Layers } from "lucide-svelte";
   import { Control } from "svelte-maplibre";
   import { ContextLayerButton } from "../common";
-  import { showExistingFiltersAndTRs } from "../stores";
+  import { appFocus, showExistingFiltersAndTRs } from "../stores";
   import BusRoutes from "./BusRoutes.svelte";
   import CBD from "./CBD.svelte";
   import POIs from "./POIs.svelte";
@@ -45,13 +45,15 @@
         bind:show={$showExistingFiltersAndTRs}
       />
 
-      <POIs />
-      <Population />
-      <RailwayStations />
-      <BusRoutes />
-      <CBD />
-      <RouteNetwork />
-      <Stats19 />
+      {#if $appFocus == "cnt"}
+        <POIs />
+        <Population />
+        <RailwayStations />
+        <BusRoutes />
+        <CBD />
+        <RouteNetwork />
+        <Stats19 />
+      {/if}
     </div>
   </div>
 </Control>
