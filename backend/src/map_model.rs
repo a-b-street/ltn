@@ -977,6 +977,16 @@ impl MapModel {
         let way = self.get_r(r).way;
         self.bus_routes_on_roads.get(&way)
     }
+
+    pub fn snap_to_road(&self, pt: Coord) -> Position {
+        let r = self.closest_road.nearest_neighbor(&pt.into()).unwrap().data;
+        let road = &self.roads[r.0];
+        let fraction_along = road.linestring.line_locate_point(&pt.into()).unwrap();
+        Position {
+            road: road.id,
+            fraction_along,
+        }
+    }
 }
 
 impl Road {
@@ -1136,6 +1146,16 @@ pub enum Direction {
     Backwards,
 }
 
+impl Direction {
+    pub fn forwards(fwd: bool) -> Self {
+        if fwd {
+            Self::Forwards
+        } else {
+            Self::Backwards
+        }
+    }
+}
+
 impl TravelFlow {
     pub fn from_osm(tags: &Tags) -> Self {
         // TODO Improve this
@@ -1197,4 +1217,11 @@ fn get_f64_prop<'a>(f: &'a Feature, key: &str) -> Result<f64> {
         bail!("Feature's {key} property isn't a f64");
     };
     Ok(n)
+}
+
+/// A position along a road
+#[derive(Clone, Debug, Copy, PartialEq)]
+pub struct Position {
+    pub road: RoadID,
+    pub fraction_along: f64,
 }

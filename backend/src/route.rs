@@ -3,10 +3,13 @@ use std::collections::HashMap;
 
 use fast_paths::{FastGraph, InputGraph, PathCalculator};
 use geo::{Coord, Euclidean, Length, LineString};
-use utils::NodeMap;
+use itertools::Itertools;
+use utils::{LineSplit, NodeMap};
 
 use crate::map_model::{DiagonalFilter, Direction};
-use crate::{Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow};
+use crate::{
+    Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID, TravelFlow,
+};
 
 // For vehicles only
 pub struct Router {
@@ -16,9 +19,11 @@ pub struct Router {
     pub main_road_penalty: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct Route {
     pub steps: Vec<(RoadID, Direction)>,
+    pub start: Position,
+    pub end: Position,
 }
 
 /// Routable input can represent the entire map, or a neighborhood within a map.
@@ -122,25 +127,54 @@ impl Router {
     }
 
     pub fn route(&self, map: &MapModel, pt1: Coord, pt2: Coord) -> Option<Route> {
-        let start = map.closest_road.nearest_neighbor(&pt1.into()).unwrap().data;
-        let end = map.closest_road.nearest_neighbor(&pt2.into()).unwrap().data;
-        self.route_from_roads(start, end)
+        self.route_from_positions(map.snap_to_road(pt1), map.snap_to_road(pt2))
     }
 
+    // TODO Revisit
     pub fn route_from_roads(&self, start: RoadID, end: RoadID) -> Option<Route> {
         if start == end {
             return None;
         }
+
+        self.route_from_positions(
+            Position {
+                road: start,
+                fraction_along: 0.5,
+            },
+            Position {
+                road: end,
+                fraction_along: 0.5,
+            },
+        )
+    }
+
+    pub fn route_from_positions(&self, start: Position, end: Position) -> Option<Route> {
+        if start == end {
+            return None;
+        }
+
+        if start.road == end.road {
+            return Some(Route {
+                start,
+                end,
+                steps: vec![(
+                    start.road,
+                    Direction::forwards(start.fraction_along < end.fraction_along),
+                )],
+            });
+        }
+
+        // TODO if start.intersection == end.intersection
 
         let mut starts = vec![];
         let mut ends = vec![];
         for direction in [Direction::Forwards, Direction::Backwards] {
             // We consider all start/end pairs equally.
             let extra_weight = 0;
-            if let Some(start) = self.node_map.get((start, direction)) {
+            if let Some(start) = self.node_map.get((start.road, direction)) {
                 starts.push((start, extra_weight));
             };
-            if let Some(end) = self.node_map.get((end, direction)) {
+            if let Some(end) = self.node_map.get((end.road, direction)) {
                 ends.push((end, extra_weight));
             };
         }
@@ -151,12 +185,27 @@ impl Router {
             .path_calculator
             .borrow_mut()
             .calc_path_multiple_sources_and_targets(&self.ch, starts, ends)?;
-        let steps: Vec<_> = shortest_path
-            .get_nodes()
-            .iter()
-            .map(|n| self.node_map.translate_id(*n))
-            .collect();
-        Some(Route { steps })
+
+        let mut steps = Vec::new();
+        for (pos, node) in shortest_path.get_nodes().into_iter().with_position() {
+            let (road, direction) = self.node_map.translate_id(*node);
+
+            if (pos == itertools::Position::First || pos == itertools::Position::Only)
+                && road != start.road
+            {
+                // TODO Test direction carefully.
+                steps.push((start.road, Direction::forwards(start.fraction_along > 0.5)));
+            }
+            steps.push((road, direction));
+            if (pos == itertools::Position::Last || pos == itertools::Position::Only)
+                && road != end.road
+            {
+                // TODO Test direction carefully.
+                steps.push((end.road, Direction::forwards(end.fraction_along <= 0.5)));
+            }
+        }
+
+        Some(Route { steps, start, end })
     }
 
     /// Produce routes for all the requests and count how many routes cross each road
@@ -176,20 +225,22 @@ impl Router {
 impl Route {
     pub fn to_linestring(&self, map: &MapModel) -> LineString {
         let mut pts = Vec::new();
-        for (r, direction) in &self.steps {
-            let road = &map.roads[r.0];
-            if *direction == Direction::Forwards {
-                pts.extend(road.linestring.0.clone());
-            } else {
-                let mut rev = road.linestring.0.clone();
-                rev.reverse();
-                pts.extend(rev);
-            }
+
+        for (pos, (road, direction)) in self.steps.iter().with_position() {
+            pts.extend(slice_road_step(
+                &map.get_r(*road).linestring,
+                *direction == Direction::Forwards,
+                &self.start,
+                &self.end,
+                pos,
+            ));
         }
+
         pts.dedup();
         LineString::new(pts)
     }
 
+    /// Includes the start and end road, even if they're only partially crossed
     pub fn crosses_road(&self, road: RoadID) -> bool {
         self.steps.iter().any(|(r, _)| *r == road)
     }
@@ -198,6 +249,7 @@ impl Route {
     pub fn get_distance_and_time(&self, map: &MapModel) -> (f64, f64) {
         let mut distance = 0.0;
         let mut time = 0.0;
+        // TODO First and last step
         for (r, _) in &self.steps {
             let road = &map.roads[r.0];
             distance += Euclidean.length(&road.linestring);
@@ -205,6 +257,56 @@ impl Route {
         }
         (distance, time)
     }
+}
+
+fn slice_road_step(
+    linestring: &LineString,
+    forwards: bool,
+    start: &Position,
+    end: &Position,
+    pos: itertools::Position,
+) -> Vec<Coord> {
+    let mut pts = match pos {
+        itertools::Position::First => {
+            let (a, b) = if forwards {
+                (start.fraction_along, 1.0)
+            } else {
+                (0.0, start.fraction_along)
+            };
+            linestring
+                .line_split_twice(a, b)
+                .unwrap()
+                .into_second()
+                // TODO There were some bugs from another project, where the first step seems to
+                // start on a road in reverse and immediately go somewhere else
+                .map(|ls| ls.0)
+                .unwrap_or_else(Vec::new)
+        }
+        itertools::Position::Last => {
+            let (a, b) = if forwards {
+                (0.0, end.fraction_along)
+            } else {
+                (end.fraction_along, 1.0)
+            };
+            linestring
+                .line_split_twice(a, b)
+                .unwrap()
+                .into_second()
+                .map(|ls| ls.0)
+                .unwrap_or_else(Vec::new)
+        }
+        itertools::Position::Middle => linestring.0.clone(),
+        itertools::Position::Only => linestring
+            .line_split_twice(start.fraction_along, end.fraction_along)
+            .unwrap()
+            .into_second()
+            .map(|ls| ls.0)
+            .unwrap_or_else(Vec::new),
+    };
+    if !forwards {
+        pts.reverse();
+    }
+    pts
 }
 
 #[cfg(test)]
