@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 impl MapModel {
     pub fn generated_boundaries(&self) -> FeatureCollection {
         let mut features = Vec::new();
-        let severances = self
+        let splitters = self
             .roads
             .iter()
             .filter_map(|r| {
@@ -33,10 +33,43 @@ impl MapModel {
                 } else {
                     true
                 }
+            })
+            .chain({
+                if let Some(context_data) = self.context_data.as_ref() {
+                    // Include the settlement boundary as a splitter to ensure we include settlement
+                    // outskirts.
+                    //
+                    // To get an intuition, imagine a classic ring-road topology. The ring road is typically
+                    // near the edge, but not *at* the edge of a settlement. I'm calling that area
+                    // of the settlement beyond the ring road the "outskirt".
+                    //
+                    // If we were splitting boundaries only between severances, then this outskirt
+                    // will become part of a potentially huge boundary that starts from just
+                    // outside the ring road and continues until it hits another major severance,
+                    // which could be a 100 miles away.
+                    //
+                    // NOTE: This approach is an improvement, but isn't perfect. Especially with small
+                    // settlements, we'll see logically disjoint outskirts grouped together in a single
+                    // neighbourhood boundary - making a kind of "donut" around the central core.
+                    // It might be related to these splitters being closed linestrings, but I haven't
+                    // investigated further. In practice, it enables important functionality, and I
+                    // don't think the downsides will be much of an issue in practice.
+                    let iter: Box<dyn Iterator<Item = &LineString>> = Box::new(
+                        context_data
+                            .settlements
+                            .geometry()
+                            .0
+                            .iter()
+                            .map(|poly| poly.exterior()),
+                    );
+                    iter
+                } else {
+                    Box::new(std::iter::empty())
+                }
             });
 
         let boundary_mercator = self.mercator.to_mercator(&self.boundary_wgs84);
-        let severance_rtree = RTree::bulk_load(severances.cloned().collect());
+        let severance_rtree = RTree::bulk_load(splitters.cloned().collect());
         let multiple_boundary_polygons = boundary_mercator.0.len() > 1;
 
         for polygon in boundary_mercator.into_iter().flat_map(|boundary_polygon| {
@@ -56,8 +89,8 @@ impl MapModel {
                 debug_assert!(false, "boundary polygon was unexpectedly empty");
                 return vec![];
             };
-            let severance_candidates = severance_rtree.locate_in_envelope_intersecting(&envelope);
-            split_polygon(boundary_polygon, severance_candidates)
+            let relevant_splitters = severance_rtree.locate_in_envelope_intersecting(&envelope);
+            split_polygon(boundary_polygon, relevant_splitters)
         }) {
             let area_km_2 = polygon.unsigned_area() / 1000. / 1000.;
 
@@ -74,14 +107,14 @@ impl MapModel {
             }
 
             // Truly huge areas typically indicate "all the non-settlement" land - a negative left
-            // behind by removing all the rural areas.
+            // after removing all the settlements.
             let max_area_km2 = 50.0;
             if area_km_2 > max_area_km2 {
                 continue;
             }
             if let Some(context_data) = self.context_data.as_ref() {
-                // PERF: We could prepare polygon here and pass that into BoundaryStats
-                // But it might actually be slower, since for many boundaries we'll on do this one
+                // We could prepare polygon here and pass that into BoundaryStats, but it might
+                // actually be slower, since for many boundaries we'll only do this one
                 // calculation.
                 if context_data.settlements.relate(&polygon).is_disjoint() {
                     info!("skipping unsettled area");
