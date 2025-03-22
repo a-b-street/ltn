@@ -66,7 +66,8 @@
           LineString,
           { road: number; name: string }
         >;
-      };
+      }
+    | { kind: "main-roads" };
   function startTurnRestrictionAction(): Action {
     return {
       kind: "turn_restriction",
@@ -80,7 +81,7 @@
   }
   let action: Action = { kind: "filter" };
 
-  $: if (action.kind == "oneway") {
+  $: if (action.kind == "oneway" || action.kind == "main-roads") {
     $map!.doubleClickZoom.disable();
   } else {
     $map!.doubleClickZoom.enable();
@@ -123,6 +124,9 @@
       $mutationCounter++;
     } else if (action.kind == "oneway") {
       $backend!.toggleTravelFlow(f.properties!.road);
+      $mutationCounter++;
+    } else if (action.kind == "main-roads") {
+      $backend!.toggleMainRoad(f.properties!.road);
       $mutationCounter++;
     } else if (action.kind == "turn_restriction") {
       action.from_road_id = f.properties!.road;
@@ -221,7 +225,11 @@
     if (e.key == "4") {
       action = startTurnRestrictionAction();
     }
+    if (e.key == "5") {
+      action = { kind: "main-roads" };
+    }
   }
+
   function undo() {
     $backend!.undo();
     $mutationCounter++;
@@ -384,12 +392,25 @@
           alt="Restrict turns"
         />
       </button>
+      <button
+        on:click={() => (action = { kind: "main-roads" })}
+        disabled={action.kind == "main-roads"}
+        class:active={action.kind == "main-roads"}
+        class:outline={action.kind != "main-roads"}
+        data-tooltip="Specify main roads (hotkey 5)"
+      >
+        <img src={onewayArrowUrl} alt="Change main/minor roads" />
+      </button>
     </div>
 
     <button class="outline" on:click={() => (settingFilterType = true)}>
       Change modal filter type
     </button>
     <ChangeFilterModal bind:show={settingFilterType} />
+
+    {#if action.kind == "main-roads"}
+      <p>TODO explain what main roads mean, why changing it might make sense</p>
+    {/if}
 
     <div style="display: flex; justify-content: space-between;">
       <button
@@ -457,6 +478,7 @@
       <NeighbourhoodRoadLayer
         interactive={action.kind == "filter" ||
           action.kind == "oneway" ||
+          action.kind == "main-roads" ||
           (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
       >
@@ -485,6 +507,8 @@
               </div>
             {:else if action.kind == "oneway"}
               <p>Click to change direction</p>
+            {:else if action.kind == "main-roads"}
+              <p>Click to toggle this a main / minor road</p>
             {:else if action.kind == "turn_restriction"}
               <p>Click to create a turn restriction from here</p>
             {/if}
