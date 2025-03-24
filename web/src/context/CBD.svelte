@@ -62,6 +62,7 @@
     <SequentialLegend
       colorScale={Object.values(levelOfServiceColors)}
       labels={{ buckets: Object.keys(levelOfServiceColors) }}
+      fullWidthBucketLegend
     />
   </div>
 
