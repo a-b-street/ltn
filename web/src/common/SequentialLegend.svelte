@@ -3,6 +3,7 @@
   type IntoLabel = string | number;
   export let labels: { limits: IntoLabel[] } | { buckets: IntoLabel[] };
   export let decimalPlaces = 0;
+  export let fullWidthBucketLegend = false;
 
   let intoLabels: IntoLabel[] = [];
   if ("limits" in labels) {
@@ -24,26 +25,29 @@
   });
 </script>
 
-<div class="colors">
-  {#each colorScale as color}
-    <span class="bucket" style="background: {color};">&nbsp;</span>
-  {/each}
-</div>
-
 <div
-  class="labels"
+  class:full-width-bucket-legend={fullWidthBucketLegend}
   class:bucketed={labels.hasOwnProperty("buckets")}
   class:limits={labels.hasOwnProperty("limits")}
 >
-  {#each labelTexts as labelText}
-    <span>{labelText}</span>
-  {/each}
+  <div class="colors">
+    {#each colorScale as color}
+      <span class="bucket" style="background: {color};">&nbsp;</span>
+    {/each}
+  </div>
+
+  <div class="labels">
+    {#each labelTexts as labelText}
+      <span>{labelText}</span>
+    {/each}
+  </div>
 </div>
 
 <style>
   .colors {
     display: flex;
     justify-content: space-around;
+    height: 20px;
   }
 
   .colors .bucket {
@@ -52,13 +56,16 @@
     /* "collapse" the double border between the inner buckets */
     border-left: 0;
   }
+
   .colors .bucket:first-child {
     border-left: 1px solid black;
   }
 
   /* align the colors so that the limits labels fall between color bucket */
-  .colors::before,
-  .colors::after {
+  :not(.full-width-bucket-legend) .colors::before,
+  :not(.full-width-bucket-legend) .colors::after,
+  .bucketed:not(.full-width-bucket-legend) .labels::before,
+  .bucketed:not(.full-width-bucket-legend) .labels::after {
     content: "";
     flex: 0.5;
   }
@@ -71,10 +78,5 @@
 
   .labels * {
     flex: 1;
-  }
-  .labels.bucketed::before,
-  .labels.bucketed::after {
-    content: "";
-    flex: 0.5;
   }
 </style>
