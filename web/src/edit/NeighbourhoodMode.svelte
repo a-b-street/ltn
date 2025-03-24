@@ -366,7 +366,7 @@
         data-tooltip="Restrict turns (hotkey 4)"
       >
         <img
-          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.png`}
+          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
           alt="Restrict turns"
         />
       </button>
