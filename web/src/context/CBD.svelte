@@ -1,10 +1,10 @@
 <script lang="ts">
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
-  import { QualitativeLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
   import {
     ContextLayerButton,
     layerId,
+    QualitativeLegend,
     roadLineWidth,
     SequentialLegend,
   } from "../common";
@@ -59,7 +59,10 @@
 
 <ContextLayerButton bind:show={showLos} label="Level of Service">
   <div slot="legend">
-    <QualitativeLegend colors={levelOfServiceColors} horiz />
+    <SequentialLegend
+      colorScale={Object.values(levelOfServiceColors)}
+      labels={{ buckets: Object.keys(levelOfServiceColors) }}
+    />
   </div>
 
   <p slot="help">
@@ -74,7 +77,7 @@
 
 <ContextLayerButton bind:show={showExistingInfra} label="Cycle infrastructure">
   <div slot="legend">
-    <QualitativeLegend colors={infraTypeColors} horiz />
+    <QualitativeLegend labelColors={infraTypeColors} />
   </div>
 
   <p slot="help">
