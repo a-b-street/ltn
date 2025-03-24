@@ -5,9 +5,8 @@
     VectorTileSource,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { QualitativeLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { ContextLayerButton, layerId } from "../common";
+  import { ContextLayerButton, layerId, QualitativeLegend } from "../common";
   import { assetUrl } from "../stores";
 
   let show = false;
@@ -90,9 +89,9 @@
   let seriousColor = "#1F9EB7";
   let slightColor = "#CDE594";
   let severityLegend = {
-    Fatal: fatalColor,
-    Serious: seriousColor,
     Slight: slightColor,
+    Serious: seriousColor,
+    Fatal: fatalColor,
   };
 </script>
 
@@ -166,7 +165,11 @@
         <input type="number" min={2017} max={2023} bind:value={state.maxYear} />
       </label>
     </fieldset>
-    <QualitativeLegend colors={severityLegend} horiz />
+    <QualitativeLegend
+      labelColors={severityLegend}
+      swatchClass="circle"
+      itemsPerRow={3}
+    />
   </div>
 </ContextLayerButton>
 

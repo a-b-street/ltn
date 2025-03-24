@@ -1,14 +1,13 @@
 <script lang="ts">
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
-  import { QualitativeLegend } from "svelte-utils";
   import { constructMatchExpression, Popup } from "svelte-utils/map";
-  import { ContextLayerButton, layerId } from "../common";
+  import { ContextLayerButton, layerId, QualitativeLegend } from "../common";
   import { backend } from "../stores";
 
   let show = false;
 
   // https://colorbrewer2.org/#type=qualitative&scheme=Accent&n=5
-  let colors = {
+  let labelColors = {
     School: "#7fc97f",
     GP: "#beaed4",
     Hospital: "#fdc086",
@@ -19,7 +18,7 @@
 
 <ContextLayerButton label="POIs" bind:show>
   <div slot="legend">
-    <QualitativeLegend {colors} horiz />
+    <QualitativeLegend {labelColors} swatchClass="circle" />
   </div>
 
   <p slot="help">
@@ -59,7 +58,7 @@
       paint={{
         "circle-color": constructMatchExpression(
           ["get", "kind"],
-          colors,
+          labelColors,
           "black",
         ),
         "circle-radius": 10,
