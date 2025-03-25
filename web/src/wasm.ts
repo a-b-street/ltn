@@ -22,6 +22,15 @@ import type { AppFocus } from "./stores";
 // here aside from parsing and making the API nicer for both the Rust and TS
 // code. This is also a step towards moving to using web workers.
 
+export type NeighbourhoodDefinitionFeature = Feature<
+  Polygon,
+  {
+    name: string;
+    waypoints?: Waypoint[];
+    kind: "boundary";
+  }
+>;
+
 export type NeighbourhoodBoundaryFeature = Feature<
   Polygon,
   {
@@ -39,6 +48,7 @@ export type NeighbourhoodBoundaryFeature = Feature<
 export type GeneratedBoundaryFeature = Feature<
   Polygon,
   {
+    // TODO: these properties went away in the rust code, update this signature.
     touches_big_road: boolean;
     touches_railway: boolean;
     touches_waterway: boolean;
