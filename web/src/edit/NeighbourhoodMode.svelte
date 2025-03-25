@@ -354,7 +354,7 @@
         disabled={action.kind == "oneway"}
         class:active={action.kind == "oneway"}
         class:outline={action.kind != "oneway"}
-        data-tooltip="Reverse directions (hotkey 3)"
+        data-tooltip="Toggle one-way (hotkey 3)"
       >
         <!-- 
          cheat the default padding just a bit with negative placement, 
