@@ -161,6 +161,18 @@ export class ProjectStorage {
     return false;
   }
 
+  nextAvailableProjectName(projectName: string): string {
+    if (this.projectNameAlreadyExists(projectName)) {
+      let originalProjectName = projectName;
+      let i = 2;
+      do {
+        projectName = `${originalProjectName} (${i})`;
+        i++;
+      } while (this.projectNameAlreadyExists(projectName));
+    }
+    return projectName;
+  }
+
   /**
    * @throws if the project name already exists
    */
