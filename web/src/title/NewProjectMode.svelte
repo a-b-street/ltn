@@ -19,7 +19,7 @@
   import { loadProject } from "./loader";
 
   let newProjectName = "";
-  let example = "";
+  let example: string | null = null;
   let exampleAreas: [string, [string, string][]][] = [];
   let loading = "";
 
@@ -54,7 +54,7 @@
   }
 
   export async function loadExample() {
-    if (example == "") {
+    if (!example) {
       return;
     }
 
@@ -62,6 +62,7 @@
     try {
       projectID = $projectStorage.createEmptyProject(newProjectName, example);
     } catch (err) {
+      example = null;
       window.alert(`Couldn't create project: ${err}`);
       return;
     }
