@@ -23,6 +23,7 @@
   } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
   import type { Intersection } from "../common/Intersection";
+  import NeighbourhoodBoundarySummary from "../common/NeighbourhoodBoundarySummary.svelte";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -440,6 +441,9 @@
         />
       {/if}
     </div>
+
+    <h2>Neighbourhood stats</h2>
+    <NeighbourhoodBoundarySummary neighbourhoodBoundary={notNull(boundary)} />
   </div>
 
   <div slot="map">

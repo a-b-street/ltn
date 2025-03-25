@@ -27,13 +27,7 @@ export type NeighbourhoodBoundaryFeature = Feature<
   {
     name: string;
     waypoints: Waypoint[];
-
-    area_km2: number;
-    population: number;
-    simd: number;
-    number_stats19_collisions: number;
-    number_pois: number;
-  }
+  } & GeneratedBoundaryFeature["properties"]
 >;
 
 export type GeneratedBoundaryFeature = Feature<
