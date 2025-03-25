@@ -16,10 +16,17 @@ export function pickNeighbourhoodName(
 
   while (true) {
     let name = window.prompt(promptMessage, defaultValue);
-    if (!name) {
+    if (name === null) {
+      // User canceled the prompt
       return null;
     }
-    if (used.has(name)) {
+
+    name = name.trim();
+    if (name === "") {
+      window.alert(
+        `Neighbourhood cannot be blank; please pick a name or cancel`,
+      );
+    } else if (used.has(name)) {
       window.alert(
         `There is already a neighbourhood called ${name}; please pick another name`,
       );
