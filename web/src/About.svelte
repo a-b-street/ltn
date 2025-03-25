@@ -43,6 +43,7 @@
     </a>
     data.
   </p>
+  <p>Some road signs images © Crown copyright.</p>
   <center>
     <button on:click={() => ($showAbout = false)}>Start!</button>
   </center>

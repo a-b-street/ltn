@@ -12,7 +12,7 @@
   import { notNull } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import onewayArrowUrl from "../../assets/arrow.png?url";
+  import onewayArrowUrl from "../../assets/one_way_left.svg?url";
   import AnimatePaths from "../AnimatePaths.svelte";
   import {
     HelpButton,
@@ -354,9 +354,24 @@
         disabled={action.kind == "oneway"}
         class:active={action.kind == "oneway"}
         class:outline={action.kind != "oneway"}
-        data-tooltip="Reverse directions (hotkey 3)"
+        data-tooltip="Toggle one-way (hotkey 3)"
       >
-        <img src={onewayArrowUrl} alt="Reverse directions" />
+        <!-- 
+         cheat the default padding just a bit with negative placement, 
+         these small circles crowd each other more than they crowd their container
+         -->
+        <div style="height: 100%; width: 100%; position: relative;">
+          <img
+            style="position: absolute; width: 60%; height: 60%; top: -1px; left: -1px;"
+            src={onewayArrowUrl}
+            alt="Reverse directions"
+          />
+          <img
+            style="position: absolute; width: 60%; height: 60%; bottom: -1px; right: -1px; transform: rotate(180deg);"
+            src={onewayArrowUrl}
+            alt="Reverse directions"
+          />
+        </div>
       </button>
       <button
         on:click={() => (action = startTurnRestrictionAction())}
@@ -366,7 +381,7 @@
         data-tooltip="Restrict turns (hotkey 4)"
       >
         <img
-          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.png`}
+          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
           alt="Restrict turns"
         />
       </button>
