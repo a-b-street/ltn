@@ -108,12 +108,12 @@
   <div slot="sidebar">
     {#if $map && wasmReady}
       {#if studyAreas.length > 0}
-        <h2>Your projects</h2>
+        <h1>Your projects</h1>
         <div class="project-list">
           {#each studyAreas as [studyAreaName, projects]}
-            <h3 class="study-area-name">
+            <h2 class="study-area-name">
               {prettyPrintStudyAreaName(studyAreaName)}
-            </h3>
+            </h2>
             <ul class="navigable-list">
               {#each projects as { projectID, projectName }}
                 <li class="actionable-cell">
@@ -148,7 +148,7 @@
         </div>
       {/if}
 
-      <h2>Start a new project</h2>
+      <h1>Start a new project</h1>
       {#if $appFocus == "global"}
         <button on:click={() => ($mode = { mode: "new-project" })}>
           New project
