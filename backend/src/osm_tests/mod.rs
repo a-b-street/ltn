@@ -1,4 +1,5 @@
 use crate::map_model::ProjectDetails;
+use crate::test_fixtures::TEST_DB_SCHEMA_VERSION;
 use crate::MapModel;
 use geo::MultiPolygon;
 
@@ -41,6 +42,7 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
         project_name: "test-project".to_string(),
         study_area_name: None,
         app_focus: "global".to_string(),
+        db_schema_version: TEST_DB_SCHEMA_VERSION,
     };
     MapModel::new(
         &std::fs::read(path).unwrap(),

@@ -1,15 +1,15 @@
 import type { FeatureCollection } from "geojson";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NeighbourhoodDefinitionFeature } from "../wasm";
-import {
-  Database,
-  ProjectStorage,
-  type ProjectFeatureCollection,
-} from "./ProjectStorage";
-
-let projectStorage: ProjectStorage;
+import { Database, type ProjectFeatureCollection } from "./ProjectStorage";
 
 // Helper function to mock localStorage with predefined data
+function mockProjectStorage(mockData = {}) {
+  let { storage, localStorage } = mockLocalStorage(mockData);
+  let projectStorage = new Database().projectStorage("cnt");
+  return { projectStorage, storage, localStorage };
+}
+
 function mockLocalStorage(mockData = {}) {
   let storage: Record<string, string> = {};
 
@@ -35,14 +35,12 @@ function mockLocalStorage(mockData = {}) {
     },
     writable: true,
   });
-  projectStorage = new Database().projectStorage("cnt");
 
   return { storage, localStorage: window.localStorage };
 }
 
 beforeEach(() => {
   vi.resetAllMocks();
-  mockLocalStorage();
 });
 
 afterEach(() => {
@@ -79,7 +77,7 @@ describe("Database", () => {
       database.ensureMigrated();
 
       // Should have schema version stored
-      expect(storage["ltn/_meta/schema-version"]).toBe("1");
+      expect(storage["ltn/_meta/schema-version"]).toBe("2");
 
       // Old format keys should be removed
       expect(storage["ltn_TestProject"]).toBeUndefined();
@@ -120,35 +118,35 @@ describe("Database", () => {
     });
 
     it("should not migrate if schema is already up to date", () => {
-      const { localStorage } = mockLocalStorage({
-        "ltn/_meta/schema-version": "1",
-      });
+      mockLocalStorage();
+
+      let database = new Database();
+      database.ensureMigrated();
 
       const getItemSpy = vi.spyOn(localStorage, "getItem");
       const setItemSpy = vi.spyOn(localStorage, "setItem");
 
-      const database = new Database();
+      database = new Database();
       database.ensureMigrated();
 
       // Should check schema version
       expect(getItemSpy).toHaveBeenCalledWith("ltn/_meta/schema-version");
-
       // Should not set schema version again
       expect(setItemSpy).not.toHaveBeenCalledWith(
         "ltn/_meta/schema-version",
-        "1",
+        expect.anything(),
       );
     });
 
     it("should set schema version when localStorage is empty", () => {
-      const { localStorage } = mockLocalStorage({});
+      const { localStorage } = mockLocalStorage();
       localStorage.clear();
       const setItemSpy = vi.spyOn(localStorage, "setItem");
 
       const database = new Database();
       database.ensureMigrated();
 
-      expect(setItemSpy).toHaveBeenCalledWith("ltn/_meta/schema-version", "1");
+      expect(setItemSpy).toHaveBeenCalledWith("ltn/_meta/schema-version", "2");
     });
   });
 });
@@ -156,7 +154,7 @@ describe("Database", () => {
 describe("ProjectStorage", () => {
   describe("createEmptyProject", () => {
     it("should save project data if it's a known project", () => {
-      let { storage } = mockLocalStorage({});
+      let { projectStorage, storage } = mockProjectStorage();
       let id = projectStorage.createEmptyProject("Project Name", "TestArea");
       let key = projectStorage.projectKey(id);
       let originalProject: ProjectFeatureCollection = JSON.parse(storage[key]);
@@ -172,6 +170,7 @@ describe("ProjectStorage", () => {
 
   describe("studyAreas", () => {
     it("should list projects by study area", () => {
+      let { projectStorage } = mockProjectStorage();
       projectStorage.createEmptyProject("Project 1", "Edinburgh");
       projectStorage.createEmptyProject("Project 2", "Glasgow");
       projectStorage.createEmptyProject("Project 3", "Edinburgh");
@@ -195,6 +194,7 @@ describe("ProjectStorage", () => {
     });
 
     it("should return empty array when storage is empty", () => {
+      let { projectStorage } = mockProjectStorage();
       const result = projectStorage.studyAreaProjects();
       expect(result).toHaveLength(0);
     });
@@ -202,7 +202,7 @@ describe("ProjectStorage", () => {
 
   describe("removeProject", () => {
     it("should remove project", () => {
-      let { storage } = mockLocalStorage({});
+      let { projectStorage, storage } = mockProjectStorage();
       let id = projectStorage.createEmptyProject("Project Name", "TestArea");
       let key = projectStorage.projectKey(id);
       expect(storage[key]).toBeDefined();
@@ -212,6 +212,7 @@ describe("ProjectStorage", () => {
     });
 
     it("should not throw error when project doesn't exist", () => {
+      let { projectStorage } = mockProjectStorage();
       expect(() =>
         projectStorage.removeProject("ce-nest-pas-un-uuid"),
       ).not.toThrow();
@@ -220,6 +221,7 @@ describe("ProjectStorage", () => {
 
   describe("renameProject", () => {
     it("should rename a project by updating the projectSummary", () => {
+      let { projectStorage } = mockProjectStorage();
       let id = projectStorage.createEmptyProject("Original Name", "TestArea");
       expect(projectStorage.projectName(id)).toBe("Original Name");
 
@@ -228,6 +230,7 @@ describe("ProjectStorage", () => {
     });
 
     it("should throw error when project doesn't exist", () => {
+      let { projectStorage } = mockProjectStorage();
       expect(() =>
         projectStorage.renameProject("ce-nest-pas-un-uuid", "New Name"),
       ).toThrow("Cannot get project: no project found for ce-nest-pas-un-uuid");
@@ -236,6 +239,7 @@ describe("ProjectStorage", () => {
 
   describe("projectNameAlreadyExists", () => {
     it("should return true if project name already exists", () => {
+      let { projectStorage } = mockProjectStorage();
       projectStorage.createEmptyProject("Existing Project", "TestArea");
       expect(projectStorage.projectNameAlreadyExists("Existing Project")).toBe(
         true,
@@ -243,6 +247,7 @@ describe("ProjectStorage", () => {
     });
 
     it("should return false if project name does not exist", () => {
+      let { projectStorage } = mockProjectStorage();
       expect(
         projectStorage.projectNameAlreadyExists("Nonexistent Project"),
       ).toBe(false);
@@ -251,17 +256,20 @@ describe("ProjectStorage", () => {
 
   describe("nextAvailableProjectName", () => {
     it("should return the same name if it's available", () => {
+      let { projectStorage } = mockProjectStorage();
       expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
         "Test Project",
       );
     });
     it("should return a unique name if the name is already taken", () => {
+      let { projectStorage } = mockProjectStorage();
       projectStorage.createEmptyProject("Test Project", "TestArea");
       expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
         "Test Project (2)",
       );
     });
     it("should return a unique name if the name is already taken multiple times", () => {
+      let { projectStorage } = mockProjectStorage();
       projectStorage.createEmptyProject("Test Project", "TestArea");
       projectStorage.createEmptyProject("Test Project (2)", "TestArea");
       expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
@@ -272,6 +280,7 @@ describe("ProjectStorage", () => {
 
   describe("nextAvailableNeighbourhoodName", () => {
     it("should return un-suffixed name when there are no neighbourhoods", () => {
+      let { projectStorage } = mockProjectStorage();
       let projectID = projectStorage.createEmptyProject(
         "Test Project",
         "TestArea",
@@ -282,6 +291,7 @@ describe("ProjectStorage", () => {
     });
 
     it("should add a unique suffix if the name is already taken", () => {
+      let { projectStorage } = mockProjectStorage();
       let projectID = projectStorage.createEmptyProject(
         "Test Project",
         "TestArea",
@@ -303,6 +313,8 @@ describe("ProjectStorage", () => {
     });
 
     it("should return un-suffixed name as long as any existing projects don't have that name.", () => {
+      let { projectStorage } = mockProjectStorage();
+
       let projectID = projectStorage.createEmptyProject(
         "Test Project",
         "TestArea",

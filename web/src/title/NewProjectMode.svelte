@@ -42,6 +42,7 @@
         $appFocus,
         studyAreaName,
         newProjectName,
+        $projectStorage.dbSchemaVersion,
       );
 
       const projectID = $projectStorage.createProject($backend.toSavefile());

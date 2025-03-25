@@ -38,6 +38,7 @@ export async function loadProject(projectID: ProjectID) {
         project.app_focus,
         project.study_area_name,
         project.project_name,
+        project.db_schema_version,
       ),
     );
     // TODO Rename savefile -> project? Or combine this call with the constructor?

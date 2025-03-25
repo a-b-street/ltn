@@ -47,6 +47,11 @@ impl NeighbourhoodFixture {
     };
 }
 
+// Currently, `db_schema_version` is only used by the frontend for import/export.
+// To the backend it's opaque, so the value here currently has no consequence.
+// In theory, we could one day do our schema migrations in rust.
+pub const TEST_DB_SCHEMA_VERSION: u32 = 3;
+
 impl NeighbourhoodFixture {
     pub fn map_model(&self) -> Result<MapModel> {
         self.map_model_builder()?()
@@ -135,6 +140,7 @@ impl NeighbourhoodFixture {
                 project_name: self.savefile_name.to_string(),
                 study_area_name: Some(study_area_name.to_string()),
                 app_focus: "global".to_string(),
+                db_schema_version: TEST_DB_SCHEMA_VERSION,
             };
             MapModel::new(
                 &input_bytes,

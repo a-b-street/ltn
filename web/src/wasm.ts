@@ -63,6 +63,7 @@ export class Backend {
     appFocus: AppFocus,
     studyAreaName: StudyAreaName,
     projectName: string,
+    dbSchemaVersion: number,
   ) {
     this.inner = new LTN(
       osmInput,
@@ -72,6 +73,7 @@ export class Backend {
       appFocus,
       studyAreaName,
       projectName,
+      dbSchemaVersion,
     );
   }
 

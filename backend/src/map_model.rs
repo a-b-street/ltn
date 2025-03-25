@@ -224,6 +224,7 @@ pub struct ProjectDetails {
     pub app_focus: String,
     pub study_area_name: Option<String>,
     pub project_name: String,
+    pub db_schema_version: u32,
 }
 
 impl MapModel {

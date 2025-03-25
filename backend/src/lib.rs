@@ -63,6 +63,7 @@ impl LTN {
         app_focus: String,
         study_area_name: Option<String>,
         project_name: String,
+        db_schema_version: u32,
     ) -> Result<LTN, JsValue> {
         // Panics shouldn't happen, but if they do, console.log them.
         console_error_panic_hook::set_once();
@@ -95,6 +96,7 @@ impl LTN {
             app_focus,
             study_area_name,
             project_name,
+            db_schema_version,
         };
         let map = MapModel::new(
             input_bytes,

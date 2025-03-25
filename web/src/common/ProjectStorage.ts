@@ -4,13 +4,20 @@ import type { NeighbourhoodDefinitionFeature } from "../wasm";
 
 export type ProjectID = ReturnType<(typeof crypto)["randomUUID"]>;
 export type StudyAreaName = string | undefined;
-export interface ProjectFeatureCollection
-  extends FeatureCollection<Polygon | MultiPolygon> {
+
+export type UnsavedProjectFeatureCollection = FeatureCollection<
+  Polygon | MultiPolygon
+> & {
   // Foreign Members
   project_name: string;
   study_area_name: StudyAreaName;
   app_focus: AppFocus;
-}
+  db_schema_version?: number;
+};
+
+export type ProjectFeatureCollection = UnsavedProjectFeatureCollection & {
+  db_schema_version: number;
+};
 
 /**
  * Handles migrating the local storage schema.
@@ -39,7 +46,7 @@ export class Database {
 
   ensureMigrated() {
     // increment this and add a new logic block if you need to add a migration
-    const latestSchemaVersion = 1;
+    const latestSchemaVersion = 2;
 
     if (localStorage.length == 0) {
       console.log("localStorage is empty — nothing to migrate.");
@@ -55,6 +62,13 @@ export class Database {
       return;
     }
 
+    // Migration v0 -> v1
+    //
+    // This introduces schema versioning, and migrates from the old project key
+    // format, which encoded project_name, study_area_name, and app_focus into
+    // the key, to the new key format, which is a meaningless UUID.
+    //
+    // project_name, study_area_name, and app_focus are now stored in the project foreign members.
     if (this.storedSchemaVersion < 1) {
       console.log(
         `Migrating storage from version ${this.storedSchemaVersion} to ${latestSchemaVersion}`,
@@ -63,6 +77,7 @@ export class Database {
         const appFocus = focus as AppFocus;
         const projectStorage = new ProjectStorage(
           appFocus,
+          1,
           INTERNAL_METHOD_TOKEN,
         );
         for (const [studyAreaName, projects] of schemaV0_studyAreaProjects(
@@ -88,7 +103,7 @@ export class Database {
             console.log(`migrating project ${legacyProjectKey}`);
             let id = projectStorage.createProject(project);
             console.log(
-              `Successfully migrated project ${legacyProjectKey} to ${projectStorage.projectKey(id)}`,
+              `Successfully migrated v0->v1 project ${legacyProjectKey} -> ${projectStorage.projectKey(id)}`,
             );
 
             // Remove the legacy data
@@ -97,16 +112,54 @@ export class Database {
         }
       }
     }
+
+    // Migration v1 -> v2
+    //
+    // Store the schemaVersion in the project foreign members.
+    //
+    // This is largely redundant information with Datagase.storedSchemaVersion,
+    // but it makes exporting projects easier, since the schema version is now
+    // stored in the project itself.
+    //
+    // It also serves as a nice safety point - in the case of a partially successful migration,
+    // we can avoid re-migrating projects which were successfully migrated last time.
+    if (this.storedSchemaVersion < 2) {
+      for (const focus of ["cnt", "global"]) {
+        const appFocus = focus as AppFocus;
+        const projectStorage = new ProjectStorage(
+          appFocus,
+          2,
+          INTERNAL_METHOD_TOKEN,
+        );
+        for (const [projectID, project] of projectStorage.projects()) {
+          if (project.db_schema_version >= 2) {
+            console.log(`skipping previously migrated project: ${projectID}`);
+            continue;
+          }
+          project.db_schema_version = 2;
+          projectStorage.saveProject(projectID, project);
+          console.log(
+            `Successfully migrated v1->v2 project: ${projectStorage.projectKey(projectID)}`,
+          );
+        }
+      }
+    }
+
     window.localStorage.setItem(
       this.schemaVersionKey,
       latestSchemaVersion.toString(),
     );
+    console.debug(`Completed migrating database to v${latestSchemaVersion}`);
   }
 
   projectStorage(appFocus: AppFocus) {
     // important that this be done before projectStorage is returned
     this.ensureMigrated();
-    return new ProjectStorage(appFocus, INTERNAL_METHOD_TOKEN);
+    return new ProjectStorage(
+      appFocus,
+      this.storedSchemaVersion,
+      INTERNAL_METHOD_TOKEN,
+    );
   }
 }
 
@@ -118,17 +171,23 @@ const INTERNAL_METHOD_TOKEN = Symbol("internal_method_token");
 
 export class ProjectStorage {
   appFocus: AppFocus;
+  dbSchemaVersion: number;
 
   /**
    * Don't call this method directly, use Database.projectStorage()
    */
-  constructor(appFocus: AppFocus, internalMethodToken: symbol) {
+  constructor(
+    appFocus: AppFocus,
+    dbSchemaVersion: number,
+    internalMethodToken: symbol,
+  ) {
     if (internalMethodToken !== INTERNAL_METHOD_TOKEN) {
       throw new Error(
         "ProjectStorage must be created via Database.projectStorage()",
       );
     }
     this.appFocus = appFocus;
+    this.dbSchemaVersion = dbSchemaVersion;
   }
 
   private get collectionKey() {
@@ -200,7 +259,7 @@ export class ProjectStorage {
     projectName: string,
     studyAreaName: StudyAreaName,
   ): ProjectID {
-    const project: ProjectFeatureCollection = {
+    const project: UnsavedProjectFeatureCollection = {
       type: "FeatureCollection" as const,
       features: [],
       study_area_name: studyAreaName,
@@ -213,12 +272,15 @@ export class ProjectStorage {
   /**
    * @throws if the project name already exists
    */
-  createProject(project: ProjectFeatureCollection): ProjectID {
+  createProject(project: UnsavedProjectFeatureCollection): ProjectID {
     if (this.projectNameAlreadyExists(project.project_name)) {
       throw new Error(`Project name already taken: ${project.project_name}`);
     }
+    if (!project.db_schema_version) {
+      project.db_schema_version = this.dbSchemaVersion;
+    }
     let projectID = crypto.randomUUID();
-    this.saveProject(projectID, project);
+    this.saveProject(projectID, project as ProjectFeatureCollection);
     return projectID;
   }
 

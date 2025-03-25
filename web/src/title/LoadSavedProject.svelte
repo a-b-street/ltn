@@ -52,7 +52,6 @@
         projectName = stripSuffix(stripPrefix(filename, "ltn_"), ".geojson");
       }
     }
-
     // Verified non-null by the above if statement
     projectName = projectName!;
     appFocus = appFocus!;
