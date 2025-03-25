@@ -48,7 +48,7 @@
     NeighbourhoodBoundaryFeature,
     RenderNeighbourhoodOutput,
   } from "../wasm";
-  import ChangeModalFilter from "./ChangeModalFilter.svelte";
+  import ChangeFilterModal from "./ChangeFilterModal.svelte";
   import FreehandLine from "./FreehandLine.svelte";
 
   // Caller is responsible for doing backend.setCurrentNeighbourhood
@@ -312,10 +312,7 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <p>
-      Editing neighbourhood <u>{notNull(boundary).properties.name}</u>
-      , with an area of {notNull(boundary).properties.area_km2.toFixed(1)} km²
-    </p>
+    <h1>{notNull(boundary).properties.name}</h1>
 
     {#if numDisconnectedCells > 0}
       <mark>
@@ -324,6 +321,7 @@
       </mark>
     {/if}
 
+    <h2>Editing tools</h2>
     <div class="tool-palette">
       <button
         on:click={() => (action = { kind: "filter" })}
@@ -390,29 +388,7 @@
     <button class="outline" on:click={() => (settingFilterType = true)}>
       Change modal filter type
     </button>
-
-    <label>
-      <input type="checkbox" bind:checked={$animateShortcuts} />
-      Animate shortcuts
-    </label>
-
-    <div style="border: 1px solid black; padding: 4px">
-      <label>
-        Draw roads:
-        <select bind:value={$roadStyle}>
-          <option value="shortcuts">Worst shortcuts</option>
-          <option value="cells">Cell</option>
-          <option value="edits">Edits (either filter or direction)</option>
-          <option value="speeds">Speed limit</option>
-        </select>
-      </label>
-      {#if $roadStyle == "speeds"}
-        <SequentialLegend
-          colorScale={speedColorScale}
-          labels={{ limits: speedLimits }}
-        />
-      {/if}
-    </div>
+    <ChangeFilterModal bind:show={settingFilterType} />
 
     <div style="display: flex; justify-content: space-between;">
       <button
@@ -441,7 +417,29 @@
       </button>
     </div>
 
-    <ChangeModalFilter bind:show={settingFilterType} />
+    <h2>Map style</h2>
+    <label>
+      <input type="checkbox" bind:checked={$animateShortcuts} />
+      Animate shortcuts
+    </label>
+
+    <div style="border: 1px solid black; padding: 4px">
+      <label>
+        Draw roads:
+        <select bind:value={$roadStyle}>
+          <option value="shortcuts">Worst shortcuts</option>
+          <option value="cells">Cell</option>
+          <option value="edits">Edits (either filter or direction)</option>
+          <option value="speeds">Speed limit</option>
+        </select>
+      </label>
+      {#if $roadStyle == "speeds"}
+        <SequentialLegend
+          colorScale={speedColorScale}
+          labels={{ limits: speedLimits }}
+        />
+      {/if}
+    </div>
   </div>
 
   <div slot="map">
