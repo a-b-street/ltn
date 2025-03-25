@@ -336,22 +336,22 @@
 
   :global(.left .pico h1) {
     font-size: 36px;
-    margin: 0 0 10px 0;
+    margin: 10px 0;
   }
 
   :global(.left .pico h2) {
     font-size: 28px;
-    margin: 0 0 8px 0;
+    margin: 8px 0;
   }
 
   :global(.left .pico h3) {
     font-size: 22px;
-    margin: 0 0 6px 0;
+    margin: 6px 0;
   }
 
   :global(.left .pico h4) {
     font-size: 18px;
-    margin: 0 0 4px 0;
+    margin: 4px 0;
   }
 
   /**
