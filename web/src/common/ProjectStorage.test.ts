@@ -247,4 +247,25 @@ describe("ProjectStorage", () => {
       ).toBe(false);
     });
   });
+
+  describe("nextAvailableProjectName", () => {
+    it("should return the same name if it's available", () => {
+      expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
+        "Test Project",
+      );
+    });
+    it("should return a unique name if the name is already taken", () => {
+      projectStorage.createEmptyProject("Test Project", "TestArea");
+      expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
+        "Test Project (2)",
+      );
+    });
+    it("should return a unique name if the name is already taken multiple times", () => {
+      projectStorage.createEmptyProject("Test Project", "TestArea");
+      projectStorage.createEmptyProject("Test Project (2)", "TestArea");
+      expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
+        "Test Project (3)",
+      );
+    });
+  });
 });

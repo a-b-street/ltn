@@ -58,7 +58,13 @@
       return;
     }
 
-    let projectID = $projectStorage.createEmptyProject(newProjectName, example);
+    let projectID;
+    try {
+      projectID = $projectStorage.createEmptyProject(newProjectName, example);
+    } catch (err) {
+      window.alert(`Couldn't create project: ${err}`);
+      return;
+    }
     loading = `Loading pre-clipped OSM area ${example}`;
     await loadProject(projectID);
     $mode = { mode: "add-neighbourhood" };

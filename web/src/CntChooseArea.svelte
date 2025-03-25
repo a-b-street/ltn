@@ -42,17 +42,28 @@
   }
 
   async function newFile(studyAreaName: string) {
-    let projectName = "";
+    let projectName;
     let created = false;
     while (!created) {
-      projectName =
-        window.prompt(
-          `Please pick a project name to create in ${prettyPrintStudyAreaName(studyAreaName)}`,
-          projectName,
-        ) || "";
-      if (projectName == "") {
-        // If the user leaves this blank or presses cancel, stop prompting them.
+      let defaultName: string | null =
+        projectName ||
+        $projectStorage.nextAvailableProjectName(
+          prettyPrintStudyAreaName(studyAreaName),
+        );
+      projectName = window.prompt(
+        `Please pick a project name to create in ${prettyPrintStudyAreaName(studyAreaName)}`,
+        defaultName,
+      );
+      if (projectName === null) {
+        // If the user presses cancel, stop prompting them.
         return;
+      }
+      projectName = projectName.trim();
+      if (projectName === "") {
+        window.alert(
+          "Project name cannot be blank; Please pick a name or cancel.",
+        );
+        continue;
       }
       activityIndicatorText = `Loading pre-clipped OSM area ${prettyPrintStudyAreaName(studyAreaName)}`;
       try {

@@ -58,15 +58,7 @@
     appFocus = appFocus!;
 
     let projectStorage = database.projectStorage(appFocus);
-
-    if (projectStorage.projectNameAlreadyExists(projectName)) {
-      let originalProjectName = projectName;
-      let i = 2;
-      do {
-        projectName = `${originalProjectName} (${i})`;
-        i++;
-      } while (projectStorage.projectNameAlreadyExists(projectName));
-    }
+    projectName = projectStorage.nextAvailableProjectName(projectName)!;
 
     gj.project_name = projectName;
     gj.app_focus = appFocus!;
