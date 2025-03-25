@@ -7,6 +7,7 @@
     GeoJSON,
     hoverStateFilter,
     JoinedData,
+    LineLayer,
   } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
@@ -108,15 +109,15 @@
   function fillColor(
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<string> {
+    let highlightedColor = "yellow";
     let color = prioritizationFillColor(
-      { none: "black" },
+      { none: highlightedColor },
       selectedPrioritization,
     );
-
     return [
       "case",
       ["==", ["feature-state", "highlight"], "yes"],
-      "yellow",
+      highlightedColor,
       // @ts-expect-error MapLibre expression types are weird, but this really does work
       color,
     ];
@@ -125,15 +126,22 @@
   function fillOpacity(
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<number> {
-    return {
-      none: hoverStateFilter(0.3, 0.5),
+    let highlightedOpacity = 0.5;
+    let styles: Record<string, DataDrivenPropertyValueSpecification<number>> = {
+      none: [
+        "case",
+        ["==", ["feature-state", "highlight"], "yes"],
+        highlightedOpacity,
+        hoverStateFilter(0.0, highlightedOpacity),
+      ],
       area: hoverStateFilter(0.7, 0.9),
       density: hoverStateFilter(0.7, 0.9),
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
       pois: hoverStateFilter(0.7, 0.9),
       car_ownership: hoverStateFilter(0.7, 0.9),
-    }[selectedPrioritization];
+    };
+    return styles[selectedPrioritization];
   }
 </script>
 
@@ -260,6 +268,26 @@
         idCol="name"
       />
 
+      <LineLayer
+        filter={["==", ["get", "kind"], "boundary"]}
+        {...layerId("neighbourhood-boundaries-selected-outline", false)}
+        manageHoverState={false}
+        paint={{
+          "line-color": "black",
+          "line-width": 4,
+          "line-dasharray": [2, 2],
+        }}
+      />
+      <LineLayer
+        filter={["==", ["get", "kind"], "boundary"]}
+        {...layerId("neighbourhood-boundaries-selected-outline-base", false)}
+        manageHoverState={false}
+        paint={{
+          "line-color": "white",
+          "line-width": 8,
+          "line-opacity": 0.7,
+        }}
+      />
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
         filter={["==", ["get", "kind"], "boundary"]}
