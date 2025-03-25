@@ -1,5 +1,6 @@
 import type { FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import type { AppFocus } from "../stores";
+import type { NeighbourhoodDefinitionFeature } from "../wasm";
 
 export type ProjectID = ReturnType<(typeof crypto)["randomUUID"]>;
 export type StudyAreaName = string | undefined;
@@ -171,6 +172,25 @@ export class ProjectStorage {
       } while (this.projectNameAlreadyExists(projectName));
     }
     return projectName;
+  }
+
+  nextAvailableNeighbourhoodName(projectID: ProjectID): string {
+    let project = this.project(projectID);
+    let basename = `${project.project_name} LTN`;
+
+    let neighbourhoods = project.features.filter(
+      (f) => f.properties?.kind == "boundary",
+    ) as Array<NeighbourhoodDefinitionFeature>;
+
+    let neighbourhoodName = basename;
+    let i = 1;
+    while (
+      neighbourhoods.some((n) => n.properties?.name == neighbourhoodName)
+    ) {
+      i++;
+      neighbourhoodName = `${basename} #${i}`;
+    }
+    return neighbourhoodName;
   }
 
   /**

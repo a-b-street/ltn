@@ -1,5 +1,6 @@
 import type { FeatureCollection } from "geojson";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { NeighbourhoodDefinitionFeature } from "../wasm";
 import {
   Database,
   ProjectStorage,
@@ -265,6 +266,60 @@ describe("ProjectStorage", () => {
       projectStorage.createEmptyProject("Test Project (2)", "TestArea");
       expect(projectStorage.nextAvailableProjectName("Test Project")).toBe(
         "Test Project (3)",
+      );
+    });
+  });
+
+  describe("nextAvailableNeighbourhoodName", () => {
+    it("should return un-suffixed name when there are no neighbourhoods", () => {
+      let projectID = projectStorage.createEmptyProject(
+        "Test Project",
+        "TestArea",
+      );
+      expect(projectStorage.nextAvailableNeighbourhoodName(projectID)).toBe(
+        "Test Project LTN",
+      );
+    });
+
+    it("should add a unique suffix if the name is already taken", () => {
+      let projectID = projectStorage.createEmptyProject(
+        "Test Project",
+        "TestArea",
+      );
+      let existingNeighbourhood: NeighbourhoodDefinitionFeature = {
+        type: "Feature",
+        geometry: { type: "Polygon", coordinates: [] },
+        properties: {
+          kind: "boundary",
+          name: "Test Project LTN",
+        },
+      };
+      let project = projectStorage.project(projectID);
+      project.features.push(existingNeighbourhood);
+      projectStorage.saveProject(projectID, project);
+      expect(projectStorage.nextAvailableNeighbourhoodName(projectID)).toBe(
+        "Test Project LTN #2",
+      );
+    });
+
+    it("should return un-suffixed name as long as any existing projects don't have that name.", () => {
+      let projectID = projectStorage.createEmptyProject(
+        "Test Project",
+        "TestArea",
+      );
+      let existingNeighbourhood: NeighbourhoodDefinitionFeature = {
+        type: "Feature",
+        geometry: { type: "Polygon", coordinates: [] },
+        properties: {
+          kind: "boundary",
+          name: "Custom neighbourhood name",
+        },
+      };
+      let project = projectStorage.project(projectID);
+      project.features.push(existingNeighbourhood);
+      projectStorage.saveProject(projectID, project);
+      expect(projectStorage.nextAvailableNeighbourhoodName(projectID)).toBe(
+        "Test Project LTN",
       );
     });
   });

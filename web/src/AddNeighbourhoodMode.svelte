@@ -27,8 +27,10 @@
   import {
     appFocus,
     backend,
+    currentProjectID,
     map,
     mode,
+    projectStorage,
     returnToChooseProject,
     saveCurrentProject,
   } from "./stores";
@@ -133,10 +135,14 @@
   }
 
   function createNeighbourhood(selectedBoundary: GeneratedBoundaryFeature) {
+    let defaultName = $projectStorage.nextAvailableNeighbourhoodName(
+      $currentProjectID!,
+    );
+
     let name = pickNeighbourhoodName(
       $backend!,
       "What do you want to name the neighbourhood?",
-      "",
+      defaultName,
     );
     if (!name) {
       return;
