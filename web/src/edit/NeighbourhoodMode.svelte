@@ -358,9 +358,9 @@
       >
         <!-- 
          cheat the default padding just a bit with negative placement, 
-         these small circles crowd eachother more than they crowd their container 
+         these small circles crowd each other more than they crowd their container
          -->
-        <div style="height: 100%; widht: 100%; position: relative;">
+        <div style="height: 100%; width: 100%; position: relative;">
           <img
             style="position: absolute; width: 60%; height: 60%; top: -1px; left: -1px;"
             src={onewayArrowUrl}
