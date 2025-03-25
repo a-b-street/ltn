@@ -282,9 +282,6 @@
   :global(.pico .icon-btn),
   :global(.icon-btn) {
     margin: 0;
-    height: 36px;
-    width: 36px;
-    aspect-ratio: 1;
     padding: 6px;
     display: flex;
     align-items: center;
@@ -303,8 +300,9 @@
 
   :global(.pico .icon-btn svg),
   :global(.icon-btn svg) {
-    width: 100%;
-    height: 100%;
+    height: 22px;
+    width: 22px;
+    aspect-ratio: 1;
     object-fit: contain;
   }
 
