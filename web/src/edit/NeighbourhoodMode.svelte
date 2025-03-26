@@ -441,9 +441,9 @@
       <p>
         <i>Main roads</i>, drawn in gray, were classified automatically using
         data from
-        <a href="https://openstreetmap.org/about" target="_blank">
-          OpenStreetMap
-        </a>, but you can reclassify a road segment by clicking on it.
+        <a href="https://openstreetmap.org/about" target="_blank"
+          >OpenStreetMap</a
+        >, but you can reclassify a road segment by clicking on it.
       </p>
 
       <p>
