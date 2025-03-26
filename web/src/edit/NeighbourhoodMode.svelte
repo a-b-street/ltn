@@ -531,10 +531,10 @@
       onClickTurnRestriction={deleteTurnRestriction}
     >
       <div slot="modal-filter">
-        <Popup openOn="hover">Click to delete</Popup>
+        <Popup openOn="hover">Click to delete filter</Popup>
       </div>
       <div slot="turn-restriction">
-        <Popup openOn="hover">Click to delete</Popup>
+        <Popup openOn="hover">Click to delete turn restriction</Popup>
       </div>
     </ModalFilterLayer>
 
