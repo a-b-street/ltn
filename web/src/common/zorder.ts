@@ -102,6 +102,8 @@ const layerZorder = [
   "editable-intersections",
   "intersection-filters",
 
+  "border-entries",
+
   "compare-route",
 
   "shortcuts",
@@ -146,10 +148,6 @@ const layerZorder = [
 
   "boundary",
   "neighbourhood-boundary",
-
-  // These're outside the neighbourhood-boundary, but don't fade them
-  "border-arrows",
-  "border-arrow-outlines",
 
   "freehand-line",
 

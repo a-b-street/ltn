@@ -1,22 +1,22 @@
 use std::collections::BTreeSet;
 
 use crate::geo_helpers::{
-    buffer_polygon, invert_feature_geometry_in_place, make_polygon_valid,
+    buffer_polygon, euclidean_bearing, invert_feature_geometry_in_place, make_polygon_valid,
     SliceNearestFrechetBoundary,
 };
 use anyhow::Result;
 use geo::{
-    Euclidean, Length, Line, LineString, MultiLineString, Polygon, PreparedGeometry, Relate,
+    Euclidean, Length, LineString, MultiLineString, Point, Polygon, PreparedGeometry, Relate,
 };
 use geojson::{Feature, FeatureCollection};
 use serde::{Deserialize, Serialize};
+use utils::Mercator;
 use web_time::Instant;
 
 use crate::boundary_stats::{BoundaryStats, PreparedContextData};
-use crate::geo_helpers::{
-    aabb, angle_of_line, buffer_aabb, clip_linestring_to_polygon, euclidean_destination, make_arrow,
-};
+use crate::geo_helpers::{aabb, buffer_aabb, clip_linestring_to_polygon};
 use crate::map_model::DiagonalFilter;
+use crate::render_cells::Color;
 use crate::route::RouterInput;
 use crate::{
     Cell, Intersection, IntersectionID, MapModel, ModalFilter, RenderCells, Road, RoadID,
@@ -373,11 +373,9 @@ impl Neighbourhood {
         }
 
         for i in &self.border_intersections {
-            let mut f = map.mercator.to_wgs84_gj(&map.get_i(*i).point);
-            f.set_property("kind", "border_intersection");
-            features.push(f);
-
-            features.extend(self.border_arrow(*i, map));
+            for border_entry in self.border_entries(*i, map) {
+                features.push(border_entry.to_feature(&map.mercator))
+            }
         }
 
         for (polygons, color) in derived
@@ -409,57 +407,53 @@ impl Neighbourhood {
         }
     }
 
-    fn border_arrow(&self, i: IntersectionID, map: &MapModel) -> Vec<Feature> {
+    fn border_entries<'a>(
+        &'a self,
+        i: IntersectionID,
+        map: &'a MapModel,
+    ) -> impl Iterator<Item = BorderEntry> + 'a {
         let derived = self.derived.as_ref().unwrap();
-        let mut features = Vec::new();
         let intersection = map.get_i(i);
-        for r in &intersection.roads {
+        intersection.roads.iter().filter_map(move |r| {
             // Most borders only have one road in the interior of the neighbourhood. Draw an arrow
             // for each of those. If there happen to be multiple interior roads for one border, the
             // arrows will overlap each other -- but that happens anyway with borders close
             // together at certain angles.
             if !self.interior_roads.contains(r) {
-                continue;
+                return None;
             }
 
             // Design choice: when we have a filter right at the entrance of a neighbourhood, it
             // creates its own little cell allowing access to just the very beginning of the
             // road. Let's not draw anything for that.
             if map.modal_filters.contains_key(r) {
-                continue;
+                return None;
             }
 
             // Find the angle pointing into the neighbourhood
             let road = map.get_r(*r);
-            let angle_in = if road.src_i == i {
-                angle_of_line(road.linestring.lines().next().unwrap())
+            let bearing_upon_entry = if road.src_i == i {
+                let entry = road
+                    .linestring
+                    .lines()
+                    .next()
+                    .expect("non-empty roads only");
+                euclidean_bearing(entry.start, entry.end)
             } else {
-                angle_of_line(road.linestring.lines().last().unwrap()) + 180.0
+                let entry = road
+                    .linestring
+                    .lines()
+                    .last()
+                    .expect("non-empty roads only");
+                euclidean_bearing(entry.end, entry.start)
             };
-
-            let center = intersection.point;
-            let pt_farther = euclidean_destination(center, angle_in + 180.0, 40.0);
-            let pt_closer = euclidean_destination(center, angle_in + 180.0, 10.0);
-
-            // Point out of the neighbourhood
-            let mut line = Line::new(pt_closer, pt_farther);
-            // If the road is one-way and points in, then flip it
-            if (map.travel_flows[r] == TravelFlow::FORWARDS && road.src_i == i)
-                || (map.travel_flows[r] == TravelFlow::BACKWARDS && road.dst_i == i)
-            {
-                std::mem::swap(&mut line.start, &mut line.end);
-            }
-
-            let thickness = 6.0;
-            let double_ended = map.travel_flows[r] == TravelFlow::BothWays;
-            if let Some(polygon) = make_arrow(line, thickness, double_ended) {
-                let mut f = map.mercator.to_wgs84_gj(&polygon);
-                f.set_property("kind", "border_arrow");
-                f.set_property("cell_color", derived.render_cells.colors_per_border[&i]);
-                features.push(f);
-            }
-        }
-        features
+            let cell_color = derived.render_cells.colors_per_border[&i];
+            Some(BorderEntry {
+                geometry: intersection.point,
+                bearing_upon_entry,
+                cell_color,
+            })
+        })
     }
 }
 
@@ -537,6 +531,29 @@ fn is_road_mostly_inside(line_string: &LineString, polygon: &Polygon) -> bool {
     };
     let ratio_inside = Euclidean.length(&clipped) / Euclidean.length(line_string);
     ratio_inside > 0.99
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct BorderEntry {
+    #[serde(serialize_with = "geojson::ser::serialize_geometry")]
+    geometry: Point,
+    cell_color: Color,
+    bearing_upon_entry: f64,
+}
+
+impl BorderEntry {
+    fn to_feature(&self, mercator: &Mercator) -> Feature {
+        let mut projected = self.clone();
+        mercator.to_wgs84_in_place(&mut projected.geometry);
+        let mut feature =
+            geojson::ser::to_feature(projected).expect("should have no unserializable fields");
+        let props = feature
+            .properties
+            .as_mut()
+            .expect("BorderEntry always has properties");
+        props.insert("kind".to_string(), "border_entry".into());
+        feature
+    }
 }
 
 #[cfg(test)]

@@ -371,12 +371,11 @@ export interface RenderNeighbourhoodOutput {
       >
     | Feature<Point, { kind: "border_intersection" }>
     | Feature<
-        Polygon,
+        Point,
         {
-          kind: "border_arrow";
+          kind: "border_entry";
           cell_color: "disconnected" | number;
-          // Populated by setCellColors, not in the Rust backend
-          color: string;
+          bearing_upon_entry: number;
         }
       >
     | Feature<
@@ -411,6 +410,24 @@ export type CompareRoute = FeatureCollection<
 function setCellColors(
   gj: RenderNeighbourhoodOutput,
 ): RenderNeighbourhoodOutput {
+  for (let f of gj.features) {
+    if (
+      f.properties.kind != "cell" &&
+      f.properties.kind != "border_arrow" &&
+      f.properties.kind != "interior_road"
+    ) {
+      continue;
+    }
+    f.properties.color = colorForCellColor(f.properties.cell_color);
+  }
+
+  return gj;
+}
+
+export function colorForCellColor(cellColor: "disconnected" | number): string {
+  if (cellColor == "disconnected") {
+    return "red";
+  }
   // A qualitative palette from colorbrewer2.org, skipping the red hue (used
   // for levels of shortcutting) and grey (too close to the basemap)
   let cell_colors = [
@@ -425,22 +442,5 @@ function setCellColors(
     "#ccebc5",
     "#ffed6f",
   ];
-
-  for (let f of gj.features) {
-    if (
-      f.properties.kind != "cell" &&
-      f.properties.kind != "border_arrow" &&
-      f.properties.kind != "interior_road"
-    ) {
-      continue;
-    }
-    if (f.properties.cell_color == "disconnected") {
-      f.properties.color = "red";
-    } else {
-      f.properties.color =
-        cell_colors[f.properties.cell_color % cell_colors.length];
-    }
-  }
-
-  return gj;
+  return cell_colors[cellColor % cell_colors.length];
 }
