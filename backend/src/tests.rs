@@ -53,7 +53,7 @@ fn get_gj(neighbourhood_fixture: &NeighbourhoodFixture) -> Result<String> {
 fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
     // Remove border_arrows
     gj.features
-        .retain(|f| f.property("kind").unwrap().as_str().unwrap() != "border_arrow");
+        .retain(|f| f.property("kind").unwrap().as_str().unwrap() != "border_entries");
 
     for f in &mut gj.features {
         if matches!(

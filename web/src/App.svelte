@@ -1,4 +1,5 @@
 <script lang="ts">
+  import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import logo from "../assets/logo.svg?url";
   import nationalRailUrl from "../assets/national_rail.png?url";
@@ -202,6 +203,11 @@
             {
               id: "oneway_arrow",
               url: onewayArrowUrl,
+            },
+            {
+              id: "border_entry_arrow",
+              url: borderEntryArrorUrl,
+              options: { sdf: true },
             },
             {
               id: "national_rail",
