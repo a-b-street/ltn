@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
-  import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
+  import { CirclePlus, FileDown, Pencil, Trash2 } from "lucide-svelte";
   import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
     FillLayer,
@@ -12,7 +12,7 @@
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { HelpButton, layerId, Link, Style } from "./common";
+  import { downloadProject, HelpButton, layerId, Link, Style } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
   import {
@@ -69,14 +69,6 @@
       saveCurrentProject();
       neighbourhoods = $backend!.getAllNeighbourhoods();
     }
-  }
-
-  function exportGJ() {
-    let projectID = $currentProjectID!;
-    let project = $projectStorage.project(projectID);
-    let dateFormatted = new Date().toISOString().split("T")[0];
-    let filename = `${project.project_name}-${dateFormatted}.geojson`;
-    downloadGeneratedFile(filename, JSON.stringify(project));
   }
 
   function debugRouteSnapper() {
@@ -197,7 +189,27 @@
   </div>
 
   <div slot="sidebar">
-    <h1>{$projectStorage.projectName(notNull($currentProjectID))}</h1>
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"
+    >
+      <h1>{$projectStorage.projectName(notNull($currentProjectID))}</h1>
+      <button
+        class="outline icon-btn"
+        style="margin-right: 8px;"
+        title="Download project as GeoJSON"
+        on:click={() => downloadProject(notNull($currentProjectID))}
+      >
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <FileDown color="black" />
+          <!-- 
+            The text feels a little crowded aginst the right edge. 
+            Currently this is the only place we use an icon+text button like this.
+            But if we do more, we might want to pattern something out.
+          -->
+          <span style="margin-right: 2px;">Export</span>
+        </div>
+      </button>
+    </div>
     <h2>Neighbourhoods</h2>
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
@@ -212,14 +224,14 @@
           <span class="actions">
             <button
               class="outline icon-btn"
-              aria-label="Rename neighbourhood"
+              title="Rename neighbourhood"
               on:click={() => renameNeighbourhood(name)}
             >
               <Pencil color="black" />
             </button>
             <button
               class="icon-btn destructive"
-              aria-label="Delete neighbourhood"
+              title="Delete neighbourhood"
               on:click={() => deleteNeighbourhood(name)}
             >
               <Trash2 color="white" />
@@ -251,7 +263,6 @@
     </p>
     <p>{edits.travelFlows} road segment direction(s) changed</p>
 
-    <button on:click={exportGJ}>Export project to GeoJSON</button>
     {#if $devMode}
       <button class="secondary" on:click={debugRouteSnapper}>
         Debug route-snapper

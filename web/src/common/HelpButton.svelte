@@ -10,7 +10,7 @@
 
 <button
   class="icon-btn help"
-  aria-label="Help"
+  title="Help"
   on:click|stopPropagation={() => (show = true)}
 >
   <CircleHelp {color} />

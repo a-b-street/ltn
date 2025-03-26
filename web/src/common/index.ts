@@ -2,9 +2,10 @@ import type {
   DataDrivenPropertyValueSpecification,
   ExpressionSpecification,
 } from "maplibre-gl";
+import { downloadGeneratedFile } from "svelte-utils";
 import { get } from "svelte/store";
-import { appFocus } from "../stores";
-import { type StudyAreaName } from "./ProjectStorage";
+import { appFocus, projectStorage } from "../stores";
+import { type ProjectID, type StudyAreaName } from "./ProjectStorage";
 
 export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as ContextLayerButton } from "./ContextLayerButton.svelte";
@@ -79,6 +80,13 @@ export function prettyPrintStudyAreaName(studyAreaName: StudyAreaName): string {
   } else {
     return studyAreaName;
   }
+}
+
+export function downloadProject(projectID: ProjectID) {
+  let project = get(projectStorage).project(projectID);
+  let dateFormatted = new Date().toISOString().split("T")[0];
+  let filename = `${project.project_name}-${dateFormatted}.geojson`;
+  downloadGeneratedFile(filename, JSON.stringify(project));
 }
 
 /**

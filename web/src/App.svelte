@@ -273,14 +273,14 @@
     width: 65%;
   }
 
-  :global(.pico .icon-btn.destructive),
-  :global(.icon-btn.destructive),
+  :global(.pico button.icon-btn.destructive),
+  :global(button.icon-btn.destructive),
   :global(.pico button.destructive) {
     background-color: #dc2626;
   }
 
-  :global(.pico .icon-btn),
-  :global(.icon-btn) {
+  :global(.pico button.icon-btn),
+  :global(button.icon-btn) {
     margin: 0;
     padding: 6px;
     display: flex;
@@ -288,18 +288,19 @@
     justify-content: center;
   }
 
-  :global(.pico .icon-btn):hover,
-  :global(.icon-btn):hover {
+  :global(.pico button.icon-btn):hover,
+  :global(button.icon-btn):hover {
     background-color: #ddd;
   }
 
-  :global(.pico .icon-btn.destructive):hover,
-  :global(.icon-btn.destructive):hover {
+  :global(.pico button.icon-btn.destructive):hover,
+  :global(button.icon-btn.destructive):hover {
     background-color: #891717;
   }
 
-  :global(.pico .icon-btn svg),
-  :global(.icon-btn svg) {
+  :global(.pico button.icon-btn svg),
+  :global(button.icon-btn svg) {
+    flex-shrink: 0; /* Prevents the button from shrinking */
     height: 22px;
     width: 22px;
     aspect-ratio: 1;

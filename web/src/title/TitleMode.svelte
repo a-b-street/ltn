@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Pencil, Trash2 } from "lucide-svelte";
+  import { FileDown, Pencil, Trash2 } from "lucide-svelte";
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
-  import { Link, prettyPrintStudyAreaName } from "../common";
+  import { downloadProject, Link, prettyPrintStudyAreaName } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { type ProjectID } from "../common/ProjectStorage";
   import {
@@ -128,14 +128,21 @@
                   <span class="actions">
                     <button
                       class="outline icon-btn"
-                      aria-label="Rename project"
+                      title="Download project as GeoJSON"
+                      on:click={() => downloadProject(projectID)}
+                    >
+                      <FileDown color="black" />
+                    </button>
+                    <button
+                      class="outline icon-btn"
+                      title="Rename project"
                       on:click={() => renameProject(projectID, projectName)}
                     >
                       <Pencil color="black" />
                     </button>
                     <button
                       class="icon-btn destructive"
-                      aria-label="Delete project"
+                      title="Delete project"
                       on:click={() => deleteProject(projectID, projectName)}
                     >
                       <Trash2 color="white" />
