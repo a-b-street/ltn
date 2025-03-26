@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
-  import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
+  import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -12,7 +12,7 @@
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { HelpButton, layerId, Link } from "./common";
+  import { HelpButton, layerId, Link, Style } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
   import {
@@ -109,7 +109,7 @@
   function fillColor(
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<string> {
-    let highlightedColor = "yellow";
+    let highlightedColor = Style.mapFeature.hover.backgroundColor;
     let color = prioritizationFillColor(
       { none: highlightedColor },
       selectedPrioritization,
@@ -126,13 +126,13 @@
   function fillOpacity(
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<number> {
-    let highlightedOpacity = 0.5;
+    let highlightedOpacity = 0.7;
     let styles: Record<string, DataDrivenPropertyValueSpecification<number>> = {
       none: [
         "case",
         ["==", ["feature-state", "highlight"], "yes"],
         highlightedOpacity,
-        hoverStateFilter(0.0, highlightedOpacity),
+        hoverStateFilter(0.3, highlightedOpacity),
       ],
       area: hoverStateFilter(0.7, 0.9),
       density: hoverStateFilter(0.7, 0.9),
@@ -325,6 +325,6 @@
 
 <style>
   li.highlighted {
-    background-color: #f0fcaa;
+    background-color: rgba(72, 96, 202, 0.15);
   }
 </style>

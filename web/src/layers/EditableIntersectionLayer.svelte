@@ -1,8 +1,7 @@
 <script lang="ts">
   import { getContext } from "svelte";
   import { CircleLayer, hoverStateFilter, Popup } from "svelte-maplibre";
-  import { layerId, mapMetersToPixels } from "../common";
-  import { Style } from "../common/colors";
+  import { layerId, mapMetersToPixels, Style } from "../common";
   import {
     Intersection,
     type IntersectionFeature,

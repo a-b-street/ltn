@@ -29,7 +29,11 @@
       return ["get", "color"];
     }
     if (style == "edits") {
-      return ["case", ["get", "edited"], signGreen, "white"];
+      return hoverStateFilter(
+        // @ts-expect-error hoverStateFilter is not properly typed - it should accept an expression
+        ["case", ["get", "edited"], signGreen, "white"],
+        Style.mapFeature.hover.backgroundColor,
+      );
     }
     if (style == "speeds") {
       return makeRamp(
@@ -43,8 +47,9 @@
       return hoverStateFilter("white", "blue");
     }
 
+    console.assert(style == "shortcuts");
     return hoverStateFilter(
-      // @ts-expect-error TODO Fix upstream types
+      // @ts-expect-error hoverStateFilter is not properly typed - it should accept an expression
       [
         "interpolate-hcl",
         ["linear"],
@@ -128,7 +133,10 @@
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),
-    "line-color": hoverStateFilter("gray", "blue"),
+    "line-color": hoverStateFilter(
+      "gray",
+      Style.mapFeature.hover.backgroundColor,
+    ),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{
