@@ -59,18 +59,18 @@
 </Control>
 
 <style>
-  .pico .show-layers-button {
+  .pico button.show-layers-button {
     background-color: #fff;
     border-color: #999;
     width: 44px;
     height: 44px;
   }
-  .pico .show-layers-button.expanded {
+  .pico button.show-layers-button.expanded {
     width: 100%;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-  .pico .show-layers-button:hover {
+  .pico button.show-layers-button:hover {
     background-color: #f2f2f2;
   }
   :global(.pico.contextual-layers button) {
