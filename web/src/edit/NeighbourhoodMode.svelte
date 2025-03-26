@@ -591,8 +591,14 @@
     object-fit: contain;
   }
   .tool-palette button.active:disabled {
+    /* slightly increased border */
     border: 2px solid black;
-    /* picocss override */
+    /* Slightly decreased padding to account for the slightly increased border */
+    padding: 7px;
+
+    /* picocss default color is very dark */
+    background: rgb(124, 190, 146);
+    /* picocss disabled override */
     opacity: 1;
   }
 </style>
