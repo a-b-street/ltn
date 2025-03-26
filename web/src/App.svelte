@@ -119,9 +119,13 @@
 </div>
 <div class="app-focus-{$appFocusStore}">
   <Layout>
-    <div slot="top" class="pico" style="display: flex">
+    <div
+      slot="top"
+      class="pico"
+      style="display: flex; align-items: center; gap: 8px;"
+    >
       <button class="outline" on:click={() => ($showAbout = true)}>
-        <img src={logo} style="height: 6vh;" alt="A/B Street logo" />
+        <img src={logo} alt="A/B Street logo" />
       </button>
       <Settings />
       <span bind:this={topDiv} style="width: 100%" />
@@ -264,6 +268,7 @@
     min-width: 400px;
     max-width: 700px;
   }
+
   :global(#app .main) {
     width: 65%;
   }
@@ -390,5 +395,36 @@
   :global(.left .pico .navigable-list .actionable-cell .actions) {
     display: flex;
     gap: 16px;
+  }
+  :global(.top) {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  :global(.top .pico button:hover) {
+    background: #ddd;
+  }
+
+  :global(.top .pico button) {
+    background: white;
+    height: 40px;
+    width: 40px;
+    padding: 4px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: none;
+  }
+
+  :global(.top .pico button img) {
+    height: 100%;
+  }
+  :global(.top .pico nav ul:last-child) {
+    /* PICO override - the right aligned nav was causing a little bit of a scroll past the page width */
+    margin-right: 0;
+  }
+  :global(.top .pico nav ul li) {
+    padding: 8px 8px;
   }
 </style>
