@@ -3,8 +3,6 @@ extern crate anyhow;
 #[macro_use]
 extern crate log;
 
-use std::sync::Once;
-
 use self::boundary_stats::ContextData;
 use self::cells::Cell;
 pub use self::map_model::{
@@ -19,6 +17,7 @@ use crate::map_model::{Command, ProjectDetails};
 use geo::{Coord, LineString, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
+use std::sync::Once;
 use wasm_bindgen::prelude::*;
 
 mod auto_boundaries;
@@ -362,22 +361,59 @@ impl LTN {
         self.after_main_road_edit()
     }
 
+    /// Takes a LineString feature
+    #[wasm_bindgen(js_name = reclassifyRoadsAlongLine)]
+    pub fn reclassify_roads_along_line(
+        &mut self,
+        input: JsValue,
+        is_main_road: bool,
+        add_to_undo_stack: bool,
+    ) -> Result<(), JsValue> {
+        let gj: Feature = serde_wasm_bindgen::from_value(input)?;
+        let mut line: LineString = gj.try_into().map_err(err_to_js)?;
+        debug_assert!(!line.0.is_empty());
+        self.map.mercator.to_mercator_in_place(&mut line);
+        self.map.reclassify_roads_along_line(
+            self.neighbourhood.as_ref().unwrap(),
+            line,
+            is_main_road,
+            add_to_undo_stack,
+        );
+
+        self.after_edit();
+        self.after_main_road_edit()
+    }
+
     pub fn undo(&mut self) -> Result<(), JsValue> {
         let maybe_cmd = self.map.undo();
-        self.after_edit();
-        if matches!(maybe_cmd, Some(Command::SetMainRoad(_, _))) {
-            return self.after_main_road_edit();
-        }
-        Ok(())
+        self.after_cmd(maybe_cmd)
     }
 
     pub fn redo(&mut self) -> Result<(), JsValue> {
         let maybe_cmd = self.map.redo();
+        self.after_cmd(maybe_cmd)
+    }
+
+    fn after_cmd(&mut self, cmd: Option<Command>) -> Result<(), JsValue> {
         self.after_edit();
-        if matches!(maybe_cmd, Some(Command::SetMainRoad(_, _))) {
-            return self.after_main_road_edit();
+        let Some(cmd) = cmd else { return Ok(()) };
+
+        let first_cmd = match &cmd {
+            Command::Multiple(cmds) => {
+                let Some(first_cmd) = cmds.first() else {
+                    debug_assert!(false, "Command::Multiple shouldn't be empty");
+                    return Ok(());
+                };
+                first_cmd
+            }
+            single_cmd => single_cmd,
+        };
+
+        if matches!(first_cmd, Command::SetMainRoad(_, _)) {
+            self.after_main_road_edit()
+        } else {
+            Ok(())
         }
-        Ok(())
     }
 
     #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]

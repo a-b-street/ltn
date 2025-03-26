@@ -10,6 +10,7 @@
 
   const dispatch = createEventDispatcher<{
     done: Feature<LineString> | null;
+    progress: Feature<LineString>;
   }>();
 
   map.on("dragstart", onDragStart);
@@ -37,17 +38,29 @@
 
   function onMouseMove(e: MapMouseEvent) {
     if (line) {
-      // TODO Simplify
-      line.geometry.coordinates.push(e.lngLat.toArray());
+      let next = e.lngLat.toArray();
+      let prev = line.geometry.coordinates.at(-1);
+      if (prev && prev[0] == next[0] && prev[1] == next[1]) {
+        // skip redundant coords
+        return;
+      }
+
+      line.geometry.coordinates.push(next);
       line = line;
+      if (line.geometry.coordinates.length % 10 == 0) {
+        dispatch("progress", line);
+      }
     }
   }
 
   function onMouseUp() {
-    if (line) {
+    if (!line || line.geometry.coordinates.length == 0) {
+      dispatch("done", null);
+    } else {
       dispatch("done", line);
-      line = null;
     }
+    line = null;
+    map.dragPan.enable();
   }
 </script>
 

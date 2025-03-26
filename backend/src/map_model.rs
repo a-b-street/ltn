@@ -1,16 +1,16 @@
 use crate::boundary_stats::{ContextData, PreparedContextData};
 use crate::geo_helpers::{
-    angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
+    aabb, angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
     invert_multi_polygon, limit_angle, linestring_intersection,
 };
 use crate::impact::Impact;
 use crate::neighbourhood::{NeighbourhoodBoundary, NeighbourhoodDefinition};
 use crate::route::RouterInput;
-use crate::{od::DemandModel, Router};
+use crate::{od::DemandModel, Neighbourhood, Router};
 use anyhow::Result;
 use geo::{
     line_measures::InterpolatableLine, Closest, ClosestPoint, Coord, Distance, Euclidean, Length,
-    LineLocatePoint, LineString, MultiPolygon, Point, Polygon,
+    LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Simplify,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
@@ -481,6 +481,59 @@ impl MapModel {
         let cmd = self.do_edit(Command::SetMainRoad(r, is_main_road));
         self.undo_stack.push(cmd);
         self.redo_stack.clear();
+        self.after_edited();
+    }
+
+    fn roads_along_line(
+        &self,
+        neighbourhood: &Neighbourhood,
+        line_string: LineString,
+    ) -> Vec<RoadID> {
+        let line_string = line_string.simplify(&0.5);
+        let bbox = aabb(&line_string);
+        let buffered_bbox = buffer_aabb(bbox, 20.);
+        let road_iter = self
+            .closest_road
+            .locate_in_envelope_intersecting(&buffered_bbox)
+            .filter(|r| {
+                neighbourhood.interior_roads.contains(&r.data)
+                    || neighbourhood.main_roads.contains(&r.data)
+            })
+            .map(|road_node| self.get_r(road_node.data));
+
+        crate::geo_helpers::roads_along_line(road_iter, &line_string)
+    }
+
+    pub fn reclassify_roads_along_line(
+        &mut self,
+        neighbourhood: &Neighbourhood,
+        line_string: LineString,
+        is_main_road: bool,
+        add_to_undo_stack: bool,
+    ) {
+        let roads_along = self.roads_along_line(neighbourhood, line_string);
+        let cmds = roads_along
+            .iter()
+            .map(|r| Command::SetMainRoad(*r, is_main_road))
+            .collect();
+        let cmd = Command::Multiple(cmds);
+
+        let undo_cmd = self.do_edit(cmd);
+        if add_to_undo_stack {
+            if let Some(prev_cmd) = self.undo_stack.first() {
+                if prev_cmd == &undo_cmd {
+                    // Don't add no-op undo commands.
+                    // e.g. when re-classifying an area the same as it was already classified.
+                    //
+                    // I originally though we could bail out earlier, by seeing if any of
+                    // `roads_along` had changed, but then that would prevent us from *ever*
+                    // recording the undo action in the case of our incremental updates (see `add_to_undo_stack`)
+                    return;
+                }
+            }
+            self.undo_stack.push(undo_cmd);
+            self.redo_stack.clear();
+        }
         self.after_edited();
     }
 
@@ -1204,7 +1257,7 @@ impl TravelFlow {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
     SetDiagonalFilter(IntersectionID, Option<DiagonalFilter>),
