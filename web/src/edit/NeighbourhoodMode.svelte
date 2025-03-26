@@ -13,6 +13,7 @@
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import onewayArrowUrl from "../../assets/one_way_left.svg?url";
+  import mainRoadIconUrl from "../../assets/traffic_1.svg?url";
   import AnimatePaths from "../AnimatePaths.svelte";
   import {
     HelpButton,
@@ -397,9 +398,9 @@
         disabled={action.kind == "main-roads"}
         class:active={action.kind == "main-roads"}
         class:outline={action.kind != "main-roads"}
-        data-tooltip="Specify main roads (hotkey 5)"
+        data-tooltip="Reclassify main roads (hotkey 5)"
       >
-        <img src={onewayArrowUrl} alt="Change main/minor roads" />
+        <img src={mainRoadIconUrl} alt="Change main/minor roads" />
       </button>
     </div>
 
@@ -407,10 +408,6 @@
       Change modal filter type
     </button>
     <ChangeFilterModal bind:show={settingFilterType} />
-
-    {#if action.kind == "main-roads"}
-      <p>TODO explain what main roads mean, why changing it might make sense</p>
-    {/if}
 
     <div style="display: flex; justify-content: space-between;">
       <button
@@ -439,12 +436,32 @@
       </button>
     </div>
 
+    {#if action.kind == "main-roads"}
+      <h3>Reclassify main roads</h3>
+      <p>
+        <i>Main roads</i>, drawn in gray, were classified automatically using
+        data from
+        <a href="https://openstreetmap.org/about" target="_blank">
+          OpenStreetMap
+        </a>, but you can reclassify a road segment by clicking on it.
+      </p>
+
+      <p>
+        Main roads are typically better suited to support higher levels of
+        traffic than neighbourhood roads.
+      </p>
+    {/if}
+
     <h2>Map style</h2>
     <label>
       <input type="checkbox" bind:checked={$animateShortcuts} />
       Animate shortcuts
     </label>
-
+    <p>
+      <i>Shortcuts</i>
+      are routes from one main road to another, which cut through the neighborhood's
+      interior.
+    </p>
     <div style="border: 1px solid black; padding: 4px">
       <label>
         Draw roads:
