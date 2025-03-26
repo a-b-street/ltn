@@ -39,20 +39,18 @@ jobs:
 
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
-      
+
       - name: Cache WASM build
         uses: actions/cache@v3
         with:
           path: target
           key: cargo-wasm-test-${{ hashFiles('Cargo.lock') }}
 
-      - name: Build wasm
+      - name: Build and test
         run: |
           cd web
           npm ci
           npm run wasm
-
-      - name: Run web tests
-        run: |
-          cd web
           npm test
+          # typechecking requires the wasm build and for vite to see the build
+          npm run check
