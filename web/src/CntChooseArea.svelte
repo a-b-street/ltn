@@ -10,7 +10,7 @@
   } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
   import boundariesUrl from "../assets/cnt_boundaries.geojson?url";
-  import { Link, prettyPrintStudyAreaName } from "./common";
+  import { Link, prettyPrintStudyAreaName, Style } from "./common";
   import { mode, projectStorage } from "./stores";
   import { loadProject } from "./title/loader";
 
@@ -92,8 +92,8 @@
 <GeoJSON data={gj} generateId>
   <FillLayer
     paint={{
-      "fill-color": "rgb(200, 100, 240)",
-      "fill-outline-color": "rgb(200, 100, 240)",
+      "fill-color": Style.mapFeature.hover.backgroundColor,
+      "fill-outline-color": Style.mapFeature.hover.backgroundColor,
       "fill-opacity": hoverStateFilter(0.0, 0.5),
     }}
     beforeId="Road labels"
@@ -108,7 +108,7 @@
 
   <LineLayer
     paint={{
-      "line-color": "rgb(200, 100, 240)",
+      "line-color": Style.mapFeature.hover.backgroundColor,
       "line-width": 2.5,
     }}
     beforeId="Road labels"

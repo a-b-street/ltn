@@ -12,8 +12,7 @@
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, mapMetersToPixels, PrevNext } from "./common";
-  import { Style } from "./common/colors";
+  import { layerId, Link, mapMetersToPixels, PrevNext, Style } from "./common";
   import type { IntersectionFeature } from "./common/Intersection";
   import {
     CellLayer,

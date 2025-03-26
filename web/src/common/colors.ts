@@ -59,7 +59,7 @@ export const signGreen = "#0C793A";
 export const Style = {
   mapFeature: {
     hover: {
-      backgroundColor: "blue",
+      backgroundColor: "rgb(72, 96, 202)",
     },
   },
 };
