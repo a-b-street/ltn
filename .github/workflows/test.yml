@@ -51,6 +51,6 @@ jobs:
           cd web
           npm ci
           npm run wasm
-          # typechecking requires the wasm build
-          npm run check
           npm test
+          # typechecking requires the wasm build and for vite to see the build
+          npm run check
