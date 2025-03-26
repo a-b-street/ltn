@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, LineString } from "geojson";
-  import { PaintbrushVertical, Redo, Undo } from "lucide-svelte";
+  import { Eraser, Paintbrush, Pointer, Redo, Undo } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import {
@@ -70,7 +70,7 @@
           { road: number; name: string }
         >;
       }
-    | { kind: "main-roads" };
+    | { kind: "main-roads"; freehand: boolean; isMain: boolean };
   function startTurnRestrictionAction(): Action {
     return {
       kind: "turn_restriction",
@@ -88,6 +88,25 @@
     $map!.doubleClickZoom.disable();
   } else {
     $map!.doubleClickZoom.enable();
+  }
+
+  $: {
+    if (
+      (action.kind == "filter" && action.freehand) ||
+      (action.kind == "main-roads" && action.freehand && action.isMain)
+    ) {
+      $map!.getCanvas().style.cursor =
+        "url(./assets/cursors/paintbrush.svg) 8 22, cell";
+    } else if (
+      action.kind == "main-roads" &&
+      action.freehand &&
+      !action.isMain
+    ) {
+      $map!.getCanvas().style.cursor =
+        "url(./assets/cursors/eraser.svg) 8 22, crosshair";
+    } else {
+      $map!.getCanvas().style.cursor = "";
+    }
   }
 
   let settingFilterType = false;
@@ -128,7 +147,7 @@
     } else if (action.kind == "oneway") {
       $backend!.toggleTravelFlow(f.properties!.road);
       $mutationCounter++;
-    } else if (action.kind == "main-roads") {
+    } else if (action.kind == "main-roads" && !action.freehand) {
       $backend!.toggleMainRoad(f.properties!.road);
       $mutationCounter++;
     } else if (action.kind == "turn_restriction") {
@@ -226,7 +245,7 @@
       action = startTurnRestrictionAction();
     }
     if (e.key == "4") {
-      action = { kind: "main-roads" };
+      action = { kind: "main-roads", freehand: false, isMain: false };
     }
   }
 
@@ -239,14 +258,28 @@
     $mutationCounter++;
   }
 
-  function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
+  function paintedModalFiltersLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
       $backend!.addManyModalFilters(f, $currentFilterType);
       $mutationCounter++;
     }
-
     action = { kind: "filter", freehand: false };
+  }
+
+  function paintedRoadClassificationsLine(
+    e: CustomEvent<Feature<LineString> | null>,
+    addToUndoStack: boolean,
+  ) {
+    if (action.kind != "main-roads") {
+      console.assert(false, "cant paint line unless in main-roads mode");
+      return;
+    }
+    let f = e.detail;
+    if (f) {
+      $backend!.reclassifyRoadsAlongLine(f, action.isMain, addToUndoStack);
+      $mutationCounter++;
+    }
   }
 </script>
 
@@ -388,7 +421,8 @@
           />
         </button>
         <button
-          on:click={() => (action = { kind: "main-roads" })}
+          on:click={() =>
+            (action = { kind: "main-roads", freehand: false, isMain: false })}
           disabled={action.kind == "main-roads"}
           class="icon-btn"
           class:active={action.kind == "main-roads"}
@@ -447,7 +481,7 @@
             data-tooltip="Add many modal filters along a line"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
-              <PaintbrushVertical />
+              <Paintbrush />
               <span> Add along a line </span>
             </div>
           </button>
@@ -479,6 +513,50 @@
           Main roads are typically better suited to support higher levels of
           traffic than neighbourhood roads.
         </p>
+        <div
+          class="classification-buttons"
+          style="display: flex; flex-direction: column; gap: 8px; justify-content: left;"
+        >
+          <button
+            on:click={() => {
+              action = { kind: "main-roads", freehand: false, isMain: true };
+            }}
+            class:active={!action.freehand}
+            class:outline={action.freehand}
+            data-tooltip="Click a road to reclassify it"
+          >
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <Pointer />
+              <span>Toggle segment or pan map</span>
+            </div>
+          </button>
+          <button
+            on:click={() => {
+              action = { kind: "main-roads", freehand: true, isMain: true };
+            }}
+            class:active={action.freehand && action.isMain}
+            class:outline={!(action.freehand && action.isMain)}
+            data-tooltip="Reclassify multiple roads by drawing a line along them"
+          >
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <Paintbrush />
+              <span>Mark as main along a line</span>
+            </div>
+          </button>
+          <button
+            on:click={() => {
+              action = { kind: "main-roads", freehand: true, isMain: false };
+            }}
+            class:active={action.freehand && !action.isMain}
+            class:outline={!(action.freehand && !action.isMain)}
+            data-tooltip="Reclassify multiple roads by drawing a line along them"
+          >
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <Eraser />
+              <span>Erase main classification</span>
+            </div>
+          </button>
+        </div>
       {/if}
     </div>
 
@@ -533,9 +611,9 @@
       <OneWayLayer />
 
       <NeighbourhoodRoadLayer
-        interactive={action.kind == "filter" ||
+        interactive={(action.kind == "filter" && !action.freehand) ||
           action.kind == "oneway" ||
-          action.kind == "main-roads" ||
+          (action.kind == "main-roads" && !action.freehand) ||
           (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
       >
@@ -564,7 +642,7 @@
               </div>
             {:else if action.kind == "oneway"}
               <p>Click to change direction</p>
-            {:else if action.kind == "main-roads"}
+            {:else if action.kind == "main-roads" && !action.freehand}
               <p>Click to designate a main road or not</p>
             {:else if action.kind == "turn_restriction"}
               <p>Click to create a turn restriction from here</p>
@@ -597,7 +675,13 @@
     </ModalFilterLayer>
 
     {#if action.kind == "filter" && action.freehand}
-      <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
+      <FreehandLine map={notNull($map)} on:done={paintedModalFiltersLine} />
+    {:else if action.kind == "main-roads" && action.freehand}
+      <FreehandLine
+        map={notNull($map)}
+        on:done={(e) => paintedRoadClassificationsLine(e, true)}
+        on:progress={(e) => paintedRoadClassificationsLine(e, false)}
+      />
     {/if}
 
     {#if action.kind == "turn_restriction"}
@@ -653,5 +737,8 @@
     background: rgb(124, 190, 146);
     /* picocss disabled override */
     opacity: 1;
+  }
+  .classification-buttons {
+    width: fit-content;
   }
 </style>
