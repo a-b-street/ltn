@@ -263,10 +263,19 @@
 </div>
 
 <style>
+  :global(.top) {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    /* so box-shadow falls onto .main (the map) and .left */
+    z-index: 2;
+  }
+
   :global(#app .left) {
     width: 35%;
     min-width: 400px;
     max-width: 700px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
+    /* so box-shadow falls onto .main (the map) */
+    z-index: 1;
   }
 
   :global(#app .main) {
@@ -394,9 +403,6 @@
   :global(.left .pico .navigable-list .actionable-cell .actions) {
     display: flex;
     gap: 16px;
-  }
-  :global(.top) {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 
   :global(.top .pico button:hover) {
