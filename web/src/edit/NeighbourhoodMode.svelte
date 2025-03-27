@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, LineString } from "geojson";
-  import { Redo, Undo } from "lucide-svelte";
+  import { PaintbrushVertical, Redo, Undo } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import {
@@ -58,8 +58,7 @@
   // Caller is responsible for doing backend.setCurrentNeighbourhood
 
   type Action =
-    | { kind: "filter" }
-    | { kind: "freehand-filters" }
+    | { kind: "filter"; freehand: boolean }
     | { kind: "oneway" }
     | {
         kind: "turn_restriction";
@@ -82,7 +81,7 @@
       >,
     };
   }
-  let action: Action = { kind: "filter" };
+  let action: Action = { kind: "filter", freehand: false };
 
   $: if (action.kind == "oneway" || action.kind == "main-roads") {
     $map!.doubleClickZoom.disable();
@@ -217,18 +216,15 @@
       redo();
     }
     if (e.key == "1") {
-      action = { kind: "filter" };
+      action = { kind: "filter", freehand: false };
     }
     if (e.key == "2") {
-      action = { kind: "freehand-filters" };
-    }
-    if (e.key == "3") {
       action = { kind: "oneway" };
     }
-    if (e.key == "4") {
+    if (e.key == "3") {
       action = startTurnRestrictionAction();
     }
-    if (e.key == "5") {
+    if (e.key == "4") {
       action = { kind: "main-roads" };
     }
   }
@@ -249,7 +245,7 @@
       $mutationCounter++;
     }
 
-    action = { kind: "filter" };
+    action = { kind: "filter", freehand: false };
   }
 </script>
 
@@ -340,7 +336,7 @@
     >
       <div style="display: flex; justify-content: left; gap: 8px;">
         <button
-          on:click={() => (action = { kind: "filter" })}
+          on:click={() => (action = { kind: "filter", freehand: false })}
           disabled={action.kind == "filter"}
           class:active={action.kind == "filter"}
           class:outline={action.kind != "filter"}
@@ -349,18 +345,6 @@
           <img
             src={notNull(ModalFilterType.getFilter($currentFilterType)).iconURL}
             alt="Add a modal filter"
-          />
-        </button>
-        <button
-          on:click={() => (action = { kind: "freehand-filters" })}
-          disabled={action.kind == "freehand-filters"}
-          class:active={action.kind == "freehand-filters"}
-          class:outline={action.kind != "freehand-filters"}
-          data-tooltip="Add many modal filters along a line (hotkey 2)"
-        >
-          <img
-            src={`${import.meta.env.BASE_URL}/filters/select_freehand.png`}
-            alt="Add many modal filters along a line"
           />
         </button>
         <button
@@ -433,26 +417,65 @@
       </div>
     </div>
 
-    <button class="outline" on:click={() => (settingFilterType = true)}>
-      Change modal filter type
-    </button>
-    <ChangeFilterModal bind:show={settingFilterType} />
+    <div
+      style="min-height: 200px; padding-bottom: 16px; border-bottom: solid #aaa 1px;"
+    >
+      {#if action.kind == "filter"}
+        <h3>Add modal filter</h3>
+        <p>
+          Modal filters restrict what kind of traffic can pass through a road
+          segment. Place them strategically to deter shortcuts through your
+          neighbourhood.
+        </p>
+        <ChangeFilterModal bind:show={settingFilterType} />
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="outline" on:click={() => (settingFilterType = true)}>
+            Change modal filter type
+          </button>
 
-    {#if action.kind == "main-roads"}
-      <h3>Reclassify main roads</h3>
-      <p>
-        <i>Main roads</i>, drawn in grey, were classified automatically using
-        data from
-        <a href="https://openstreetmap.org/about" target="_blank"
-          >OpenStreetMap</a
-        >, but you can reclassify a road segment by clicking on it.
-      </p>
+          <button
+            on:click={action.freehand
+              ? () => (action = { kind: "filter", freehand: false })
+              : () => (action = { kind: "filter", freehand: true })}
+            class:active={action.freehand}
+            class:outline={!action.freehand}
+            data-tooltip="Add many modal filters along a line (hotkey 2)"
+          >
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <PaintbrushVertical />
+              <span> Add along a line </span>
+            </div>
+          </button>
+        </div>
+      {:else if action.kind == "oneway"}
+        <h3>Toggle one-way</h3>
+        <p>
+          Click on a road segment to toggle its direction. This will change the
+          direction of traffic flow on that road.
+        </p>
+      {:else if action.kind == "turn_restriction"}
+        <h3>Restrict turns</h3>
+        <p>
+          To restrict certain turns, first click on the source road, then the
+          destination road. Traffic will no longer be able to turn from the
+          source road to the destination road.
+        </p>
+      {:else if action.kind == "main-roads"}
+        <h3>Reclassify main roads</h3>
+        <p>
+          <i>Main roads</i>, drawn in grey, were classified automatically using
+          data from
+          <a href="https://openstreetmap.org/about" target="_blank"
+            >OpenStreetMap</a
+          >, but you can reclassify a road segment by clicking on it.
+        </p>
 
-      <p>
-        Main roads are typically better suited to support higher levels of
-        traffic than neighbourhood roads.
-      </p>
-    {/if}
+        <p>
+          Main roads are typically better suited to support higher levels of
+          traffic than neighbourhood roads.
+        </p>
+      {/if}
+    </div>
 
     <h2>Map style</h2>
     <label>
@@ -557,7 +580,7 @@
       </div>
     </ModalFilterLayer>
 
-    {#if action.kind == "freehand-filters"}
+    {#if action.kind == "filter" && action.freehand}
       <FreehandLine map={notNull($map)} on:done={gotFreehandLine} />
     {/if}
 
