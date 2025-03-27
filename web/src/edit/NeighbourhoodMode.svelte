@@ -24,6 +24,7 @@
   } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
   import type { Intersection } from "../common/Intersection";
+  import { ModalFilterType } from "../common/ModalFilterType";
   import NeighbourhoodBoundarySummary from "../common/NeighbourhoodBoundarySummary.svelte";
   import {
     CellLayer,
@@ -37,8 +38,8 @@
   import {
     animateShortcuts,
     backend,
+    currentFilterType,
     devMode,
-    filterType,
     map,
     mode,
     mutationCounter,
@@ -121,7 +122,7 @@
 
   function onClickLine(f: Feature, pt: LngLat) {
     if (action.kind == "filter") {
-      $backend!.addModalFilter(pt, $filterType);
+      $backend!.addModalFilter(pt, $currentFilterType);
       $mutationCounter++;
     } else if (action.kind == "oneway") {
       $backend!.toggleTravelFlow(f.properties!.road);
@@ -243,7 +244,7 @@
   function gotFreehandLine(e: CustomEvent<Feature<LineString> | null>) {
     let f = e.detail;
     if (f) {
-      $backend!.addManyModalFilters(f, $filterType);
+      $backend!.addManyModalFilters(f, $currentFilterType);
       $mutationCounter++;
     }
 
@@ -341,7 +342,7 @@
         data-tooltip="Add a modal filter (hotkey 1)"
       >
         <img
-          src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+          src={notNull(ModalFilterType.getFilter($currentFilterType)).iconURL}
           alt="Add a modal filter"
         />
       </button>
@@ -516,7 +517,7 @@
             {#if action.kind == "filter"}
               <div>
                 <img
-                  src={`${import.meta.env.BASE_URL}/filters/${$filterType}_icon.gif`}
+                  src={`${import.meta.env.BASE_URL}/filters/${$currentFilterType}_icon.gif`}
                   width="20"
                   alt="Add modal filter"
                 />
