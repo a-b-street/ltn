@@ -439,7 +439,7 @@
     {#if action.kind == "main-roads"}
       <h3>Reclassify main roads</h3>
       <p>
-        <i>Main roads</i>, drawn in gray, were classified automatically using
+        <i>Main roads</i>, drawn in grey, were classified automatically using
         data from
         <a href="https://openstreetmap.org/about" target="_blank"
           >OpenStreetMap</a
@@ -525,7 +525,7 @@
             {:else if action.kind == "oneway"}
               <p>Click to change direction</p>
             {:else if action.kind == "main-roads"}
-              <p>Click to toggle this a main / minor road</p>
+              <p>Click to designate a main road or not</p>
             {:else if action.kind == "turn_restriction"}
               <p>Click to create a turn restriction from here</p>
             {/if}
