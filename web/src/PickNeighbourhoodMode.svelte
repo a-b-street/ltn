@@ -200,7 +200,7 @@
         on:click={() => downloadProject(notNull($currentProjectID))}
       >
         <div style="display: flex; align-items: center; gap: 8px;">
-          <FileDown color="black" />
+          <FileDown />
           <!-- 
             The text feels a little crowded aginst the right edge. 
             Currently this is the only place we use an icon+text button like this.
