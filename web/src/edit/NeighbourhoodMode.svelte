@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, LineString } from "geojson";
+  import { Redo, Undo } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import {
@@ -333,109 +334,109 @@
     {/if}
 
     <h2>Editing tools</h2>
-    <div class="tool-palette">
-      <button
-        on:click={() => (action = { kind: "filter" })}
-        disabled={action.kind == "filter"}
-        class:active={action.kind == "filter"}
-        class:outline={action.kind != "filter"}
-        data-tooltip="Add a modal filter (hotkey 1)"
-      >
-        <img
-          src={notNull(ModalFilterType.getFilter($currentFilterType)).iconURL}
-          alt="Add a modal filter"
-        />
-      </button>
-      <button
-        on:click={() => (action = { kind: "freehand-filters" })}
-        disabled={action.kind == "freehand-filters"}
-        class:active={action.kind == "freehand-filters"}
-        class:outline={action.kind != "freehand-filters"}
-        data-tooltip="Add many modal filters along a line (hotkey 2)"
-      >
-        <img
-          src={`${import.meta.env.BASE_URL}/filters/select_freehand.png`}
-          alt="Add many modal filters along a line"
-        />
-      </button>
-      <button
-        on:click={() => (action = { kind: "oneway" })}
-        disabled={action.kind == "oneway"}
-        class:active={action.kind == "oneway"}
-        class:outline={action.kind != "oneway"}
-        data-tooltip="Toggle one-way (hotkey 3)"
-      >
-        <!-- 
+    <div
+      class="tool-palette"
+      style="height: 60px; display: flex; justify-content: space-between;"
+    >
+      <div style="display: flex; justify-content: left; gap: 8px;">
+        <button
+          on:click={() => (action = { kind: "filter" })}
+          disabled={action.kind == "filter"}
+          class:active={action.kind == "filter"}
+          class:outline={action.kind != "filter"}
+          data-tooltip="Add a modal filter (hotkey 1)"
+        >
+          <img
+            src={notNull(ModalFilterType.getFilter($currentFilterType)).iconURL}
+            alt="Add a modal filter"
+          />
+        </button>
+        <button
+          on:click={() => (action = { kind: "freehand-filters" })}
+          disabled={action.kind == "freehand-filters"}
+          class:active={action.kind == "freehand-filters"}
+          class:outline={action.kind != "freehand-filters"}
+          data-tooltip="Add many modal filters along a line (hotkey 2)"
+        >
+          <img
+            src={`${import.meta.env.BASE_URL}/filters/select_freehand.png`}
+            alt="Add many modal filters along a line"
+          />
+        </button>
+        <button
+          on:click={() => (action = { kind: "oneway" })}
+          disabled={action.kind == "oneway"}
+          class:active={action.kind == "oneway"}
+          class:outline={action.kind != "oneway"}
+          data-tooltip="Toggle one-way (hotkey 3)"
+        >
+          <!-- 
          cheat the default padding just a bit with negative placement, 
          these small circles crowd each other more than they crowd their container
          -->
-        <div style="height: 100%; width: 100%; position: relative;">
+          <div style="height: 100%; width: 100%; position: relative;">
+            <img
+              style="position: absolute; width: 60%; height: 60%; top: -1px; left: -1px;"
+              src={onewayArrowUrl}
+              alt="Reverse directions"
+            />
+            <img
+              style="position: absolute; width: 60%; height: 60%; bottom: -1px; right: -1px; transform: rotate(180deg);"
+              src={onewayArrowUrl}
+              alt="Reverse directions"
+            />
+          </div>
+        </button>
+        <button
+          on:click={() => (action = startTurnRestrictionAction())}
+          disabled={action.kind == "turn_restriction"}
+          class:active={action.kind == "turn_restriction"}
+          class:outline={action.kind != "turn_restriction"}
+          data-tooltip="Restrict turns (hotkey 4)"
+        >
           <img
-            style="position: absolute; width: 60%; height: 60%; top: -1px; left: -1px;"
-            src={onewayArrowUrl}
-            alt="Reverse directions"
+            src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
+            alt="Restrict turns"
           />
-          <img
-            style="position: absolute; width: 60%; height: 60%; bottom: -1px; right: -1px; transform: rotate(180deg);"
-            src={onewayArrowUrl}
-            alt="Reverse directions"
-          />
-        </div>
-      </button>
-      <button
-        on:click={() => (action = startTurnRestrictionAction())}
-        disabled={action.kind == "turn_restriction"}
-        class:active={action.kind == "turn_restriction"}
-        class:outline={action.kind != "turn_restriction"}
-        data-tooltip="Restrict turns (hotkey 4)"
-      >
-        <img
-          src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
-          alt="Restrict turns"
-        />
-      </button>
-      <button
-        on:click={() => (action = { kind: "main-roads" })}
-        disabled={action.kind == "main-roads"}
-        class:active={action.kind == "main-roads"}
-        class:outline={action.kind != "main-roads"}
-        data-tooltip="Reclassify main roads (hotkey 5)"
-      >
-        <img src={mainRoadIconUrl} alt="Change main/minor roads" />
-      </button>
+        </button>
+        <button
+          on:click={() => (action = { kind: "main-roads" })}
+          disabled={action.kind == "main-roads"}
+          class:active={action.kind == "main-roads"}
+          class:outline={action.kind != "main-roads"}
+          data-tooltip="Reclassify main roads (hotkey 5)"
+        >
+          <img src={mainRoadIconUrl} alt="Change main/minor roads" />
+        </button>
+      </div>
+      <div style="display: flex; justify-content: right; gap: 8px;">
+        <button
+          class="outline"
+          disabled={undoLength == 0}
+          on:click={undo}
+          data-tooltip={undoLength == 0
+            ? "Undo Ctrl+Z"
+            : `Undo (${undoLength}) Ctrl+Z`}
+        >
+          <Undo />
+        </button>
+        <button
+          class="outline"
+          disabled={redoLength == 0}
+          on:click={redo}
+          data-tooltip={redoLength == 0
+            ? "Redo Ctrl+Y"
+            : `Redo (${redoLength}) Ctrl+Y`}
+        >
+          <Redo />
+        </button>
+      </div>
     </div>
 
     <button class="outline" on:click={() => (settingFilterType = true)}>
       Change modal filter type
     </button>
     <ChangeFilterModal bind:show={settingFilterType} />
-
-    <div style="display: flex; justify-content: space-between;">
-      <button
-        class="outline"
-        disabled={undoLength == 0}
-        on:click={undo}
-        data-tooltip="Ctrl+Z"
-      >
-        {#if undoLength == 0}
-          Undo
-        {:else}
-          Undo ({undoLength})
-        {/if}
-      </button>
-      <button
-        class="outline"
-        disabled={redoLength == 0}
-        on:click={redo}
-        data-tooltip="Ctrl+Y"
-      >
-        {#if redoLength == 0}
-          Redo
-        {:else}
-          Redo ({redoLength})
-        {/if}
-      </button>
-    </div>
 
     {#if action.kind == "main-roads"}
       <h3>Reclassify main roads</h3>
@@ -591,12 +592,6 @@
 </SplitComponent>
 
 <style>
-  .tool-palette {
-    height: 60px;
-    display: flex;
-    justify-content: left;
-    gap: 8px;
-  }
   .tool-palette button {
     padding: 8px;
     margin: 0;
