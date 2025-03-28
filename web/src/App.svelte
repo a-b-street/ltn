@@ -298,6 +298,11 @@
     justify-content: center;
   }
 
+  :global(#app .pico button.outline) {
+    color: black;
+    border-color: black;
+  }
+
   :global(.pico button.icon-btn):hover,
   :global(button.icon-btn):hover {
     background-color: #ddd;

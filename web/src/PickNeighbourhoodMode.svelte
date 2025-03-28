@@ -199,7 +199,9 @@
         title="Download project as GeoJSON"
         on:click={() => downloadProject(notNull($currentProjectID))}
       >
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div
+          style="display: flex; align-items: center; gap: 8px; color: black;"
+        >
           <FileDown />
           <!-- 
             The text feels a little crowded aginst the right edge. 
