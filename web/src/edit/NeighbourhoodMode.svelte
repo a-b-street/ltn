@@ -443,7 +443,7 @@
               : () => (action = { kind: "filter", freehand: true })}
             class:active={action.freehand}
             class:outline={!action.freehand}
-            data-tooltip="Add many modal filters along a line (hotkey 2)"
+            data-tooltip="Add many modal filters along a line"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <PaintbrushVertical />
