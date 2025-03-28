@@ -354,7 +354,7 @@
           class="icon-btn"
           class:active={action.kind == "oneway"}
           class:outline={action.kind != "oneway"}
-          data-tooltip="Toggle one-way (hotkey 3)"
+          data-tooltip="Toggle one-way (hotkey 2)"
         >
           <!-- 
          cheat the default padding just a bit with negative placement, 
@@ -379,7 +379,7 @@
           class="icon-btn"
           class:active={action.kind == "turn_restriction"}
           class:outline={action.kind != "turn_restriction"}
-          data-tooltip="Restrict turns (hotkey 4)"
+          data-tooltip="Restrict turns (hotkey 3)"
         >
           <img
             src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
@@ -392,7 +392,7 @@
           class="icon-btn"
           class:active={action.kind == "main-roads"}
           class:outline={action.kind != "main-roads"}
-          data-tooltip="Reclassify main roads (hotkey 5)"
+          data-tooltip="Reclassify main roads (hotkey 4)"
         >
           <img src={mainRoadIconUrl} alt="Change main/minor roads" />
         </button>
