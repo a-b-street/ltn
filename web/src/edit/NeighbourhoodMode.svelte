@@ -338,6 +338,7 @@
         <button
           on:click={() => (action = { kind: "filter", freehand: false })}
           disabled={action.kind == "filter"}
+          class="icon-btn"
           class:active={action.kind == "filter"}
           class:outline={action.kind != "filter"}
           data-tooltip="Add a modal filter (hotkey 1)"
@@ -350,6 +351,7 @@
         <button
           on:click={() => (action = { kind: "oneway" })}
           disabled={action.kind == "oneway"}
+          class="icon-btn"
           class:active={action.kind == "oneway"}
           class:outline={action.kind != "oneway"}
           data-tooltip="Toggle one-way (hotkey 3)"
@@ -374,6 +376,7 @@
         <button
           on:click={() => (action = startTurnRestrictionAction())}
           disabled={action.kind == "turn_restriction"}
+          class="icon-btn"
           class:active={action.kind == "turn_restriction"}
           class:outline={action.kind != "turn_restriction"}
           data-tooltip="Restrict turns (hotkey 4)"
@@ -386,6 +389,7 @@
         <button
           on:click={() => (action = { kind: "main-roads" })}
           disabled={action.kind == "main-roads"}
+          class="icon-btn"
           class:active={action.kind == "main-roads"}
           class:outline={action.kind != "main-roads"}
           data-tooltip="Reclassify main roads (hotkey 5)"
@@ -395,7 +399,7 @@
       </div>
       <div style="display: flex; justify-content: right; gap: 8px;">
         <button
-          class="outline"
+          class="outline icon-btn"
           disabled={undoLength == 0}
           on:click={undo}
           data-tooltip={undoLength == 0
@@ -405,7 +409,7 @@
           <Undo />
         </button>
         <button
-          class="outline"
+          class="outline icon-btn"
           disabled={redoLength == 0}
           on:click={redo}
           data-tooltip={redoLength == 0
@@ -418,7 +422,7 @@
     </div>
 
     <div
-      style="min-height: 200px; padding-bottom: 16px; border-bottom: solid #aaa 1px;"
+      style="min-height: 200px; padding-bottom: 16px; border-bottom: solid var(--pico-muted-border-color) 1px;"
     >
       {#if action.kind == "filter"}
         <h3>Add modal filter</h3>
