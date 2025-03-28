@@ -332,7 +332,7 @@
     <h2>Editing tools</h2>
     <div
       class="tool-palette"
-      style="height: 60px; display: flex; justify-content: space-between;"
+      style="height: 54px; display: flex; justify-content: space-between; gap: 32px;"
     >
       <div style="display: flex; justify-content: left; gap: 8px;">
         <button
@@ -627,7 +627,8 @@
   }
   .tool-palette button img {
     aspect-ratio: 1;
-    width: 100%;
+    height: 100%;
+    width: auto;
     object-fit: contain;
   }
   .tool-palette button.active:disabled {

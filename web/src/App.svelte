@@ -315,9 +315,8 @@
 
   :global(.pico button.icon-btn svg),
   :global(button.icon-btn svg) {
-    flex-shrink: 0; /* Prevents the button from shrinking */
-    height: 22px;
-    width: 22px;
+    height: 100%;
+    width: auto;
     aspect-ratio: 1;
     object-fit: contain;
   }
@@ -409,6 +408,7 @@
   :global(.left .pico .navigable-list .actionable-cell .actions) {
     display: flex;
     gap: 16px;
+    height: 36px;
   }
 
   :global(.top .pico button:hover) {
