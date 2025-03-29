@@ -246,7 +246,7 @@ pub fn create_from_osm(
         demand: None,
 
         undo_stack: Vec::new(),
-        redo_queue: Vec::new(),
+        redo_stack: Vec::new(),
         boundaries: BTreeMap::new(),
         context_data,
     };
@@ -364,7 +364,7 @@ fn apply_existing_filters(
     // The commands above populate the existing modal filters and edit history. Undo that.
     map.original_modal_filters = map.modal_filters.clone();
     map.undo_stack.clear();
-    map.redo_queue.clear();
+    map.redo_stack.clear();
 }
 
 fn apply_turn_restrictions(

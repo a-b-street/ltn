@@ -61,7 +61,7 @@ pub struct MapModel {
 
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
-    pub redo_queue: Vec<Command>,
+    pub redo_stack: Vec<Command>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
     pub context_data: Option<PreparedContextData>,
@@ -272,7 +272,7 @@ impl MapModel {
     ) {
         let cmd = self.do_edit(self.add_modal_filter_cmd(pt, candidate_roads, kind));
         self.undo_stack.push(cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -382,14 +382,14 @@ impl MapModel {
         }
         let cmd = self.do_edit(Command::Multiple(edits));
         self.undo_stack.push(cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
     pub fn delete_modal_filter(&mut self, r: RoadID) {
         let cmd = self.do_edit(Command::SetModalFilter(r, None));
         self.undo_stack.push(cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -399,7 +399,7 @@ impl MapModel {
         let cmd = Command::SetDiagonalFilter(i, Some(diagonal_filter));
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -409,7 +409,7 @@ impl MapModel {
         let cmd = Command::SetDiagonalFilter(i, Some(diagonal_filter));
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -417,7 +417,7 @@ impl MapModel {
         let cmd = Command::SetDiagonalFilter(i, None);
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -442,7 +442,7 @@ impl MapModel {
         let cmd = Command::SetTurnRestrictions(i, restrictions);
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
         Ok(())
     }
@@ -459,7 +459,7 @@ impl MapModel {
         let cmd = Command::SetTurnRestrictions(i, restrictions);
         let undo_cmd = self.do_edit(cmd);
         self.undo_stack.push(undo_cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
         Ok(())
     }
@@ -472,7 +472,7 @@ impl MapModel {
         };
         let cmd = self.do_edit(Command::SetTravelFlow(r, dir));
         self.undo_stack.push(cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -480,7 +480,7 @@ impl MapModel {
         let is_main_road = !self.is_main_road[&r];
         let cmd = self.do_edit(Command::SetMainRoad(r, is_main_road));
         self.undo_stack.push(cmd);
-        self.redo_queue.clear();
+        self.redo_stack.clear();
         self.after_edited();
     }
 
@@ -537,17 +537,14 @@ impl MapModel {
         // it doesn't update fast enough
         let cmd = self.undo_stack.pop()?;
         let redo_cmd = self.do_edit(cmd.clone());
-        self.redo_queue.push(redo_cmd);
+        self.redo_stack.push(redo_cmd);
         self.after_edited();
         Some(cmd)
     }
 
     /// Returns the command that was applied.
     pub fn redo(&mut self) -> Option<Command> {
-        if self.redo_queue.is_empty() {
-            return None;
-        }
-        let cmd = self.redo_queue.remove(0);
+        let cmd = self.redo_stack.pop()?;
         let undo_cmd = self.do_edit(cmd.clone());
         self.undo_stack.push(undo_cmd);
         self.after_edited();
@@ -704,7 +701,7 @@ impl MapModel {
             *is_main_road = self.roads[r.0].is_severance();
         }
         self.undo_stack.clear();
-        self.redo_queue.clear();
+        self.redo_stack.clear();
 
         // Filters could be defined for multiple neighbourhoods, not just the one
         // in the savefile

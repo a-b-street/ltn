@@ -247,7 +247,7 @@ impl LTN {
         // Undoing edits in another neighbourhood doesn't make sense
         if !editing_same {
             self.map.undo_stack.clear();
-            self.map.redo_queue.clear();
+            self.map.redo_stack.clear();
         }
 
         Ok(())

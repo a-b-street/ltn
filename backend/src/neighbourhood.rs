@@ -400,7 +400,7 @@ impl Neighbourhood {
                 // The foreign members are properties of the *entire* neighborhood.
                 serde_json::json!({
                     "undo_length": map.undo_stack.len(),
-                    "redo_length": map.redo_queue.len(),
+                    "redo_length": map.redo_stack.len(),
                 })
                 .as_object()
                 .unwrap()
