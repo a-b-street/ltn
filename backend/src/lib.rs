@@ -15,7 +15,7 @@ use self::render_cells::RenderCells;
 pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
 use crate::geo_helpers::make_polygon_valid;
-use crate::map_model::ProjectDetails;
+use crate::map_model::{Command, ProjectDetails};
 use geo::{Coord, LineString, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
@@ -359,25 +359,25 @@ impl LTN {
     pub fn toggle_main_road(&mut self, road: usize) -> Result<(), JsValue> {
         self.map.toggle_main_road(RoadID(road));
         self.after_edit();
+        self.after_main_road_edit()
+    }
 
-        let name = self
-            .neighbourhood
-            .as_ref()
-            .expect("toggle_main_road must be called while a neighbourhood is being edited")
-            .name();
-        let boundary = self.map.boundaries.get(name).unwrap();
-        self.neighbourhood =
-            Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
+    pub fn undo(&mut self) -> Result<(), JsValue> {
+        let maybe_cmd = self.map.undo();
+        self.after_edit();
+        if matches!(maybe_cmd, Some(Command::SetMainRoad(_, _))) {
+            return self.after_main_road_edit();
+        }
         Ok(())
     }
 
-    pub fn undo(&mut self) {
-        self.map.undo();
+    pub fn redo(&mut self) -> Result<(), JsValue> {
+        let maybe_cmd = self.map.redo();
         self.after_edit();
-    }
-    pub fn redo(&mut self) {
-        self.map.redo();
-        self.after_edit();
+        if matches!(maybe_cmd, Some(Command::SetMainRoad(_, _))) {
+            return self.after_main_road_edit();
+        }
+        Ok(())
     }
 
     #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]
@@ -544,6 +544,16 @@ impl LTN {
         if let Some(ref mut n) = self.neighbourhood {
             n.after_edit(&self.map);
         }
+    }
+
+    // After any edit involving changing main road classification, this is necessary to call.
+    fn after_main_road_edit(&mut self) -> Result<(), JsValue> {
+        if let Some(name) = self.neighbourhood.as_ref().map(|n| n.name()) {
+            let boundary = self.map.boundaries.get(name).unwrap();
+            self.neighbourhood =
+                Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
+        }
+        Ok(())
     }
 }
 

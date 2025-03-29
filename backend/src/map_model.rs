@@ -531,24 +531,27 @@ impl MapModel {
         }
     }
 
-    pub fn undo(&mut self) {
+    /// Returns the command that was reverted.
+    pub fn undo(&mut self) -> Option<Command> {
         // The UI shouldn't call this when the stack is empty, but when holding down the redo key,
         // it doesn't update fast enough
-        if let Some(cmd) = self.undo_stack.pop() {
-            let cmd = self.do_edit(cmd);
-            self.redo_queue.push(cmd);
-            self.after_edited();
-        }
+        let cmd = self.undo_stack.pop()?;
+        let redo_cmd = self.do_edit(cmd.clone());
+        self.redo_queue.push(redo_cmd);
+        self.after_edited();
+        Some(cmd)
     }
 
-    pub fn redo(&mut self) {
+    /// Returns the command that was applied.
+    pub fn redo(&mut self) -> Option<Command> {
         if self.redo_queue.is_empty() {
-            return;
+            return None;
         }
         let cmd = self.redo_queue.remove(0);
-        let cmd = self.do_edit(cmd);
-        self.undo_stack.push(cmd);
+        let undo_cmd = self.do_edit(cmd.clone());
+        self.undo_stack.push(undo_cmd);
         self.after_edited();
+        Some(cmd)
     }
 
     // NOTE: this method is used both for saving and for serializing to the frontend,
@@ -1204,6 +1207,7 @@ impl TravelFlow {
     }
 }
 
+#[derive(Clone)]
 pub enum Command {
     SetModalFilter(RoadID, Option<ModalFilter>),
     SetDiagonalFilter(IntersectionID, Option<DiagonalFilter>),
