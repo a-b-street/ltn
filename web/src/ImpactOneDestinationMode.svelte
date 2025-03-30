@@ -193,7 +193,7 @@
       />
     </GeoJSON>
 
-    <ModalFilterLayer />
+    <ModalFilterLayer interactive={false} />
 
     <DotMarker bind:lngLat={$oneDestination} draggable>X</DotMarker>
   </div>

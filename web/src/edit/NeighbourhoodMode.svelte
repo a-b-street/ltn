@@ -586,6 +586,7 @@
     <ModalFilterLayer
       onClickModalFilter={deleteModalFilter}
       onClickTurnRestriction={deleteTurnRestriction}
+      interactive={action.kind == "filter"}
     >
       <div slot="modal-filter">
         <Popup openOn="hover">Click to delete filter</Popup>

@@ -170,6 +170,6 @@
       </DotMarker>
     {/if}
 
-    <ModalFilterLayer />
+    <ModalFilterLayer interactive={false} />
   </div>
 </SplitComponent>
