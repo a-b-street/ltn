@@ -18,6 +18,8 @@
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
 
+  export let interactive: boolean;
+
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj =
@@ -27,6 +29,7 @@
 <GeoJSON data={gj} generateId>
   <SymbolLayer
     {...layerId("modal-filters")}
+    {interactive}
     filter={[
       "all",
       ["!=", ["get", "filter_kind"], "diagonal_filter"],

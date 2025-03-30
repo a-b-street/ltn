@@ -162,6 +162,6 @@
       <DotMarker lngLat={endPos(idx)}>B</DotMarker>
     {/if}
 
-    <ModalFilterLayer />
+    <ModalFilterLayer interactive={false} />
   </div>
 </SplitComponent>

@@ -135,7 +135,7 @@
       </RenderNeighbourhood>
     {/if}
 
-    <ModalFilterLayer />
+    <ModalFilterLayer interactive={false} />
 
     <GeoJSON data={gj}>
       <LineLayer

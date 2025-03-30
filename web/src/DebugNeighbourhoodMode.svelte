@@ -119,7 +119,8 @@
       </NeighbourhoodRoadLayer>
     </RenderNeighbourhood>
 
-    <ModalFilterLayer>
+    <ModalFilterLayer interactive={true}>
+      <!-- Note: This popup is currently broken (it was before this commit too). -->
       <Popup openOn="hover" let:props>
         <PropertiesTable properties={props} />
       </Popup>

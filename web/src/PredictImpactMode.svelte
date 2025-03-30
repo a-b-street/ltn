@@ -209,6 +209,6 @@
       </LineLayer>
     </GeoJSON>
 
-    <ModalFilterLayer />
+    <ModalFilterLayer interactive={false} />
   </div>
 </SplitComponent>
