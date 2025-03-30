@@ -124,7 +124,9 @@ export class Backend {
   // This adds a 'color' property to all cells. It's nicer to keep this on the
   // frontend, since it's about styling.
   renderNeighbourhood(): RenderNeighbourhoodOutput {
-    let gj = setCellColors(JSON.parse(this.inner.renderNeighbourhood()));
+    let gj: RenderNeighbourhoodOutput = JSON.parse(
+      this.inner.renderNeighbourhood(),
+    );
     gj.maxShortcuts =
       Math.max(
         ...gj.features.map((f) =>
@@ -405,42 +407,3 @@ export type CompareRoute = FeatureCollection<
   LineString,
   { kind: "before" | "after"; distance: number; time: number }
 >;
-
-// Sets a 'color' property on any cell polygons. Idempotent.
-function setCellColors(
-  gj: RenderNeighbourhoodOutput,
-): RenderNeighbourhoodOutput {
-  for (let f of gj.features) {
-    if (
-      f.properties.kind != "cell" &&
-      f.properties.kind != "border_arrow" &&
-      f.properties.kind != "interior_road"
-    ) {
-      continue;
-    }
-    f.properties.color = colorForCellColor(f.properties.cell_color);
-  }
-
-  return gj;
-}
-
-export function colorForCellColor(cellColor: "disconnected" | number): string {
-  if (cellColor == "disconnected") {
-    return "red";
-  }
-  // A qualitative palette from colorbrewer2.org, skipping the red hue (used
-  // for levels of shortcutting) and grey (too close to the basemap)
-  let cell_colors = [
-    "#8dd3c7",
-    "#ffffb3",
-    "#bebada",
-    "#80b1d3",
-    "#fdb462",
-    "#b3de69",
-    "#fccde5",
-    "#bc80bd",
-    "#ccebc5",
-    "#ffed6f",
-  ];
-  return cell_colors[cellColor % cell_colors.length];
-}
