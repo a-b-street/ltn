@@ -1,48 +1,9 @@
 <script lang="ts">
   import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import { FillLayer, SymbolLayer } from "svelte-maplibre";
+  import { colorByCellColor } from ".";
   import { layerId } from "../common";
   import { roadStyle } from "../stores";
-
-  function colorIconByCell(): DataDrivenPropertyValueSpecification<string> {
-    return [
-      "match",
-      ["get", "cell_color"],
-      "disconnected",
-      "red",
-      // For numeric values, need to use a step function with % operation
-      [
-        "let",
-        "index",
-        ["%", ["to-number", ["get", "cell_color"]], 10],
-        [
-          "match",
-          ["var", "index"],
-          0,
-          "#8dd3c7",
-          1,
-          "#ffffb3",
-          2,
-          "#bebada",
-          3,
-          "#80b1d3",
-          4,
-          "#fdb462",
-          5,
-          "#b3de69",
-          6,
-          "#fccde5",
-          7,
-          "#bc80bd",
-          8,
-          "#ccebc5",
-          9,
-          "#ffed6f",
-          "blue", // default color if something goes wrong
-        ],
-      ],
-    ];
-  }
 
   function borderEntryIconSize(
     scale: number,
@@ -75,7 +36,7 @@
     visibility: $roadStyle == "cells" ? "none" : "visible",
   }}
   paint={{
-    "fill-color": ["get", "color"],
+    "fill-color": colorByCellColor(),
     "fill-opacity": 0.5,
     "fill-outline-color": "hsla(0, 0%, 0%, 0.3)",
   }}
@@ -97,7 +58,7 @@
     "symbol-sort-key": ["get", "bearing_upon_entry"],
   }}
   paint={{
-    "icon-color": colorIconByCell(),
+    "icon-color": colorByCellColor(),
     "icon-halo-color": "black",
     "icon-opacity": borderEntryIconOpacity(),
     // We can add a "stroke" to our icon with halo-width.

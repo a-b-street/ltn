@@ -1,10 +1,15 @@
 <script lang="ts">
   // TODO: This should be called "EditableRoadLayer" or something, because it optionally includes the Perimeter (requires changes to backend as well)
   import type { Feature } from "geojson";
-  import type { ExpressionSpecification, LngLat } from "maplibre-gl";
+  import type {
+    DataDrivenPropertyValueSpecification,
+    ExpressionSpecification,
+    LngLat,
+  } from "maplibre-gl";
   import { getContext } from "svelte";
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { makeRamp } from "svelte-utils/map";
+  import { colorByCellColor } from ".";
   import { layerId, roadLineWidth } from "../common";
   import {
     signGreen,
@@ -24,9 +29,9 @@
   function roadLineColor(
     style: "shortcuts" | "cells" | "edits" | "speeds",
     maxShortcuts: number,
-  ): ExpressionSpecification {
+  ): DataDrivenPropertyValueSpecification<string> {
     if (style == "cells") {
-      return ["get", "color"];
+      return colorByCellColor();
     }
     if (style == "edits") {
       return hoverStateFilter(
