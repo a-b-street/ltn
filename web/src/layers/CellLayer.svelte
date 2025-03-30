@@ -22,6 +22,7 @@
   filter={["==", ["get", "kind"], "border_arrow"]}
   paint={{
     "fill-color": ["get", "color"],
+    "fill-opacity": 0.7,
   }}
   minzoom={14}
 />
