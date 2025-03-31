@@ -41,6 +41,7 @@
     backend,
     currentFilterType,
     devMode,
+    drawBorderEntries,
     map,
     mode,
     mutationCounter,
@@ -482,6 +483,7 @@
     </div>
 
     <h2>Map style</h2>
+
     <label>
       <input type="checkbox" bind:checked={$animateShortcuts} />
       Animate shortcuts
@@ -491,6 +493,15 @@
       are routes from one main road to another, which cut through the neighborhood's
       interior.
     </p>
+
+    <label>
+      <input type="checkbox" bind:checked={$drawBorderEntries} />
+      Show arrows into cells
+    </label>
+    <p>
+      <i>Cells</i> show the area reachable without travelling along a main road.
+    </p>
+
     <div style="border: 1px solid black; padding: 4px">
       <label>
         Draw roads:
