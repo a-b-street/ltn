@@ -3,7 +3,7 @@
   import { FillLayer, SymbolLayer } from "svelte-maplibre";
   import { colorByCellColor } from ".";
   import { layerId } from "../common";
-  import { roadStyle } from "../stores";
+  import { drawBorderEntries, roadStyle } from "../stores";
 
   function borderEntryIconSize(
     scale: number,
@@ -56,6 +56,7 @@
     // Using bearing is arbitrary, but it's already available and seems to work in practice.
     // Any number which is unique between overlapping icons should suffice.
     "symbol-sort-key": ["get", "bearing_upon_entry"],
+    visibility: $drawBorderEntries ? "visible" : "none",
   }}
   paint={{
     "icon-color": colorByCellColor(),
