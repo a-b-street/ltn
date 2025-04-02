@@ -875,6 +875,9 @@ impl MapModel {
             fn roads_iter(&self) -> impl Iterator<Item = &Road> {
                 self.map.roads.iter()
             }
+            fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>> {
+                &self.map.closest_road
+            }
 
             fn get_r(&self, r: RoadID) -> &Road {
                 self.map.get_r(r)
@@ -914,6 +917,9 @@ impl MapModel {
         impl RouterInput for RouterInputAfter<'_> {
             fn roads_iter(&self) -> impl Iterator<Item = &Road> {
                 self.map.roads.iter()
+            }
+            fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>> {
+                &self.map.closest_road
             }
 
             fn get_r(&self, r: RoadID) -> &Road {
@@ -975,7 +981,7 @@ impl MapModel {
             .router_before_with_penalty
             .as_ref()
             .unwrap()
-            .route(self, pt1, pt2)
+            .route_from_points(&self.router_input_before(), pt1, pt2)
         {
             let (distance, time) = route.get_distance_and_time(self);
             let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
@@ -984,7 +990,11 @@ impl MapModel {
             f.set_property("time", time);
             features.push(f);
         }
-        if let Some(route) = self.router_after.as_ref().unwrap().route(self, pt1, pt2) {
+        if let Some(route) = self.router_after.as_ref().unwrap().route_from_points(
+            &self.router_input_after(),
+            pt1,
+            pt2,
+        ) {
             let (distance, time) = route.get_distance_and_time(self);
             let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
             f.set_property("kind", "after");
@@ -1003,6 +1013,9 @@ impl MapModel {
         // main_road_penalty doesn't seem relevant for this question
         self.rebuild_router(1.0);
 
+        let router_input_before = self.router_input_before();
+        let router_input_after = self.router_input_after();
+
         // From every road, calculate the route before and after to the one destination
         let mut features = Vec::new();
         let mut highest_time_ratio: f64 = 1.0;
@@ -1019,8 +1032,12 @@ impl MapModel {
                 self.router_before_with_penalty
                     .as_ref()
                     .unwrap()
-                    .route(self, pt1, pt2),
-                self.router_after.as_ref().unwrap().route(self, pt1, pt2),
+                    .route_from_points(&router_input_before, pt1, pt2),
+                self.router_after.as_ref().unwrap().route_from_points(
+                    &router_input_after,
+                    pt1,
+                    pt2,
+                ),
             ) {
                 let from_pt = self.mercator.pt_to_wgs84(pt1);
                 let (distance_before, time_before) = before.get_distance_and_time(self);
@@ -1222,6 +1239,16 @@ pub enum Direction {
     Backwards,
 }
 
+impl Direction {
+    pub fn forwards(forwards: bool) -> Self {
+        if forwards {
+            Self::Forwards
+        } else {
+            Self::Backwards
+        }
+    }
+}
+
 impl TravelFlow {
     pub fn from_osm(tags: &Tags) -> Self {
         // TODO Improve this
@@ -1295,4 +1322,11 @@ fn get_bool_prop<'a>(f: &'a Feature, key: &str) -> Result<bool> {
         bail!("Feature's {key} property isn't a boolean");
     };
     Ok(x)
+}
+
+/// A position along a road
+#[derive(Clone, Debug, Copy, PartialEq)]
+pub struct Position {
+    pub road: RoadID,
+    pub percent_along: f64,
 }

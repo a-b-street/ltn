@@ -30,7 +30,8 @@ fn benchmark_route(c: &mut Criterion) {
     ] {
         let map = neighbourhood.map_model().unwrap();
         let main_road_penalty = 1.0;
-        let router = Router::new(&map.router_input_before(), main_road_penalty);
+        let router_input = map.router_input_before();
+        let router = Router::new(&router_input, main_road_penalty);
 
         let route_requests = synthetic_od_requests(&map);
         c.benchmark_group(neighbourhood.savefile_name)
@@ -39,7 +40,7 @@ fn benchmark_route(c: &mut Criterion) {
                 b.iter(|| {
                     let mut num_found = 0;
                     for (start, end, _) in &route_requests {
-                        if let Some(_found) = router.route_from_roads(*start, *end) {
+                        if let Some(_found) = router.route_from_roads(&router_input, *start, *end) {
                             num_found += 1;
                         }
                     }

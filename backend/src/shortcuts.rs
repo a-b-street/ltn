@@ -41,7 +41,10 @@ impl Shortcuts {
                             continue;
                         }
 
-                        let Some(route) = router.route_from_roads(*start_r, *end_r) else {
+                        // TODO We could get a little more precision by starting from the correct
+                        // end of the road, but it doesn't matter
+                        let Some(route) = router.route_from_roads(&router_input, *start_r, *end_r)
+                        else {
                             continue;
                         };
 
@@ -84,10 +87,11 @@ impl Shortcuts {
 
                         // How long is the shortest route through the original router, using this
                         // neighbourhood or not?
-                        let direct_length = match map
-                            .router_before
-                            .route_from_roads(*start_r, *end_r)
-                        {
+                        let direct_length = match map.router_before.route_from_roads(
+                            &router_input,
+                            *start_r,
+                            *end_r,
+                        ) {
                             Some(route) => Euclidean.length(&route.to_linestring(map)),
                             None => {
                                 warn!("Found a shortcut from {start_r} to {end_r}, but not a route using the whole map");

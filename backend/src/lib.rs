@@ -6,7 +6,8 @@ extern crate log;
 use self::boundary_stats::ContextData;
 use self::cells::Cell;
 pub use self::map_model::{
-    FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow,
+    FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID,
+    TravelFlow,
 };
 pub use self::neighbourhood::{Neighbourhood, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use self::render_cells::RenderCells;
