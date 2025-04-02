@@ -1,4 +1,5 @@
 <script lang="ts">
+  import turfDistance from "@turf/distance";
   import type { Feature, LineString } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { createEventDispatcher, onDestroy } from "svelte";
@@ -40,9 +41,13 @@
     if (line) {
       let next = e.lngLat.toArray();
       let prev = line.geometry.coordinates.at(-1);
-      if (prev && prev[0] == next[0] && prev[1] == next[1]) {
-        // skip redundant coords
-        return;
+
+      if (prev) {
+        let distanceMeters = turfDistance(prev, next) * 1000;
+        if (distanceMeters < 0.5) {
+          // Skip if the distance is too small, this avoids redraw.
+          return;
+        }
       }
 
       line.geometry.coordinates.push(next);
