@@ -19,8 +19,9 @@ pub struct Path {
 
 impl Shortcuts {
     pub fn new(map: &MapModel, neighbourhood: &Neighbourhood) -> Self {
-        let router_input = neighbourhood.shortcuts_router_input(map);
-        let router = Router::new(&router_input, 1.0);
+        let router_input_after = neighbourhood.shortcuts_router_input_after(map);
+        let router_input_before = neighbourhood.shortcuts_router_input_before(map);
+        let router_after = Router::new(&router_input_after, 1.0);
         let mut paths = Vec::new();
         let mut count_per_road = HashMap::new();
         for start_i in &neighbourhood.border_intersections {
@@ -43,7 +44,8 @@ impl Shortcuts {
 
                         // TODO We could get a little more precision by starting from the correct
                         // end of the road, but it doesn't matter
-                        let Some(route) = router.route_from_roads(&router_input, *start_r, *end_r)
+                        let Some(route) =
+                            router_after.route_from_roads(&router_input_after, *start_r, *end_r)
                         else {
                             continue;
                         };
@@ -88,7 +90,7 @@ impl Shortcuts {
                         // How long is the shortest route through the original router, using this
                         // neighbourhood or not?
                         let direct_length = match map.router_before.route_from_roads(
-                            &router_input,
+                            &router_input_before,
                             *start_r,
                             *end_r,
                         ) {

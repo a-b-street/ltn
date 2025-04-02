@@ -251,52 +251,19 @@ impl Neighbourhood {
             .collect()
     }
 
-    pub fn shortcuts_router_input<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
-        struct NeighbourhoodShortcutsRouterInput<'a> {
-            pub(crate) map: &'a MapModel,
-            pub(crate) neighbourhood: &'a Neighbourhood,
-        }
-
-        impl RouterInput for NeighbourhoodShortcutsRouterInput<'_> {
-            fn roads_iter(&self) -> impl Iterator<Item = &Road> {
-                self.neighbourhood
-                    .interior_roads
-                    .iter()
-                    .chain(self.neighbourhood.main_roads.iter())
-                    .map(|r| self.map.get_r(*r))
-            }
-            fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>> {
-                &self.map.closest_road
-            }
-
-            fn get_r(&self, r: RoadID) -> &Road {
-                self.map.get_r(r)
-            }
-
-            fn get_i(&self, i: IntersectionID) -> &Intersection {
-                self.map.get_i(i)
-            }
-
-            fn modal_filter(&self, r: RoadID) -> Option<&ModalFilter> {
-                self.map.modal_filters.get(&r)
-            }
-
-            fn travel_flow(&self, r: RoadID) -> TravelFlow {
-                self.map.travel_flows[&r]
-            }
-
-            fn diagonal_filter(&self, r: IntersectionID) -> Option<&DiagonalFilter> {
-                self.map.diagonal_filters.get(&r)
-            }
-
-            fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)> {
-                &self.map.turn_restrictions[i.0]
-            }
-        }
-
+    pub fn shortcuts_router_input_before<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
         NeighbourhoodShortcutsRouterInput {
             map: &map,
             neighbourhood: &self,
+            before: true,
+        }
+    }
+
+    pub fn shortcuts_router_input_after<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
+        NeighbourhoodShortcutsRouterInput {
+            map: &map,
+            neighbourhood: &self,
+            before: false,
         }
     }
 
@@ -543,6 +510,65 @@ struct BorderEntry {
     geometry: Point,
     cell_color: Color,
     bearing_upon_entry: f64,
+}
+
+struct NeighbourhoodShortcutsRouterInput<'a> {
+    pub(crate) map: &'a MapModel,
+    pub(crate) neighbourhood: &'a Neighbourhood,
+    before: bool,
+}
+
+impl RouterInput for NeighbourhoodShortcutsRouterInput<'_> {
+    fn roads_iter(&self) -> impl Iterator<Item = &Road> {
+        self.neighbourhood
+            .interior_roads
+            .iter()
+            .chain(self.neighbourhood.main_roads.iter())
+            .map(|r| self.map.get_r(*r))
+    }
+    fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>> {
+        &self.map.closest_road
+    }
+
+    fn get_r(&self, r: RoadID) -> &Road {
+        self.map.get_r(r)
+    }
+
+    fn get_i(&self, i: IntersectionID) -> &Intersection {
+        self.map.get_i(i)
+    }
+
+    fn modal_filter(&self, r: RoadID) -> Option<&ModalFilter> {
+        if self.before {
+            self.map.original_modal_filters.get(&r)
+        } else {
+            self.map.modal_filters.get(&r)
+        }
+    }
+
+    fn travel_flow(&self, r: RoadID) -> TravelFlow {
+        if self.before {
+            TravelFlow::from_osm(&self.get_r(r).tags)
+        } else {
+            self.map.travel_flows[&r]
+        }
+    }
+
+    fn diagonal_filter(&self, r: IntersectionID) -> Option<&DiagonalFilter> {
+        if self.before {
+            None
+        } else {
+            self.map.diagonal_filters.get(&r)
+        }
+    }
+
+    fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)> {
+        if self.before {
+            &self.map.original_turn_restrictions[i.0]
+        } else {
+            &self.map.turn_restrictions[i.0]
+        }
+    }
 }
 
 impl BorderEntry {
