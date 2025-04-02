@@ -13,6 +13,8 @@
   import { notNull } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
+  import paintbrushCursorURL from "../../assets/cursors/paintbrush.svg?url";
   import onewayArrowUrl from "../../assets/one_way_left.svg?url";
   import mainRoadIconUrl from "../../assets/traffic_1.svg?url";
   import AnimatePaths from "../AnimatePaths.svelte";
@@ -95,15 +97,13 @@
       (action.kind == "filter" && action.freehand) ||
       (action.kind == "main-roads" && action.freehand && action.isMain)
     ) {
-      $map!.getCanvas().style.cursor =
-        "url(./assets/cursors/paintbrush.svg) 8 22, cell";
+      $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
     } else if (
       action.kind == "main-roads" &&
       action.freehand &&
       !action.isMain
     ) {
-      $map!.getCanvas().style.cursor =
-        "url(./assets/cursors/eraser.svg) 8 22, crosshair";
+      $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
     } else {
       $map!.getCanvas().style.cursor = "";
     }
