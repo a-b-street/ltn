@@ -2,11 +2,14 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 
 use fast_paths::{FastGraph, InputGraph, PathCalculator};
-use geo::{Coord, Euclidean, Length, LineString};
+use geo::{Coord, Euclidean, Length, LineLocatePoint, LineString};
+use rstar::{primitives::GeomWithData, RTree};
 use utils::NodeMap;
 
 use crate::map_model::{DiagonalFilter, Direction};
-use crate::{Intersection, IntersectionID, MapModel, ModalFilter, Road, RoadID, TravelFlow};
+use crate::{
+    Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID, TravelFlow,
+};
 
 // For vehicles only
 pub struct Router {
@@ -16,7 +19,7 @@ pub struct Router {
     pub main_road_penalty: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct Route {
     pub steps: Vec<(RoadID, Direction)>,
 }
@@ -27,6 +30,7 @@ pub struct Route {
 /// specify a subset of roads, so we can build a routing graph focused within a single neighborhood.
 pub trait RouterInput {
     fn roads_iter(&self) -> impl Iterator<Item = &Road>;
+    fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>>;
 
     fn get_r(&self, r: RoadID) -> &Road;
     fn get_i(&self, i: IntersectionID) -> &Intersection;
@@ -37,6 +41,20 @@ pub trait RouterInput {
     fn travel_flow(&self, r: RoadID) -> TravelFlow;
     fn diagonal_filter(&self, i: IntersectionID) -> Option<&DiagonalFilter>;
     fn turn_restrictions(&self, i: IntersectionID) -> &Vec<(RoadID, RoadID)>;
+
+    fn snap_to_road(&self, pt: Coord) -> Position {
+        let r = self
+            .closest_road()
+            .nearest_neighbor(&pt.into())
+            .unwrap()
+            .data;
+        let road = self.get_r(r);
+        let percent_along = road.linestring.line_locate_point(&pt.into()).unwrap();
+        Position {
+            road: road.id,
+            percent_along,
+        }
+    }
 }
 
 impl Router {
@@ -121,13 +139,45 @@ impl Router {
         }
     }
 
-    pub fn route(&self, map: &MapModel, pt1: Coord, pt2: Coord) -> Option<Route> {
-        let start = map.closest_road.nearest_neighbor(&pt1.into()).unwrap().data;
-        let end = map.closest_road.nearest_neighbor(&pt2.into()).unwrap().data;
-        self.route_from_roads(start, end)
+    pub fn route_from_points(
+        &self,
+        router_input: &impl RouterInput,
+        pt1: Coord,
+        pt2: Coord,
+    ) -> Option<Route> {
+        self.route_from_positions(
+            router_input,
+            router_input.snap_to_road(pt1),
+            router_input.snap_to_road(pt2),
+        )
     }
 
-    pub fn route_from_roads(&self, start: RoadID, end: RoadID) -> Option<Route> {
+    /// Routes from the middle of `start` to the middle of `end`.
+    pub fn route_from_roads(
+        &self,
+        router_input: &impl RouterInput,
+        start: RoadID,
+        end: RoadID,
+    ) -> Option<Route> {
+        self.route_from_positions(
+            router_input,
+            Position {
+                road: start,
+                percent_along: 0.5,
+            },
+            Position {
+                road: end,
+                percent_along: 0.5,
+            },
+        )
+    }
+
+    pub fn route_from_positions(
+        &self,
+        _router_input: &impl RouterInput,
+        start: Position,
+        end: Position,
+    ) -> Option<Route> {
         if start == end {
             return None;
         }
@@ -137,13 +187,14 @@ impl Router {
         for direction in [Direction::Forwards, Direction::Backwards] {
             // We consider all start/end pairs equally.
             let extra_weight = 0;
-            if let Some(start) = self.node_map.get((start, direction)) {
+            if let Some(start) = self.node_map.get((start.road, direction)) {
                 starts.push((start, extra_weight));
             };
-            if let Some(end) = self.node_map.get((end, direction)) {
+            if let Some(end) = self.node_map.get((end.road, direction)) {
                 ends.push((end, extra_weight));
             };
         }
+
         if starts.is_empty() || ends.is_empty() {
             return None;
         }
@@ -160,10 +211,14 @@ impl Router {
     }
 
     /// Produce routes for all the requests and count how many routes cross each road
-    pub fn od_to_counts(&self, requests: &Vec<(RoadID, RoadID, usize)>) -> HashMap<RoadID, usize> {
+    pub fn od_to_counts(
+        &self,
+        router_input: &impl RouterInput,
+        requests: &Vec<(RoadID, RoadID, usize)>,
+    ) -> HashMap<RoadID, usize> {
         let mut results = HashMap::new();
         for (r1, r2, count) in requests {
-            if let Some(route) = self.route_from_roads(*r1, *r2) {
+            if let Some(route) = self.route_from_roads(router_input, *r1, *r2) {
                 for (r, _) in route.steps {
                     *results.entry(r).or_insert(0) += *count;
                 }
@@ -234,7 +289,10 @@ mod tests {
         //              i0
         // ```
         let mut map = load_osm_xml("simple_four_way_intersection");
-        let Route { steps } = map.router_before.route_from_roads(r(3), r(2)).unwrap();
+        let Route { steps } = map
+            .router_before
+            .route_from_roads(&map.router_input_before(), r(3), r(2))
+            .unwrap();
         assert_eq!(
             steps,
             vec![(r(3), Direction::Backwards), (r(2), Direction::Backwards)]
@@ -249,8 +307,12 @@ mod tests {
         map.rebuild_router(1.0);
         let router_after = map.router_after.as_ref().unwrap();
         // A route starting or ending there should fail
-        assert!(router_after.route_from_roads(r(2), r(3)).is_none());
-        assert!(router_after.route_from_roads(r(3), r(2)).is_none());
+        assert!(router_after
+            .route_from_roads(&map.router_input_after(), r(2), r(3))
+            .is_none());
+        assert!(router_after
+            .route_from_roads(&map.router_input_after(), r(3), r(2))
+            .is_none());
     }
 
     #[test]
@@ -269,13 +331,18 @@ mod tests {
         //              i0
         // ```
         let map = load_osm_xml("two_crossing_one_ways");
-        let Route { steps: valid_path } = map.router_before.route_from_roads(r(0), r(3)).unwrap();
+        let Route { steps: valid_path } = map
+            .router_before
+            .route_from_roads(&map.router_input_before(), r(0), r(3))
+            .unwrap();
         assert_eq!(
             valid_path,
             vec![(r(0), Direction::Forwards), (r(3), Direction::Forwards)]
         );
         // attempting illegal left turn
-        let invalid_path = map.router_before.route_from_roads(r(0), r(2));
+        let invalid_path =
+            map.router_before
+                .route_from_roads(&map.router_input_before(), r(0), r(2));
         assert!(invalid_path.is_none());
     }
 
@@ -304,17 +371,17 @@ mod tests {
             .router_after
             .as_ref()
             .unwrap()
-            .route_from_roads(r(3), r(1))
+            .route_from_roads(&map.router_input_after(), r(3), r(1))
             .unwrap();
         assert_eq!(
             right_turn_path,
             vec![(r(3), Direction::Backwards), (r(1), Direction::Forwards)]
         );
-        let left_turn_path = map
-            .router_after
-            .as_ref()
-            .unwrap()
-            .route_from_roads(r(3), r(0));
+        let left_turn_path = map.router_after.as_ref().unwrap().route_from_roads(
+            &map.router_input_after(),
+            r(3),
+            r(0),
+        );
         assert!(left_turn_path.is_none());
     }
 }

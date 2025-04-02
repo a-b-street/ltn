@@ -60,7 +60,9 @@ impl Impact {
                 "Calculating impacts before edits ({} requests)",
                 requests.len()
             );
-            self.counts_before = map.router_before.od_to_counts(requests);
+            self.counts_before = map
+                .router_before
+                .od_to_counts(&map.router_input_before(), requests);
         }
 
         if self.counts_after.is_empty() || fast_sample != self.last_fast_sample {
@@ -72,7 +74,7 @@ impl Impact {
                 .router_after
                 .as_ref()
                 .expect("need to rebuild_router")
-                .od_to_counts(requests);
+                .od_to_counts(&map.router_input_after(), requests);
         }
         self.last_fast_sample = fast_sample;
 
@@ -121,12 +123,16 @@ impl Impact {
 
         let mut changed_paths = Vec::new();
 
+        let router_input_before = map.router_input_before();
+        let router_input_after = map.router_input_after();
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
         for (r1, r2, count) in requests {
-            let route1 = map.router_before.route_from_roads(*r1, *r2);
-            let route2 = router_after.route_from_roads(*r1, *r2);
+            let route1 = map
+                .router_before
+                .route_from_roads(&router_input_before, *r1, *r2);
+            let route2 = router_after.route_from_roads(&router_input_after, *r1, *r2);
             let crosses1 = route1
                 .as_ref()
                 .map(|route| route.crosses_road(road))

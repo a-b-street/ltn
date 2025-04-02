@@ -9,6 +9,7 @@ use geo::{
     Euclidean, Length, LineString, MultiLineString, Point, Polygon, PreparedGeometry, Relate,
 };
 use geojson::{Feature, FeatureCollection};
+use rstar::{primitives::GeomWithData, RTree};
 use serde::{Deserialize, Serialize};
 use utils::Mercator;
 use web_time::Instant;
@@ -263,6 +264,9 @@ impl Neighbourhood {
                     .iter()
                     .chain(self.neighbourhood.main_roads.iter())
                     .map(|r| self.map.get_r(*r))
+            }
+            fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>> {
+                &self.map.closest_road
             }
 
             fn get_r(&self, r: RoadID) -> &Road {
