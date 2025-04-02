@@ -2,7 +2,7 @@
   import { Modal } from "svelte-utils";
   import icon from "../assets/settings.svg?url";
   import { BasemapPicker } from "./common";
-  import { devMode, thickRoadsForShortcuts } from "./stores";
+  import { devMode } from "./stores";
 
   let show = false;
 </script>
@@ -15,11 +15,6 @@
   <h1>Settings</h1>
 
   <BasemapPicker />
-
-  <label>
-    <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
-    Road thickness depends on shortcuts
-  </label>
 
   <label>
     <input type="checkbox" bind:checked={$devMode} />

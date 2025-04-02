@@ -48,6 +48,7 @@
     returnToChooseProject,
     roadStyle,
     saveCurrentProject,
+    thickRoadsForShortcuts,
   } from "../stores";
   import type {
     NeighbourhoodBoundaryFeature,
@@ -561,42 +562,52 @@
     </div>
 
     <h2>Map style</h2>
-
     <label>
       <input type="checkbox" bind:checked={$animateShortcuts} />
-      Animate shortcuts
+      Animate shortcuts<sup>[1]</sup>
     </label>
+
+    <label>
+      <input type="checkbox" bind:checked={$drawBorderEntries} />
+      Show entries into cells<sup>[2]</sup>
+    </label>
+
+    <label>
+      <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
+      Road thickness depends on shortcuts<sup>[1]</sup>
+    </label>
+
+    <label style="display: flex; align-items: center; gap: 8px;">
+      <span style="text-wrap: nowrap;">Draw roads:</span>
+      <select
+        style="margin: 0; padding: 8px; width: auto;"
+        bind:value={$roadStyle}
+      >
+        <option value="shortcuts">Worst shortcuts</option>
+        <option value="cells">Cell</option>
+        <option value="edits">Edits (either filter or direction)</option>
+        <option value="speeds">Speed limit</option>
+      </select>
+    </label>
+    {#if $roadStyle == "speeds"}
+      <SequentialLegend
+        colorScale={speedColorScale}
+        labels={{ limits: speedLimits }}
+      />
+    {/if}
+
+    <br />
     <p>
+      <sup>[1]</sup>
       <i>Shortcuts</i>
       are routes from one main road to another, which cut through the neighborhood's
       interior.
     </p>
-
-    <label>
-      <input type="checkbox" bind:checked={$drawBorderEntries} />
-      Show arrows into cells
-    </label>
     <p>
-      <i>Cells</i> show the area reachable without travelling along a main road.
+      <sup>[2]</sup>
+      <i>Cells</i> are the colored area reachable without travelling along a main
+      road.
     </p>
-
-    <div style="border: 1px solid black; padding: 4px">
-      <label>
-        Draw roads:
-        <select bind:value={$roadStyle}>
-          <option value="shortcuts">Worst shortcuts</option>
-          <option value="cells">Cell</option>
-          <option value="edits">Edits (either filter or direction)</option>
-          <option value="speeds">Speed limit</option>
-        </select>
-      </label>
-      {#if $roadStyle == "speeds"}
-        <SequentialLegend
-          colorScale={speedColorScale}
-          labels={{ limits: speedLimits }}
-        />
-      {/if}
-    </div>
 
     <h2>Neighbourhood stats</h2>
     <NeighbourhoodBoundarySummary neighbourhoodBoundary={notNull(boundary)} />
