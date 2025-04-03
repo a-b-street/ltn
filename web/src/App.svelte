@@ -39,10 +39,10 @@
   import PredictImpactMode from "./PredictImpactMode.svelte";
   import RouteMode from "./RouteMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";
-  import Settings from "./Settings.svelte";
   import {
     appFocus as appFocusStore,
     backend,
+    devMode,
     map as mapStore,
     maptilerApiKey,
     maptilerBasemap,
@@ -72,6 +72,17 @@
         console.log("Using local cache, not od2net.org");
       }
     } catch (err) {}
+
+    let devParam = new URLSearchParams(window.location.search).get("dev");
+    if (devParam === "true" || devParam === "") {
+      $devMode = true;
+    } else {
+      console.assert(
+        devParam === null || devParam == "false",
+        `unknown dev mode value: ${devParam}, should be "true", "false", or empty`,
+      );
+      $devMode = false;
+    }
   });
 
   let map: Map | null = null;
@@ -127,9 +138,8 @@
       style="display: flex; align-items: center; gap: 8px;"
     >
       <button class="outline" on:click={() => ($showAbout = true)}>
-        <img src={logo} alt="A/B Street logo" />
+        <img src={logo} style="height: 32px;" alt="A/B Street logo" />
       </button>
-      <Settings />
       <span bind:this={topDiv} style="width: 100%" />
     </div>
     <div class="pico" slot="left">
