@@ -3,8 +3,9 @@ use std::collections::HashMap;
 
 use fast_paths::{FastGraph, InputGraph, PathCalculator};
 use geo::{Coord, Euclidean, Length, LineLocatePoint, LineString};
+use itertools::Itertools;
 use rstar::{primitives::GeomWithData, RTree};
-use utils::NodeMap;
+use utils::{LineSplit, NodeMap};
 
 use crate::map_model::{DiagonalFilter, Direction};
 use crate::{
@@ -22,6 +23,8 @@ pub struct Router {
 #[derive(Debug, Clone)]
 pub struct Route {
     pub steps: Vec<(RoadID, Direction)>,
+    pub start: Position,
+    pub end: Position,
 }
 
 /// Routable input can represent the entire map, or a neighborhood within a map.
@@ -86,21 +89,7 @@ impl Router {
                 continue;
             }
 
-            let penalty = if road.tags.is_any(
-                "highway",
-                vec![
-                    "motorway",
-                    "motorway_link",
-                    "trunk",
-                    "trunk_link",
-                    "primary",
-                    "primary_link",
-                    "secondary",
-                    "secondary_link",
-                    "tertiary",
-                    "tertiary_link",
-                ],
-            ) {
+            let penalty = if road.is_severance() {
                 main_road_penalty
             } else {
                 1.0
@@ -174,7 +163,7 @@ impl Router {
 
     pub fn route_from_positions(
         &self,
-        _router_input: &impl RouterInput,
+        router_input: &impl RouterInput,
         start: Position,
         end: Position,
     ) -> Option<Route> {
@@ -182,32 +171,73 @@ impl Router {
             return None;
         }
 
-        let mut starts = vec![];
-        let mut ends = vec![];
-        for direction in [Direction::Forwards, Direction::Backwards] {
-            // We consider all start/end pairs equally.
-            let extra_weight = 0;
-            if let Some(start) = self.node_map.get((start.road, direction)) {
-                starts.push((start, extra_weight));
-            };
-            if let Some(end) = self.node_map.get((end.road, direction)) {
-                ends.push((end, extra_weight));
-            };
+        if start.road == end.road {
+            return Some(Route {
+                start,
+                end,
+                steps: vec![(
+                    start.road,
+                    Direction::forwards(start.percent_along < end.percent_along),
+                )],
+            });
         }
 
-        if starts.is_empty() || ends.is_empty() {
+        // Nodes in the contraction hierarchy are (road, direction) pairs. The start and end of the
+        // search can happen in two directions.
+        let mut start_nodes = vec![];
+        let mut end_nodes = vec![];
+        for (nodes, position, is_start) in [
+            (&mut start_nodes, start, true),
+            (&mut end_nodes, end, false),
+        ] {
+            for direction in [Direction::Forwards, Direction::Backwards] {
+                if let Some(node) = self.node_map.get((position.road, direction)) {
+                    // Calculate the cost of the first or last road, which usually doesn't use the
+                    // entire length of the road.
+                    // Note this extra cost gets double-counted -- the contraction hierachy edge
+                    // weights count crossing the full start and end road. But this is OK; the sum
+                    // cost is only used to pick the shortest path.
+                    let road = router_input.get_r(position.road);
+                    let percent_of_length = if (direction == Direction::Forwards) == is_start {
+                        // From the position to the end (dst_i) of this road
+                        1.0 - position.percent_along
+                    } else {
+                        // From the position to the start (src_i) of this road
+                        position.percent_along
+                    };
+                    let penalty = if road.is_severance() {
+                        self.main_road_penalty
+                    } else {
+                        1.0
+                    };
+                    let extra_cost =
+                        (penalty * percent_of_length * road.cost_seconds() * 100.0) as usize;
+
+                    nodes.push((node, extra_cost));
+                }
+            }
+        }
+        if start_nodes.is_empty() || end_nodes.is_empty() {
             return None;
         }
+
         let shortest_path = self
             .path_calculator
             .borrow_mut()
-            .calc_path_multiple_sources_and_targets(&self.ch, starts, ends)?;
-        let steps: Vec<_> = shortest_path
-            .get_nodes()
-            .iter()
-            .map(|n| self.node_map.translate_id(*n))
-            .collect();
-        Some(Route { steps })
+            .calc_path_multiple_sources_and_targets(&self.ch, start_nodes, end_nodes)?;
+
+        let mut steps = Vec::new();
+        for node in shortest_path.get_nodes() {
+            let (road, direction) = self.node_map.translate_id(*node);
+            steps.push((road, direction));
+        }
+        debug_assert_eq!(start.road, steps[0].0, "First step isn't on the start road");
+        debug_assert_eq!(
+            end.road,
+            steps.last().unwrap().0,
+            "Last step isn't on the end road"
+        );
+        Some(Route { steps, start, end })
     }
 
     /// Produce routes for all the requests and count how many routes cross each road
@@ -231,20 +261,16 @@ impl Router {
 impl Route {
     pub fn to_linestring(&self, map: &MapModel) -> LineString {
         let mut pts = Vec::new();
-        for (r, direction) in &self.steps {
-            let road = &map.roads[r.0];
-            if *direction == Direction::Forwards {
-                pts.extend(road.linestring.0.clone());
-            } else {
-                let mut rev = road.linestring.0.clone();
-                rev.reverse();
-                pts.extend(rev);
-            }
+
+        for (pos, (road, direction)) in self.steps.iter().with_position() {
+            pts.extend(self.slice_road_step(&map.get_r(*road).linestring, *direction, pos));
         }
+
         pts.dedup();
         LineString::new(pts)
     }
 
+    /// Includes the start and end road, even if they're only partially crossed
     pub fn crosses_road(&self, road: RoadID) -> bool {
         self.steps.iter().any(|(r, _)| *r == road)
     }
@@ -253,12 +279,83 @@ impl Route {
     pub fn get_distance_and_time(&self, map: &MapModel) -> (f64, f64) {
         let mut distance = 0.0;
         let mut time = 0.0;
-        for (r, _) in &self.steps {
+        for (pos, (r, dir)) in self.steps.iter().with_position() {
             let road = &map.roads[r.0];
-            distance += Euclidean.length(&road.linestring);
-            time += road.cost_seconds();
+
+            let percent_of_length = match pos {
+                itertools::Position::Only => {
+                    (self.start.percent_along - self.end.percent_along).abs()
+                }
+                itertools::Position::First => {
+                    if *dir == Direction::Forwards {
+                        1.0 - self.start.percent_along
+                    } else {
+                        self.start.percent_along
+                    }
+                }
+                itertools::Position::Middle => 1.0,
+                itertools::Position::Last => {
+                    if *dir == Direction::Forwards {
+                        self.end.percent_along
+                    } else {
+                        1.0 - self.end.percent_along
+                    }
+                }
+            };
+            distance += percent_of_length * Euclidean.length(&road.linestring);
+            time += percent_of_length * road.cost_seconds();
         }
         (distance, time)
+    }
+
+    /// Returns the points to glue together in order for one step of the route
+    fn slice_road_step(
+        &self,
+        linestring: &LineString,
+        dir: Direction,
+        pos: itertools::Position,
+    ) -> Vec<Coord> {
+        let mut pts = match pos {
+            itertools::Position::First => {
+                let (a, b) = if dir == Direction::Forwards {
+                    (self.start.percent_along, 1.0)
+                } else {
+                    (0.0, self.start.percent_along)
+                };
+                linestring
+                    .line_split_twice(a, b)
+                    .unwrap()
+                    .into_second()
+                    .map(|ls| ls.0)
+                    // If start.percent_along is exactly 0 or 1, depending on the direction, then
+                    // there are no actual points here
+                    .unwrap_or_else(Vec::new)
+            }
+            itertools::Position::Last => {
+                let (a, b) = if dir == Direction::Forwards {
+                    (0.0, self.end.percent_along)
+                } else {
+                    (self.end.percent_along, 1.0)
+                };
+                linestring
+                    .line_split_twice(a, b)
+                    .unwrap()
+                    .into_second()
+                    .map(|ls| ls.0)
+                    .unwrap_or_else(Vec::new)
+            }
+            itertools::Position::Middle => linestring.0.clone(),
+            itertools::Position::Only => linestring
+                .line_split_twice(self.start.percent_along, self.end.percent_along)
+                .unwrap()
+                .into_second()
+                .map(|ls| ls.0)
+                .unwrap_or_else(Vec::new),
+        };
+        if dir == Direction::Backwards {
+            pts.reverse();
+        }
+        pts
     }
 }
 
@@ -289,7 +386,7 @@ mod tests {
         //              i0
         // ```
         let mut map = load_osm_xml("simple_four_way_intersection");
-        let Route { steps } = map
+        let Route { steps, .. } = map
             .router_before
             .route_from_roads(&map.router_input_before(), r(3), r(2))
             .unwrap();
@@ -331,7 +428,9 @@ mod tests {
         //              i0
         // ```
         let map = load_osm_xml("two_crossing_one_ways");
-        let Route { steps: valid_path } = map
+        let Route {
+            steps: valid_path, ..
+        } = map
             .router_before
             .route_from_roads(&map.router_input_before(), r(0), r(3))
             .unwrap();
@@ -367,6 +466,7 @@ mod tests {
 
         let Route {
             steps: right_turn_path,
+            ..
         } = map
             .router_after
             .as_ref()
