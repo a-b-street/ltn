@@ -205,18 +205,47 @@ impl Router {
                         // From the position to the start (src_i) of this road
                         position.percent_along
                     };
-                    let penalty = if road.is_severance() {
-                        self.main_road_penalty
-                    } else {
-                        1.0
-                    };
-                    let extra_cost =
-                        (penalty * percent_of_length * road.cost_seconds() * 100.0) as usize;
+                    let extra_cost = self.cost_for_road(road, percent_of_length);
 
                     nodes.push((node, extra_cost));
                 }
             }
+
+            // If the start or end road has a modal filter, then it won't be in the contraction
+            // hierarchy. Depending on the filter position, we can only travel in one direction.
+            // (If the position is EXACTLY on the filter position, arbitrarily pick one side)
+            if let Some(filter) = router_input.modal_filter(position.road) {
+                assert!(nodes.is_empty(), "a road with a filter is in the CH");
+                let road = router_input.get_r(position.road);
+                let (i, percent_of_length) = if position.percent_along <= filter.percent_along {
+                    (road.src_i, position.percent_along)
+                } else {
+                    (road.dst_i, 1.0 - position.percent_along)
+                };
+                let extra_cost = self.cost_for_road(road, percent_of_length);
+
+                if is_start {
+                    for outgoing_road in router_input
+                        .get_i(i)
+                        .allowed_movements_from(position.road, router_input)
+                    {
+                        if let Some(node) = self.node_map.get(outgoing_road) {
+                            nodes.push((node, extra_cost));
+                        }
+                    }
+                } else {
+                    for incoming_road in router_input
+                        .get_i(i)
+                        .allowed_movements_to(position.road, router_input)
+                    {
+                        if let Some(node) = self.node_map.get(incoming_road) {
+                            nodes.push((node, extra_cost));
+                        }
+                    }
+                }
+            }
         }
+
         if start_nodes.is_empty() || end_nodes.is_empty() {
             return None;
         }
@@ -231,12 +260,30 @@ impl Router {
             let (road, direction) = self.node_map.translate_id(*node);
             steps.push((road, direction));
         }
-        debug_assert_eq!(start.road, steps[0].0, "First step isn't on the start road");
-        debug_assert_eq!(
-            end.road,
-            steps.last().unwrap().0,
-            "Last step isn't on the end road"
-        );
+
+        // If we started or ended on a filtered road, we need to insert the step for that
+        if start.road != steps[0].0 {
+            let filter = router_input
+                .modal_filter(start.road)
+                .expect("start road must have a filter");
+            steps.insert(
+                0,
+                (
+                    start.road,
+                    Direction::forwards(start.percent_along > filter.percent_along),
+                ),
+            );
+        }
+        if end.road != steps.last().unwrap().0 {
+            let filter = router_input
+                .modal_filter(end.road)
+                .expect("end road must have a filter");
+            steps.push((
+                end.road,
+                Direction::forwards(end.percent_along <= filter.percent_along),
+            ));
+        }
+
         Some(Route { steps, start, end })
     }
 
@@ -255,6 +302,15 @@ impl Router {
             }
         }
         results
+    }
+
+    fn cost_for_road(&self, road: &Road, percent_of_length: f64) -> usize {
+        let penalty = if road.is_severance() {
+            self.main_road_penalty
+        } else {
+            1.0
+        };
+        (penalty * percent_of_length * road.cost_seconds() * 100.0) as usize
     }
 }
 

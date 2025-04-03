@@ -168,6 +168,7 @@ impl Intersection {
         }
     }
 
+    /// Starting from `from_r` at this intersection, where can we go?
     pub fn allowed_movements_from<'a>(
         &'a self,
         from_r: RoadID,
@@ -202,6 +203,49 @@ impl Intersection {
                 Some((to_road.id, Direction::Forwards))
             } else if self.id == to_road.dst_i && travel_flow.flows_backwards() {
                 Some((to_road.id, Direction::Backwards))
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Where can we start from to reach `to_r` through this intersection?
+    pub fn allowed_movements_to<'a>(
+        &'a self,
+        to_r: RoadID,
+        router_input: &'a impl RouterInput,
+    ) -> impl Iterator<Item = (RoadID, Direction)> + 'a {
+        debug_assert!(
+            self.roads.contains(&to_r),
+            "{to_r:?} is not connected to intersection {self:?}"
+        );
+        let to_road = router_input.get_r(to_r);
+        self.roads.iter().filter_map(move |road_id| {
+            let from_road = router_input.get_r(*road_id);
+            if from_road.id == to_road.id {
+                return None;
+            }
+            if router_input.has_modal_filter(from_road.id) {
+                return None;
+            }
+            if router_input
+                .turn_restrictions(self.id)
+                .contains(&(from_road.id, to_r))
+            {
+                return None;
+            }
+            if let Some(diagonal_filter) = router_input.diagonal_filter(self.id) {
+                if !diagonal_filter.allows_movement(&(from_road.id, to_road.id)) {
+                    return None;
+                }
+            }
+            // Note this method is almost identical to allowed_movements_from, except for flipping
+            // directions here
+            let travel_flow = router_input.travel_flow(from_road.id);
+            if self.id == from_road.src_i && travel_flow.flows_forwards() {
+                Some((from_road.id, Direction::Backwards))
+            } else if self.id == from_road.dst_i && travel_flow.flows_backwards() {
+                Some((from_road.id, Direction::Forwards))
             } else {
                 None
             }
