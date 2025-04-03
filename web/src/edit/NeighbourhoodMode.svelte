@@ -282,6 +282,11 @@
       $mutationCounter++;
     }
   }
+
+  let shortcutDescriptionText =
+    "Shortcuts are routes from one main road to another, which cut through the neighborhood's interior.";
+  let cellsDescriptionText =
+    "Cells are the colored area reachable without travelling along a main road.";
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -564,17 +569,26 @@
     <h2>Map style</h2>
     <label>
       <input type="checkbox" bind:checked={$animateShortcuts} />
-      Animate shortcuts<sup>[1]</sup>
+      Animate shortcuts<span
+        class="footnote-ref"
+        data-tooltip={shortcutDescriptionText}>1</span
+      >
     </label>
 
     <label>
       <input type="checkbox" bind:checked={$drawBorderEntries} />
-      Show entries into cells<sup>[2]</sup>
+      Show entries into cells<span
+        class="footnote-ref"
+        data-tooltip={cellsDescriptionText}>2</span
+      >
     </label>
 
     <label>
       <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
-      Road thickness depends on shortcuts<sup>[1]</sup>
+      Road thickness depends on shortcuts<span
+        class="footnote-ref"
+        data-tooltip={shortcutDescriptionText}>1</span
+      >
     </label>
 
     <label style="display: flex; align-items: center; gap: 8px;">
@@ -595,20 +609,6 @@
         labels={{ limits: speedLimits }}
       />
     {/if}
-
-    <br />
-    <p>
-      <sup>[1]</sup>
-      <i>Shortcuts</i>
-      are routes from one main road to another, which cut through the neighborhood's
-      interior.
-    </p>
-    <p>
-      <sup>[2]</sup>
-      <i>Cells</i> are the colored area reachable without travelling along a main
-      road.
-    </p>
-
     <h2>Neighbourhood stats</h2>
     <NeighbourhoodBoundarySummary neighbourhoodBoundary={notNull(boundary)} />
   </div>
@@ -751,5 +751,17 @@
   }
   .classification-buttons {
     width: fit-content;
+  }
+  .footnote-ref {
+    font-size: 70%;
+    color: var(--pico-secondary);
+    position: relative;
+    top: -12px;
+    left: 4px;
+  }
+  :global(.pico .footnote-ref[data-tooltip]:hover::before) {
+    max-width: 400px;
+    min-width: 300px;
+    text-wrap: auto;
   }
 </style>
