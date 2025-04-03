@@ -7,10 +7,14 @@
   import ContextualLayers from "./context/ContextualLayers.svelte";
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import initLtn from "backend";
+  import { House } from "lucide-svelte";
   import type { LngLatBoundsLike, Map, StyleSpecification } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
   import {
+    Control,
+    ControlButton,
+    ControlGroup,
     FillLayer,
     GeoJSON,
     MapLibre,
@@ -79,8 +83,8 @@
     mapStore.set(map);
   }
 
-  function zoomToFit() {
-    $mapStore!.fitBounds($backend!.getBounds(), { animate: false });
+  function zoomToFit(animate: boolean) {
+    $mapStore!.fitBounds($backend!.getBounds(), { animate });
   }
 
   let topDiv: HTMLSpanElement;
@@ -138,9 +142,6 @@
       <hr />
 
       {#if $backend}
-        <button class="secondary" on:click={zoomToFit}>
-          Zoom to fit study area
-        </button>
         <StreetView
           map={notNull($mapStore)}
           maptilerBasemap={$maptilerBasemap}
@@ -216,8 +217,25 @@
           ]}
         >
           <NavigationControl />
-          <ScaleControl />
+
+          {#if $backend}
+            <Control position="top-left">
+              <ControlGroup>
+                <ControlButton
+                  title="Zoom to fit study area"
+                  on:click={() => zoomToFit(true)}
+                >
+                  <div class="zoom-to-fit-map-btn">
+                    <House />
+                  </div>
+                </ControlButton>
+              </ControlGroup>
+            </Control>
+          {/if}
+
           <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
+
+          <ScaleControl />
 
           <div bind:this={mapDiv} />
 
@@ -442,5 +460,10 @@
   }
   :global(.top .pico nav ul li) {
     padding: 8px 8px;
+  }
+
+  :global(.zoom-to-fit-map-btn svg) {
+    height: 20px;
+    width: auto;
   }
 </style>
