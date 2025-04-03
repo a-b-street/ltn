@@ -148,15 +148,6 @@
     </div>
     <div class="pico" slot="left">
       <div bind:this={sidebarDiv} />
-
-      <hr />
-
-      {#if $backend}
-        <StreetView
-          map={notNull($mapStore)}
-          maptilerBasemap={$maptilerBasemap}
-        />
-      {/if}
     </div>
     <div slot="main" style="position: relative; width: 100%; height: 100%;">
       {#await getStyle($maptilerBasemap) then style}
@@ -235,10 +226,18 @@
                   title="Zoom to fit study area"
                   on:click={() => zoomToFit(true)}
                 >
-                  <div class="zoom-to-fit-map-btn">
+                  <div class="ltn-map-btn zoom-to-fit-btn">
                     <House />
                   </div>
                 </ControlButton>
+              </ControlGroup>
+            </Control>
+            <Control position="top-left">
+              <ControlGroup>
+                <StreetView
+                  map={notNull($mapStore)}
+                  maptilerBasemap={$maptilerBasemap}
+                />
               </ControlGroup>
             </Control>
           {/if}
@@ -472,8 +471,9 @@
     padding: 8px 8px;
   }
 
-  :global(.zoom-to-fit-map-btn svg) {
+  :global(.ltn-map-btn svg) {
     height: 20px;
     width: auto;
+    margin-top: 2px;
   }
 </style>
