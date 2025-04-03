@@ -1,14 +1,17 @@
 <script lang="ts">
+  import { Eye, EyeClosed } from "lucide-svelte";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
+  import { ControlButton } from "svelte-maplibre";
   import { getRoadLayerNames } from "./highlight_roads";
   import { interactiveMapLayersEnabled } from "./stores";
 
   // TODO Need to intercept the escape key always
-  // TODO Make sure all layers respect DisableInteractiveLayers
+  // TODO Make sure all layers respect DisableInteractiveLayers (they currently do not)
 
   export let map: Map;
   export let maptilerBasemap: string;
+  let expanded = false;
 
   let source: "google" | "bing" = "google";
   let defaultLineColorPerLayer: [string, any][] = [];
@@ -66,20 +69,59 @@
 
 <svelte:window on:keydown={onKeyDown} />
 
-{#if $interactiveMapLayersEnabled}
-  <button class="secondary" on:click={start}>StreetView</button>
-{:else}
-  <button class="secondary" on:click={stop}>Stop StreetView</button>
+<ControlButton>
+  <button
+    on:click={() => {
+      expanded = !expanded;
+      expanded ? start() : stop();
+    }}
+    title="Street view"
+  >
+    <div class="ltn-map-btn">
+      {#if expanded}
+        <EyeClosed />
+      {:else}
+        <Eye />
+      {/if}
+    </div>
+  </button>
+  {#if expanded}
+    <div class="street-view-control-source" class:expanded>
+      Click the map to see street view
+      <br />
+      <br />
+      <b>Street view source</b>
+      <label>
+        <input type="radio" value="google" bind:group={source} />
+        Google Street View
+      </label>
+      <label>
+        <input type="radio" value="bing" bind:group={source} />
+        Bing Streetside
+      </label>
+    </div>
+  {/if}
+</ControlButton>
 
-  <fieldset>
-    <legend>Source:</legend>
-    <label>
-      <input type="radio" value="google" bind:group={source} />
-      Google Street View
-    </label>
-    <label>
-      <input type="radio" value="bing" bind:group={source} />
-      Bing Streetside
-    </label>
-  </fieldset>
-{/if}
+<style>
+  .street-view-control-source.expanded {
+    position: absolute;
+    top: 34px;
+    width: 200px;
+    background: white;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: left;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    cursor: default;
+  }
+  .street-view-control-source label {
+    display: block;
+    text-align: left;
+    margin-top: 4px;
+    cursor: pointer;
+  }
+  .street-view-control-source input {
+    cursor: pointer;
+  }
+</style>
