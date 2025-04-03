@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Modal } from "svelte-utils";
   import icon from "../assets/settings.svg?url";
-  import { BasemapPicker } from "./common";
   import { devMode } from "./stores";
 
   let show = false;
@@ -13,8 +12,6 @@
 
 <Modal bind:show>
   <h1>Settings</h1>
-
-  <BasemapPicker />
 
   <label>
     <input type="checkbox" bind:checked={$devMode} />

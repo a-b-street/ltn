@@ -227,9 +227,8 @@
             <NewProjectMode />
           {/if}
 
+          <ContextualLayers />
           {#if $backend}
-            <ContextualLayers />
-
             <GeoJSON data={$backend.getInvertedBoundary()}>
               <FillLayer
                 {...layerId("boundary")}
