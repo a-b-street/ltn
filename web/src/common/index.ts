@@ -7,7 +7,6 @@ import { get } from "svelte/store";
 import { appFocus, projectStorage } from "../stores";
 import { type ProjectID, type StudyAreaName } from "./ProjectStorage";
 
-export { default as BasemapPicker } from "./BasemapPicker.svelte";
 export { default as ContextLayerButton } from "./ContextLayerButton.svelte";
 export { default as DisableInteractiveLayers } from "./DisableInteractiveLayers.svelte";
 export { default as DotMarker } from "./DotMarker.svelte";

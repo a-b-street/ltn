@@ -2,7 +2,12 @@
   import { Layers } from "lucide-svelte";
   import { Control } from "svelte-maplibre";
   import { ContextLayerButton } from "../common";
-  import { appFocus, showExistingFiltersAndTRs } from "../stores";
+  import {
+    appFocus,
+    backend,
+    maptilerBasemap,
+    showExistingFiltersAndTRs,
+  } from "../stores";
   import BusRoutes from "./BusRoutes.svelte";
   import CBD from "./CBD.svelte";
   import POIs from "./POIs.svelte";
@@ -40,20 +45,35 @@
       style:display={expand ? "flex" : "none"}
       style:background-color="#515f7A"
     >
-      <ContextLayerButton
-        label="Existing modal filters and turn restrictions"
-        bind:show={$showExistingFiltersAndTRs}
-      />
-
-      {#if $appFocus == "cnt"}
-        <POIs />
-        <Population />
-        <RailwayStations />
-        <BusRoutes />
-        <CBD />
-        <RouteNetwork />
-        <Stats19 />
+      {#if $backend}
+        <ContextLayerButton
+          label="Existing modal filters and turn restrictions"
+          bind:show={$showExistingFiltersAndTRs}
+        />
+        {#if $appFocus == "cnt"}
+          <POIs />
+          <Population />
+          <RailwayStations />
+          <BusRoutes />
+          <CBD />
+          <RouteNetwork />
+          <Stats19 />
+        {/if}
       {/if}
+      <span
+        style="font-size: 20px; color: var(--pico-secondary-inverse); margin-left: 8px; margin-top: 4px;"
+      >
+        Basemap
+      </span>
+      <select
+        style="width: auto; font-size: 20px; margin: 8px; padding: 8px; text-overflow: ellipsis;"
+        bind:value={$maptilerBasemap}
+      >
+        <option value="dataviz">MapTiler Dataviz</option>
+        <option value="streets-v2">MapTiler Streets</option>
+        <option value="hybrid">MapTiler Satellite</option>
+        <option value="uk-openzoomstack-light">OS Open Zoomstack</option>
+      </select>
     </div>
   </div>
 </Control>
