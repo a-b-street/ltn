@@ -6,14 +6,14 @@
 </script>
 
 <button
+  class="context-control"
   style="display: flex; align-items: center; justify-content: leading; gap: 8px; text-align: left;"
-  class="secondary"
   on:click={() => (show = !show)}
 >
   <input style="aspect-ratio: 1.0" type="checkbox" bind:checked={show} />
   {label}
   {#if $$slots.help}
-    <HelpButton color="var(--pico-secondary-inverse)">
+    <HelpButton color="white">
       <div class="context-layer-help-content">
         <slot name="help" />
       </div>
@@ -35,7 +35,8 @@
     padding-left: 4px;
   }
   .legend {
-    padding: 8px;
     background-color: white;
+    color: black;
+    padding: 8px;
   }
 </style>
