@@ -172,14 +172,28 @@ impl Router {
         }
 
         if start.road == end.road {
-            return Some(Route {
-                start,
-                end,
-                steps: vec![(
-                    start.road,
-                    Direction::forwards(start.percent_along < end.percent_along),
-                )],
-            });
+            let mut one_step = true;
+
+            // Edge case: if the route starts and ends on the same road AND there's a filter, check
+            // if the start and end position are on the same side of the filter or not.
+            if let Some(filter) = router_input.modal_filter(start.road) {
+                let start_before = start.percent_along <= filter.percent_along;
+                let end_before = end.percent_along <= filter.percent_along;
+                if start_before != end_before {
+                    one_step = false;
+                }
+            }
+
+            if one_step {
+                return Some(Route {
+                    start,
+                    end,
+                    steps: vec![(
+                        start.road,
+                        Direction::forwards(start.percent_along < end.percent_along),
+                    )],
+                });
+            }
         }
 
         // Nodes in the contraction hierarchy are (road, direction) pairs. The start and end of the
@@ -215,7 +229,7 @@ impl Router {
             // hierarchy. Depending on the filter position, we can only travel in one direction.
             // (If the position is EXACTLY on the filter position, arbitrarily pick one side)
             if let Some(filter) = router_input.modal_filter(position.road) {
-                assert!(nodes.is_empty(), "a road with a filter is in the CH");
+                debug_assert!(nodes.is_empty(), "a road with a filter is in the CH");
                 let road = router_input.get_r(position.road);
                 let (i, percent_of_length) = if position.percent_along <= filter.percent_along {
                     (road.src_i, position.percent_along)
@@ -364,7 +378,7 @@ impl Route {
         (distance, time)
     }
 
-    /// Returns the points to glue together in order for one step of the route
+    /// Returns the points to glue together for one step of the route
     fn slice_road_step(
         &self,
         linestring: &LineString,
@@ -451,15 +465,16 @@ mod tests {
             vec![(r(3), Direction::Backwards), (r(2), Direction::Backwards)]
         );
 
-        // Filter r2
+        // Filter r2 at the i1 end
         map.add_modal_filter(
-            map.get_r(r(2)).linestring.0[0],
+            *map.get_r(r(2)).linestring.0.last().unwrap(),
             Some(vec![r(2)]),
             FilterKind::NoEntry,
         );
         map.rebuild_router(1.0);
         let router_after = map.router_after.as_ref().unwrap();
-        // A route starting or ending there should fail
+        // A route starting or ending there should fail. route_from_roads uses the middle of the
+        // road, so it hits the filter.
         assert!(router_after
             .route_from_roads(&map.router_input_after(), r(2), r(3))
             .is_none());
