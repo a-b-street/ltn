@@ -27,6 +27,7 @@
   import {
     appFocus,
     backend,
+    currentNeighbourhoodName,
     currentProjectID,
     map,
     mode,
@@ -161,6 +162,7 @@
       $backend!.setNeighbourhoodBoundary(name, feature);
       saveCurrentProject();
       $backend!.setCurrentNeighbourhood(name);
+      $currentNeighbourhoodName = name;
       $mode = {
         mode: "neighbourhood",
       };

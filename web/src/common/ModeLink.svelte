@@ -14,6 +14,18 @@
     afterLink && afterLink();
   }}
   ><slot>
-    {pageTitle(mode.mode)}
+    <span class="page-title">{pageTitle(mode.mode)}</span>
   </slot>
 </Link>
+
+<style>
+  .page-title {
+    display: inline-block;
+    max-width: 20vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    vertical-align: middle;
+  }
+</style>

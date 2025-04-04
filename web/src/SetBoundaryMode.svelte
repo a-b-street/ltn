@@ -7,7 +7,7 @@
   import { gjPosition, ModeLink, pageTitle } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
-  import { backend, map, mode, saveCurrentProject } from "./stores";
+  import { backend, currentNeighbourhoodName, map, mode, saveCurrentProject } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps>;
@@ -39,10 +39,9 @@
       try {
         $backend!.setNeighbourhoodBoundary(name, drawnShape);
         saveCurrentProject();
+        console.assert(name == $currentNeighbourhoodName);
         $backend!.setCurrentNeighbourhood(name);
-        $mode = {
-          mode: "neighbourhood",
-        };
+        $mode = { mode: "neighbourhood" };
       } catch (err) {
         window.alert(`Sorry, this boundary is invalid: ${err}`);
         cancel();
