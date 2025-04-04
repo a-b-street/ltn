@@ -249,7 +249,7 @@
           <div bind:this={mapDiv} />
 
           {#if $mode.mode == "title"}
-            <TitleMode {wasmReady} firstLoad={$mode.firstLoad} />
+            <TitleMode {wasmReady} />
           {:else if $mode.mode == "new-project"}
             <NewProjectMode />
           {/if}

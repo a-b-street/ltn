@@ -25,9 +25,9 @@
     ensurePointInVisibleBounds,
     mainRoadPenalty,
     mode,
-    zoomToDefault,
     routePtA,
     routePtB,
+    zoomToDefault,
   } from "./stores";
 
   export let prevMode:
@@ -53,10 +53,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink
-            mode={{ mode: "title", firstLoad: false }}
-            afterLink={zoomToDefault}
-          />
+          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />
