@@ -60,30 +60,29 @@
           <Stats19 />
         {/if}
       {/if}
-      <span
-        style="font-size: 20px; color: var(--pico-secondary-inverse); margin-left: 8px; margin-top: 4px;"
-      >
-        Basemap
-      </span>
-      <select
-        style="width: auto; font-size: 20px; margin: 8px; padding: 8px; text-overflow: ellipsis;"
-        bind:value={$maptilerBasemap}
-      >
-        <option value="dataviz">MapTiler Dataviz</option>
-        <option value="streets-v2">MapTiler Streets</option>
-        <option value="hybrid">MapTiler Satellite</option>
-        <option value="uk-openzoomstack-light">OS Open Zoomstack</option>
-      </select>
+      <div class="context-control">
+        <span style="font-size: 20px; margin-left: 8px; margin-top: 4px;">
+          Basemap
+        </span>
+        <select
+          style="width: auto; font-size: 20px; margin: 8px; padding: 8px; text-overflow: ellipsis;"
+          bind:value={$maptilerBasemap}
+        >
+          <option value="dataviz">MapTiler Dataviz</option>
+          <option value="streets-v2">MapTiler Streets</option>
+          <option value="hybrid">MapTiler Satellite</option>
+          <option value="uk-openzoomstack-light">OS Open Zoomstack</option>
+        </select>
+      </div>
     </div>
   </div>
 </Control>
 
 <style>
   .contextual-layers {
-    background: #515F7A;
+    background: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    color: white;
   }
   button.show-layers-button {
     background-color: #fff;
@@ -110,8 +109,12 @@
   :global(.pico.contextual-layers .context-control) {
     border: none;
     border-radius: 0;
-    color: white;
+    color: black;
     background: none;
     padding: 8px 8px;
+  }
+
+  :global(.pico.contextual-layers .context-control:not(:first-child)) {
+    border-top: solid #ddd 1px;
   }
 </style>

@@ -13,7 +13,7 @@
   <input style="aspect-ratio: 1.0" type="checkbox" bind:checked={show} />
   {label}
   {#if $$slots.help}
-    <HelpButton color="white">
+    <HelpButton>
       <div class="context-layer-help-content">
         <slot name="help" />
       </div>
@@ -35,7 +35,6 @@
     padding-left: 4px;
   }
   .legend {
-    background-color: white;
     color: black;
     padding: 8px;
   }
