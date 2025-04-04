@@ -7,13 +7,7 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, ModeLink, pageTitle, SequentialLegend } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import {
-    backend,
-    fastSample,
-    minImpactCount,
-    mode,
-    zoomToDefault,
-  } from "./stores";
+  import { backend, fastSample, minImpactCount, mode } from "./stores";
   import type { Impact } from "./wasm";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
@@ -62,7 +56,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

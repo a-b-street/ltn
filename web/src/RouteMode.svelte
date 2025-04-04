@@ -27,7 +27,6 @@
     mode,
     routePtA,
     routePtB,
-    zoomToDefault,
   } from "./stores";
 
   export let prevMode:
@@ -53,7 +52,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

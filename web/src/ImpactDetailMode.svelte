@@ -15,7 +15,7 @@
     PrevNext,
   } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, fastSample, mode, zoomToDefault } from "./stores";
+  import { backend, fastSample, mode } from "./stores";
   import type { ImpactOnRoad } from "./wasm";
 
   export let road: Feature;
@@ -78,7 +78,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

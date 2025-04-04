@@ -26,7 +26,6 @@
     oneDestination,
     routePtA,
     routePtB,
-    zoomToDefault,
   } from "./stores";
   import type { CompareRoute } from "./wasm";
 
@@ -77,7 +76,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

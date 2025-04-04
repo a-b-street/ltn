@@ -12,7 +12,7 @@
   import BackButton from "./BackButton.svelte";
   import { layerId, ModeLink, pageTitle, SequentialLegend } from "./common";
   import { demandColorScale } from "./common/colors";
-  import { backend, mode, zoomToDefault } from "./stores";
+  import { backend, mode } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
 
   let gj = emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>;
@@ -77,7 +77,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

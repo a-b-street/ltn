@@ -1,5 +1,6 @@
 <script lang="ts">
   import { FileDown, Pencil, Trash2 } from "lucide-svelte";
+  import type { LngLatBoundsLike } from "maplibre-gl";
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
@@ -45,6 +46,18 @@
       let url = new URL(window.location.href);
       url.searchParams.delete("project");
       window.history.replaceState(null, "", url.toString());
+    }
+  }
+
+  {
+    // The App component intiailizes the map to the proper zoom,
+    // so no need to redundantly do it here for the first load.
+    if ($map && !$firstTimeLoadProjectFromURL) {
+      let bounds = [-180, -90, 180, 90] as LngLatBoundsLike;
+      if ($appFocus == "cnt") {
+        bounds = [-8.943, 54.631, -0.901, 59.489];
+      }
+      $map.fitBounds(bounds, { duration: 500 });
     }
   }
 

@@ -36,7 +36,6 @@
     mode,
     projectStorage,
     saveCurrentProject,
-    zoomToDefault,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
 
@@ -150,7 +149,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           {pageTitle($mode.mode)}

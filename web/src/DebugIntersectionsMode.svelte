@@ -11,7 +11,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, ModeLink, pageTitle, PrevNext } from "./common";
-  import { backend, mode, zoomToDefault } from "./stores";
+  import { backend, mode } from "./stores";
 
   let currentOsm: string | null = null;
   let movements = emptyGeojson();
@@ -29,7 +29,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />
