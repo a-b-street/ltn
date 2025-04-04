@@ -234,9 +234,9 @@ export class ProjectStorage {
   }
 
   nextAvailableNeighbourhoodName(projectID: ProjectID): string {
-    let project = this.project(projectID);
-    let basename = `${project.project_name} LTN`;
+    let basename = "My neighbourhood";
 
+    let project = this.project(projectID);
     let neighbourhoods = project.features.filter(
       (f) => f.properties?.kind == "boundary",
     ) as Array<NeighbourhoodDefinitionFeature>;
