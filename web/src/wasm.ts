@@ -150,8 +150,8 @@ export class Backend {
     return JSON.parse(serializedMergedBoundary);
   }
 
-  setNeighbourhoodBoundary(name: string, input: Feature) {
-    this.inner.setNeighbourhoodBoundary(name, input);
+  setCurrentNeighbourhoodBoundary(name: string, input: Feature) {
+    this.inner.setCurrentNeighbourhoodBoundary(name, input);
   }
 
   deleteNeighbourhoodBoundary(name: string) {

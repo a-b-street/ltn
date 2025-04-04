@@ -203,8 +203,8 @@ impl LTN {
     }
 
     /// `input`: GeoJson Feature w/ Polygon Geometry
-    #[wasm_bindgen(js_name = setNeighbourhoodBoundary)]
-    pub fn set_neighbourhood_boundary(
+    #[wasm_bindgen(js_name = setCurrentNeighbourhoodBoundary)]
+    pub fn set_current_neighbourhood_boundary(
         &mut self,
         name: String,
         neighborhood_feature: JsValue,
@@ -215,7 +215,9 @@ impl LTN {
             NeighbourhoodDefinition::from_feature(feature, &self.map).map_err(err_to_js)?;
         let boundary =
             NeighbourhoodBoundary::new(neighbourhood_definition, self.map.context_data.as_ref());
-        self.map.boundaries.insert(name, boundary);
+        self.map.boundaries.insert(name, boundary.clone());
+
+        self.neighbourhood = Some(Neighbourhood::new(&self.map, boundary).map_err(err_to_js)?);
         Ok(())
     }
 
@@ -244,7 +246,12 @@ impl LTN {
         self.neighbourhood =
             Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
 
-        debug_assert!(!editing_same, "I don't think this happens anymore since we got rid of 'edit_perimeter_roads'");
+        // We can delete this assert if it's a valid code path, but I think it's not.
+        // If we haven't triggered it after a while, we can delete the editing_same logic.
+        debug_assert!(
+            !editing_same,
+            "I don't think this happens anymore since we got rid of 'edit_perimeter_roads'"
+        );
 
         // Undoing edits in another neighbourhood doesn't make sense
         if !editing_same {

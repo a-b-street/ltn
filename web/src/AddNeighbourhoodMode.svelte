@@ -159,10 +159,9 @@
         properties,
         geometry: selectedBoundary.geometry,
       };
-      $backend!.setNeighbourhoodBoundary(name, feature);
-      saveCurrentProject();
-      $backend!.setCurrentNeighbourhood(name);
+      $backend!.setCurrentNeighbourhoodBoundary(name, feature);
       $currentNeighbourhoodName = name;
+      saveCurrentProject();
       $mode = {
         mode: "neighbourhood",
       };
