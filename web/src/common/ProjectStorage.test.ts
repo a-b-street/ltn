@@ -286,7 +286,7 @@ describe("ProjectStorage", () => {
         "TestArea",
       );
       expect(projectStorage.nextAvailableNeighbourhoodName(projectID)).toBe(
-        "Test Project LTN",
+        "My neighbourhood",
       );
     });
 
@@ -301,14 +301,14 @@ describe("ProjectStorage", () => {
         geometry: { type: "Polygon", coordinates: [] },
         properties: {
           kind: "boundary",
-          name: "Test Project LTN",
+          name: "My neighbourhood",
         },
       };
       let project = projectStorage.project(projectID);
       project.features.push(existingNeighbourhood);
       projectStorage.saveProject(projectID, project);
       expect(projectStorage.nextAvailableNeighbourhoodName(projectID)).toBe(
-        "Test Project LTN #2",
+        "My neighbourhood #2",
       );
     });
 
@@ -331,7 +331,7 @@ describe("ProjectStorage", () => {
       project.features.push(existingNeighbourhood);
       projectStorage.saveProject(projectID, project);
       expect(projectStorage.nextAvailableNeighbourhoodName(projectID)).toBe(
-        "Test Project LTN",
+        "My neighbourhood",
       );
     });
   });
