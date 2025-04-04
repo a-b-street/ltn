@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, Polygon } from "geojson";
-  import { Trash2 } from "lucide-svelte";
+  import { Pencil, Pointer, Trash2 } from "lucide-svelte";
   import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import { onMount } from "svelte";
   import {
@@ -254,20 +254,20 @@
     <hr />
 
     <div>
-      <div class="modes">
+      <div class="tool-palette">
         <button
           on:click={() => (addMode = "choose-area")}
           class:active={addMode == "choose-area"}
-          disabled={addMode == "choose-area"}
         >
+          <Pointer />
           Choose area
         </button>
         <span style="margin: 0 16px;">or</span>
         <button
           on:click={() => (addMode = "draw-area")}
           class:active={addMode == "draw-area"}
-          disabled={addMode == "draw-area"}
         >
+          <Pencil />
           Draw area
         </button>
       </div>
@@ -350,7 +350,7 @@
         {:else}
           <span style="text-align:center;">
             {#if addMode == "choose-area"}
-              Empty so far. Click an area to get started.
+              Empty so far. Click a colored area to get started.
             {:else if addMode == "draw-area"}
               {#if waypoints.length < 3}
                 Empty so far. Click the map to add points around your
@@ -452,21 +452,8 @@
 </SplitComponent>
 
 <style>
-  .modes {
-    margin-bottom: 8px;
-  }
-  .modes button.active {
-    background-color: rgb(0, 116, 76);
-    opacity: 1;
-    color: white;
-  }
-  .modes button:not(.active):hover {
-    background-color: rgba(0, 116, 76, 0.5);
-  }
-  .modes button {
-    background-color: white;
-    color: black;
-    border: solid green 1px;
+  .tool-palette {
+    margin-bottom: 16px;
   }
   .neighbourhood-boundary-summary {
     border: dashed black 2px;

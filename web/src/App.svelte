@@ -336,7 +336,8 @@
   }
 
   :global(.pico button.icon-btn):hover,
-  :global(button.icon-btn):hover {
+  :global(button.icon-btn):hover,
+  :global(.pico .tool-palette button:hover) {
     background-color: #ddd;
   }
 
