@@ -20,7 +20,6 @@ export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
 export type Mode =
   | {
       mode: "title";
-      firstLoad: boolean;
     }
   | {
       mode: "new-project";
@@ -85,6 +84,8 @@ export let projectStorage: Writable<ProjectStorage> = writable(
 appFocus.subscribe((focus) => {
   projectStorage.set(database.projectStorage(focus));
 });
+
+export let firstTimeLoadProjectFromURL = writable(true);
 
 // False until user activates
 export let showAbout: Writable<boolean> = writable(false);

@@ -15,6 +15,7 @@
     appFocus,
     backend,
     currentProjectID,
+    firstTimeLoadProjectFromURL,
     map,
     mode,
     projectStorage,
@@ -23,7 +24,6 @@
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
   export let wasmReady: boolean;
-  export let firstLoad: boolean;
 
   let loading = "";
 
@@ -33,12 +33,13 @@
     $routeTool = null;
     $currentProjectID = undefined;
 
-    if (firstLoad) {
+    if ($firstTimeLoadProjectFromURL) {
       let params = new URLSearchParams(window.location.search);
       let projectID = params.get("project") as ProjectID;
       if (projectID) {
         loadProjectFromUrlParam(projectID);
       }
+      $firstTimeLoadProjectFromURL = false;
     } else {
       // Update the URL
       let url = new URL(window.location.href);

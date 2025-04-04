@@ -62,10 +62,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink
-            mode={{ mode: "title", firstLoad: false }}
-            afterLink={zoomToDefault}
-          />
+          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />
