@@ -19,10 +19,10 @@
   let expand = false;
 </script>
 
-<Control defaultStyling={true}>
+<Control defaultStyling>
   <div
     class="pico contextual-layers"
-    style="display: flex; flex-direction: column; max-height: 80vh; overflow: auto; border-radius: 5px;"
+    style="display: flex; flex-direction: column; border-radius: 5px;"
     style:width={expand ? "300px" : "auto"}
   >
     <button
@@ -41,9 +41,9 @@
     </button>
 
     <div
-      style="flex-direction: column"
+      class="contextual-layer-controls"
+      style="flex-direction: column;"
       style:display={expand ? "flex" : "none"}
-      style:background-color="#515f7A"
     >
       {#if $backend}
         <ContextLayerButton
@@ -79,21 +79,39 @@
 </Control>
 
 <style>
-  .pico button.show-layers-button {
+  .contextual-layers {
+    background: #515F7A;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    color: white;
+  }
+  button.show-layers-button {
     background-color: #fff;
+    border-radius: 5px;
     border-color: #999;
     width: 44px;
     height: 44px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
-  .pico button.show-layers-button.expanded {
+  button.show-layers-button:hover {
+    background-color: #eee;
+  }
+  button.show-layers-button.expanded {
     width: 100%;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  .pico button.show-layers-button:hover {
     background-color: #f2f2f2;
+    border-bottom: none;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
   }
-  :global(.pico.contextual-layers button) {
+  .contextual-layer-controls {
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+  }
+  :global(.pico.contextual-layers .context-control) {
+    border: none;
+    border-radius: 0;
+    color: white;
+    background: none;
     padding: 8px 8px;
   }
 </style>
