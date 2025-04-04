@@ -344,15 +344,6 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <h1>{notNull(boundary).properties.name}</h1>
-
-    {#if numDisconnectedCells > 0}
-      <mark>
-        Some parts of the neighbourhood aren't reachable by drivers, shown in
-        red
-      </mark>
-    {/if}
-
     <h2>Editing tools</h2>
     <div
       class="tool-palette"
@@ -549,6 +540,13 @@
         </div>
       {/if}
     </div>
+
+    {#if numDisconnectedCells > 0}
+      <mark>
+        Some parts of the neighbourhood aren't reachable by drivers, shown in
+        red
+      </mark>
+    {/if}
 
     <h2>Map style</h2>
     <label>

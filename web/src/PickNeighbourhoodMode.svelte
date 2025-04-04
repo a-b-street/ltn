@@ -35,7 +35,6 @@
     currentProjectID,
     devMode,
     mode,
-    projectStorage,
     saveCurrentProject,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
@@ -195,7 +194,7 @@
     <div
       style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"
     >
-      <h1>{$projectStorage.projectName(notNull($currentProjectID))}</h1>
+      <h2>Neighbourhoods</h2>
       <button
         class="outline icon-btn"
         style="margin-right: 8px;"
@@ -215,7 +214,6 @@
         </div>
       </button>
     </div>
-    <h2>Neighbourhoods</h2>
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
         <li
