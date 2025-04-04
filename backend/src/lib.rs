@@ -244,6 +244,8 @@ impl LTN {
         self.neighbourhood =
             Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
 
+        debug_assert!(!editing_same, "I don't think this happens anymore since we got rid of 'edit_perimeter_roads'");
+
         // Undoing edits in another neighbourhood doesn't make sense
         if !editing_same {
             self.map.undo_stack.clear();

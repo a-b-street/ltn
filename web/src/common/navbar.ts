@@ -1,4 +1,5 @@
-import type { Mode } from "../stores";
+import { get } from "svelte/store";
+import { currentNeighbourhoodName, currentProject, type Mode } from "../stores";
 
 export function pageTitle(mode: Mode["mode"]): string {
   switch (mode) {
@@ -7,13 +8,13 @@ export function pageTitle(mode: Mode["mode"]): string {
     case "new-project":
       return "New project";
     case "pick-neighbourhood":
-      return "Pick neighbourhood";
+      return get(currentProject)?.project_name || "Pick neighbourhood"; // TODO truncate if necessary
     case "set-boundary":
       return "Adjust boundary";
     case "add-neighbourhood":
       return "Add a neighbourhood";
     case "neighbourhood":
-      return "Editing";
+      return get(currentNeighbourhoodName) || "Editing"; // TODO truncate if necessary
     case "view-shortcuts":
       return "View shortcuts";
     case "impact-one-destination":

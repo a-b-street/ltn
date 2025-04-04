@@ -31,6 +31,7 @@
   import {
     appFocus,
     backend,
+    currentNeighbourhoodName,
     currentProjectID,
     devMode,
     mode,
@@ -46,9 +47,11 @@
   let selectedPrioritization: Prioritization = "none";
   let hoveredNeighbourhoodFromList: string | null = null;
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
+  $currentNeighbourhoodName = undefined;
 
   function pickNeighbourhood(name: string) {
     $backend!.setCurrentNeighbourhood(name);
+    $currentNeighbourhoodName = name;
     $mode = { mode: "neighbourhood" };
   }
 
@@ -59,6 +62,7 @@
       )
     ) {
       $backend!.deleteNeighbourhoodBoundary(name);
+      console.assert(!currentNeighbourhoodName);
       saveCurrentProject();
       // TODO Improve perf, don't call this twice
       neighbourhoods = $backend!.getAllNeighbourhoods();
@@ -73,6 +77,7 @@
     );
     if (newName) {
       $backend!.renameNeighbourhoodBoundary(name, newName);
+      $currentNeighbourhoodName = newName;
       saveCurrentProject();
       neighbourhoods = $backend!.getAllNeighbourhoods();
     }

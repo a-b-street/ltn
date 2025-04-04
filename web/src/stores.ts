@@ -1,10 +1,17 @@
 import type { Feature, Polygon } from "geojson";
 import { LngLat, LngLatBounds, type Map } from "maplibre-gl";
 import { type AreaProps } from "route-snapper-ts";
-import { get, writable, type Writable } from "svelte/store";
+import {
+  derived,
+  get,
+  writable,
+  type Readable,
+  type Writable,
+} from "svelte/store";
 import {
   Database,
   ProjectStorage,
+  type ProjectFeatureCollection,
   type ProjectID,
 } from "./common/ProjectStorage";
 import type { Backend } from "./wasm";
@@ -71,14 +78,23 @@ export let appFocus: Writable<AppFocus> = writable("global");
 // The id of the project currently being worked on
 export let currentProjectID: Writable<ProjectID | undefined> =
   writable(undefined);
+export let currentProject: Readable<ProjectFeatureCollection | undefined> =
+  derived(currentProjectID, ($id) => {
+    if ($id) {
+      return get(projectStorage).project($id);
+    } else {
+      return undefined;
+    }
+  });
+
+export let currentNeighbourhoodName: Writable<string | undefined> =
+  writable(undefined);
 
 export let database = new Database();
-export let projectStorage: Writable<ProjectStorage> = writable(
-  database.projectStorage(get(appFocus)),
+export let projectStorage: Readable<ProjectStorage> = derived(
+  appFocus,
+  ($appFocus) => database.projectStorage($appFocus),
 );
-appFocus.subscribe((focus) => {
-  projectStorage.set(database.projectStorage(focus));
-});
 
 export let firstTimeLoadProjectFromURL = writable(true);
 
