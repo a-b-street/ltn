@@ -14,7 +14,7 @@
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, prettyPrintPercent } from "./common";
+  import { layerId, ModeLink, pageTitle, prettyPrintPercent } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
   import NeighbourhoodBoundarySummary from "./common/NeighbourhoodBoundarySummary.svelte";
@@ -31,8 +31,8 @@
     map,
     mode,
     projectStorage,
-    returnToChooseProject,
     saveCurrentProject,
+    zoomToDefault,
   } from "./stores";
   import type { GeneratedBoundaryFeature } from "./wasm";
 
@@ -229,20 +229,21 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
-        <li>Add a neighbourhood</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
+    <BackButton mode={{ mode: "pick-neighbourhood" }} />
     {#if $appFocus == "cnt"}
       <h3>Prioritization</h3>
       <p>Compare metrics across candidate neighbourhoods.</p>

@@ -5,7 +5,7 @@
   import { Loading } from "svelte-utils";
   import { OverpassSelector } from "svelte-utils/overpass";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { Link, safeFetch } from "../common";
+  import { ModeLink, pageTitle, safeFetch } from "../common";
   import {
     appFocus,
     assetUrl,
@@ -13,7 +13,7 @@
     map,
     mode,
     projectStorage,
-    returnToChooseProject,
+    zoomToDefault,
   } from "../stores";
   import { Backend } from "../wasm";
   import { loadProject } from "./loader";
@@ -79,9 +79,12 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
-        <li>New project</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>

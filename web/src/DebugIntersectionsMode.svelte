@@ -10,8 +10,8 @@
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, PrevNext } from "./common";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { layerId, ModeLink, pageTitle, PrevNext } from "./common";
+  import { backend, mode, zoomToDefault } from "./stores";
 
   let currentOsm: string | null = null;
   let movements = emptyGeojson();
@@ -29,20 +29,21 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
-        <li>Debug intersections</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
+    <BackButton mode={{ mode: "pick-neighbourhood" }} />
 
     <p>Purple intersections have some kind of turn restriction.</p>
 

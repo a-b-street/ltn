@@ -5,14 +5,14 @@
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, SequentialLegend } from "./common";
+  import { layerId, ModeLink, pageTitle, SequentialLegend } from "./common";
   import { ModalFilterLayer } from "./layers";
   import {
     backend,
     fastSample,
     minImpactCount,
     mode,
-    returnToChooseProject,
+    zoomToDefault,
   } from "./stores";
   import type { Impact } from "./wasm";
 
@@ -62,27 +62,28 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
-        <li>Predict impact</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "pick-neighbourhood" })} />
+    <BackButton mode={{ mode: "pick-neighbourhood" }} />
 
     <p>
       This mode estimates the impact of all your changes on traffic around the
       entire area. It's based on many assumptions and must be interpreted very
-      carefully. <Link on:click={() => ($mode = { mode: "debug-demand" })}>
+      carefully. <ModeLink mode={{ mode: "debug-demand" }}>
         Explore the origin/destination demand data used
-      </Link>
+      </ModeLink>
     </p>
 
     <fieldset>

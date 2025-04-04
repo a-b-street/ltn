@@ -7,7 +7,8 @@
   import {
     DotMarker,
     layerId,
-    Link,
+    ModeLink,
+    pageTitle,
     prettyPrintDistance,
     prettyPrintTime,
   } from "./common";
@@ -24,7 +25,7 @@
     ensurePointInVisibleBounds,
     mainRoadPenalty,
     mode,
-    returnToChooseProject,
+    zoomToDefault,
     routePtA,
     routePtB,
   } from "./stores";
@@ -45,10 +46,6 @@
       ensurePointInVisibleBounds(routePtB);
     }, 10);
   });
-
-  function back() {
-    $mode = { mode: prevMode };
-  }
 </script>
 
 <SplitComponent>
@@ -56,26 +53,25 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         {#if prevMode == "neighbourhood"}
           <li>
-            <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-              Editing
-            </Link>
+            <ModeLink mode={{ mode: "neighbourhood" }} />
           </li>
         {/if}
-        <li>Routing</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
   <div slot="sidebar">
-    <BackButton on:click={back} />
+    <BackButton mode={{ mode: prevMode }} />
 
     <p>Drag markers for a route</p>
 

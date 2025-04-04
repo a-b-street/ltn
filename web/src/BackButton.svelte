@@ -1,19 +1,17 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import { Link } from "./common";
+  import { mode as storedMode, type Mode } from "./stores";
 
-  let dispatch = createEventDispatcher<{
-    click: void;
-  }>();
+  export let mode: Mode;
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key == "Escape") {
       e.stopPropagation();
-      dispatch("click");
+      $storedMode = mode;
     }
   }
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
 
-<Link on:click={() => dispatch("click")}>Back</Link>
+<Link on:click={() => ($storedMode = mode)}>Back</Link>

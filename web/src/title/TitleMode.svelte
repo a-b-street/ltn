@@ -3,7 +3,12 @@
   import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
-  import { downloadProject, Link, prettyPrintStudyAreaName } from "../common";
+  import {
+    downloadProject,
+    Link,
+    pageTitle,
+    prettyPrintStudyAreaName,
+  } from "../common";
   import { routeTool } from "../common/draw_area/stores";
   import { type ProjectID } from "../common/ProjectStorage";
   import {
@@ -101,7 +106,7 @@
   <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
-        <li>Choose project</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>

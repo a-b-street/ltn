@@ -3,14 +3,15 @@
   import type { AreaProps } from "route-snapper-ts";
   import { notNull } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { gjPosition, Link } from "./common";
+  import BackButton from "./BackButton.svelte";
+  import { gjPosition, ModeLink, pageTitle } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
   import {
     backend,
     map,
     mode,
-    returnToChooseProject,
+    zoomToDefault,
     saveCurrentProject,
   } from "./stores";
 
@@ -67,24 +68,25 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-            Editing
-          </Link>
+          <ModeLink mode={{ mode: "neighbourhood" }} />
         </li>
-        <li>Changing neighbourhood boundary</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
   <div slot="sidebar">
-    <h1>Edit boundary</h1>
+    <BackButton mode={{ mode: "neighbourhood" }} />
+
+    <h1>Adjust boundary</h1>
 
     <AreaControls
       map={notNull($map)}

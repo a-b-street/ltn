@@ -12,7 +12,14 @@
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, mapMetersToPixels, PrevNext, Style } from "./common";
+  import {
+    layerId,
+    mapMetersToPixels,
+    ModeLink,
+    pageTitle,
+    PrevNext,
+    Style,
+  } from "./common";
   import type { IntersectionFeature } from "./common/Intersection";
   import {
     CellLayer,
@@ -22,7 +29,7 @@
     RenderNeighbourhood,
   } from "./layers";
   import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { backend, mode, zoomToDefault } from "./stores";
 
   let intersection: DebugIntersection | null = null;
   type DebugIntersection = {
@@ -44,25 +51,24 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "neighbourhood" })}>
-            Editing
-          </Link>
+          <ModeLink mode={{ mode: "neighbourhood" }} />
         </li>
-        <li>Debug mode</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "neighbourhood" })} />
+    <BackButton mode={{ mode: "neighbourhood" }} />
 
     <h4>Roads</h4>
     <p>Click a road to visit its OSM object.</p>

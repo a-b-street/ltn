@@ -12,7 +12,15 @@
   import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { downloadProject, HelpButton, layerId, Link, Style } from "./common";
+  import {
+    downloadProject,
+    HelpButton,
+    layerId,
+    Link,
+    ModeLink,
+    pageTitle,
+    Style,
+  } from "./common";
   import { pickNeighbourhoodName } from "./common/pick_names";
   import { ModalFilterLayer } from "./layers";
   import {
@@ -27,7 +35,7 @@
     devMode,
     mode,
     projectStorage,
-    returnToChooseProject,
+    zoomToDefault,
     saveCurrentProject,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
@@ -142,10 +150,13 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          Pick neighbourhood
+          {pageTitle($mode.mode)}
           <HelpButton>
             <p>
               Inside the neighbourhood you define, the goal is to eliminate (or
@@ -165,23 +176,14 @@
     <nav>
       <ul>
         <li>
-          <Link
-            on:click={() =>
-              ($mode = { mode: "route", prevMode: "pick-neighbourhood" })}
-          >
-            Route
-          </Link>
+          <ModeLink mode={{ mode: "route", prevMode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "predict-impact" })}>
-            Predict impact
-          </Link>
+          <ModeLink mode={{ mode: "predict-impact" }} />
         </li>
         {#if $devMode}
           <li>
-            <Link on:click={() => ($mode = { mode: "debug-intersections" })}>
-              Debug intersections
-            </Link>
+            <ModeLink mode={{ mode: "debug-intersections" }} />
           </li>
         {/if}
       </ul>
@@ -242,10 +244,10 @@
         </li>
       {/each}
       <li>
-        <Link on:click={() => ($mode = { mode: "add-neighbourhood" })}>
+        <ModeLink mode={{ mode: "add-neighbourhood" }}>
           <CirclePlus />
           Add a new neighbourhood
-        </Link>
+        </ModeLink>
       </li>
     </ul>
 

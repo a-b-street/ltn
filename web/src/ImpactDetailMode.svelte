@@ -6,9 +6,16 @@
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
+  import {
+    DotMarker,
+    gjPosition,
+    layerId,
+    ModeLink,
+    pageTitle,
+    PrevNext,
+  } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, fastSample, mode, returnToChooseProject } from "./stores";
+  import { backend, fastSample, mode, zoomToDefault } from "./stores";
   import type { ImpactOnRoad } from "./wasm";
 
   export let road: Feature;
@@ -71,20 +78,21 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
-        <li>Predict impact</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "predict-impact" })} />
+    <BackButton mode={{ mode: "predict-impact" }} />
 
     <p>
       {props.before.toLocaleString()} routes cross here
