@@ -6,7 +6,14 @@
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { DotMarker, gjPosition, layerId, Link, PrevNext } from "./common";
+  import {
+    DotMarker,
+    gjPosition,
+    layerId,
+    ModeLink,
+    pageTitle,
+    PrevNext,
+  } from "./common";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -15,7 +22,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { backend, mode, zoomToDefault } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
   type State =
@@ -44,10 +51,6 @@
       shortcutIndex: 0,
     };
   }
-
-  function back() {
-    $mode = { mode: "neighbourhood" };
-  }
 </script>
 
 <SplitComponent>
@@ -55,23 +58,24 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <Link on:click={back}>Editing</Link>
+          <ModeLink mode={{ mode: "neighbourhood" }} />
         </li>
-        <li>Viewing shortcuts</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={back} />
+    <BackButton mode={{ mode: "neighbourhood" }} />
 
     {#if state.state == "neutral"}
       <p>Click a road to see shortcuts</p>

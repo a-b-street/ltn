@@ -21,7 +21,8 @@
   import {
     HelpButton,
     layerId,
-    Link,
+    ModeLink,
+    pageTitle,
     roadLineWidth,
     SequentialLegend,
   } from "../common";
@@ -47,7 +48,7 @@
     map,
     mode,
     mutationCounter,
-    returnToChooseProject,
+    zoomToDefault,
     roadStyle,
     saveCurrentProject,
     thickRoadsForShortcuts,
@@ -296,15 +297,16 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         <li>
-          Editing
+          {pageTitle($mode.mode)}
           <HelpButton>
             <p>
               Now that you've defined a neighbourhood boundary, you can see the
@@ -320,40 +322,26 @@
     <nav>
       <ul>
         <li>
-          <Link on:click={() => ($mode = { mode: "view-shortcuts" })}>
-            View shortcuts
-          </Link>
+          <ModeLink mode={{ mode: "view-shortcuts" }} />
         </li>
         <li>
-          <Link
-            on:click={() =>
-              ($mode = { mode: "route", prevMode: "neighbourhood" })}
-          >
-            Route
-          </Link>
+          <ModeLink mode={{ mode: "route", prevMode: "neighbourhood" }} />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "impact-one-destination" })}>
-            Impact routing to one destination
-          </Link>
+          <ModeLink mode={{ mode: "impact-one-destination" }} />
         </li>
         <li>
-          <Link
-            on:click={() =>
-              ($mode = {
-                mode: "set-boundary",
-                name: notNull(boundary).properties.name,
-                existing: notNull(boundary),
-              })}
-          >
-            Change this boundary
-          </Link>
+          <ModeLink
+            mode={{
+              mode: "set-boundary",
+              name: notNull(boundary).properties.name,
+              existing: notNull(boundary),
+            }}
+          />
         </li>
         {#if $devMode}
           <li>
-            <Link on:click={() => ($mode = { mode: "debug-neighbourhood" })}>
-              Debug
-            </Link>
+            <ModeLink mode={{ mode: "debug-neighbourhood" }}>Debug</ModeLink>
           </li>
         {/if}
       </ul>

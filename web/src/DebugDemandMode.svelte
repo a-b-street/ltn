@@ -10,9 +10,9 @@
   import { emptyGeojson, makeRamp } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Link, SequentialLegend } from "./common";
+  import { layerId, ModeLink, pageTitle, SequentialLegend } from "./common";
   import { demandColorScale } from "./common/colors";
-  import { backend, mode, returnToChooseProject } from "./stores";
+  import { backend, mode, zoomToDefault } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
 
   let gj = emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>;
@@ -77,20 +77,24 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
+        </li> 
+        <li>
+          <ModeLink mode={{ mode: "predict-impact" }} />
         </li>
-        <li>Explore origin/destination demand data</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={() => ($mode = { mode: "predict-impact" })} />
+    <BackButton mode={{ mode: "predict-impact" }} />
 
     <!-- TODO Plumb through metadata about the sources used -->
 

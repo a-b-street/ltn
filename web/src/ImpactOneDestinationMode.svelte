@@ -13,7 +13,8 @@
   import {
     DotMarker,
     layerId,
-    Link,
+    ModeLink,
+    pageTitle,
     prettyPrintDistance,
     prettyPrintTime,
   } from "./common";
@@ -23,15 +24,11 @@
     ensurePointInVisibleBounds,
     mode,
     oneDestination,
-    returnToChooseProject,
+    zoomToDefault,
     routePtA,
     routePtB,
   } from "./stores";
   import type { CompareRoute } from "./wasm";
-
-  function back() {
-    $mode = { mode: "neighbourhood" };
-  }
 
   $: perRoadGj = $backend!.impactToOneDestination($oneDestination);
 
@@ -80,23 +77,24 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <Link on:click={returnToChooseProject}>Choose project</Link>
+          <ModeLink
+            mode={{ mode: "title", firstLoad: false }}
+            afterLink={zoomToDefault}
+          />
         </li>
         <li>
-          <Link on:click={() => ($mode = { mode: "pick-neighbourhood" })}>
-            Pick neighbourhood
-          </Link>
+          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <Link on:click={back}>Editing</Link>
+          <ModeLink mode={{ mode: "neighbourhood" }} />
         </li>
-        <li>Impact routing to one destination</li>
+        <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton on:click={back} />
+    <BackButton mode={{ mode: "neighbourhood" }} />
 
     <p>
       This shows the change in driving time to one destination from everywhere

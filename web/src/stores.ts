@@ -129,9 +129,7 @@ export function assetUrl(path: string): string {
   return get(useLocalVite) ? `/${path}` : `https://assets.od2net.org/${path}`;
 }
 
-export function returnToChooseProject() {
-  mode.set({ mode: "title", firstLoad: false });
-
+export function zoomToDefault() {
   let bounds = [-180, -90, 180, 90] as LngLatBoundsLike;
   if (get(appFocus) == "cnt") {
     bounds = [-8.943, 54.631, -0.901, 59.489];
