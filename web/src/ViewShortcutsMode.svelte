@@ -22,7 +22,7 @@
     OneWayLayer,
     RenderNeighbourhood,
   } from "./layers";
-  import { backend, mode, zoomToDefault } from "./stores";
+  import { backend, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
   type State =
@@ -58,7 +58,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

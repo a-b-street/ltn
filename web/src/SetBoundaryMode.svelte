@@ -7,13 +7,7 @@
   import { gjPosition, ModeLink, pageTitle } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
-  import {
-    backend,
-    map,
-    mode,
-    saveCurrentProject,
-    zoomToDefault,
-  } from "./stores";
+  import { backend, map, mode, saveCurrentProject } from "./stores";
 
   export let name: string;
   export let existing: Feature<Polygon, AreaProps>;
@@ -68,7 +62,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

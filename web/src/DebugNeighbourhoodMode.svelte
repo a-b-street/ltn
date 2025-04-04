@@ -29,7 +29,7 @@
     RenderNeighbourhood,
   } from "./layers";
   import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
-  import { backend, mode, zoomToDefault } from "./stores";
+  import { backend, mode } from "./stores";
 
   let intersection: DebugIntersection | null = null;
   type DebugIntersection = {
@@ -51,7 +51,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />

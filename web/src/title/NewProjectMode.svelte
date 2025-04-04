@@ -13,7 +13,6 @@
     map,
     mode,
     projectStorage,
-    zoomToDefault,
   } from "../stores";
   import { Backend } from "../wasm";
   import { loadProject } from "./loader";
@@ -79,7 +78,7 @@
     <nav aria-label="breadcrumb">
       <ul>
         <li>
-          <ModeLink mode={{ mode: "title" }} afterLink={zoomToDefault} />
+          <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>{pageTitle($mode.mode)}</li>
       </ul>
