@@ -377,10 +377,8 @@
       <div style="display: flex; justify-content: left; gap: 8px;">
         <button
           on:click={() => (action = { kind: "filter", freehand: false })}
-          disabled={action.kind == "filter"}
           class="icon-btn"
           class:active={action.kind == "filter"}
-          class:outline={action.kind != "filter"}
           data-tooltip="Add a modal filter (hotkey 1)"
         >
           <img
@@ -390,10 +388,8 @@
         </button>
         <button
           on:click={() => (action = { kind: "oneway" })}
-          disabled={action.kind == "oneway"}
           class="icon-btn"
           class:active={action.kind == "oneway"}
-          class:outline={action.kind != "oneway"}
           data-tooltip="Toggle one-way (hotkey 2)"
         >
           <!-- 
@@ -415,10 +411,8 @@
         </button>
         <button
           on:click={() => (action = startTurnRestrictionAction())}
-          disabled={action.kind == "turn_restriction"}
           class="icon-btn"
           class:active={action.kind == "turn_restriction"}
-          class:outline={action.kind != "turn_restriction"}
           data-tooltip="Restrict turns (hotkey 3)"
         >
           <img
@@ -429,10 +423,8 @@
         <button
           on:click={() =>
             (action = { kind: "main-roads", freehand: false, isMain: false })}
-          disabled={action.kind == "main-roads"}
           class="icon-btn"
           class:active={action.kind == "main-roads"}
-          class:outline={action.kind != "main-roads"}
           data-tooltip="Reclassify main roads (hotkey 4)"
         >
           <img src={mainRoadIconUrl} alt="Change main/minor roads" />
@@ -726,32 +718,50 @@
 </SplitComponent>
 
 <style>
-  .tool-palette button {
-    padding: 8px;
+  :global(.pico .tool-palette button) {
+    padding: 12px;
     margin: 0;
+    background: none;
+    color: black;
+  }
+
+  :global(.pico .tool-palette button.icon-btn) {
+    padding: 8px;
     height: 100%;
     aspect-ratio: 1;
   }
-  .tool-palette button img {
+
+  :global(.pico .tool-palette button.icon-btn img) {
     aspect-ratio: 1;
     height: 100%;
     width: auto;
     object-fit: contain;
   }
-  .tool-palette button.active:disabled {
+
+  :global(.pico .tool-palette button.active) {
     /* slightly increased border */
     border: 2px solid black;
     /* Slightly decreased padding to account for the slightly increased border */
-    padding: 7px;
-
-    /* picocss default color is very dark */
-    background: rgb(124, 190, 146);
+    padding: 11px;
     /* picocss disabled override */
     opacity: 1;
   }
+
+  :global(.pico .tool-palette button.icon-btn.active) {
+    /* Slightly decreased padding to account for the slightly increased border */
+    padding: 7px;
+  }
+
+  :global(.pico .tool-palette button.active),
+  :global(.pico .tool-palette button.active:hover) {
+    /* picocss default color is very dark */
+    background: rgb(124, 190, 146);
+  }
+
   .classification-buttons {
     width: fit-content;
   }
+
   .footnote-ref {
     font-size: 70%;
     color: var(--pico-secondary);
