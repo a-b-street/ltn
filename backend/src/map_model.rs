@@ -62,6 +62,7 @@ pub struct MapModel {
     // TODO Keep edits / state here or not?
     pub undo_stack: Vec<Command>,
     pub redo_stack: Vec<Command>,
+    pub reclassifications_in_progress: BTreeSet<RoadID>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
     pub context_data: Option<PreparedContextData>,
@@ -556,7 +557,20 @@ impl MapModel {
         add_to_undo_stack: bool,
     ) {
         let roads_along = self.roads_along_line(neighbourhood, line_string);
-        let cmds = roads_along
+        for r in roads_along {
+            if self.is_main_road[&r] == is_main_road {
+                // It's important that these no-ops don't get added to the undo stack
+                continue;
+            }
+            self.reclassifications_in_progress.insert(r);
+        }
+
+        if self.reclassifications_in_progress.is_empty() {
+            return;
+        }
+
+        let cmds = self
+            .reclassifications_in_progress
             .iter()
             .map(|r| Command::SetMainRoad(*r, is_main_road))
             .collect();
@@ -564,19 +578,9 @@ impl MapModel {
 
         let undo_cmd = self.do_edit(cmd);
         if add_to_undo_stack {
-            if let Some(prev_cmd) = self.undo_stack.first() {
-                if prev_cmd == &undo_cmd {
-                    // Don't add no-op undo commands.
-                    // e.g. when re-classifying an area the same as it was already classified.
-                    //
-                    // I originally though we could bail out earlier, by seeing if any of
-                    // `roads_along` had changed, but then that would prevent us from *ever*
-                    // recording the undo action in the case of our incremental updates (see `add_to_undo_stack`)
-                    return;
-                }
-            }
             self.undo_stack.push(undo_cmd);
             self.redo_stack.clear();
+            self.reclassifications_in_progress.clear();
         }
         self.after_edited();
     }

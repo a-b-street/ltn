@@ -247,6 +247,7 @@ pub fn create_from_osm(
 
         undo_stack: Vec::new(),
         redo_stack: Vec::new(),
+        reclassifications_in_progress: BTreeSet::new(),
         boundaries: BTreeMap::new(),
         context_data,
     };
