@@ -277,9 +277,12 @@
             {:else if $mode.mode == "route"}
               <RouteMode prevMode={$mode.prevMode} />
             {:else if $mode.mode == "predict-impact"}
-              <PredictImpactMode />
+              <PredictImpactMode prevMode={$mode.prevMode} />
             {:else if $mode.mode == "impact-detail"}
-              <ImpactDetailMode road={$mode.road} />
+              <ImpactDetailMode
+                road={$mode.road}
+                prevPrevMode={$mode.prevPrevMode}
+              />
             {:else if $mode.mode == "debug-neighbourhood"}
               <DebugNeighbourhoodMode />
             {:else if $mode.mode == "debug-intersections"}

@@ -10,6 +10,8 @@
   import { backend, fastSample, minImpactCount, mode } from "./stores";
   import type { Impact } from "./wasm";
 
+  export let prevMode: "pick-neighbourhood" | "neighbourhood";
+
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
   let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
@@ -27,7 +29,7 @@
   let maxRoadWidth = 10;
 
   function pickRoad(f: Feature) {
-    $mode = { mode: "impact-detail", road: f };
+    $mode = { mode: "impact-detail", road: f, prevPrevMode: prevMode };
   }
 
   async function recalculate(fastSample: boolean) {
@@ -61,13 +63,18 @@
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
+        {#if prevMode == "neighbourhood"}
+          <li>
+            <ModeLink mode={{ mode: "neighbourhood" }} />
+          </li>
+        {/if}
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton mode={{ mode: "pick-neighbourhood" }} />
+    <BackButton mode={{ mode: prevMode }} />
 
     <p>
       This mode estimates the impact of all your changes on traffic around the

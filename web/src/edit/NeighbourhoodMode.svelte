@@ -324,6 +324,11 @@
           <ModeLink mode={{ mode: "route", prevMode: "neighbourhood" }} />
         </li>
         <li>
+          <ModeLink
+            mode={{ mode: "predict-impact", prevMode: "neighbourhood" }}
+          />
+        </li>
+        <li>
           <ModeLink mode={{ mode: "impact-one-destination" }} />
         </li>
         <li>
