@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use backend::boundary_stats::{ContextData, POIKind, PopulationZone, POI};
 use data_prep::{PopulationZoneInput, StudyArea};
 use geo::{MultiPolygon, Point, Relate};
@@ -111,9 +111,10 @@ impl InputPOI {
             ("tmp/gp_practices.geojson", POIKind::GP),
             ("tmp/hospitals.geojson", POIKind::Hospital),
             ("tmp/schools.geojson", POIKind::School),
+            ("out_layers/recreation.geojson", POIKind::Recreation),
         ] {
             let input: Vec<InputPOI> = geojson::de::deserialize_feature_collection_str_to_vec(
-                &fs_err::read_to_string(path)?,
+                &fs_err::read_to_string(path).context(format!("opening {path}"))?,
             )?;
             for poi in input {
                 pois.push(POI {
@@ -173,7 +174,7 @@ impl CarOwnershipDataZone {
     fn read_all_from_file() -> Result<Vec<Self>> {
         let input_path = "input/car_ownership_data_zones.csv";
         let mut output = vec![];
-        for rec in csv::Reader::from_path(input_path)?.deserialize() {
+        for rec in csv::Reader::from_path(input_path).context(format!("opening {input_path}"))?.deserialize() {
             let rec: Self = rec?;
             debug_assert_eq!(
                 rec.total_households,

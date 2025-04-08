@@ -289,4 +289,5 @@ pub enum POIKind {
     Grocery,
     Hospital,
     School,
+    Recreation,
 }
