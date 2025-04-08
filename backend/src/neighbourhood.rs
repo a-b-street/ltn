@@ -6,7 +6,8 @@ use crate::geo_helpers::{
 };
 use anyhow::Result;
 use geo::{
-    Euclidean, Length, LineString, MultiLineString, Point, Polygon, PreparedGeometry, Relate,
+    Coord, CoordNum, Euclidean, Length, LineString, MapCoordsInPlace, MultiLineString, Point,
+    Polygon, PreparedGeometry, Relate, Simplify,
 };
 use geojson::{Feature, FeatureCollection};
 use rstar::{primitives::GeomWithData, RTree};
@@ -47,6 +48,63 @@ pub struct WayPoint {
     lat: f64,
     lon: f64,
     snapped: bool,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct WayPoints(Vec<WayPoint>);
+impl MapCoordsInPlace<f64> for WayPoints {
+    fn map_coords_in_place(&mut self, func: impl Fn(Coord<f64>) -> Coord<f64> + Copy)
+    where
+        f64: CoordNum,
+    {
+        for waypoint in self.0.iter_mut() {
+            let coord = Coord {
+                x: waypoint.lon,
+                y: waypoint.lat,
+            };
+            let new_coord = func(coord);
+            waypoint.lon = new_coord.x;
+            waypoint.lat = new_coord.y;
+        }
+    }
+
+    fn try_map_coords_in_place<E>(
+        &mut self,
+        func: impl Fn(Coord<f64>) -> std::result::Result<Coord<f64>, E>,
+    ) -> std::result::Result<(), E>
+    where
+        f64: CoordNum,
+    {
+        for waypoint in self.0.iter_mut() {
+            let coord = Coord {
+                x: waypoint.lon,
+                y: waypoint.lat,
+            };
+            let new_coord = func(coord)?;
+            waypoint.lon = new_coord.x;
+            waypoint.lat = new_coord.y;
+        }
+        Ok(())
+    }
+}
+
+impl WayPoint {
+    pub fn waypoints_for_ring(ring: &LineString) -> WayPoints {
+        let simplified = ring.simplify(&5.0);
+
+        // ring is closed, so skip the first point, which is redundant with the last
+        let coords_iter = simplified.0.iter().skip(1);
+
+        WayPoints(
+            coords_iter
+                .map(|coord| WayPoint {
+                    lat: coord.y,
+                    lon: coord.x,
+                    snapped: false,
+                })
+                .collect(),
+        )
+    }
 }
 
 /// Includes data derived from the neighborhoods definition.

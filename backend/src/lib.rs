@@ -15,6 +15,7 @@ pub use self::route::Router;
 pub use self::shortcuts::Shortcuts;
 use crate::geo_helpers::make_polygon_valid;
 use crate::map_model::{Command, ProjectDetails};
+use crate::neighbourhood::WayPoint;
 use geo::{Coord, LineString, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
@@ -200,6 +201,19 @@ impl LTN {
             .generate_merged_boundary(polygons)
             .map_err(err_to_js)?;
         Ok(serde_json::to_string(&merged_boundary.to_feature(&self.map)).map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = extractWaypointsFromRing)]
+    pub fn extract_waypoints_from_polygon(&self, js_polygon: JsValue) -> Result<String, JsValue> {
+        let geojson_geometry: Geometry = serde_wasm_bindgen::from_value(js_polygon)?;
+
+        let Ok(mut ring) = geo::LineString::try_from(geojson_geometry) else {
+            return Err("invalid Polygon GeoJSON".into());
+        };
+        self.map.mercator.to_mercator_in_place(&mut ring);
+        let mut waypoints = WayPoint::waypoints_for_ring(&ring);
+        self.map.mercator.to_wgs84_in_place(&mut waypoints);
+        Ok(serde_json::to_string(&waypoints).map_err(err_to_js)?)
     }
 
     /// `input`: GeoJson Feature w/ Polygon Geometry

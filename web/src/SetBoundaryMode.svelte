@@ -4,7 +4,7 @@
   import { notNull } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { gjPosition, ModeLink, pageTitle } from "./common";
+  import { ModeLink, pageTitle } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
   import { backend, map, mode, saveCurrentProject } from "./stores";
@@ -14,25 +14,30 @@
   let waypoints: Waypoint[] = [];
   let drawnShape: Feature<Polygon>;
 
-  if (existing.properties.waypoints) {
-    // Transform into the correct format
-    waypoints = existing.properties.waypoints.map((waypt) => {
-      return {
-        point: [waypt.lon, waypt.lat],
-        snapped: waypt.snapped,
-      };
-    });
-  } else {
+  let unformattedWaypoints = existing.properties.waypoints;
+  if (!unformattedWaypoints) {
     // No stored waypoints -- this is either a boundary drawn with a very old
-    // version of this tool, or an auto-generated boundary. Just
-    // "backfill" by using the full geometry as freehand points.
-    // Editing will be very painful in practice, but it won't break.
+    // version of this tool, or an auto-generated boundary.
+    // "backfill" by using the geometry (simplified) as freehand points.
+
     // Note the second polygon ring is used, because the boundary is expressed as
     // "everywhere" minus a hole for the boundary, to achieve the fade-outside effect.
-    waypoints = existing.geometry.coordinates[1].slice(1).map((point) => {
-      return { point: gjPosition(point), snapped: false };
-    });
+    let neighbourhoodBoundary = {
+      type: "LineString" as const,
+      coordinates: existing.geometry.coordinates[1],
+    };
+
+    unformattedWaypoints = $backend!.extractWaypointsFromRing(
+      neighbourhoodBoundary,
+    );
   }
+  // Transform into the correct format
+  waypoints = unformattedWaypoints.map((waypt) => {
+    return {
+      point: [waypt.lon, waypt.lat],
+      snapped: waypt.snapped,
+    };
+  });
 
   function finish() {
     if (drawnShape) {
