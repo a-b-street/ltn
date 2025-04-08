@@ -298,17 +298,6 @@ impl MapModel {
         &self.intersections[i.0]
     }
 
-    pub fn find_edge(&self, i1: IntersectionID, i2: IntersectionID) -> &Road {
-        // TODO Store lookup table
-        for r in &self.get_i(i1).roads {
-            let road = self.get_r(*r);
-            if road.src_i == i2 || road.dst_i == i2 {
-                return road;
-            }
-        }
-        panic!("no road from {i1} to {i2} or vice versa");
-    }
-
     pub fn add_modal_filter(
         &mut self,
         pt: Coord,
