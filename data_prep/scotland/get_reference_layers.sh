@@ -44,6 +44,28 @@ function cbd {
   wget https://nptscot.blob.core.windows.net/pmtiles/cbd_layer_2024-12-01.pmtiles -O $OUT/cbd.pmtiles
 }
 
+function recreation {
+  get_scotland_osm
+
+  # This list of tags is somewhat arbitary.
+  # I went down the amenity,leisure,tourism tags and picked the most popular ones that arguably fall under recreation.
+  # Note that we're currently only considering node geometries. This will exclude items which are defined on an area
+  # or linear geometry.
+  osmium tags-filter tmp/scotland-latest.osm.pbf \
+      n/amenity=cafe,bar,pub,ice_cream,theatre,arts_centre,nightclub,biergarten,food_court,cinema \
+      n/leisure=pitch,swimming_pool,garden,park,playground,sports_centre,track,nature_reserve,fitness_centre,fitness_station \
+      n/tourism=attraction,gallery,museum \
+      --overwrite \
+      -o tmp/raw_recreation.osm.pbf
+
+  osmium export tmp/raw_recreation.osm.pbf \
+      --overwrite \
+      -o tmp/raw_recreation.geojson
+
+  # Strip most tags
+  cat tmp/raw_recreation.geojson | jq '{ type: "FeatureCollection", features: [.features[] | { type: "Feature", geometry: .geometry, properties: { name: .properties.name } }] }' > $OUT/recreation.geojson
+}
+
 function railway_stations {
   get_scotland_osm
   osmium tags-filter tmp/scotland-latest.osm.pbf n/railway=station -o tmp/railways.osm.pbf
@@ -154,10 +176,13 @@ function _car_ownership() {
   # We could omit it and put it in the readme, but maybe it's nice here for consistency with the other sources.
   cat <<EOS
 🚗 Manually download car ownership CSV (buckle up, it's a wild ride!)
-  1. go to https://www.scotlandscensus.gov.uk/search-the-census#/topics
-  2. search for "UV405" that's the "Car or van availability" table
-  3. choose "Data Zone 2011" area
-  4. download the results as CSV (~48k records)
+  1. Go to https://www.scotlandscensus.gov.uk/search-the-census#/topics
+  2. Search for "UV405". That's the "Car or van availability" table.
+  3. For "Choose location type", under "Advanced area types", choose "Data Zone 2011" to match our existing geometries.
+  4. Press "Select All". After a bit you should see a table of data.
+  4. Top right, choose "Comma Separated Value (.csv)"
+     ⚠️ BEWARE: Do not pick "CSV String Value (.csv)" which aggregates the rows very differntly.
+  5. Press "Download Table". There should be about ~7k rows.
   5. mv \$downloaded_file ./input/car_ownership_data_zones.csv
   6. Manually delete the front-matter - it looks like this:
        1 SuperWEB2(tm)
@@ -216,6 +241,7 @@ download_to_subdir() {
 #gp_and_hospitals ~/Downloads/GP_Practices_-_Scotland.json ~/Downloads/NHS_Hospitals_-_Scotland.json
 #cbd
 #railway_stations
+#recreation
 #bus_routes
 #population
 #stats19

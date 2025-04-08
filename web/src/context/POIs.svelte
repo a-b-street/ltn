@@ -6,13 +6,14 @@
 
   let show = false;
 
-  // https://colorbrewer2.org/#type=qualitative&scheme=Accent&n=5
+  // https://colorbrewer2.org/#type=qualitative&scheme=Accent&n=6
   let labelColors = {
     School: "#7fc97f",
     GP: "#beaed4",
     Hospital: "#fdc086",
     Grocery: "#386cb0",
     CommunityCenter: "#ffff99",
+    Recreation: "#f0027f",
   };
 </script>
 
@@ -64,6 +65,7 @@
         "circle-radius": 10,
         "circle-stroke-color": "black",
         "circle-stroke-width": 1,
+        "circle-opacity": 0.8,
       }}
       layout={{
         visibility: show ? "visible" : "none",
