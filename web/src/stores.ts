@@ -55,10 +55,12 @@ export type Mode =
     }
   | {
       mode: "predict-impact";
+      prevMode: "pick-neighbourhood" | "neighbourhood";
     }
   | {
       mode: "impact-detail";
       road: Feature;
+      prevPrevMode: "pick-neighbourhood" | "neighbourhood";
     }
   | {
       mode: "debug-intersections";

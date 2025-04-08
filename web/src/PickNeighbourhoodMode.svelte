@@ -179,7 +179,9 @@
           <ModeLink mode={{ mode: "route", prevMode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <ModeLink mode={{ mode: "predict-impact" }} />
+          <ModeLink
+            mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
+          />
         </li>
         {#if $devMode}
           <li>

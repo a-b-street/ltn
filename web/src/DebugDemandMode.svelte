@@ -83,7 +83,9 @@
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
         <li>
-          <ModeLink mode={{ mode: "predict-impact" }} />
+          <ModeLink
+            mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
+          />
         </li>
         <li>{pageTitle($mode.mode)}</li>
       </ul>
@@ -91,7 +93,9 @@
   </div>
 
   <div slot="sidebar">
-    <BackButton mode={{ mode: "predict-impact" }} />
+    <BackButton
+      mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
+    />
 
     <!-- TODO Plumb through metadata about the sources used -->
 

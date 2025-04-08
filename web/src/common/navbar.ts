@@ -16,7 +16,7 @@ export function pageTitle(mode: Mode["mode"]): string {
     case "neighbourhood":
       return get(currentNeighbourhoodName) || "Editing"; // TODO truncate if necessary
     case "view-shortcuts":
-      return "View shortcuts";
+      return "Shortcuts";
     case "impact-one-destination":
       return "Impact on one destination";
     case "route":

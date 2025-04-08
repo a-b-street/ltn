@@ -19,6 +19,7 @@
   import type { ImpactOnRoad } from "./wasm";
 
   export let road: Feature;
+  export let prevPrevMode: "pick-neighbourhood" | "neighbourhood";
 
   // TODO Weird to modify the input like this?
   let props = road.properties!;
@@ -42,7 +43,7 @@
       window.alert(
         "No routes over this road change. (This is a bug in progress of being fixed.)",
       );
-      $mode = { mode: "predict-impact" };
+      $mode = { mode: "predict-impact", prevMode: prevPrevMode };
     }
   });
 
@@ -83,13 +84,21 @@
         <li>
           <ModeLink mode={{ mode: "pick-neighbourhood" }} />
         </li>
+        {#if prevPrevMode == "neighbourhood"}
+          <li>
+            <ModeLink mode={{ mode: "neighbourhood" }} />
+          </li>
+        {/if}
+        <li>
+          <ModeLink mode={{ mode: "predict-impact", prevMode: prevPrevMode }} />
+        </li>
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
   </div>
 
   <div slot="sidebar">
-    <BackButton mode={{ mode: "predict-impact" }} />
+    <BackButton mode={{ mode: "predict-impact", prevMode: prevPrevMode }} />
 
     <p>
       {props.before.toLocaleString()} routes cross here
