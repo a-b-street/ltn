@@ -430,8 +430,8 @@ dependencies = [
 
 [[package]]
 name = "geo"
-version = "0.29.3"
-source = "git+https://github.com/georust/geo?branch=mkirk%2Fgeo-ltn#9286aa364bcaafb5c0732a300329a5fdccacc849"
+version = "0.30.0"
+source = "git+https://github.com/georust/geo?branch=mkirk%2Fgeo-ltn#6ce58f2eda1f06b1596fcabf9e62068bcef09dde"
 dependencies = [
  "earcutr",
  "float_next_after",
@@ -447,8 +447,9 @@ dependencies = [
 
 [[package]]
 name = "geo-types"
-version = "0.7.15"
-source = "git+https://github.com/georust/geo?branch=mkirk%2Fgeo-ltn#9286aa364bcaafb5c0732a300329a5fdccacc849"
+version = "0.7.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62ddb1950450d67efee2bbc5e429c68d052a822de3aad010d28b351fbb705224"
 dependencies = [
  "approx",
  "num-traits",
@@ -468,8 +469,8 @@ dependencies = [
 
 [[package]]
 name = "geojson"
-version = "0.24.1"
-source = "git+https://github.com/georust/geojson#6c29f3f66cae55804364906b0208542414ff869c"
+version = "0.24.2"
+source = "git+https://github.com/georust/geojson#5380bfded95dd5c020ddd62b0769899b50fab42a"
 dependencies = [
  "geo-types",
  "log",
@@ -961,7 +962,7 @@ checksum = "cbf4a6aa5f6d6888f39e980649f3ad6b666acdce1d78e95b8a2cb076e687ae30"
 [[package]]
 name = "route-snapper-graph"
 version = "0.1.0"
-source = "git+https://github.com/dabreegster/route_snapper#0834519b09152168ee4908dcd630d54605aa759b"
+source = "git+https://github.com/dabreegster/route_snapper#2f4086f9e11f12664f8007566650dae99775b759"
 dependencies = [
  "geo",
  "serde",
@@ -1182,7 +1183,7 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#8a9804368a0ccb7b3e76b3f18a11e28947d4252c"
+source = "git+https://github.com/a-b-street/utils#2e724ae0378250f4580dd002c91fce0ed2d3d223"
 dependencies = [
  "anyhow",
  "fast_paths",
