@@ -246,13 +246,6 @@ impl LTN {
         self.neighbourhood =
             Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
 
-        // We can delete this assert if it's a valid code path, but I think it's not.
-        // If we haven't triggered it after a while, we can delete the editing_same logic.
-        debug_assert!(
-            !editing_same,
-            "I don't think this happens anymore since we got rid of 'edit_perimeter_roads'"
-        );
-
         // Undoing edits in another neighbourhood doesn't make sense
         if !editing_same {
             self.map.undo_stack.clear();
