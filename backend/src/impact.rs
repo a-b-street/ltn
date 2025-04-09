@@ -34,9 +34,6 @@ impl Impact {
     /// Returns a feature per road, with `before` and `after` counts, and a `max_count` foreign
     /// member
     pub fn recalculate(&mut self, map: &MapModel, fast_sample: bool) -> FeatureCollection {
-        use web_time::Instant;
-        let t0 = Instant::now();
-
         // Which requests are we using?
         let requests = if fast_sample {
             if self.sampled_requests.is_empty() {
@@ -58,8 +55,6 @@ impl Impact {
             &self.all_requests
         };
 
-        info!("time elapsed: {:?}", t0.elapsed());
-
         if self.counts_before.is_empty() || fast_sample != self.last_fast_sample {
             info!(
                 "Calculating impacts before edits ({} requests)",
@@ -70,7 +65,6 @@ impl Impact {
                 .od_to_counts(&map.router_input_before(), requests);
         }
 
-        info!("time elapsed: {:?}", t0.elapsed());
         if self.counts_after.is_empty() || fast_sample != self.last_fast_sample {
             info!(
                 "Calculating impacts after edits ({} requests)",
@@ -83,7 +77,6 @@ impl Impact {
                 .od_to_counts(&map.router_input_after(), requests);
         }
         self.last_fast_sample = fast_sample;
-        info!("time elapsed: {:?}", t0.elapsed());
 
         let mut features = Vec::new();
         let mut max_count = 0;
