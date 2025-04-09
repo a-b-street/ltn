@@ -57,25 +57,26 @@ impl DemandModel {
             Some(slice[idx])
         }
 
-        // At least this many trips will be included in each sample when `fast_sample` is enabled.
+        // One sample will be made for this many trips when `fast_sample` is enabled.
         // Increasing this will speed up fast_sample mode, but give less accurate results.
-        let sample_size = 5;
-        let mut accumulated_sample_weight = 0;
-        for (zone1, zone2, raw_count) in &self.desire_lines {
-            accumulated_sample_weight += *raw_count;
+        // Some OD pairs with less than this many trips might be skipped completely.
+        let trips_per_sampled_request = 10;
+        let mut accumulated_trip_count = 0;
+        for (zone1, zone2, trip_count) in &self.desire_lines {
+            accumulated_trip_count += *trip_count;
 
-            let (iterations, trip_count) = if fast_sample {
-                if accumulated_sample_weight < sample_size {
+            let (request_count, request_weight) = if fast_sample {
+                if accumulated_trip_count < trips_per_sampled_request {
                     continue;
                 }
-                let accumulated_iterations = accumulated_sample_weight / sample_size;
-                accumulated_sample_weight -= accumulated_iterations * sample_size;
-                (accumulated_iterations, sample_size)
+                let accumulated_requests = accumulated_trip_count / trips_per_sampled_request;
+                accumulated_trip_count -= accumulated_requests * trips_per_sampled_request;
+                (accumulated_requests, trips_per_sampled_request)
             } else {
-                (*raw_count, 1)
+                (*trip_count, 1)
             };
 
-            for _ in 0..iterations {
+            for _ in 0..request_count {
                 let Some(r1) = choose(&self.prepared_zones[zone1.0].roads, &mut rng) else {
                     continue;
                 };
@@ -83,7 +84,7 @@ impl DemandModel {
                     continue;
                 };
                 if r1 != r2 {
-                    requests.push((r1, r2, trip_count));
+                    requests.push((r1, r2, request_weight));
                 }
             }
         }
