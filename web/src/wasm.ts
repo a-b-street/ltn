@@ -154,6 +154,11 @@ export class Backend {
     this.inner.setCurrentNeighbourhoodBoundary(name, input);
   }
 
+  extractWaypointsFromRing(line_string: LineString): Waypoint[] {
+    let serializedWaypoints = this.inner.extractWaypointsFromRing(line_string);
+    return JSON.parse(serializedWaypoints);
+  }
+
   deleteNeighbourhoodBoundary(name: string) {
     this.inner.deleteNeighbourhoodBoundary(name);
   }
