@@ -2,8 +2,6 @@ use geo::{MultiPolygon, PreparedGeometry, Relate};
 use geojson::GeoJson;
 use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use utils::Mercator;
 
 use crate::{MapModel, RoadID};
 
@@ -23,16 +21,25 @@ pub struct DemandModel {
 impl DemandModel {
     /// Turn all of the zones into Mercator. Don't do this when originally building and serializing
     /// them, because that process might not use exactly the same Mercator object.
-    pub fn finish_loading(&mut self, mercator: &Mercator) {
+    pub fn finish_loading(&mut self, map: &MapModel) {
         let mut prepared_zones = vec![];
         for zone in &mut self.zones {
-            mercator.to_mercator_in_place(&mut zone.geometry);
+            map.mercator.to_mercator_in_place(&mut zone.geometry);
             prepared_zones.push(PreparedZone::from_zone(&zone));
         }
+
+        for road in &map.roads {
+            for zone in &mut prepared_zones {
+                if zone.geometry.relate(&road.linestring).is_intersects() {
+                    zone.roads.push(road.id);
+                }
+            }
+        }
+
         self.prepared_zones = prepared_zones;
     }
 
-    pub fn make_requests(&self, map: &MapModel, fast_sample: bool) -> Vec<(RoadID, RoadID, usize)> {
+    pub fn make_requests(&self, fast_sample: bool) -> Vec<(RoadID, RoadID, usize)> {
         info!(
             "Making requests from {} zones and {} desire lines, sampling = {fast_sample}",
             self.zones.len(),
@@ -41,18 +48,6 @@ impl DemandModel {
 
         let mut rng = WyRand::new_seed(42);
         let mut requests = Vec::new();
-
-        let mut roads_per_zone: HashMap<ZoneID, Vec<RoadID>> = HashMap::new();
-        for road in &map.roads {
-            for (zone_id, zone) in self.prepared_zones.iter().enumerate() {
-                if zone.geometry.relate(&road.linestring).is_intersects() {
-                    let roads = roads_per_zone
-                        .entry(ZoneID(zone_id))
-                        .or_insert_with(Vec::new);
-                    roads.push(road.id);
-                }
-            }
-        }
 
         fn choose(slice: &[RoadID], rng: &mut WyRand) -> Option<RoadID> {
             if slice.is_empty() {
@@ -72,10 +67,10 @@ impl DemandModel {
             };
 
             for _ in 0..iterations {
-                let Some(r1) = roads_per_zone.get(zone1).and_then(|roads|choose(&roads, &mut rng)) else {
+                let Some(r1) = choose(&self.prepared_zones[zone1.0].roads, &mut rng) else {
                     continue;
                 };
-                let Some(r2) = roads_per_zone.get(zone2).and_then(|roads|choose(&roads, &mut rng)) else {
+                let Some(r2) = choose(&self.prepared_zones[zone2.0].roads, &mut rng) else {
                     continue;
                 };
                 if r1 != r2 {
@@ -116,12 +111,14 @@ impl DemandModel {
 }
 pub struct PreparedZone {
     pub geometry: PreparedGeometry<'static, MultiPolygon>,
+    pub roads: Vec<RoadID>,
 }
 
 impl PreparedZone {
     fn from_zone(zone: &Zone) -> PreparedZone {
         Self {
             geometry: PreparedGeometry::from(zone.geometry.clone()),
+            roads: Vec::new(),
         }
     }
 }

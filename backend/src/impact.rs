@@ -39,7 +39,7 @@ impl Impact {
             if self.sampled_requests.is_empty() {
                 info!("Calculating a fast sample of requests");
                 self.sampled_requests = match &map.demand {
-                    Some(demand) => demand.make_requests(map, fast_sample),
+                    Some(demand) => demand.make_requests(fast_sample),
                     None => od::synthetic_od_requests(map),
                 };
             }
@@ -48,7 +48,7 @@ impl Impact {
             if self.all_requests.is_empty() {
                 info!("Calculating all requests");
                 self.all_requests = match &map.demand {
-                    Some(demand) => demand.make_requests(map, fast_sample),
+                    Some(demand) => demand.make_requests(fast_sample),
                     None => od::synthetic_od_requests(map),
                 };
             }
