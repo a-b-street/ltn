@@ -1,10 +1,10 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
-
 use fast_paths::{FastGraph, InputGraph, PathCalculator};
 use geo::{Coord, Euclidean, Length, LineLocatePoint, LineString};
 use itertools::Itertools;
 use rstar::{primitives::GeomWithData, RTree};
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 use utils::{LineSplit, NodeMap};
 
 use crate::map_model::{DiagonalFilter, Direction};
@@ -15,7 +15,7 @@ use crate::{
 // For vehicles only
 pub struct Router {
     ch: FastGraph,
-    path_calculator: RefCell<PathCalculator>,
+    path_calculator: Rc<RefCell<PathCalculator>>,
     node_map: NodeMap<(RoadID, Direction)>,
     pub main_road_penalty: f64,
 }
@@ -23,7 +23,7 @@ pub struct Router {
 impl Clone for Router {
     fn clone(&self) -> Self {
         let ch = self.ch.clone();
-        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let path_calculator = self.path_calculator.clone();
         let node_map = self.node_map.clone();
         let main_road_penalty = self.main_road_penalty;
         Self {
@@ -81,7 +81,7 @@ impl Router {
         let node_map = NodeMap::new();
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
-        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let path_calculator = Rc::new(RefCell::new(fast_paths::create_calculator(&ch)));
 
         Self {
             ch,
@@ -133,7 +133,7 @@ impl Router {
         }
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
-        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let path_calculator = Rc::new(RefCell::new(fast_paths::create_calculator(&ch)));
 
         Self {
             ch,

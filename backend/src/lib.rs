@@ -513,7 +513,10 @@ impl LTN {
         info!("time elapsed after building router: {:?}", t0.elapsed());
         let mut impact = self.map.impact.take().unwrap();
         let out = impact.recalculate(&self.map, fast_sample);
-        info!("time elapsed after recalculating impact: {:?}", t0.elapsed());
+        info!(
+            "time elapsed after recalculating impact: {:?}",
+            t0.elapsed()
+        );
         self.map.impact = Some(impact);
         Ok(serde_json::to_string(&out).map_err(err_to_js)?)
     }

@@ -988,7 +988,12 @@ impl MapModel {
 
     // Lazily builds the router if needed.
     pub fn rebuild_router(&mut self, main_road_penalty: f64) {
-        info!("rebuild_router - router_before_with_penalty: {:?}", self.router_before_with_penalty.as_ref().map(|r| format!("Router penalty: {}", r.main_road_penalty)));
+        info!(
+            "rebuild_router - router_before_with_penalty: {:?}",
+            self.router_before_with_penalty
+                .as_ref()
+                .map(|r| format!("Router penalty: {}", r.main_road_penalty))
+        );
         if self
             .router_before_with_penalty
             .as_ref()
@@ -1004,7 +1009,12 @@ impl MapModel {
             self.router_before_with_penalty = Some(router_before_with_penalty);
         }
 
-        info!("rebuild_router - router_after: {:?}", self.router_after.as_ref().map(|r| format!("Router penalty: {}", r.main_road_penalty)));
+        info!(
+            "rebuild_router - router_after: {:?}",
+            self.router_after
+                .as_ref()
+                .map(|r| format!("Router penalty: {}", r.main_road_penalty))
+        );
         if self
             .router_after
             .as_ref()
