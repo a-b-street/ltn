@@ -208,7 +208,7 @@ impl LTN {
         let geojson_geometry: Geometry = serde_wasm_bindgen::from_value(js_polygon)?;
 
         let Ok(mut ring) = geo::LineString::try_from(geojson_geometry) else {
-            return Err("invalid Polygon GeoJSON".into());
+            return Err("invalid LineString GeoJSON".into());
         };
         self.map.mercator.to_mercator_in_place(&mut ring);
         let mut waypoints = WayPoint::waypoints_for_ring(&ring);
