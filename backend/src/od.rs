@@ -1,7 +1,8 @@
-use geo::{BoundingRect, MultiPolygon, Point, PreparedGeometry, Relate};
+use geo::{MultiPolygon, PreparedGeometry, Relate};
 use geojson::GeoJson;
 use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use utils::Mercator;
 
 use crate::{MapModel, RoadID};
@@ -41,6 +42,26 @@ impl DemandModel {
         let mut rng = WyRand::new_seed(42);
         let mut requests = Vec::new();
 
+        let mut roads_per_zone: HashMap<ZoneID, Vec<RoadID>> = HashMap::new();
+        for road in &map.roads {
+            for (zone_id, zone) in self.prepared_zones.iter().enumerate() {
+                if zone.geometry.relate(&road.linestring).is_intersects() {
+                    let roads = roads_per_zone
+                        .entry(ZoneID(zone_id))
+                        .or_insert_with(Vec::new);
+                    roads.push(road.id);
+                }
+            }
+        }
+
+        fn choose(slice: &[RoadID], rng: &mut WyRand) -> Option<RoadID> {
+            if slice.is_empty() {
+                return None;
+            }
+            let idx = rng.generate_range(0..slice.len());
+            Some(slice[idx])
+        }
+
         for (zone1, zone2, raw_count) in &self.desire_lines {
             // To speed up the impact calculation, how many specific requests per (zone1, zone2)? If
             // true, just do one, but weight it by count.
@@ -51,15 +72,14 @@ impl DemandModel {
             };
 
             for _ in 0..iterations {
-                let pt1 = self.prepared_zones[zone1.0].random_point(&mut rng);
-                let pt2 = self.prepared_zones[zone2.0].random_point(&mut rng);
-                if let (Some(i1), Some(i2)) = (
-                    map.closest_road.nearest_neighbor(&pt1).map(|obj| obj.data),
-                    map.closest_road.nearest_neighbor(&pt2).map(|obj| obj.data),
-                ) {
-                    if i1 != i2 {
-                        requests.push((i1, i2, trip_count));
-                    }
+                let Some(r1) = roads_per_zone.get(zone1).and_then(|roads|choose(&roads, &mut rng)) else {
+                    continue;
+                };
+                let Some(r2) = roads_per_zone.get(zone2).and_then(|roads|choose(&roads, &mut rng)) else {
+                    continue;
+                };
+                if r1 != r2 {
+                    requests.push((r1, r2, trip_count));
                 }
             }
         }
@@ -102,19 +122,6 @@ impl PreparedZone {
     fn from_zone(zone: &Zone) -> PreparedZone {
         Self {
             geometry: PreparedGeometry::from(zone.geometry.clone()),
-        }
-    }
-    fn random_point(&self, rng: &mut WyRand) -> Point {
-        let bounding_rect = self.geometry.bounding_rect().unwrap();
-        loop {
-            let x = rng.generate_range(bounding_rect.min().x as i64..=bounding_rect.max().x as i64)
-                as f64;
-            let y = rng.generate_range(bounding_rect.min().y as i64..=bounding_rect.max().y as i64)
-                as f64;
-            let pt = Point::new(x, y);
-            if self.geometry.relate(&pt).is_contains() {
-                return pt;
-            }
         }
     }
 }
