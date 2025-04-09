@@ -42,7 +42,7 @@ fn main() -> Result<()> {
                 })
                 .collect(),
             desire_lines: subset_desire_lines,
-            prepared_zones: vec![],
+            cached_zone_roads: vec![],
         };
         let path = format!("demand/demand_{}_{}.bin", study_area.kind, study_area.name);
         println!(

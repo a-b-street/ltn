@@ -13,7 +13,7 @@ pub struct ZoneID(pub usize);
 pub struct DemandModel {
     pub zones: Vec<Zone>,
     #[serde(skip)]
-    pub prepared_zones: Vec<PreparedZone>,
+    pub cached_zone_roads: Vec<Vec<RoadID>>,
     // (zone1, zone2, count), with count being the number of trips from zone1 to zone2
     pub desire_lines: Vec<(ZoneID, ZoneID, usize)>,
 }
@@ -21,22 +21,24 @@ pub struct DemandModel {
 impl DemandModel {
     /// Turn all of the zones into Mercator. Don't do this when originally building and serializing
     /// them, because that process might not use exactly the same Mercator object.
+    ///
+    /// Also, calculate all the roads in each zone.
     pub fn finish_loading(&mut self, map: &MapModel) {
+        self.cached_zone_roads = vec![vec![]; self.zones.len()];
+
         let mut prepared_zones = vec![];
         for zone in &mut self.zones {
             map.mercator.to_mercator_in_place(&mut zone.geometry);
-            prepared_zones.push(PreparedZone::from_zone(&zone));
+            prepared_zones.push(PreparedGeometry::from(&zone.geometry));
         }
 
         for road in &map.roads {
-            for zone in &mut prepared_zones {
-                if zone.geometry.relate(&road.linestring).is_intersects() {
-                    zone.roads.push(road.id);
+            for (zone_idx, zone) in prepared_zones.iter().enumerate() {
+                if zone.relate(&road.linestring).is_intersects() {
+                    self.cached_zone_roads[zone_idx].push(road.id);
                 }
             }
         }
-
-        self.prepared_zones = prepared_zones;
     }
 
     pub fn make_requests(&self, fast_sample: bool) -> Vec<(RoadID, RoadID, usize)> {
@@ -77,10 +79,10 @@ impl DemandModel {
             };
 
             for _ in 0..request_count {
-                let Some(r1) = choose(&self.prepared_zones[zone1.0].roads, &mut rng) else {
+                let Some(r1) = choose(&self.cached_zone_roads[zone1.0], &mut rng) else {
                     continue;
                 };
-                let Some(r2) = choose(&self.prepared_zones[zone2.0].roads, &mut rng) else {
+                let Some(r2) = choose(&self.cached_zone_roads[zone2.0], &mut rng) else {
                     continue;
                 };
                 if r1 != r2 {
@@ -117,19 +119,6 @@ impl DemandModel {
             features.push(f);
         }
         GeoJson::from(features)
-    }
-}
-pub struct PreparedZone {
-    pub geometry: PreparedGeometry<'static, MultiPolygon>,
-    pub roads: Vec<RoadID>,
-}
-
-impl PreparedZone {
-    fn from_zone(zone: &Zone) -> PreparedZone {
-        Self {
-            geometry: PreparedGeometry::from(zone.geometry.clone()),
-            roads: Vec::new(),
-        }
     }
 }
 
