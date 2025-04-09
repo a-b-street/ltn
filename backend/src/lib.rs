@@ -507,9 +507,13 @@ impl LTN {
     /// Returns GJ with a LineString per road, with before/after counts
     #[wasm_bindgen(js_name = predictImpact)]
     pub fn predict_impact(&mut self, fast_sample: bool) -> Result<String, JsValue> {
+        use web_time::Instant;
+        let t0 = Instant::now();
         self.map.rebuild_router(1.0);
+        info!("time elapsed after building router: {:?}", t0.elapsed());
         let mut impact = self.map.impact.take().unwrap();
         let out = impact.recalculate(&self.map, fast_sample);
+        info!("time elapsed after recalculating impact: {:?}", t0.elapsed());
         self.map.impact = Some(impact);
         Ok(serde_json::to_string(&out).map_err(err_to_js)?)
     }

@@ -20,6 +20,21 @@ pub struct Router {
     pub main_road_penalty: f64,
 }
 
+impl Clone for Router {
+    fn clone(&self) -> Self {
+        let ch = self.ch.clone();
+        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let node_map = self.node_map.clone();
+        let main_road_penalty = self.main_road_penalty;
+        Self {
+            ch,
+            path_calculator,
+            node_map,
+            main_road_penalty,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Route {
     pub steps: Vec<(RoadID, Direction)>,
