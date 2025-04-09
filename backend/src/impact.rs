@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use geojson::{Feature, FeatureCollection};
 
@@ -12,8 +12,8 @@ use crate::{od, MapModel, RoadID};
 #[derive(Default)]
 pub struct Impact {
     // (r1, r2, count) -- `count` identical trips from `r1` to `r2`
-    sampled_requests: Vec<(RoadID, RoadID, usize)>,
-    all_requests: Vec<(RoadID, RoadID, usize)>,
+    sampled_requests: BTreeMap<(RoadID, RoadID), usize>,
+    all_requests: BTreeMap<(RoadID, RoadID), usize>,
 
     // Are the two sets of counts calculated with fast_sample or not?
     last_fast_sample: bool,
@@ -40,7 +40,7 @@ impl Impact {
                 info!("Calculating a fast sample of requests");
                 self.sampled_requests = match &map.demand {
                     Some(demand) => demand.make_requests(fast_sample),
-                    None => od::synthetic_od_requests(map),
+                    None => todo!() //od::synthetic_od_requests(map),
                 };
             }
             &self.sampled_requests
@@ -49,7 +49,7 @@ impl Impact {
                 info!("Calculating all requests");
                 self.all_requests = match &map.demand {
                     Some(demand) => demand.make_requests(fast_sample),
-                    None => od::synthetic_od_requests(map),
+                    None => todo!() //od::synthetic_od_requests(map),
                 };
             }
             &self.all_requests
@@ -128,7 +128,7 @@ impl Impact {
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes
-        for (r1, r2, count) in requests {
+        for ((r1, r2), count) in requests {
             let route1 = map
                 .router_before
                 .route_from_roads(&router_input_before, *r1, *r2);

@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use fast_paths::{FastGraph, InputGraph, PathCalculator};
 use geo::{Coord, Euclidean, Length, LineLocatePoint, LineString};
@@ -305,10 +305,10 @@ impl Router {
     pub fn od_to_counts(
         &self,
         router_input: &impl RouterInput,
-        requests: &Vec<(RoadID, RoadID, usize)>,
+        requests: &BTreeMap<(RoadID, RoadID), usize>,
     ) -> HashMap<RoadID, usize> {
         let mut results = HashMap::new();
-        for (r1, r2, count) in requests {
+        for ((r1, r2), count) in requests {
             if let Some(route) = self.route_from_roads(router_input, *r1, *r2) {
                 for (r, _) in route.steps {
                     *results.entry(r).or_insert(0) += *count;

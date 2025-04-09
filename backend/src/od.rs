@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use geo::{MultiPolygon, PreparedGeometry, Relate};
 use geojson::GeoJson;
 use nanorand::{Rng, WyRand};
@@ -41,7 +42,7 @@ impl DemandModel {
         }
     }
 
-    pub fn make_requests(&self, fast_sample: bool) -> Vec<(RoadID, RoadID, usize)> {
+    pub fn make_requests(&self, fast_sample: bool) -> BTreeMap<(RoadID, RoadID), usize> {
         info!(
             "Making requests from {} zones and {} desire lines, sampling = {fast_sample}",
             self.zones.len(),
@@ -49,7 +50,7 @@ impl DemandModel {
         );
 
         let mut rng = WyRand::new_seed(42);
-        let mut requests = Vec::new();
+        let mut requests = BTreeMap::new();
 
         fn choose(slice: &[RoadID], rng: &mut WyRand) -> Option<RoadID> {
             if slice.is_empty() {
@@ -86,7 +87,7 @@ impl DemandModel {
                     continue;
                 };
                 if r1 != r2 {
-                    requests.push((r1, r2, request_weight));
+                    *requests.entry((r1, r2)).or_insert(0) += request_weight;
                 }
             }
         }
