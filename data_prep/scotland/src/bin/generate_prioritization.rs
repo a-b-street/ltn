@@ -174,7 +174,10 @@ impl CarOwnershipDataZone {
     fn read_all_from_file() -> Result<Vec<Self>> {
         let input_path = "input/car_ownership_data_zones.csv";
         let mut output = vec![];
-        for rec in csv::Reader::from_path(input_path).context(format!("opening {input_path}"))?.deserialize() {
+        for rec in csv::Reader::from_path(input_path)
+            .context(format!("opening {input_path}"))?
+            .deserialize()
+        {
             let rec: Self = rec?;
             debug_assert_eq!(
                 rec.total_households,
