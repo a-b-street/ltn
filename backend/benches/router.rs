@@ -24,9 +24,9 @@ fn benchmark_build_router(c: &mut Criterion) {
 }
 
 fn benchmark_route(c: &mut Criterion) {
-    for neighbourhood in [
-        NeighbourhoodFixture::BRISTOL_EAST,
-        NeighbourhoodFixture::STRASBOURG,
+    for (neighbourhood, expected_routes_found) in [
+        (NeighbourhoodFixture::BRISTOL_EAST, 850),
+        (NeighbourhoodFixture::STRASBOURG, 903),
     ] {
         let map = neighbourhood.map_model().unwrap();
         let main_road_penalty = 1.0;
@@ -44,16 +44,10 @@ fn benchmark_route(c: &mut Criterion) {
                             num_found += 1;
                         }
                     }
-                    match neighbourhood {
-                        // These exact numbers are brittle - but they should only change if the
-                        // routing logic or the input data are updated, and even then they shouldn't
-                        // change by much.
-                        NeighbourhoodFixture::BRISTOL_EAST => assert_eq!(num_found, 830),
-                        NeighbourhoodFixture::STRASBOURG => assert_eq!(num_found, 885),
-                        _ => todo!(
-                            "unknown neighbourhood: {neighbourhood:?}, (num_found: {num_found})"
-                        ),
-                    }
+                    // These exact numbers are brittle - but they should only change if the
+                    // routing logic or the input data are updated, and even then they shouldn't
+                    // change by much.
+                    assert_eq!(num_found, expected_routes_found);
                 });
             });
     }
