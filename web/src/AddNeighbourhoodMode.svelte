@@ -10,11 +10,17 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { downloadGeneratedFile, Loading, notNull } from "svelte-utils";
+  import { downloadGeneratedFile, notNull } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, ModeLink, pageTitle, prettyPrintPercent } from "./common";
+  import {
+    layerId,
+    Loading,
+    ModeLink,
+    pageTitle,
+    prettyPrintPercent,
+  } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
   import NeighbourhoodBoundarySummary from "./common/NeighbourhoodBoundarySummary.svelte";
