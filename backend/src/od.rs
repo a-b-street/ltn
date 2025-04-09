@@ -57,11 +57,20 @@ impl DemandModel {
             Some(slice[idx])
         }
 
+        // At least this many trips will be included in each sample when `fast_sample` is enabled.
+        // Increasing this will speed up fast_sample mode, but give less accurate results.
+        let sample_size = 5;
+        let mut accumulated_sample_weight = 0;
         for (zone1, zone2, raw_count) in &self.desire_lines {
-            // To speed up the impact calculation, how many specific requests per (zone1, zone2)? If
-            // true, just do one, but weight it by count.
+            accumulated_sample_weight += *raw_count;
+
             let (iterations, trip_count) = if fast_sample {
-                (1, *raw_count)
+                if accumulated_sample_weight < sample_size {
+                    continue;
+                }
+                let accumulated_iterations = accumulated_sample_weight / sample_size;
+                accumulated_sample_weight -= accumulated_iterations * sample_size;
+                (accumulated_iterations, sample_size)
             } else {
                 (*raw_count, 1)
             };
