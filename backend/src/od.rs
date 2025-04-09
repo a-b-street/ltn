@@ -1,4 +1,4 @@
-use geo::{BoundingRect, Contains, MultiPolygon, Point};
+use geo::{BoundingRect, MultiPolygon, Point, PreparedGeometry, Relate};
 use geojson::GeoJson;
 use nanorand::{Rng, WyRand};
 use serde::{Deserialize, Serialize};
@@ -13,6 +13,8 @@ pub struct ZoneID(pub usize);
 #[derive(Serialize, Deserialize)]
 pub struct DemandModel {
     pub zones: Vec<Zone>,
+    #[serde(skip)]
+    pub prepared_zones: Vec<PreparedZone>,
     // (zone1, zone2, count), with count being the number of trips from zone1 to zone2
     pub desire_lines: Vec<(ZoneID, ZoneID, usize)>,
 }
@@ -21,14 +23,12 @@ impl DemandModel {
     /// Turn all of the zones into Mercator. Don't do this when originally building and serializing
     /// them, because that process might not use exactly the same Mercator object.
     pub fn finish_loading(&mut self, mercator: &Mercator) {
+        let mut prepared_zones = vec![];
         for zone in &mut self.zones {
             mercator.to_mercator_in_place(&mut zone.geometry);
-            let bbox = zone.geometry.bounding_rect().unwrap();
-            zone.x1 = (bbox.min().x * 100.0) as i64;
-            zone.y1 = (bbox.min().y * 100.0) as i64;
-            zone.x2 = (bbox.max().x * 100.0) as i64;
-            zone.y2 = (bbox.max().y * 100.0) as i64;
+            prepared_zones.push(PreparedZone::from_zone(&zone));
         }
+        self.prepared_zones = prepared_zones;
     }
 
     pub fn make_requests(&self, map: &MapModel, fast_sample: bool) -> Vec<(RoadID, RoadID, usize)> {
@@ -51,8 +51,8 @@ impl DemandModel {
             };
 
             for _ in 0..iterations {
-                let pt1 = self.zones[zone1.0].random_point(&mut rng);
-                let pt2 = self.zones[zone2.0].random_point(&mut rng);
+                let pt1 = self.prepared_zones[zone1.0].random_point(&mut rng);
+                let pt2 = self.prepared_zones[zone2.0].random_point(&mut rng);
                 if let (Some(i1), Some(i2)) = (
                     map.closest_road.nearest_neighbor(&pt1).map(|obj| obj.data),
                     map.closest_road.nearest_neighbor(&pt2).map(|obj| obj.data),
@@ -94,6 +94,30 @@ impl DemandModel {
         GeoJson::from(features)
     }
 }
+pub struct PreparedZone {
+    pub geometry: PreparedGeometry<'static, MultiPolygon>,
+}
+
+impl PreparedZone {
+    fn from_zone(zone: &Zone) -> PreparedZone {
+        Self {
+            geometry: PreparedGeometry::from(zone.geometry.clone()),
+        }
+    }
+    fn random_point(&self, rng: &mut WyRand) -> Point {
+        let bounding_rect = self.geometry.bounding_rect().unwrap();
+        loop {
+            let x = rng.generate_range(bounding_rect.min().x as i64..=bounding_rect.max().x as i64)
+                as f64;
+            let y = rng.generate_range(bounding_rect.min().y as i64..=bounding_rect.max().y as i64)
+                as f64;
+            let pt = Point::new(x, y);
+            if self.geometry.relate(&pt).is_contains() {
+                return pt;
+            }
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct Zone {
@@ -101,29 +125,6 @@ pub struct Zone {
     pub name: String,
     /// WGS84 when built originally and serialized, then Mercator right before being used
     pub geometry: MultiPolygon,
-    /// The bbox, rounded to centimeters, for generate_range to work. Only calculated right before
-    /// use.
-    #[serde(skip_deserializing, skip_serializing)]
-    pub x1: i64,
-    #[serde(skip_deserializing, skip_serializing)]
-    pub y1: i64,
-    #[serde(skip_deserializing, skip_serializing)]
-    pub x2: i64,
-    #[serde(skip_deserializing, skip_serializing)]
-    pub y2: i64,
-}
-
-impl Zone {
-    fn random_point(&self, rng: &mut WyRand) -> Point {
-        loop {
-            let x = (rng.generate_range(self.x1..=self.x2) as f64) / 100.0;
-            let y = (rng.generate_range(self.y1..=self.y2) as f64) / 100.0;
-            let pt = Point::new(x, y);
-            if self.geometry.contains(&pt) {
-                return pt;
-            }
-        }
-    }
 }
 
 /// Deterministically produce a bunch of OD pairs, just as a fallback when there's no real data

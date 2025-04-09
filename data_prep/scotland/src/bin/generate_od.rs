@@ -39,13 +39,10 @@ fn main() -> Result<()> {
                 .map(|name| backend::od::Zone {
                     name: name.clone(),
                     geometry: zones[&name].geometry.clone(),
-                    x1: 0,
-                    y1: 0,
-                    x2: 0,
-                    y2: 0,
                 })
                 .collect(),
             desire_lines: subset_desire_lines,
+            prepared_zones: vec![],
         };
         let path = format!("demand/demand_{}_{}.bin", study_area.kind, study_area.name);
         println!(
