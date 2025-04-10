@@ -2,7 +2,6 @@
   import type { Feature, FeatureCollection } from "geojson";
   import { onMount } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
-  import { Loading } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -10,6 +9,7 @@
     DotMarker,
     gjPosition,
     layerId,
+    Loading,
     ModeLink,
     pageTitle,
     PrevNext,

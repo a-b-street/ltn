@@ -252,7 +252,7 @@ pub fn create_from_osm(
         context_data,
     };
     if let Some(mut demand) = demand {
-        demand.finish_loading(&map.mercator);
+        demand.finish_loading(&map);
         map.demand = Some(demand);
     }
 

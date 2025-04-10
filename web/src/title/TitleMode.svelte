@@ -1,12 +1,12 @@
 <script lang="ts">
   import { FileDown, Pencil, Trash2 } from "lucide-svelte";
   import type { LngLatBoundsLike } from "maplibre-gl";
-  import { Loading } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import CntChooseArea from "../CntChooseArea.svelte";
   import {
     downloadProject,
     Link,
+    Loading,
     pageTitle,
     prettyPrintStudyAreaName,
   } from "../common";

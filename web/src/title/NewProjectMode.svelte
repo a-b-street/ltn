@@ -2,10 +2,9 @@
   import type { Feature, Polygon } from "geojson";
   import { PolygonToolLayer } from "maplibre-draw-polygon";
   import { onMount } from "svelte";
-  import { Loading } from "svelte-utils";
   import { OverpassSelector } from "svelte-utils/overpass";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { ModeLink, pageTitle, safeFetch } from "../common";
+  import { Loading, ModeLink, pageTitle, safeFetch } from "../common";
   import {
     appFocus,
     assetUrl,

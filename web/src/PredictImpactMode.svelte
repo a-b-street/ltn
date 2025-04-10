@@ -1,11 +1,16 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
-  import { Loading } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, ModeLink, pageTitle, SequentialLegend } from "./common";
+  import {
+    layerId,
+    Loading,
+    ModeLink,
+    pageTitle,
+    SequentialLegend,
+  } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, fastSample, minImpactCount, mode } from "./stores";
   import type { Impact } from "./wasm";
