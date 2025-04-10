@@ -1,7 +1,7 @@
 use crate::boundary_stats::{ContextData, PreparedContextData};
 use crate::geo_helpers::{
-    aabb, angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb, diagonal_bearing,
-    invert_multi_polygon, limit_angle, linestring_intersection,
+    aabb, angle_between_bearings, angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb,
+    invert_multi_polygon, limit_angle, linestring_intersection, split_bearing,
 };
 use crate::impact::Impact;
 use crate::neighbourhood::{NeighbourhoodBoundary, NeighbourhoodDefinition};
@@ -1188,12 +1188,31 @@ impl DiagonalFilter {
             .map(|offset| intersection.roads[(offset + split_offset) % intersection.roads.len()])
             .collect();
 
-        let road_1 = map_model.get_r(group_a[0]);
-        let road_2 = map_model.get_r(group_a[1]);
+        let angle = {
+            let road_a = if is_rotated {
+                map_model.get_r(group_a[0])
+            } else {
+                map_model.get_r(group_a[1])
+            };
+            let road_b0 = map_model.get_r(group_b[0]);
+            let road_b1 = map_model.get_r(group_b[1]);
 
-        let bearing_1 = bearing_from_endpoint(intersection.point, &road_1.linestring);
-        let bearing_2 = bearing_from_endpoint(intersection.point, &road_2.linestring);
-        let angle = diagonal_bearing(bearing_1, bearing_2) as f32;
+            let bearing_a0 = bearing_from_endpoint(intersection.point, &road_a.linestring);
+            let bearing_b0 = bearing_from_endpoint(intersection.point, &road_b0.linestring);
+            let bearing_b1 = bearing_from_endpoint(intersection.point, &road_b1.linestring);
+
+            let angle_b0 = angle_between_bearings(bearing_a0, bearing_b0);
+            let angle_b1 = angle_between_bearings(bearing_a0, bearing_b1);
+
+            // Split the acute angle, since the obtuse angle has more tolerance
+            let split = if angle_b0 < angle_b1 {
+                split_bearing(bearing_a0, bearing_b0) as f32
+            } else {
+                split_bearing(bearing_a0, bearing_b1) as f32
+            };
+
+            split
+        };
         DiagonalFilter {
             group_a,
             group_b,
