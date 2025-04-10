@@ -308,7 +308,7 @@
 
   :global(#app .left) {
     width: 30%;
-    min-width: 350px;
+    min-width: 400px;
     max-width: 500px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
     /* so box-shadow falls onto .main (the map) */
@@ -320,14 +320,18 @@
     flex: 1;
   }
 
+  :global(#app .pico button) {
+    padding: 4px 8px;
+  }
+
   :global(.pico button.icon-btn.destructive),
   :global(button.icon-btn.destructive),
   :global(.pico button.destructive) {
     background-color: #dc2626;
   }
 
-  :global(.pico button.icon-btn),
-  :global(button.icon-btn) {
+  :global(#app .pico button.icon-btn),
+  :global(#app button.icon-btn) {
     margin: 0;
     padding: 6px;
     display: flex;
@@ -340,46 +344,96 @@
     border-color: black;
   }
 
-  :global(.pico button.icon-btn):hover,
-  :global(button.icon-btn):hover,
-  :global(.pico .tool-palette button:hover) {
+  :global(#app .pico button.icon-btn):hover,
+  :global(#app button.icon-btn):hover,
+  :global(#app .pico .tool-palette button:hover) {
     background-color: #ddd;
   }
 
-  :global(.pico button.icon-btn.destructive):hover,
-  :global(button.icon-btn.destructive):hover {
+  :global(#app.pico button.icon-btn.destructive):hover,
+  :global(#app button.icon-btn.destructive):hover {
     background-color: #891717;
   }
 
-  :global(.pico button.icon-btn svg),
-  :global(button.icon-btn svg) {
+  :global(#app .pico button.icon-btn svg),
+  :global(#app button.icon-btn svg) {
     height: 100%;
     width: auto;
     aspect-ratio: 1;
     object-fit: contain;
   }
 
-  :global(.pico nav[aria-label="breadcrumb"] ul) {
+  :global(#app .pico .tool-palette button) {
+    padding: 12px;
+    margin: 0;
+    background: none;
+    color: black;
+  }
+
+  :global(#app .pico .tool-palette button.icon-btn) {
+    padding: 8px;
+    height: 100%;
+    aspect-ratio: 1;
+  }
+
+  :global(#app .pico .tool-palette button.icon-btn img) {
+    aspect-ratio: 1;
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+  }
+
+  :global(#app .pico .tool-palette button.active) {
+    /* slightly increased border */
+    border: 2px solid black;
+    /* Slightly decreased padding to account for the slightly increased border */
+    padding: 11px;
+    /* picocss disabled override */
+    opacity: 1;
+  }
+
+  :global(#app .pico .tool-palette button.icon-btn.active) {
+    /* Slightly decreased padding to account for the slightly increased border */
+    padding: 7px;
+  }
+
+  :global(#app .pico .tool-palette button.active),
+  :global(#app .pico .tool-palette button.active:hover) {
+    /* picocss default color is very dark */
+    background: rgb(124, 190, 146);
+  }
+
+  :global(#app .pico [type="checkbox"]),
+  :global(#app .pico [type="radio"]) {
+    width: 1em;
+    height: 1em;
+    margin-inline-end: 4px;
+  }
+
+  :global(#app .pico nav[aria-label="breadcrumb"] ul) {
     margin-left: 4px;
   }
 
-  :global(.pico nav[aria-label="breadcrumb"] ul > li) {
+  :global(#app .pico nav[aria-label="breadcrumb"] ul > li) {
     display: flex;
     align-items: center;
     gap: 4px;
   }
 
-  :global(.pico nav[aria-label="breadcrumb"] ul li:before) {
+  :global(#app .pico nav[aria-label="breadcrumb"] ul li:before) {
     /* pico overrides to reconcile breadcrumb li becoming `flex` */
     display: none;
   }
 
-  :global(.pico nav[aria-label="breadcrumb"] ul li:not(:last-child)::after) {
+  :global(
+    #app .pico nav[aria-label="breadcrumb"] ul li:not(:last-child)::after
+  ) {
     /* pico overrides to reconcile breadcrumb li becoming `flex` */
     position: static;
     margin-right: -32px;
     margin-left: -16px;
   }
+
   :global(.pico nav[aria-label="breadcrumb"] ul li:last-child) {
     font-size: 110%;
     font-weight: bold;
@@ -453,7 +507,7 @@
     background: #ddd;
   }
 
-  :global(.top .pico button) {
+  :global(#app .top .pico button) {
     background: white;
     height: 40px;
     width: 40px;
