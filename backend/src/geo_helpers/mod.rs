@@ -368,20 +368,35 @@ pub fn invert_multi_polygon(wgs84_multipolygon: MultiPolygon) -> Polygon {
     )
 }
 
-/// The "diagonal line" is an equal angular distance from a and b.
-/// The diagonal bearing is the bearing of this "diagonal line".
-///
-/// That is, given the bearing of a and b, returns the bearing of line c.
+/// Given the bearing of a and b, returns the bearing of line c, which equally splits them.
 ///
 /// ```ignore
-///       a    b
-///        \  /
-///      ∂° \/ ∂°
-///    ------------ c
+///     a    c    b
+///      \   |   /
+///       \∂°|∂°/
+///        \ | /
+///         \|/
+///          X
+///          |
+///          |
+///          c
 /// ```
-pub fn diagonal_bearing(bearing_a: f64, bearing_b: f64) -> f64 {
-    let angle_between = bearing_b - bearing_a;
-    (angle_between / 2.0 + 90.0 + bearing_a) % 360.0
+pub fn split_bearing(bearing_a: f64, bearing_b: f64) -> f64 {
+    let split = (bearing_a + bearing_b) / 2.0;
+    if angle_between_bearings(split, bearing_a) > 90.0 {
+        (split + 180.0) % 360.0
+    } else {
+        split
+    }
+}
+
+pub fn angle_between_bearings(bearing_a: f64, bearing_b: f64) -> f64 {
+    let diff = (bearing_b - bearing_a).abs() % 360.0;
+    if diff > 180.0 {
+        360.0 - diff
+    } else {
+        diff
+    }
 }
 
 #[cfg(test)]
@@ -461,9 +476,20 @@ mod tests {
     }
 
     #[test]
-    fn test_diagonal_angle() {
-        assert_eq!(135.0, diagonal_bearing(0., 90.));
-        assert_eq!(270.0, diagonal_bearing(135., 225.));
-        assert_eq!(270.0, diagonal_bearing(300., 60.));
+    fn test_split_bearing() {
+        assert_eq!(45.0, split_bearing(0., 90.));
+        assert_eq!(45.0, split_bearing(90., 0.));
+        assert_eq!(10.0, split_bearing(350., 30.));
+        assert_eq!(10.0, split_bearing(30., 350.));
+        assert_eq!(320.0, split_bearing(300., 340.));
+    }
+
+    #[test]
+    fn test_angle_between_bearings() {
+        assert_eq!(90.0, angle_between_bearings(0., 90.));
+        assert_eq!(90.0, angle_between_bearings(90., 0.));
+        assert_eq!(10.0, angle_between_bearings(355., 5.));
+        assert_eq!(10.0, angle_between_bearings(5., 355.));
+        assert_eq!(10.0, angle_between_bearings(320., 330.));
     }
 }
