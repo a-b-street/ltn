@@ -464,7 +464,7 @@
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Paintbrush />
-              <span> Add along a line </span>
+              <span>Add along a line</span>
             </div>
           </button>
         </div>
@@ -709,46 +709,6 @@
 </SplitComponent>
 
 <style>
-  :global(.pico .tool-palette button) {
-    padding: 12px;
-    margin: 0;
-    background: none;
-    color: black;
-  }
-
-  :global(.pico .tool-palette button.icon-btn) {
-    padding: 8px;
-    height: 100%;
-    aspect-ratio: 1;
-  }
-
-  :global(.pico .tool-palette button.icon-btn img) {
-    aspect-ratio: 1;
-    height: 100%;
-    width: auto;
-    object-fit: contain;
-  }
-
-  :global(.pico .tool-palette button.active) {
-    /* slightly increased border */
-    border: 2px solid black;
-    /* Slightly decreased padding to account for the slightly increased border */
-    padding: 11px;
-    /* picocss disabled override */
-    opacity: 1;
-  }
-
-  :global(.pico .tool-palette button.icon-btn.active) {
-    /* Slightly decreased padding to account for the slightly increased border */
-    padding: 7px;
-  }
-
-  :global(.pico .tool-palette button.active),
-  :global(.pico .tool-palette button.active:hover) {
-    /* picocss default color is very dark */
-    background: rgb(124, 190, 146);
-  }
-
   .classification-buttons {
     width: fit-content;
   }
