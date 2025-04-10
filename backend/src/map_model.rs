@@ -994,11 +994,12 @@ impl MapModel {
             .map(|r| r.main_road_penalty != main_road_penalty)
             .unwrap_or(true)
         {
-            let router_before_with_penalty = if self.router_before.main_road_penalty == main_road_penalty {
-                self.router_before.clone()
-            } else {
-                Router::new(&self.router_input_before(), main_road_penalty)
-            };
+            let router_before_with_penalty =
+                if self.router_before.main_road_penalty == main_road_penalty {
+                    self.router_before.clone()
+                } else {
+                    Router::new(&self.router_input_before(), main_road_penalty)
+                };
             self.router_before_with_penalty = Some(router_before_with_penalty);
         }
 
