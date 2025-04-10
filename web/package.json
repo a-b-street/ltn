@@ -39,6 +39,7 @@
     "route-snapper": "^0.4.9",
     "route-snapper-ts": "^0.0.8",
     "svelte-maplibre": "^0.9.14",
-    "svelte-utils": "github:a-b-street/svelte-utils"
+    "svelte-utils": "github:a-b-street/svelte-utils",
+    "tippy.js": "^6.3.7"
   }
 }

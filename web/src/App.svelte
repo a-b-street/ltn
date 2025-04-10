@@ -58,6 +58,7 @@
   import NewProjectMode from "./title/NewProjectMode.svelte";
   import TitleMode from "./title/TitleMode.svelte";
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
+  import "tippy.js/dist/tippy.css";
 
   export let appFocus: AppFocus = "global";
   appFocusStore.set(appFocus);

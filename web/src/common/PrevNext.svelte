@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+  import { initTooltips } from ".";
   import { map } from "../stores";
 
   export let list: any[];
@@ -7,6 +8,7 @@
 
   onMount(() => {
     $map?.keyboard.disable();
+    initTooltips();
   });
   onDestroy(() => {
     $map?.keyboard.enable();
@@ -41,14 +43,14 @@
 <div
   style="display: flex; justify-content: space-between; align-items: center;"
 >
-  <button disabled={idx == 0} on:click={prev} data-tooltip="Left">
+  <button disabled={idx == 0} on:click={prev} data-tippy-content="Left">
     Previous
   </button>
   {idx + 1} / {list.length}
   <button
     disabled={idx == list.length - 1}
     on:click={next}
-    data-tooltip="Right"
+    data-tippy-content="Right"
   >
     Next
   </button>
