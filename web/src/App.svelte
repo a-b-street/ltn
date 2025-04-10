@@ -307,16 +307,17 @@
   }
 
   :global(#app .left) {
-    width: 35%;
-    min-width: 400px;
-    max-width: 700px;
+    width: 30%;
+    min-width: 350px;
+    max-width: 500px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
     /* so box-shadow falls onto .main (the map) */
     z-index: 1;
   }
 
   :global(#app .main) {
-    width: 65%;
+    width: auto;
+    flex: 1;
   }
 
   :global(.pico button.icon-btn.destructive),
