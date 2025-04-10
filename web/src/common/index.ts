@@ -4,6 +4,7 @@ import type {
 } from "maplibre-gl";
 import { downloadGeneratedFile } from "svelte-utils";
 import { get } from "svelte/store";
+import tippy from "tippy.js";
 import { appFocus, projectStorage } from "../stores";
 import { type ProjectID, type StudyAreaName } from "./ProjectStorage";
 
@@ -27,6 +28,14 @@ export function gjPosition(pt: number[]): [number, number] {
   return pt as [number, number];
 }
 
+/// Any component using tooltips must call this in onMount
+///
+/// Add tooltips like this:
+///   <button data-tippy-content="My Tooltip">...</button>;
+/// Then call this method in onMount:
+export function initTooltips() {
+  tippy("[data-tippy-content]");
+}
 // Zoom-dependant line width, adapted from from the Minor road layer (secondary
 // road class) from https://api.maptiler.com/maps/streets-v2/style.json.
 export function roadLineWidth(extraWidth: number): ExpressionSpecification {

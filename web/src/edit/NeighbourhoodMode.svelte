@@ -2,7 +2,7 @@
   import type { Feature, FeatureCollection, LineString } from "geojson";
   import { Eraser, Paintbrush, Pointer, Redo, Undo } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import {
     GeoJSON,
     hoverStateFilter,
@@ -20,6 +20,7 @@
   import AnimatePaths from "../AnimatePaths.svelte";
   import {
     HelpButton,
+    initTooltips,
     layerId,
     ModeLink,
     pageTitle,
@@ -124,6 +125,9 @@
       f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
   ).length;
 
+  onMount(() => {
+    initTooltips();
+  });
   onDestroy(() => {
     $map!.doubleClickZoom.enable();
   });
@@ -359,7 +363,7 @@
           on:click={() => (action = { kind: "filter", freehand: false })}
           class="icon-btn"
           class:active={action.kind == "filter"}
-          data-tooltip="Add a modal filter (hotkey 1)"
+          data-tippy-content="Add a modal filter (hotkey 1)"
         >
           <img
             src={notNull(ModalFilterType.getFilter($currentFilterType)).iconURL}
@@ -370,7 +374,7 @@
           on:click={() => (action = { kind: "oneway" })}
           class="icon-btn"
           class:active={action.kind == "oneway"}
-          data-tooltip="Toggle one-way (hotkey 2)"
+          data-tippy-content="Toggle one-way (hotkey 2)"
         >
           <!-- 
          cheat the default padding just a bit with negative placement, 
@@ -393,7 +397,7 @@
           on:click={() => (action = startTurnRestrictionAction())}
           class="icon-btn"
           class:active={action.kind == "turn_restriction"}
-          data-tooltip="Restrict turns (hotkey 3)"
+          data-tippy-content="Restrict turns (hotkey 3)"
         >
           <img
             src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
@@ -405,7 +409,7 @@
             (action = { kind: "main-roads", freehand: false, isMain: false })}
           class="icon-btn"
           class:active={action.kind == "main-roads"}
-          data-tooltip="Reclassify main roads (hotkey 4)"
+          data-tippy-content="Reclassify main roads (hotkey 4)"
         >
           <img src={mainRoadIconUrl} alt="Change main/minor roads" />
         </button>
@@ -415,7 +419,7 @@
           class="outline icon-btn"
           disabled={undoLength == 0}
           on:click={undo}
-          data-tooltip={undoLength == 0
+          data-tippy-content={undoLength == 0
             ? "Undo Ctrl+Z"
             : `Undo (${undoLength}) Ctrl+Z`}
         >
@@ -425,7 +429,7 @@
           class="outline icon-btn"
           disabled={redoLength == 0}
           on:click={redo}
-          data-tooltip={redoLength == 0
+          data-tippy-content={redoLength == 0
             ? "Redo Ctrl+Y"
             : `Redo (${redoLength}) Ctrl+Y`}
         >
@@ -456,7 +460,7 @@
               : () => (action = { kind: "filter", freehand: true })}
             class:active={action.freehand}
             class:outline={!action.freehand}
-            data-tooltip="Add many modal filters along a line"
+            data-tippy-content="Add many modal filters along a line"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Paintbrush />
@@ -501,7 +505,7 @@
             }}
             class:active={!action.freehand}
             class:outline={action.freehand}
-            data-tooltip="Click a road to reclassify it"
+            data-tippy-content="Click a road to reclassify it"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Pointer />
@@ -514,7 +518,7 @@
             }}
             class:active={action.freehand && action.isMain}
             class:outline={!(action.freehand && action.isMain)}
-            data-tooltip="Reclassify multiple roads by drawing a line along them"
+            data-tippy-content="Reclassify multiple roads by drawing a line along them"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Paintbrush />
@@ -527,7 +531,7 @@
             }}
             class:active={action.freehand && !action.isMain}
             class:outline={!(action.freehand && !action.isMain)}
-            data-tooltip="Reclassify multiple roads by drawing a line along them"
+            data-tippy-content="Reclassify multiple roads by drawing a line along them"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Eraser />
@@ -550,7 +554,7 @@
       <input type="checkbox" bind:checked={$animateShortcuts} />
       Animate shortcuts<span
         class="footnote-ref"
-        data-tooltip={shortcutDescriptionText}>1</span
+        data-tippy-content={shortcutDescriptionText}>1</span
       >
     </label>
 
@@ -558,7 +562,7 @@
       <input type="checkbox" bind:checked={$drawBorderEntries} />
       Show entries into cells<span
         class="footnote-ref"
-        data-tooltip={cellsDescriptionText}>2</span
+        data-tippy-content={cellsDescriptionText}>2</span
       >
     </label>
 
@@ -566,7 +570,7 @@
       <input type="checkbox" bind:checked={$thickRoadsForShortcuts} />
       Road thickness depends on shortcuts<span
         class="footnote-ref"
-        data-tooltip={shortcutDescriptionText}>1</span
+        data-tippy-content={shortcutDescriptionText}>1</span
       >
     </label>
 
@@ -752,13 +756,10 @@
   .footnote-ref {
     font-size: 70%;
     color: var(--pico-secondary);
+    text-decoration: underline;
+    cursor: help;
     position: relative;
     top: -12px;
     left: 4px;
-  }
-  :global(.pico .footnote-ref[data-tooltip]:hover::before) {
-    max-width: 400px;
-    min-width: 300px;
-    text-wrap: auto;
   }
 </style>
