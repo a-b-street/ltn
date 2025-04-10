@@ -356,9 +356,11 @@
     <h2>Editing tools</h2>
     <div
       class="tool-palette"
-      style="height: 54px; display: flex; justify-content: space-between; gap: 32px;"
+      style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"
     >
-      <div style="display: flex; justify-content: left; gap: 8px;">
+      <div
+        style="height: 50px; display: flex; justify-content: left; gap: 6px;"
+      >
         <button
           on:click={() => (action = { kind: "filter", freehand: false })}
           class="icon-btn"
@@ -414,7 +416,9 @@
           <img src={mainRoadIconUrl} alt="Change main/minor roads" />
         </button>
       </div>
-      <div style="display: flex; justify-content: right; gap: 8px;">
+      <div
+        style="height: 50px; display: flex; justify-content: right; gap: 6px;"
+      >
         <button
           class="outline icon-btn"
           disabled={undoLength == 0}
@@ -449,7 +453,9 @@
           neighbourhood.
         </p>
         <ChangeFilterModal bind:show={settingFilterType} />
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div
+          style="display: flex; gap: 8px; align-items: leading; flex-direction: column; width: fit-content;"
+        >
           <button class="outline" on:click={() => (settingFilterType = true)}>
             Change modal filter type
           </button>
@@ -574,7 +580,9 @@
       >
     </label>
 
-    <label style="display: flex; align-items: center; gap: 8px;">
+    <label
+      style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"
+    >
       <span style="text-wrap: nowrap;">Draw roads:</span>
       <select
         style="margin: 0; padding: 8px; width: auto;"

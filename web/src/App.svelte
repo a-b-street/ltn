@@ -308,8 +308,8 @@
 
   :global(#app .left) {
     width: 30%;
-    min-width: 400px;
-    max-width: 500px;
+    min-width: 300px;
+    max-width: 450px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
     /* so box-shadow falls onto .main (the map) */
     z-index: 1;
@@ -321,7 +321,7 @@
   }
 
   :global(#app .pico button) {
-    padding: 4px 8px;
+    padding: 6px 14px;
   }
 
   :global(.pico button.icon-btn.destructive),
@@ -364,14 +364,13 @@
   }
 
   :global(#app .pico .tool-palette button) {
-    padding: 12px;
     margin: 0;
     background: none;
     color: black;
   }
 
   :global(#app .pico .tool-palette button.icon-btn) {
-    padding: 8px;
+    padding: 6px;
     height: 100%;
     aspect-ratio: 1;
   }
@@ -386,15 +385,11 @@
   :global(#app .pico .tool-palette button.active) {
     /* slightly increased border */
     border: 2px solid black;
-    /* Slightly decreased padding to account for the slightly increased border */
-    padding: 11px;
-    /* picocss disabled override */
-    opacity: 1;
   }
 
   :global(#app .pico .tool-palette button.icon-btn.active) {
     /* Slightly decreased padding to account for the slightly increased border */
-    padding: 7px;
+    padding: 5px;
   }
 
   :global(#app .pico .tool-palette button.active),
@@ -403,11 +398,17 @@
     background: rgb(124, 190, 146);
   }
 
+  /* Form Controls */
   :global(#app .pico [type="checkbox"]),
   :global(#app .pico [type="radio"]) {
     width: 1em;
     height: 1em;
     margin-inline-end: 4px;
+  }
+
+  :global(#app .pico select) {
+    padding: 4px 40px 4px 8px;
+    margin: 8px;
   }
 
   :global(#app .pico nav[aria-label="breadcrumb"] ul) {

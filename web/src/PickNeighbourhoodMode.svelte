@@ -198,7 +198,7 @@
     >
       <h2>Neighbourhoods</h2>
       <button
-        class="outline icon-btn"
+        class="outline"
         style="margin-right: 8px;"
         title="Download project as GeoJSON"
         on:click={() => downloadProject(notNull($currentProjectID))}
