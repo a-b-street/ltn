@@ -356,9 +356,11 @@
     <h2>Editing tools</h2>
     <div
       class="tool-palette"
-      style="height: 54px; display: flex; justify-content: space-between; gap: 32px;"
+      style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"
     >
-      <div style="display: flex; justify-content: left; gap: 8px;">
+      <div
+        style="height: 50px; display: flex; justify-content: left; gap: 6px;"
+      >
         <button
           on:click={() => (action = { kind: "filter", freehand: false })}
           class="icon-btn"
@@ -414,7 +416,9 @@
           <img src={mainRoadIconUrl} alt="Change main/minor roads" />
         </button>
       </div>
-      <div style="display: flex; justify-content: right; gap: 8px;">
+      <div
+        style="height: 50px; display: flex; justify-content: right; gap: 6px;"
+      >
         <button
           class="outline icon-btn"
           disabled={undoLength == 0}
@@ -449,7 +453,9 @@
           neighbourhood.
         </p>
         <ChangeFilterModal bind:show={settingFilterType} />
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div
+          style="display: flex; gap: 8px; align-items: leading; flex-direction: column; width: fit-content;"
+        >
           <button class="outline" on:click={() => (settingFilterType = true)}>
             Change modal filter type
           </button>
@@ -464,7 +470,7 @@
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Paintbrush />
-              <span> Add along a line </span>
+              <span>Add along a line</span>
             </div>
           </button>
         </div>
@@ -574,7 +580,9 @@
       >
     </label>
 
-    <label style="display: flex; align-items: center; gap: 8px;">
+    <label
+      style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"
+    >
       <span style="text-wrap: nowrap;">Draw roads:</span>
       <select
         style="margin: 0; padding: 8px; width: auto;"
@@ -709,46 +717,6 @@
 </SplitComponent>
 
 <style>
-  :global(.pico .tool-palette button) {
-    padding: 12px;
-    margin: 0;
-    background: none;
-    color: black;
-  }
-
-  :global(.pico .tool-palette button.icon-btn) {
-    padding: 8px;
-    height: 100%;
-    aspect-ratio: 1;
-  }
-
-  :global(.pico .tool-palette button.icon-btn img) {
-    aspect-ratio: 1;
-    height: 100%;
-    width: auto;
-    object-fit: contain;
-  }
-
-  :global(.pico .tool-palette button.active) {
-    /* slightly increased border */
-    border: 2px solid black;
-    /* Slightly decreased padding to account for the slightly increased border */
-    padding: 11px;
-    /* picocss disabled override */
-    opacity: 1;
-  }
-
-  :global(.pico .tool-palette button.icon-btn.active) {
-    /* Slightly decreased padding to account for the slightly increased border */
-    padding: 7px;
-  }
-
-  :global(.pico .tool-palette button.active),
-  :global(.pico .tool-palette button.active:hover) {
-    /* picocss default color is very dark */
-    background: rgb(124, 190, 146);
-  }
-
   .classification-buttons {
     width: fit-content;
   }

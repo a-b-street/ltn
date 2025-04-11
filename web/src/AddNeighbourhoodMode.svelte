@@ -260,7 +260,10 @@
     <hr />
 
     <div>
-      <div class="tool-palette">
+      <div
+        class="tool-palette"
+        style="display: flex; align-items: center; gap: 16px;"
+      >
         <button
           on:click={() => (addMode = "choose-area")}
           class:active={addMode == "choose-area"}
@@ -268,7 +271,7 @@
           <Pointer />
           Choose area
         </button>
-        <span style="margin: 0 16px;">or</span>
+        or
         <button
           on:click={() => (addMode = "draw-area")}
           class:active={addMode == "draw-area"}

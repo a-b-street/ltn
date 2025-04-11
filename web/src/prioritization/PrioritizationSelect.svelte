@@ -52,8 +52,8 @@
   }
 </script>
 
-<div style="display: flex; gap: 16px; align-items: center;">
-  <label for="prioritization-selection">Metric</label>
+<div style="display: flex; gap: 16px; align-items: center; width: fit-content;">
+  <label style="margin: 0; padding: 0;" for="prioritization-selection">Metric</label>
   <select id="prioritization-selection" bind:value={selectedPrioritization}>
     <option value="none">None</option>
     <option value="density">Density</option>
