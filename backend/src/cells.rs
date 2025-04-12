@@ -126,11 +126,11 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
 
             for next in &map.get_i(i).roads {
                 let next_road = map.get_r(*next);
-                /*if let Some(ref filter) = map.get_i(i).modal_filter {
-                    if !filter.allows_turn(current.id, *next) {
+                if let Some(ref filter) = map.diagonal_filters.get(&i) {
+                    if !filter.allows_movement(&(current.id, *next)) {
                         continue;
                     }
-                }*/
+                }
                 if let Some(ref filter) = map.modal_filters.get(next) {
                     // Which ends of the filtered road have we reached?
                     let mut visited_start = next_road.src_i == i;
