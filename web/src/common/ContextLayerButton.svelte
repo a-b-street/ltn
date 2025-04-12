@@ -13,11 +13,13 @@
   <input style="aspect-ratio: 1.0" type="checkbox" bind:checked={show} />
   {label}
   {#if $$slots.help}
-    <HelpButton>
-      <div class="context-layer-help-content">
-        <slot name="help" />
-      </div>
-    </HelpButton>
+    <span style="margin-left: auto"
+      ><HelpButton>
+        <div class="context-layer-help-content">
+          <slot name="help" />
+        </div>
+      </HelpButton></span
+    >
   {/if}
 </button>
 {#if show && $$slots.legend}
