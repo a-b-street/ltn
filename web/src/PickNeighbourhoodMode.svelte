@@ -34,6 +34,7 @@
     currentNeighbourhoodName,
     currentProjectID,
     devMode,
+    metricBuckets,
     mode,
     saveCurrentProject,
   } from "./stores";
@@ -116,6 +117,7 @@
     let color = prioritizationFillColor(
       { none: highlightedColor },
       selectedPrioritization,
+      $metricBuckets,
     );
     return [
       "case",

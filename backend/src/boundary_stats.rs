@@ -128,6 +128,16 @@ pub struct ContextData {
     pub population_zones: Vec<PopulationZone>,
     pub stats19_collisions: Vec<Point>,
     pub pois: Vec<POI>,
+    pub metric_buckets: MetricBuckets,
+}
+
+/// Precalculated buckets to classify metrics
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+pub struct MetricBuckets {
+    pub population_density: [usize; 6],
+    pub collision_density: [usize; 6],
+    pub poi_density: [usize; 6],
+    pub car_ownership_percents: [usize; 6],
 }
 
 impl ContextData {
@@ -162,6 +172,7 @@ impl ContextData {
             population_zones,
             stats19_collisions: self.stats19_collisions,
             pois: self.pois,
+            metric_buckets: self.metric_buckets,
         }
     }
 }
@@ -172,6 +183,7 @@ pub struct PreparedContextData {
     pub population_zones: Vec<PreparedPopulationZone>,
     pub stats19_collisions: Vec<Point>,
     pub pois: Vec<POI>,
+    pub metric_buckets: MetricBuckets,
 }
 
 /// Note when we deserialize this entity it will be in WGS84, but we should immediately

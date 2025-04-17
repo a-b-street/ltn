@@ -23,14 +23,6 @@ export let simdLimits = [0, 20, 40, 60, 80, 100];
 
 export let densityColorScale = commonQuintileColorScale.toReversed();
 
-// To get raw quintiles, run:
-//
-//     cd data_prep/scotland && cargo run --bin density_buckets
-//     > Raw limits for Scotland density (/ km²): [0, 1324, 2940, 4247, 5858, 52389]
-//
-// Slightly round those raw numbers:
-export let densityLimits = [0, 1_300, 3_000, 4_200, 5_900, 52_000];
-
 export let demandColorScale = commonQuintileColorScale.toReversed();
 
 export let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];

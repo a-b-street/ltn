@@ -14,7 +14,7 @@ import {
   type ProjectFeatureCollection,
   type ProjectID,
 } from "./common/ProjectStorage";
-import type { Backend } from "./wasm";
+import type { Backend, MetricBuckets } from "./wasm";
 
 // NOTE: our maptiler apiKey is baked into the customized assets/map-styles/, so if we rotate keys, we'll need to update that file too.
 export const maptilerApiKey = "MZEJTanw3WpxRvt7qDfo";
@@ -104,6 +104,16 @@ export let firstTimeLoadProjectFromURL = writable(true);
 export let showAbout: Writable<boolean> = writable(false);
 
 export let backend: Writable<Backend | null> = writable(null);
+// This changes alongside the backend and isn't valid for non-CNT areas. Rather
+// than express `| null` in TS and deal with it everywhere, just set default
+// values that are clearly visibly broken, since we never expect these to be
+// used when invalid.
+export let metricBuckets: Writable<MetricBuckets> = writable({
+  population_density: [0, 1, 2, 3, 4, 5],
+  collision_density: [0, 1, 2, 3, 4, 5],
+  poi_density: [0, 1, 2, 3, 4, 5],
+  car_ownership_percents: [0, 1, 2, 3, 4, 5],
+});
 export let routePtA: Writable<LngLat> = writable(new LngLat(0, 0));
 export let routePtB: Writable<LngLat> = writable(new LngLat(0, 0));
 export let oneDestination: Writable<LngLat> = writable(new LngLat(0, 0));

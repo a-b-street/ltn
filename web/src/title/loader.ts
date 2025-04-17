@@ -14,6 +14,7 @@ import {
   backend,
   currentProjectID,
   map,
+  metricBuckets,
   projectStorage,
 } from "../stores";
 import { Backend } from "../wasm";
@@ -132,6 +133,12 @@ export function afterProjectLoaded(projectID: ProjectID) {
     ),
   );
   get(map)!.fitBounds(get(backend)!.getBounds(), { duration: 500 });
+
+  // If there are no buckets defined for this project, then leave at the default value
+  let buckets = get(backend)!.getMetricBuckets();
+  if (buckets) {
+    metricBuckets.set(buckets);
+  }
 
   // Update the URL
   let url = new URL(window.location.href);

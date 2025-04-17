@@ -6,7 +6,6 @@ import {
   carOwnershipColorScale,
   carOwnershipLimits,
   densityColorScale,
-  densityLimits,
   poiColorScale,
   poiLimits,
   simdColorScale,
@@ -14,6 +13,7 @@ import {
   stats19ColorScale,
   stats19Limits,
 } from "../common/colors";
+import type { MetricBuckets } from "../wasm";
 
 export { default as PrioritizationSelect } from "./PrioritizationSelect.svelte";
 
@@ -28,6 +28,7 @@ export type Prioritization =
 export function prioritizationFillColor(
   noneColor: { none: DataDrivenPropertyValueSpecification<string> },
   selectedPrioritization: Prioritization,
+  metricBuckets: MetricBuckets,
 ): DataDrivenPropertyValueSpecification<string> {
   return {
     none: noneColor.none,
@@ -47,7 +48,7 @@ export function prioritizationFillColor(
     ),
     density: makeRamp(
       ["/", ["get", "population"], ["get", "area_km2"]],
-      densityLimits,
+      metricBuckets.population_density,
       densityColorScale,
     ),
     pois: makeRamp(
