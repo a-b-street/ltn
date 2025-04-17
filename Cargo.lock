@@ -172,6 +172,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ckmeans"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8b4542d3393c68cedaea1ee1730f3a0867dae6afc5bde352a2905f42781d05c"
+dependencies = [
+ "js-sys",
+ "libc",
+ "num-traits",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "clap"
 version = "4.5.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -340,6 +352,7 @@ dependencies = [
  "anyhow",
  "backend",
  "bincode",
+ "ckmeans",
  "csv",
  "fs-err",
  "geo",

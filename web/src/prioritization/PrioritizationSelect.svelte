@@ -5,7 +5,6 @@
     carOwnershipColorScale,
     carOwnershipLimits,
     densityColorScale,
-    densityLimits,
     poiColorScale,
     poiLimits,
     simdColorScale,
@@ -13,7 +12,7 @@
     stats19ColorScale,
     stats19Limits,
   } from "../common/colors";
-  import { appFocus } from "../stores";
+  import { appFocus, metricBuckets } from "../stores";
   import type { Prioritization } from "./index";
 
   export let selectedPrioritization: Prioritization;
@@ -69,7 +68,7 @@
 {#if selectedPrioritization == "density"}
   <SequentialLegend
     colorScale={densityColorScale}
-    labels={{ limits: densityLimits }}
+    labels={{ limits: $metricBuckets.population_density }}
   />
   <div class="sub-labels">
     <span>Less dense</span>

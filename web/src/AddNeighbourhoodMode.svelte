@@ -36,6 +36,7 @@
     currentNeighbourhoodName,
     currentProjectID,
     map,
+    metricBuckets,
     mode,
     projectStorage,
     saveCurrentProject,
@@ -202,7 +203,11 @@
       "black",
     ] as DataDrivenPropertyValueSpecification<string>;
 
-    return prioritizationFillColor({ none: noneColor }, selectedPrioritization);
+    return prioritizationFillColor(
+      { none: noneColor },
+      selectedPrioritization,
+      $metricBuckets,
+    );
   }
 
   function fillOpacity(

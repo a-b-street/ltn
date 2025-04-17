@@ -17,11 +17,10 @@
     carOwnershipColorScale,
     carOwnershipLimits,
     densityColorScale,
-    densityLimits,
     simdColorScale,
     simdLimits,
   } from "../common/colors";
-  import { assetUrl } from "../stores";
+  import { assetUrl, metricBuckets } from "../stores";
 
   let showSIMD = false;
   let showDensity = false;
@@ -56,7 +55,7 @@
   <div slot="legend">
     <SequentialLegend
       colorScale={densityColorScale}
-      labels={{ limits: densityLimits }}
+      labels={{ limits: $metricBuckets.population_density }}
     />
     <div style="display: flex; justify-content: space-between;">
       <span>Less dense</span>
@@ -166,7 +165,7 @@
     paint={{
       "fill-color": makeRamp(
         ["/", ["get", "population"], ["/", ["get", "area"], 1e6]],
-        densityLimits,
+        $metricBuckets.population_density,
         densityColorScale,
       ),
       "fill-opacity": hoverStateFilter(0.7, 0.9),
