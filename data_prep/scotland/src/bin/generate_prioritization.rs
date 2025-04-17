@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZone, POI};
 use data_prep::{PopulationZoneInput, StudyArea};
-use geo::{MultiPolygon, Point, Relate};
+use geo::{MultiPolygon, Point, PreparedGeometry, Relate};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -240,14 +240,56 @@ fn calculate_metric_buckets(
     data: &mut ContextData,
     population_zone_area_km2: Vec<f64>,
 ) -> Result<()> {
-    let population_density: Vec<f64> = data
+    data.metric_buckets.population_density = make_buckets(
+        &data
+            .population_zones
+            .iter()
+            .enumerate()
+            .map(|(idx, zone)| zone.population as f64 / population_zone_area_km2[idx])
+            .collect(),
+    )?;
+
+    let population_zones = data
         .population_zones
         .iter()
-        .enumerate()
-        .map(|(idx, zone)| zone.population as f64 / population_zone_area_km2[idx])
-        .collect();
+        .map(|zone| PreparedGeometry::from(&zone.geometry))
+        .collect::<Vec<_>>();
 
-    data.metric_buckets.population_density = make_buckets(&population_density)?;
+    let mut collions_per_zone = Vec::new();
+    for zone in &population_zones {
+        let mut count = 0;
+        for pt in &data.stats19_collisions {
+            if zone.relate(pt).is_contains() {
+                count += 1;
+            }
+        }
+        collions_per_zone.push(count);
+    }
+    data.metric_buckets.collision_density = make_buckets(
+        &collions_per_zone
+            .into_iter()
+            .enumerate()
+            .map(|(idx, collisions)| collisions as f64 / population_zone_area_km2[idx])
+            .collect(),
+    )?;
+
+    let mut pois_per_zone = Vec::new();
+    for zone in &population_zones {
+        let mut count = 0;
+        for poi in &data.pois {
+            if zone.relate(&poi.point).is_contains() {
+                count += 1;
+            }
+        }
+        pois_per_zone.push(count);
+    }
+    data.metric_buckets.poi_density = make_buckets(
+        &pois_per_zone
+            .into_iter()
+            .enumerate()
+            .map(|(idx, pois)| pois as f64 / population_zone_area_km2[idx])
+            .collect(),
+    )?;
 
     Ok(())
 }

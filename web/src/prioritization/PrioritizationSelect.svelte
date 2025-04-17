@@ -6,11 +6,9 @@
     carOwnershipLimits,
     densityColorScale,
     poiColorScale,
-    poiLimits,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
-    stats19Limits,
   } from "../common/colors";
   import { appFocus, metricBuckets } from "../stores";
   import type { Prioritization } from "./index";
@@ -97,11 +95,14 @@
 {:else if selectedPrioritization == "stats19"}
   <SequentialLegend
     colorScale={stats19ColorScale}
-    labels={{ limits: stats19Limits }}
+    labels={{ limits: $metricBuckets.collision_density }}
   />
   <div style="text-align: center;">collisions / km²</div>
 {:else if selectedPrioritization == "pois"}
-  <SequentialLegend colorScale={poiColorScale} labels={{ limits: poiLimits }} />
+  <SequentialLegend
+    colorScale={poiColorScale}
+    labels={{ limits: $metricBuckets.poi_density }}
+  />
   <div style="text-align: center;">POIs / km²</div>
 {/if}
 

@@ -434,5 +434,4 @@ export interface MetricBuckets {
   population_density: number[];
   collision_density: number[];
   poi_density: number[];
-  car_ownership_percents: number[];
 }

@@ -7,11 +7,9 @@ import {
   carOwnershipLimits,
   densityColorScale,
   poiColorScale,
-  poiLimits,
   simdColorScale,
   simdLimits,
   stats19ColorScale,
-  stats19Limits,
 } from "../common/colors";
 import type { MetricBuckets } from "../wasm";
 
@@ -53,13 +51,13 @@ export function prioritizationFillColor(
     ),
     pois: makeRamp(
       ["/", ["get", "number_pois"], ["get", "area_km2"]],
-      poiLimits,
+      metricBuckets.poi_density,
       poiColorScale,
     ),
     simd: makeRamp(["get", "simd"], simdLimits, simdColorScale),
     stats19: makeRamp(
       ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
-      stats19Limits,
+      metricBuckets.collision_density,
       stats19ColorScale,
     ),
   }[selectedPrioritization];
