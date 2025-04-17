@@ -112,7 +112,6 @@ export let metricBuckets: Writable<MetricBuckets> = writable({
   population_density: [0, 1, 2, 3, 4, 5],
   collision_density: [0, 1, 2, 3, 4, 5],
   poi_density: [0, 1, 2, 3, 4, 5],
-  car_ownership_percents: [0, 1, 2, 3, 4, 5],
 });
 export let routePtA: Writable<LngLat> = writable(new LngLat(0, 0));
 export let routePtB: Writable<LngLat> = writable(new LngLat(0, 0));

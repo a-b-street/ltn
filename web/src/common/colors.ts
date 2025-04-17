@@ -28,10 +28,8 @@ export let demandColorScale = commonQuintileColorScale.toReversed();
 export let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];
 export let areaColorScale = commonQuintileColorScale.toReversed();
 
-export let stats19Limits = [0, 1.0, 10.0, 50.0, 100.0, 1000.0];
 export let stats19ColorScale = commonQuintileColorScale.toReversed();
 
-export let poiLimits = [0, 1.0, 10.0, 50.0, 100.0, 1000.0];
 export let poiColorScale = commonQuintileColorScale.toReversed();
 
 export let carOwnershipLimits = [0, 20, 40, 60, 80, 100];
