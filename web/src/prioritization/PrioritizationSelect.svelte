@@ -4,6 +4,7 @@
     bucketize,
     carOwnershipColorScale,
     carOwnershipLimits,
+    combinedColorScale,
     densityColorScale,
     poiColorScale,
     simdColorScale,
@@ -30,6 +31,8 @@
       selectedPrioritization = "pois";
     } else if (currentURLParam == "car_ownership") {
       selectedPrioritization = "car_ownership";
+    } else if (currentURLParam == "combined") {
+      selectedPrioritization = "combined";
     }
   }
 
@@ -60,6 +63,7 @@
     <option value="simd">SIMD</option>
     <option value="pois">Points of interest</option>
     <option value="car_ownership">Car ownership</option>
+    <option value="combined">Combined</option>
   </select>
 </div>
 
@@ -104,6 +108,20 @@
     labels={{ limits: $metricBuckets.poi_density }}
   />
   <div style="text-align: center;">POIs / km²</div>
+{:else if selectedPrioritization == "combined"}
+  <SequentialLegend
+    colorScale={combinedColorScale}
+    labels={{ limits: [1, 2, 3, 4, 5] }}
+  />
+  <div class="sub-labels">
+    <span>Least important</span>
+    <span>Most important</span>
+  </div>
+  <br />
+  <p>
+    This metric combines the other five by averaging each of the metrics, on the
+    1-5 scale.
+  </p>
 {/if}
 
 <style>

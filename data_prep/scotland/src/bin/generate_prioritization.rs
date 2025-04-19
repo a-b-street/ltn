@@ -71,8 +71,6 @@ fn main() -> Result<()> {
         }
 
         calculate_metric_buckets(&mut context_data, population_zone_area_km2)?;
-        // TODO do not commit
-        //println!("for {}, got {:?}", study_area.1.name, context_data.metric_buckets.population_density);
 
         std::fs::create_dir_all("prioritization")?;
         let path = format!(

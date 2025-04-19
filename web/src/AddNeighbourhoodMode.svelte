@@ -221,6 +221,7 @@
       pois: hoverStateFilter(0.7, 0.9),
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
+      combined: hoverStateFilter(0.7, 0.9),
     }[selectedPrioritization];
   }
 
@@ -448,6 +449,10 @@
                 <b>Points of interest</b>
                 <br />
                 {(props.number_pois / props.area_km2).toFixed(1)} / km²
+              {:else if selectedPrioritization == "combined"}
+                <b>Combined score</b>
+                <br />
+                {props.combined_score}
               {/if}
             </Popup>
           {/if}
