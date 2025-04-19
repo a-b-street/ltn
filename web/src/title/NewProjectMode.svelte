@@ -9,12 +9,13 @@
     appFocus,
     assetUrl,
     backend,
+    currentProjectID,
     map,
     mode,
     projectStorage,
   } from "../stores";
   import { Backend } from "../wasm";
-  import { loadProject } from "./loader";
+  import { afterProjectLoaded, loadProject } from "./loader";
 
   let newProjectName = "";
   let example: string | null = null;
@@ -44,7 +45,11 @@
       );
 
       const projectID = $projectStorage.createProject($backend.toSavefile());
-      await loadProject(projectID);
+      // Calling loadProject would immediately re-fetch OSM data from Overpass
+      // and recreate the backend. Instead, just call some of the things
+      // it does.
+      $currentProjectID = projectID;
+      afterProjectLoaded(projectID);
       $mode = { mode: "add-neighbourhood" };
     } catch (err) {
       window.alert(`Couldn't import from Overpass: ${err}`);

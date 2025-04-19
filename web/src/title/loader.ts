@@ -120,7 +120,7 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
   }
 }
 
-function afterProjectLoaded(projectID: ProjectID) {
+export function afterProjectLoaded(projectID: ProjectID) {
   // The stores are unused; the WASM API is used directly. This TS wrapper is unused.
   routeTool.set(
     new RouteTool(
