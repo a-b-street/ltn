@@ -49,6 +49,7 @@ export type GeneratedBoundaryFeature = Feature<
     simd: number;
     number_stats19_collisions: number;
     number_pois: number;
+    combined_score: number;
   }
 >;
 
@@ -329,6 +330,15 @@ export class Backend {
   getPOIs(): FeatureCollection<Point, { name?: string; kind: string }> {
     return JSON.parse(this.inner.getPOIs());
   }
+
+  getMetricBuckets(): MetricBuckets | null {
+    try {
+      return JSON.parse(this.inner.getMetricBuckets());
+    } catch (err) {
+      // This area doesn't have any
+      return null;
+    }
+  }
 }
 
 export type Impact = FeatureCollection<
@@ -420,3 +430,9 @@ export type CompareRoute = FeatureCollection<
   LineString,
   { kind: "before" | "after"; distance: number; time: number }
 >;
+
+export interface MetricBuckets {
+  population_density: number[];
+  collision_density: number[];
+  poi_density: number[];
+}

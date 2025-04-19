@@ -4,16 +4,14 @@
     bucketize,
     carOwnershipColorScale,
     carOwnershipLimits,
+    combinedColorScale,
     densityColorScale,
-    densityLimits,
     poiColorScale,
-    poiLimits,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
-    stats19Limits,
   } from "../common/colors";
-  import { appFocus } from "../stores";
+  import { appFocus, metricBuckets } from "../stores";
   import type { Prioritization } from "./index";
 
   export let selectedPrioritization: Prioritization;
@@ -33,6 +31,8 @@
       selectedPrioritization = "pois";
     } else if (currentURLParam == "car_ownership") {
       selectedPrioritization = "car_ownership";
+    } else if (currentURLParam == "combined") {
+      selectedPrioritization = "combined";
     }
   }
 
@@ -63,13 +63,14 @@
     <option value="simd">SIMD</option>
     <option value="pois">Points of interest</option>
     <option value="car_ownership">Car ownership</option>
+    <option value="combined">Combined</option>
   </select>
 </div>
 
 {#if selectedPrioritization == "density"}
   <SequentialLegend
     colorScale={densityColorScale}
-    labels={{ limits: densityLimits }}
+    labels={{ limits: $metricBuckets.population_density }}
   />
   <div class="sub-labels">
     <span>Less dense</span>
@@ -98,12 +99,29 @@
 {:else if selectedPrioritization == "stats19"}
   <SequentialLegend
     colorScale={stats19ColorScale}
-    labels={{ limits: stats19Limits }}
+    labels={{ limits: $metricBuckets.collision_density }}
   />
   <div style="text-align: center;">collisions / km²</div>
 {:else if selectedPrioritization == "pois"}
-  <SequentialLegend colorScale={poiColorScale} labels={{ limits: poiLimits }} />
+  <SequentialLegend
+    colorScale={poiColorScale}
+    labels={{ limits: $metricBuckets.poi_density }}
+  />
   <div style="text-align: center;">POIs / km²</div>
+{:else if selectedPrioritization == "combined"}
+  <SequentialLegend
+    colorScale={combinedColorScale}
+    labels={{ limits: [1, 2, 3, 4, 5] }}
+  />
+  <div class="sub-labels">
+    <span>Least important</span>
+    <span>Most important</span>
+  </div>
+  <br />
+  <p>
+    This metric combines the other five by averaging each of the metrics, on the
+    1-5 scale.
+  </p>
 {/if}
 
 <style>

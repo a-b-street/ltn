@@ -591,6 +591,14 @@ impl LTN {
         Ok(serde_json::to_string(&GeoJson::from(features)).map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = getMetricBuckets)]
+    pub fn get_metric_buckets(&self) -> Result<String, JsValue> {
+        if let Some(ref context_data) = self.map.context_data {
+            return Ok(serde_json::to_string(&context_data.metric_buckets).map_err(err_to_js)?);
+        }
+        Err(JsValue::from_str("no context_data for this area"))
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {

@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
-use backend::boundary_stats::{ContextData, POIKind, PopulationZone, POI};
+use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZone, POI};
 use data_prep::{PopulationZoneInput, StudyArea};
-use geo::{MultiPolygon, Point, Relate};
+use geo::{MultiPolygon, Point, PreparedGeometry, Relate};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -21,16 +21,24 @@ fn main() -> Result<()> {
 
     let mut all_settlements = SettlementsInput::read_all_from_file()?;
 
-    for study_area in &study_areas {
+    for (idx, study_area) in study_areas.iter().enumerate() {
         let study_area_start = Instant::now();
-        println!("Starting {}", study_area.1.name);
+        println!(
+            "Starting {} ({} / {})",
+            study_area.1.name,
+            idx + 1,
+            study_areas.len()
+        );
         let mut context_data = ContextData {
             settlements: all_settlements.remove(&study_area.1.name).unwrap().geometry,
             population_zones: Vec::new(),
             stats19_collisions: Vec::new(),
             pois: Vec::new(),
+            metric_buckets: MetricBuckets::default(),
         };
 
+        // Store the area per population zone temporarily, to calculate buckets
+        let mut population_zone_area_km2 = Vec::new();
         for population_zone_input in &population_zone_inputs {
             if study_area
                 .0
@@ -45,6 +53,8 @@ fn main() -> Result<()> {
                     total_households: car_ownership.total_households,
                     households_with_cars_or_vans: car_ownership.households_with_cars_or_vans(),
                 });
+
+                population_zone_area_km2.push(population_zone_input.area / 1000.0 / 1000.0);
             }
         }
 
@@ -59,6 +69,8 @@ fn main() -> Result<()> {
                 context_data.pois.push(poi.clone());
             }
         }
+
+        calculate_metric_buckets(&mut context_data, population_zone_area_km2)?;
 
         std::fs::create_dir_all("prioritization")?;
         let path = format!(
@@ -220,4 +232,77 @@ impl SettlementsInput {
             .map(|s| (s.study_area_name.clone(), s))
             .collect())
     }
+}
+
+fn calculate_metric_buckets(
+    data: &mut ContextData,
+    population_zone_area_km2: Vec<f64>,
+) -> Result<()> {
+    data.metric_buckets.population_density = make_buckets(
+        &data
+            .population_zones
+            .iter()
+            .enumerate()
+            .map(|(idx, zone)| zone.population as f64 / population_zone_area_km2[idx])
+            .collect(),
+    )?;
+
+    let population_zones = data
+        .population_zones
+        .iter()
+        .map(|zone| PreparedGeometry::from(&zone.geometry))
+        .collect::<Vec<_>>();
+
+    let mut collions_per_zone = Vec::new();
+    for zone in &population_zones {
+        let mut count = 0;
+        for pt in &data.stats19_collisions {
+            if zone.relate(pt).is_contains() {
+                count += 1;
+            }
+        }
+        collions_per_zone.push(count);
+    }
+    data.metric_buckets.collision_density = make_buckets(
+        &collions_per_zone
+            .into_iter()
+            .enumerate()
+            .map(|(idx, collisions)| collisions as f64 / population_zone_area_km2[idx])
+            .collect(),
+    )?;
+
+    let mut pois_per_zone = Vec::new();
+    for zone in &population_zones {
+        let mut count = 0;
+        for poi in &data.pois {
+            if zone.relate(&poi.point).is_contains() {
+                count += 1;
+            }
+        }
+        pois_per_zone.push(count);
+    }
+    data.metric_buckets.poi_density = make_buckets(
+        &pois_per_zone
+            .into_iter()
+            .enumerate()
+            .map(|(idx, pois)| pois as f64 / population_zone_area_km2[idx])
+            .collect(),
+    )?;
+
+    Ok(())
+}
+
+// Use ckmeans to find the upper limit of 5 buckets
+fn make_buckets(values: &Vec<f64>) -> Result<[usize; 6]> {
+    let breaks = ckmeans::roundbreaks(&values, 6)?;
+    assert_eq!(breaks.len(), 5);
+    Ok([
+        // Always start with a leading 0, for convenience on the maplibre end
+        0,
+        breaks[0] as usize,
+        breaks[1] as usize,
+        breaks[2] as usize,
+        breaks[3] as usize,
+        breaks[4] as usize,
+    ])
 }
