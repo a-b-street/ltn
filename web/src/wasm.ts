@@ -49,6 +49,7 @@ export type GeneratedBoundaryFeature = Feature<
     simd: number;
     number_stats19_collisions: number;
     number_pois: number;
+    combined_score: number;
   }
 >;
 

@@ -5,6 +5,7 @@ import {
   areaLimits,
   carOwnershipColorScale,
   carOwnershipLimits,
+  combinedColorScale,
   densityColorScale,
   poiColorScale,
   simdColorScale,
@@ -21,7 +22,8 @@ export type Prioritization =
   | "density"
   | "pois"
   | "simd"
-  | "stats19";
+  | "stats19"
+  | "combined";
 
 export function prioritizationFillColor(
   noneColor: { none: DataDrivenPropertyValueSpecification<string> },
@@ -59,6 +61,11 @@ export function prioritizationFillColor(
       ["/", ["get", "number_stats19_collisions"], ["get", "area_km2"]],
       metricBuckets.collision_density,
       stats19ColorScale,
+    ),
+    combined: makeRamp(
+      ["get", "combined_score"],
+      [1, 2, 3, 4, 5],
+      combinedColorScale,
     ),
   }[selectedPrioritization];
 }

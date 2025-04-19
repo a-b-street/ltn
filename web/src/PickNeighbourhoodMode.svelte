@@ -132,7 +132,10 @@
     selectedPrioritization: Prioritization,
   ): DataDrivenPropertyValueSpecification<number> {
     let highlightedOpacity = 0.7;
-    let styles: Record<string, DataDrivenPropertyValueSpecification<number>> = {
+    let styles: Record<
+      Prioritization | "area",
+      DataDrivenPropertyValueSpecification<number>
+    > = {
       none: [
         "case",
         ["==", ["feature-state", "highlight"], "yes"],
@@ -145,6 +148,7 @@
       stats19: hoverStateFilter(0.7, 0.9),
       pois: hoverStateFilter(0.7, 0.9),
       car_ownership: hoverStateFilter(0.7, 0.9),
+      combined: hoverStateFilter(0.7, 0.9),
     };
     return styles[selectedPrioritization];
   }

@@ -14,6 +14,7 @@ pub struct BoundaryStats {
     pub number_pois: u32,
     pub total_households: u32,
     pub households_with_cars_or_vans: u32,
+    pub combined_score: f64,
 }
 
 impl BoundaryStats {
@@ -108,7 +109,7 @@ impl BoundaryStats {
             }
         }
 
-        Self {
+        let mut stats = Self {
             area_km2: area_meters / 1_000_000.0,
             population,
             simd,
@@ -116,7 +117,14 @@ impl BoundaryStats {
             number_pois,
             total_households: total_households.round() as u32,
             households_with_cars_or_vans: households_with_cars_or_vans.round() as u32,
+            combined_score: 0.0,
+        };
+
+        if let Some(context_data) = context_data {
+            stats.combined_score = calculate_combined_score(context_data, &stats);
         }
+
+        stats
     }
 }
 
@@ -137,7 +145,6 @@ pub struct MetricBuckets {
     pub population_density: [usize; 6],
     pub collision_density: [usize; 6],
     pub poi_density: [usize; 6],
-    pub car_ownership_percents: [usize; 6],
 }
 
 impl ContextData {
@@ -215,6 +222,73 @@ pub struct PreparedPopulationZone {
     pub prepared_geometry: PreparedGeometry<'static, MultiPolygon>,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct POI {
+    pub point: Point,
+    pub kind: POIKind,
+    pub name: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+pub enum POIKind {
+    CommunityCenter,
+    GP,
+    Grocery,
+    Hospital,
+    School,
+    Recreation,
+}
+
+fn calculate_combined_score(context: &PreparedContextData, stats: &BoundaryStats) -> f64 {
+    // Turn each metric into 1 (least important) to 5 (most important)
+    let population = find_bucket(
+        stats.population / stats.area_km2,
+        &context.metric_buckets.population_density,
+    );
+    let collisions = find_bucket(
+        (stats.number_stats19_collisions as f64) / stats.area_km2,
+        &context.metric_buckets.collision_density,
+    );
+    let pois = find_bucket(
+        (stats.number_pois as f64) / stats.area_km2,
+        &context.metric_buckets.poi_density,
+    );
+
+    // SIMD is [1, 100], with the [1, 20] group being the most important
+    let simd = find_bucket(100.0 - stats.simd, &[0, 20, 40, 60, 80, 100]);
+
+    let percent_with_cars = if stats.total_households > 0 {
+        100.0 * (stats.households_with_cars_or_vans as f64) / (stats.total_households as f64)
+    } else {
+        0.0
+    };
+    // Lowest percentage of cars is the most important
+    let car_ownership = find_bucket(100.0 - percent_with_cars, &[0, 20, 40, 60, 80, 100]);
+
+    // Average
+    (population + collisions + pois + simd + car_ownership) / 5.0
+}
+
+fn find_bucket(value: f64, buckets: &[usize; 6]) -> f64 {
+    let value = value as usize;
+
+    // First value is always 0
+    if value < buckets[1] {
+        1.0
+    } else if value < buckets[2] {
+        2.0
+    } else if value < buckets[3] {
+        3.0
+    } else if value < buckets[4] {
+        4.0
+    } else {
+        // buckets[5] may not be the true upper limit. The buckets are calculated from
+        // PopulationZones, but BoundaryStats could be built from smaller areas that achieve even
+        // higher density.
+        5.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -265,6 +339,7 @@ mod tests {
             population_zones: vec![zone_1, zone_2],
             stats19_collisions: vec![],
             pois: vec![],
+            metric_buckets: MetricBuckets::default(),
         }
         .into_prepared(&mercator);
 
@@ -285,21 +360,17 @@ mod tests {
         assert_eq!(boundary_stats.total_households, 600);
         assert_eq!(boundary_stats.households_with_cars_or_vans, 65);
     }
-}
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct POI {
-    pub point: Point,
-    pub kind: POIKind,
-    pub name: Option<String>,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
-pub enum POIKind {
-    CommunityCenter,
-    GP,
-    Grocery,
-    Hospital,
-    School,
-    Recreation,
+    #[test]
+    fn test_find_bucket() {
+        let buckets = [0, 1_100, 2_600, 3_900, 5_450, 12_000];
+        assert_eq!(1.0, find_bucket(50.0, &buckets));
+        // Right on the boundary
+        assert_eq!(2.0, find_bucket(1_100.0, &buckets));
+        assert_eq!(3.0, find_bucket(3_000.0, &buckets));
+        assert_eq!(5.0, find_bucket(10_000.0, &buckets));
+        assert_eq!(5.0, find_bucket(10_000.0, &buckets));
+        // Even higher than the last threshold
+        assert_eq!(5.0, find_bucket(13_000.0, &buckets));
+    }
 }

@@ -35,6 +35,8 @@ export let poiColorScale = commonQuintileColorScale.toReversed();
 export let carOwnershipLimits = [0, 20, 40, 60, 80, 100];
 export let carOwnershipColorScale = commonQuintileColorScale;
 
+export let combinedColorScale = commonQuintileColorScale.toReversed();
+
 export function bucketize(limits: number[]) {
   let buckets = [];
   for (let i = 1; i < limits.length; i++) {
