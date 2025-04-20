@@ -15,6 +15,7 @@ download_to_subdir() {
         || echo "❌ Download failed: $url"
 }
 
+mkdir -p "${APP_ROOT}/web/public"
 cd "${APP_ROOT}/web/public"
 
 download_to_subdir severance_pbfs https://assets.od2net.org/severance_pbfs/areas.json
