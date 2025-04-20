@@ -1,6 +1,12 @@
 <script lang="ts">
   import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
+  import diagonalUrl from "../assets/filters/diagonal_filter_icon.png?url";
+  import noLeftUrl from "../assets/filters/no_left_turn.png?url";
+  import noRightUrl from "../assets/filters/no_right_turn.png?url";
+  import noStraightUrl from "../assets/filters/no_straight_turn.png?url";
+  import noUTurnRtlUrl from "../assets/filters/no_u_left_to_right_turn.png?url";
+  import noUTurnLtrUrl from "../assets/filters/no_u_right_to_left_turn.png?url";
   import logo from "../assets/logo.svg?url";
   import nationalRailUrl from "../assets/national_rail.png?url";
   import About from "./About.svelte";
@@ -181,27 +187,27 @@
             },
             {
               id: "diagonal_filter",
-              url: `${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`,
+              url: diagonalUrl,
             },
             {
               id: "no_straight_turn",
-              url: `${import.meta.env.BASE_URL}/filters/no_straight_turn.png`,
+              url: noStraightUrl,
             },
             {
               id: "no_left_turn",
-              url: `${import.meta.env.BASE_URL}/filters/no_left_turn.png`,
+              url: noLeftUrl,
             },
             {
               id: "no_right_turn",
-              url: `${import.meta.env.BASE_URL}/filters/no_right_turn.png`,
+              url: noRightUrl,
             },
             {
               id: "no_u_left_to_right_turn",
-              url: `${import.meta.env.BASE_URL}/filters/no_u_left_to_right_turn.png`,
+              url: noUTurnLtrUrl,
             },
             {
               id: "no_u_right_to_left_turn",
-              url: `${import.meta.env.BASE_URL}/filters/no_u_right_to_left_turn.png`,
+              url: noUTurnRtlUrl,
             },
             {
               id: "oneway_arrow",

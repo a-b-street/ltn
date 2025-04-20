@@ -15,6 +15,11 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
   import paintbrushCursorURL from "../../assets/cursors/paintbrush.svg?url";
+  import noLeftUrl from "../../assets/filters/no_left_turn.png?url";
+  import noRightUrl from "../../assets/filters/no_right_turn.png?url";
+  import noStraightUrl from "../../assets/filters/no_straight_turn.png?url";
+  import noUTurnRtlUrl from "../../assets/filters/no_u_left_to_right_turn.png?url";
+  import noUTurnLtrUrl from "../../assets/filters/no_u_right_to_left_turn.png?url";
   import onewayArrowUrl from "../../assets/one_way_left.svg?url";
   import mainRoadIconUrl from "../../assets/traffic_1.svg?url";
   import AnimatePaths from "../AnimatePaths.svelte";
@@ -291,6 +296,14 @@
     "Shortcuts are routes from one main road to another, which cut through the neighborhood's interior.";
   let cellsDescriptionText =
     "Cells are the colored area reachable without travelling along a main road.";
+
+  let turnRestrictionUrls: Record<any, string> = {
+    left: noLeftUrl,
+    right: noRightUrl,
+    straight: noStraightUrl,
+    u_left_to_right: noUTurnLtrUrl,
+    u_right_to_left: noUTurnRtlUrl,
+  };
 </script>
 
 <svelte:window on:keydown={onKeyDown} />
@@ -401,10 +414,7 @@
           class:active={action.kind == "turn_restriction"}
           data-tippy-content="Restrict turns (hotkey 3)"
         >
-          <img
-            src={`${import.meta.env.BASE_URL}/filters/no_right_turn.svg`}
-            alt="Restrict turns"
-          />
+          <img src={noRightUrl} alt="Restrict turns" />
         </button>
         <button
           on:click={() =>
@@ -636,7 +646,8 @@
             {#if action.kind == "filter"}
               <div>
                 <img
-                  src={`${import.meta.env.BASE_URL}/filters/${$currentFilterType}_icon.gif`}
+                  src={notNull(ModalFilterType.getFilter($currentFilterType))
+                    .iconURL}
                   width="20"
                   alt="Add modal filter"
                 />
@@ -701,7 +712,7 @@
           <Popup openOn="hover" let:props>
             <div>
               <img
-                src={`${import.meta.env.BASE_URL}/filters/no_${props.kind}_turn.png`}
+                src={turnRestrictionUrls[props.kind]}
                 width="20"
                 alt="Add turn restriction"
               />

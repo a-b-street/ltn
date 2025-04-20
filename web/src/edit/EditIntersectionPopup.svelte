@@ -1,4 +1,5 @@
 <script lang="ts">
+  import icon from "../../assets/filters/diagonal_filter_icon.png";
   import { Intersection } from "../common/Intersection";
 
   export let intersection: Intersection;
@@ -9,7 +10,7 @@
     {#if intersection.hasRotatedFilter}
       <div class="icon">❌</div>
       <img
-        src={`${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`}
+        src={icon}
         alt="Remove diagonal filter"
         style="transform: rotate(45deg);"
       />
@@ -17,7 +18,7 @@
     {:else}
       <div style="font-size: 200%; padding-bottom: 4px;" class="icon">↻</div>
       <img
-        src={`${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`}
+        src={icon}
         alt="Rotate diagonal filter"
         style="transform: rotate(45deg);"
       />
@@ -26,7 +27,7 @@
   {:else}
     <div style="font-size: 200%; margin-top: -12px;" class="icon">+</div>
     <img
-      src={`${import.meta.env.BASE_URL}/filters/diagonal_filter_icon.png`}
+      src={icon}
       alt="Add diagonal filter"
       style="transform: rotate(135deg);"
     />
