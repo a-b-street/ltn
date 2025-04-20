@@ -17,6 +17,7 @@ download_to_subdir() {
         || echo "❌ (CNT) Download failed: $url"
 }
 
+mkdir -p "${APP_ROOT}/web/public"
 cd "${APP_ROOT}/web/public"
 
 # Scotland specific data
