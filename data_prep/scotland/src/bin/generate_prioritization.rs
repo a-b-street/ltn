@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZone, POI};
 use data_prep::{PopulationZoneInput, StudyArea};
-use geo::{MultiPolygon, Point, PreparedGeometry, Relate};
+use geo::{MultiPolygon, Point, Relate};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -16,8 +16,8 @@ fn main() -> Result<()> {
     println!("Time since start {:?}", start.elapsed());
     let population_zone_inputs = PopulationZoneInput::read_all_from_file()?;
     println!("Time since start {:?}", start.elapsed());
-    let stats19_collisions = Stats19Input::read_all_from_file()?;
-    let pois = InputPOI::read_all_from_files()?;
+    let stats19_collisions_input = Stats19Input::read_all_from_file()?;
+    let pois_input = InputPOI::read_all_from_files()?;
 
     let mut all_settlements = SettlementsInput::read_all_from_file()?;
 
@@ -29,16 +29,13 @@ fn main() -> Result<()> {
             idx + 1,
             study_areas.len()
         );
-        let mut context_data = ContextData {
-            settlements: all_settlements.remove(&study_area.1.name).unwrap().geometry,
-            population_zones: Vec::new(),
-            stats19_collisions: Vec::new(),
-            pois: Vec::new(),
-            metric_buckets: MetricBuckets::default(),
-        };
+
+        let settlements = all_settlements.remove(&study_area.1.name).unwrap().geometry;
+        let mut population_zones = Vec::new();
+        let mut stats19_collisions = Vec::new();
+        let mut pois = Vec::new();
 
         // Store the area per population zone temporarily, to calculate buckets
-        let mut population_zone_area_km2 = Vec::new();
         for population_zone_input in &population_zone_inputs {
             if study_area
                 .0
@@ -46,32 +43,37 @@ fn main() -> Result<()> {
                 .is_intersects()
             {
                 let car_ownership = &car_ownership_data_zones[&population_zone_input.id];
-                context_data.population_zones.push(PopulationZone {
+                population_zones.push(PopulationZone {
                     geometry: population_zone_input.geometry.geometry().clone(),
                     imd_percentile: population_zone_input.imd_percentile,
                     population: population_zone_input.population,
                     total_households: car_ownership.total_households,
                     households_with_cars_or_vans: car_ownership.households_with_cars_or_vans(),
                 });
-
-                population_zone_area_km2.push(population_zone_input.area / 1000.0 / 1000.0);
             }
         }
 
-        for pt in &stats19_collisions {
+        for pt in &stats19_collisions_input {
             if study_area.0.relate(&pt.geometry).is_contains() {
-                context_data.stats19_collisions.push(pt.geometry);
+                stats19_collisions.push(pt.geometry);
             }
         }
 
-        for poi in &pois {
+        for poi in &pois_input {
             if study_area.0.relate(&poi.point).is_contains() {
-                context_data.pois.push(poi.clone());
+                pois.push(poi.clone());
             }
         }
 
-        calculate_metric_buckets(&mut context_data, population_zone_area_km2)?;
-
+        let metric_buckets =
+            calculate_metric_buckets(&population_zone_inputs, &stats19_collisions, &pois)?;
+        let context_data = ContextData {
+            settlements,
+            population_zones,
+            stats19_collisions,
+            pois,
+            metric_buckets,
+        };
         std::fs::create_dir_all("prioritization")?;
         let path = format!(
             "prioritization/context_{}_{}.bin",
@@ -235,61 +237,60 @@ impl SettlementsInput {
 }
 
 fn calculate_metric_buckets(
-    data: &mut ContextData,
-    population_zone_area_km2: Vec<f64>,
-) -> Result<()> {
-    data.metric_buckets.population_density = make_buckets(
-        &data
-            .population_zones
+    population_zone_inputs: &[PopulationZoneInput],
+    stats19_collisions: &[Point],
+    pois: &[POI],
+) -> Result<MetricBuckets> {
+    let population_density = make_buckets(
+        &population_zone_inputs
             .iter()
-            .enumerate()
-            .map(|(idx, zone)| zone.population as f64 / population_zone_area_km2[idx])
+            .map(|zone| zone.population as f64 / zone.area_km2())
             .collect(),
     )?;
 
-    let population_zones = data
-        .population_zones
-        .iter()
-        .map(|zone| PreparedGeometry::from(&zone.geometry))
-        .collect::<Vec<_>>();
-
-    let mut collions_per_zone = Vec::new();
-    for zone in &population_zones {
+    let mut collisions_per_zone = Vec::new();
+    for zone in population_zone_inputs {
         let mut count = 0;
-        for pt in &data.stats19_collisions {
-            if zone.relate(pt).is_contains() {
+        for pt in stats19_collisions {
+            if zone.geometry.relate(pt).is_contains() {
                 count += 1;
             }
         }
-        collions_per_zone.push(count);
+        collisions_per_zone.push(count);
     }
-    data.metric_buckets.collision_density = make_buckets(
-        &collions_per_zone
+
+    let collision_density = make_buckets(
+        &collisions_per_zone
             .into_iter()
-            .enumerate()
-            .map(|(idx, collisions)| collisions as f64 / population_zone_area_km2[idx])
+            .zip(population_zone_inputs.iter())
+            .map(|(collisions, population_zone)| collisions as f64 / population_zone.area_km2())
             .collect(),
     )?;
 
     let mut pois_per_zone = Vec::new();
-    for zone in &population_zones {
+    for zone in population_zone_inputs {
         let mut count = 0;
-        for poi in &data.pois {
-            if zone.relate(&poi.point).is_contains() {
+        for poi in pois {
+            if zone.geometry.relate(&poi.point).is_contains() {
                 count += 1;
             }
         }
         pois_per_zone.push(count);
     }
-    data.metric_buckets.poi_density = make_buckets(
+
+    let poi_density = make_buckets(
         &pois_per_zone
             .into_iter()
-            .enumerate()
-            .map(|(idx, pois)| pois as f64 / population_zone_area_km2[idx])
+            .zip(population_zone_inputs.iter())
+            .map(|(pois, population_zone)| pois as f64 / population_zone.area_km2())
             .collect(),
     )?;
 
-    Ok(())
+    Ok(MetricBuckets {
+        population_density,
+        collision_density,
+        poi_density,
+    })
 }
 
 // Use ckmeans to find the upper limit of 5 buckets
