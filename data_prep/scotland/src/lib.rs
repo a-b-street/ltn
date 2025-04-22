@@ -69,4 +69,8 @@ impl PopulationZoneInput {
         println!("Read {} population zones", population_zones.len());
         Ok(population_zones)
     }
+
+    pub fn area_km2(&self) -> f64 {
+        self.area / 1000.0 / 1000.0
+    }
 }
