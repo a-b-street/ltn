@@ -381,7 +381,9 @@
     </div>
     <hr />
 
-    <button class="secondary" on:click={download}>Export to GeoJSON</button>
+    <button class="secondary" on:click={download}
+      >Export metrics to GeoJSON</button
+    >
   </div>
 
   <div slot="map">
