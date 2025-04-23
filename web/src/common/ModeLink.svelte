@@ -5,14 +5,9 @@
   import { pageTitle } from "./navbar";
 
   export let mode: Mode;
-  export let afterLink: (() => void) | undefined = undefined;
 </script>
 
-<Link
-  on:click={() => {
-    $storedMode = mode;
-    afterLink && afterLink();
-  }}
+<Link on:click={() => ($storedMode = mode)}
   ><slot>
     <span class="page-title">{pageTitle(mode.mode)}</span>
   </slot>

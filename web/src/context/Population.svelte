@@ -27,7 +27,16 @@
   let showCarOwnership = false;
 </script>
 
-<ContextLayerButton label="SIMD" bind:show={showSIMD}>
+<ContextLayerButton
+  label="SIMD"
+  bind:show={showSIMD}
+  onChange={() => {
+    if (showSIMD) {
+      showDensity = false;
+      showCarOwnership = false;
+    }
+  }}
+>
   <div slot="legend">
     <SequentialLegend
       colorScale={simdColorScale}
@@ -51,7 +60,16 @@
   </p>
 </ContextLayerButton>
 
-<ContextLayerButton label="Population density" bind:show={showDensity}>
+<ContextLayerButton
+  label="Population density"
+  bind:show={showDensity}
+  onChange={() => {
+    if (showDensity) {
+      showSIMD = false;
+      showCarOwnership = false;
+    }
+  }}
+>
   <div slot="legend">
     <SequentialLegend
       colorScale={densityColorScale}
@@ -75,7 +93,16 @@
   </p>
 </ContextLayerButton>
 
-<ContextLayerButton label="Car ownership" bind:show={showCarOwnership}>
+<ContextLayerButton
+  label="Car ownership"
+  bind:show={showCarOwnership}
+  onChange={() => {
+    if (showCarOwnership) {
+      showSIMD = false;
+      showDensity = false;
+    }
+  }}
+>
   <div slot="legend">
     <SequentialLegend
       colorScale={carOwnershipColorScale}

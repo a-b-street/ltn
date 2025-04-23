@@ -3,14 +3,23 @@
 
   export let label: string;
   export let show = false;
+  export let onChange: () => void = () => {};
 </script>
 
 <button
   class="context-control"
   style="display: flex; align-items: center; justify-content: leading; gap: 8px; text-align: left;"
-  on:click={() => (show = !show)}
+  on:click={() => {
+    show = !show;
+    onChange();
+  }}
 >
-  <input style="aspect-ratio: 1.0" type="checkbox" bind:checked={show} />
+  <input
+    style="aspect-ratio: 1.0"
+    type="checkbox"
+    bind:checked={show}
+    on:change={onChange}
+  />
   {label}
   {#if $$slots.help}
     <span style="margin-left: auto"
