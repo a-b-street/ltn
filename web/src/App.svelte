@@ -98,6 +98,9 @@
 
   let map: Map | null = null;
   $: if (map) {
+    map.keyboard.disableRotation();
+    map.dragRotate.disable();
+    map.touchZoomRotate.disableRotation();
     mapStore.set(map);
   }
 
@@ -224,7 +227,7 @@
             },
           ]}
         >
-          <NavigationControl />
+          <NavigationControl showCompass={false} />
 
           {#if $backend}
             <Control position="top-left">
