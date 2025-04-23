@@ -9,6 +9,7 @@
     SequentialLegend,
   } from "../common";
   import { assetUrl } from "../stores";
+  import RouteNetwork from "./RouteNetwork.svelte";
 
   // The NPT project bundles together a few layers into one pmtiles file, all
   // related to the Cycling By Design guidance
@@ -39,12 +40,12 @@
   };
 </script>
 
-<ContextLayerButton bind:show={showTraffic} label="Traffic">
+<ContextLayerButton
+  bind:show={showExistingInfra}
+  label="Existing cycling infrastructure"
+>
   <div slot="legend">
-    <SequentialLegend
-      colorScale={traffic.colorScale}
-      labels={{ limits: traffic.limits }}
-    />
+    <QualitativeLegend labelColors={infraTypeColors} />
   </div>
 
   <p slot="help">
@@ -57,7 +58,7 @@
   </p>
 </ContextLayerButton>
 
-<ContextLayerButton bind:show={showLos} label="Level of Service">
+<ContextLayerButton bind:show={showLos} label="Cycling safety Level of Service">
   <div slot="legend">
     <SequentialLegend
       colorScale={Object.values(levelOfServiceColors)}
@@ -76,9 +77,16 @@
   </p>
 </ContextLayerButton>
 
-<ContextLayerButton bind:show={showExistingInfra} label="Cycle infrastructure">
+<RouteNetwork />
+
+<div class="layer-group">Other</div>
+
+<ContextLayerButton bind:show={showTraffic} label="Estimated traffic">
   <div slot="legend">
-    <QualitativeLegend labelColors={infraTypeColors} />
+    <SequentialLegend
+      colorScale={traffic.colorScale}
+      labels={{ limits: traffic.limits }}
+    />
   </div>
 
   <p slot="help">
