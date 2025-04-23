@@ -131,7 +131,7 @@
   }
 </script>
 
-<ContextLayerButton bind:show label="Route network">
+<ContextLayerButton bind:show label="Estimated cycling demand">
   <p slot="help">
     <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
       Data from NPT

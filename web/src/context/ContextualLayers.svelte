@@ -13,7 +13,6 @@
   import POIs from "./POIs.svelte";
   import Population from "./Population.svelte";
   import RailwayStations from "./RailwayStations.svelte";
-  import RouteNetwork from "./RouteNetwork.svelte";
   import Stats19 from "./Stats19.svelte";
 
   let expand = false;
@@ -51,15 +50,20 @@
           bind:show={$showExistingFiltersAndTRs}
         />
         {#if $appFocus == "cnt"}
-          <POIs />
+          <div class="layer-group">Metrics</div>
           <Population />
+          <POIs />
+          <Stats19 />
+
+          <div class="layer-group">Public transport integration</div>
           <RailwayStations />
           <BusRoutes />
+
+          <div class="layer-group">Active travel</div>
           <CBD />
-          <RouteNetwork />
-          <Stats19 />
         {/if}
       {/if}
+
       <div class="context-control">
         <span style="font-size: 20px; margin-left: 8px; margin-top: 4px;">
           Basemap
@@ -116,5 +120,11 @@
 
   :global(.pico.contextual-layers .context-control:not(:first-child)) {
     border-top: solid #ddd 1px;
+  }
+
+  :global(.layer-group) {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 4px;
   }
 </style>
