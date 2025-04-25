@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { ArrowUp } from "lucide-svelte";
+
   export let colorScale;
   export let limits: number[];
   export let value: number;
@@ -20,24 +22,34 @@
 
 <div class="colors">
   {#each colorScale as color, idx}
-    <span class="bucket" class:fits={idx == bucketIdx} style:background={color}
-      >&nbsp;</span
-    >
+    <div class="bucket" class:selected={idx == bucketIdx}>
+      <div class="bucket-color" style:background={color}></div>
+      <div class="bucket-indicator">
+        <ArrowUp strokeWidth="4px" size="14px" />
+      </div>
+    </div>
   {/each}
 </div>
 
 <style>
   .colors {
     display: flex;
-    justify-content: space-around;
+  }
+
+  .bucket {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bucket .bucket-color {
     height: 20px;
   }
-
-  .colors .bucket {
-    flex: 1;
+  .bucket .bucket-indicator {
+    display: none;
+    justify-content: center;
   }
-
-  .fits {
-    border: 3px solid red;
+  .bucket.selected .bucket-indicator {
+    display: flex;
   }
 </style>
