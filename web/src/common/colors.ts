@@ -21,7 +21,7 @@ export let simdColorScale = commonQuintileColorScale;
 // The percentiles are [1, 100]. The 5 colors cover 4 each.
 export let simdLimits = [0, 20, 40, 60, 80, 100];
 
-export let densityColorScale = commonQuintileColorScale.toReversed();
+export let populationDensityColorScale = commonQuintileColorScale.toReversed();
 
 export let demandColorScale = commonQuintileColorScale.toReversed();
 
