@@ -63,7 +63,7 @@
     <option value="car_ownership">Car ownership</option>
     <option value="pois">Points of interest</option>
     <option value="stats19">Collisions</option>
-    <option value="combined">Combined</option>
+    <option value="combined">Overall prioritisation score</option>
   </select>
 </div>
 
@@ -118,10 +118,7 @@
     <span>Most important</span>
   </div>
   <br />
-  <p>
-    This metric combines the other five by averaging each of the metrics, on the
-    1-5 scale.
-  </p>
+  <p>This score averages the other five metrics, on the 1-5 scale.</p>
 {/if}
 
 <style>
