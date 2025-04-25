@@ -16,14 +16,14 @@
     bucketize,
     carOwnershipColorScale,
     carOwnershipLimits,
-    densityColorScale,
+    populationDensityColorScale,
     simdColorScale,
     simdLimits,
   } from "../common/colors";
   import { assetUrl, metricBuckets } from "../stores";
 
   let showSIMD = false;
-  let showDensity = false;
+  let showPopulationDensity = false;
   let showCarOwnership = false;
 </script>
 
@@ -32,7 +32,7 @@
   bind:show={showSIMD}
   onChange={() => {
     if (showSIMD) {
-      showDensity = false;
+      showPopulationDensity = false;
       showCarOwnership = false;
     }
   }}
@@ -62,9 +62,9 @@
 
 <ContextLayerButton
   label="Population density"
-  bind:show={showDensity}
+  bind:show={showPopulationDensity}
   onChange={() => {
-    if (showDensity) {
+    if (showPopulationDensity) {
       showSIMD = false;
       showCarOwnership = false;
     }
@@ -72,7 +72,7 @@
 >
   <div slot="legend">
     <SequentialLegend
-      colorScale={densityColorScale}
+      colorScale={populationDensityColorScale}
       labels={{ limits: $metricBuckets.population_density }}
     />
     <div style="display: flex; justify-content: space-between;">
@@ -99,7 +99,7 @@
   onChange={() => {
     if (showCarOwnership) {
       showSIMD = false;
-      showDensity = false;
+      showPopulationDensity = false;
     }
   }}
 >
@@ -193,12 +193,12 @@
       "fill-color": makeRamp(
         ["/", ["get", "population"], ["/", ["get", "area"], 1e6]],
         $metricBuckets.population_density,
-        densityColorScale,
+        populationDensityColorScale,
       ),
       "fill-opacity": hoverStateFilter(0.7, 0.9),
     }}
     layout={{
-      visibility: showDensity ? "visible" : "none",
+      visibility: showPopulationDensity ? "visible" : "none",
     }}
   >
     <Popup openOn="hover" let:props>
@@ -218,7 +218,9 @@
     paint={{ "line-color": "black", "line-width": 1 }}
     layout={{
       visibility:
-        showSIMD || showDensity || showCarOwnership ? "visible" : "none",
+        showSIMD || showPopulationDensity || showCarOwnership
+          ? "visible"
+          : "none",
     }}
   />
 </VectorTileSource>

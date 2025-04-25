@@ -6,8 +6,8 @@ import {
   carOwnershipColorScale,
   carOwnershipLimits,
   combinedColorScale,
-  densityColorScale,
   poiColorScale,
+  populationDensityColorScale,
   simdColorScale,
   simdLimits,
   stats19ColorScale,
@@ -19,7 +19,7 @@ export { default as PrioritizationSelect } from "./PrioritizationSelect.svelte";
 export type Prioritization =
   | "none"
   | "car_ownership"
-  | "density"
+  | "population_density"
   | "pois"
   | "simd"
   | "stats19"
@@ -46,10 +46,10 @@ export function prioritizationFillColor(
       carOwnershipLimits,
       carOwnershipColorScale,
     ),
-    density: makeRamp(
+    population_density: makeRamp(
       ["/", ["get", "population"], ["get", "area_km2"]],
       metricBuckets.population_density,
-      densityColorScale,
+      populationDensityColorScale,
     ),
     pois: makeRamp(
       ["/", ["get", "number_pois"], ["get", "area_km2"]],

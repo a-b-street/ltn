@@ -143,7 +143,7 @@
         hoverStateFilter(0.3, highlightedOpacity),
       ],
       area: hoverStateFilter(0.7, 0.9),
-      density: hoverStateFilter(0.7, 0.9),
+      population_density: hoverStateFilter(0.7, 0.9),
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
       pois: hoverStateFilter(0.7, 0.9),
@@ -326,7 +326,7 @@
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>
 
-          {#if selectedPrioritization == "density"}
+          {#if selectedPrioritization == "population_density"}
             <b>Population density:</b>
             {Math.round(props.population / props.area_km2).toLocaleString()} people
             / km²

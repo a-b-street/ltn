@@ -5,8 +5,8 @@
     carOwnershipColorScale,
     carOwnershipLimits,
     combinedColorScale,
-    densityColorScale,
     poiColorScale,
+    populationDensityColorScale,
     simdColorScale,
     simdLimits,
     stats19ColorScale,
@@ -21,8 +21,8 @@
       "prioritizationMetric",
     );
 
-    if (currentURLParam == "density") {
-      selectedPrioritization = "density";
+    if (currentURLParam == "population_density") {
+      selectedPrioritization = "population_density";
     } else if (currentURLParam == "simd") {
       selectedPrioritization = "simd";
     } else if (currentURLParam == "stats19") {
@@ -59,7 +59,7 @@
   <select id="prioritization-selection" bind:value={selectedPrioritization}>
     <option value="none">None</option>
     <option value="simd">SIMD</option>
-    <option value="density">Density</option>
+    <option value="population_density">Population density</option>
     <option value="car_ownership">Car ownership</option>
     <option value="pois">Points of interest</option>
     <option value="stats19">Collisions</option>
@@ -67,9 +67,9 @@
   </select>
 </div>
 
-{#if selectedPrioritization == "density"}
+{#if selectedPrioritization == "population_density"}
   <SequentialLegend
-    colorScale={densityColorScale}
+    colorScale={populationDensityColorScale}
     labels={{ limits: $metricBuckets.population_density }}
   />
   <div class="sub-labels">

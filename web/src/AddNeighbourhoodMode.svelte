@@ -217,7 +217,7 @@
       none: hoverStateFilter(0.3, 0.5),
       area: hoverStateFilter(0.7, 0.9),
       car_ownership: hoverStateFilter(0.7, 0.9),
-      density: hoverStateFilter(0.7, 0.9),
+      population_density: hoverStateFilter(0.7, 0.9),
       pois: hoverStateFilter(0.7, 0.9),
       simd: hoverStateFilter(0.7, 0.9),
       stats19: hoverStateFilter(0.7, 0.9),
@@ -437,7 +437,7 @@
                   props.total_households,
                 )} of approximately {props.total_households.toLocaleString()}
                 households have at least one car or van.
-              {:else if selectedPrioritization == "density"}
+              {:else if selectedPrioritization == "population_density"}
                 <b>Population density</b>
                 <br />
                 {Math.round(props.population / props.area_km2).toLocaleString()}
