@@ -112,7 +112,7 @@
 {:else if selectedPrioritization == "combined"}
   <SequentialLegend
     colorScale={combinedColorScale}
-    labels={{ limits: combinedLimits }}
+    labels={{ buckets: combinedLimits }}
   />
   <div class="sub-labels">
     <span>Least important</span>
