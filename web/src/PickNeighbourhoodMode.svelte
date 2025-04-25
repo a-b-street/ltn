@@ -259,7 +259,7 @@
     </ul>
 
     {#if $appFocus == "cnt"}
-      <h3>Prioritization</h3>
+      <h3>Prioritisation</h3>
       <p>Compare metrics across your neighbourhoods.</p>
       <PrioritizationSelect bind:selectedPrioritization />
       <hr />
