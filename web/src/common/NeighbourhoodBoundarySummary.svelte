@@ -1,7 +1,19 @@
 <script lang="ts">
   import { prettyPrintPercent } from "../common";
-  import { appFocus } from "../stores";
+  import {
+    carOwnershipColorScale,
+    carOwnershipLimits,
+    combinedColorScale,
+    combinedLimits,
+    poiColorScale,
+    populationDensityColorScale,
+    simdColorScale,
+    simdLimits,
+    stats19ColorScale,
+  } from "../common/colors";
+  import { appFocus, metricBuckets } from "../stores";
   import type { GeneratedBoundaryFeature } from "../wasm";
+  import MetricProgress from "./MetricProgress.svelte";
 
   export let neighbourhoodBoundary: GeneratedBoundaryFeature;
 </script>
@@ -16,7 +28,14 @@
 
   {#if $appFocus == "cnt"}
     <tr>
-      <th>SIMD</th>
+      <th
+        >SIMD
+        <MetricProgress
+          colorScale={simdColorScale}
+          limits={simdLimits}
+          value={neighbourhoodBoundary.properties.simd}
+        />
+      </th>
       <td
         >quintile {1 +
           Math.floor(neighbourhoodBoundary.properties.simd / 20)}</td
@@ -24,7 +43,15 @@
     </tr>
 
     <tr>
-      <th>Population density</th>
+      <th
+        >Population density
+        <MetricProgress
+          colorScale={populationDensityColorScale}
+          limits={$metricBuckets.population_density}
+          value={neighbourhoodBoundary.properties.population /
+            neighbourhoodBoundary.properties.area_km2}
+        />
+      </th>
       <td>
         {Math.round(
           neighbourhoodBoundary.properties.population /
@@ -34,7 +61,16 @@
     </tr>
 
     <tr>
-      <th>Car ownership</th>
+      <th
+        >Car ownership
+        <MetricProgress
+          colorScale={carOwnershipColorScale}
+          limits={carOwnershipLimits}
+          value={(100 *
+            neighbourhoodBoundary.properties.households_with_cars_or_vans) /
+            neighbourhoodBoundary.properties.total_households}
+        />
+      </th>
       <td>
         {prettyPrintPercent(
           neighbourhoodBoundary.properties.households_with_cars_or_vans,
@@ -44,7 +80,15 @@
     </tr>
 
     <tr>
-      <th>POI density</th>
+      <th
+        >POI density
+        <MetricProgress
+          colorScale={poiColorScale}
+          limits={$metricBuckets.poi_density}
+          value={neighbourhoodBoundary.properties.number_pois /
+            neighbourhoodBoundary.properties.area_km2}
+        />
+      </th>
       <td>
         {(
           neighbourhoodBoundary.properties.number_pois /
@@ -54,12 +98,34 @@
     </tr>
 
     <tr>
-      <th>Collision density</th>
+      <th
+        >Collision density
+        <MetricProgress
+          colorScale={stats19ColorScale}
+          limits={$metricBuckets.collision_density}
+          value={neighbourhoodBoundary.properties.number_stats19_collisions /
+            neighbourhoodBoundary.properties.area_km2}
+        />
+      </th>
       <td>
         {(
           neighbourhoodBoundary.properties.number_stats19_collisions /
           neighbourhoodBoundary.properties.area_km2
         ).toFixed(1)} / km²
+      </td>
+    </tr>
+
+    <tr>
+      <th
+        >Overall prioritisation score
+        <MetricProgress
+          colorScale={combinedColorScale}
+          limits={combinedLimits}
+          value={neighbourhoodBoundary.properties.combined_score}
+        />
+      </th>
+      <td>
+        {neighbourhoodBoundary.properties.combined_score} / 5
       </td>
     </tr>
   {/if}
