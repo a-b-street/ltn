@@ -58,11 +58,11 @@
   >
   <select id="prioritization-selection" bind:value={selectedPrioritization}>
     <option value="none">None</option>
-    <option value="density">Density</option>
-    <option value="stats19">Collisions</option>
     <option value="simd">SIMD</option>
-    <option value="pois">Points of interest</option>
+    <option value="density">Density</option>
     <option value="car_ownership">Car ownership</option>
+    <option value="pois">Points of interest</option>
+    <option value="stats19">Collisions</option>
     <option value="combined">Combined</option>
   </select>
 </div>
