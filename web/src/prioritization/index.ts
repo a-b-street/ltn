@@ -6,6 +6,7 @@ import {
   carOwnershipColorScale,
   carOwnershipLimits,
   combinedColorScale,
+  combinedLimits,
   poiColorScale,
   populationDensityColorScale,
   simdColorScale,
@@ -64,7 +65,7 @@ export function prioritizationFillColor(
     ),
     combined: makeRamp(
       ["get", "combined_score"],
-      [1, 2, 3, 4, 5],
+      combinedLimits,
       combinedColorScale,
     ),
   }[selectedPrioritization];

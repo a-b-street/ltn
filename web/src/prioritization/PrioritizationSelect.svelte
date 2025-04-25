@@ -5,6 +5,7 @@
     carOwnershipColorScale,
     carOwnershipLimits,
     combinedColorScale,
+    combinedLimits,
     poiColorScale,
     populationDensityColorScale,
     simdColorScale,
@@ -111,7 +112,7 @@
 {:else if selectedPrioritization == "combined"}
   <SequentialLegend
     colorScale={combinedColorScale}
-    labels={{ limits: [1, 2, 3, 4, 5] }}
+    labels={{ limits: combinedLimits }}
   />
   <div class="sub-labels">
     <span>Least important</span>
