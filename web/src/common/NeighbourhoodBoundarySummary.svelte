@@ -17,7 +17,10 @@
   {#if $appFocus == "cnt"}
     <tr>
       <th>SIMD</th>
-      <td>{neighbourhoodBoundary.properties.simd.toFixed(1)}%</td>
+      <td
+        >quintile {1 +
+          Math.floor(neighbourhoodBoundary.properties.simd / 20)}</td
+      >
     </tr>
 
     <tr>
