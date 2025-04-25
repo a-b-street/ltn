@@ -254,7 +254,7 @@
   <div slot="sidebar">
     <BackButton mode={{ mode: "pick-neighbourhood" }} />
     {#if $appFocus == "cnt"}
-      <h3>Prioritization</h3>
+      <h3>Prioritisation</h3>
       <p>Compare metrics across candidate neighbourhoods.</p>
       <PrioritizationSelect bind:selectedPrioritization />
     {/if}

@@ -18,7 +18,7 @@
 
   function setSelectedPrioritizationFromURL() {
     let currentURLParam = new URL(window.location.href).searchParams.get(
-      "prioritizationMetric",
+      "prioritisationMetric",
     );
 
     if (currentURLParam == "population_density") {
@@ -44,9 +44,9 @@
   $: {
     const url = new URL(window.location.href);
     if (selectedPrioritization == "none") {
-      url.searchParams.delete("prioritizationMetric");
+      url.searchParams.delete("prioritisationMetric");
     } else {
-      url.searchParams.set("prioritizationMetric", selectedPrioritization);
+      url.searchParams.set("prioritisationMetric", selectedPrioritization);
     }
     history.replaceState({}, "", url);
   }
