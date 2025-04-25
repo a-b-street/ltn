@@ -44,7 +44,8 @@
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
 
-  let selectedPrioritization: Prioritization = "none";
+  let selectedPrioritization: Prioritization =
+    $appFocus == "cnt" ? "combined" : "none";
   let hoveredNeighbourhoodFromList: string | null = null;
   let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
   $currentNeighbourhoodName = undefined;
@@ -260,7 +261,10 @@
 
     {#if $appFocus == "cnt"}
       <h3>Prioritisation</h3>
-      <p>Compare metrics across your neighbourhoods.</p>
+      <p>
+        Compare the prioritisation or individual metrics across your
+        neighbourhoods.
+      </p>
       <PrioritizationSelect bind:selectedPrioritization />
       <hr />
     {/if}
