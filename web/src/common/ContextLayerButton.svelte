@@ -8,7 +8,6 @@
 
 <button
   class="context-control"
-  style="display: flex; align-items: center; justify-content: leading; gap: 8px; text-align: left;"
   on:click={() => {
     show = !show;
     onChange();
@@ -31,6 +30,7 @@
     >
   {/if}
 </button>
+
 {#if show && $$slots.legend}
   <div class="legend">
     <slot name="legend" />
@@ -48,5 +48,13 @@
   .legend {
     color: black;
     padding: 8px;
+  }
+
+  .context-control {
+    display: flex;
+    align-items: center;
+    justify-content: leading;
+    gap: 8px;
+    text-align: left;
   }
 </style>
