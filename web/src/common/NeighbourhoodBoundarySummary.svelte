@@ -64,11 +64,12 @@
       <th
         >Car ownership
         <MetricProgress
-          colorScale={carOwnershipColorScale}
+          colorScale={carOwnershipColorScale.toReversed()}
           limits={carOwnershipLimits}
-          value={(100 *
-            neighbourhoodBoundary.properties.households_with_cars_or_vans) /
-            neighbourhoodBoundary.properties.total_households}
+          value={100 *
+            (1 -
+              neighbourhoodBoundary.properties.households_with_cars_or_vans /
+                neighbourhoodBoundary.properties.total_households)}
         />
       </th>
       <td>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ArrowUp } from "lucide-svelte";
 
-  export let colorScale;
+  export let colorScale: string[];
   export let limits: number[];
   export let value: number;
 
