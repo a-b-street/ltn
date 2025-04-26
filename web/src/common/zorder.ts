@@ -135,7 +135,8 @@ const layerZorder = [
   "context-bus-routes",
   "context-pois",
   "context-railway-stations",
-  "context-stats19",
+  "context-stats19-heatmap",
+  "context-stats19-points",
 
   dataviz("Road labels"),
   streets("road_label"),

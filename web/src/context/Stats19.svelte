@@ -2,6 +2,7 @@
   import type { ExpressionSpecification } from "maplibre-gl";
   import {
     CircleLayer,
+    HeatmapLayer,
     VectorTileSource,
     type LayerClickInfo,
   } from "svelte-maplibre";
@@ -174,9 +175,23 @@
 </ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt_layers/stats19.pmtiles")}`}>
-  <CircleLayer
-    {...layerId("context-stats19")}
+  <HeatmapLayer
+    {...layerId("context-stats19-heatmap")}
     sourceLayer="stats19"
+    maxzoom={13}
+    filter={makeFilter(state)}
+    layout={{
+      visibility: show ? "visible" : "none",
+    }}
+    paint={{
+      "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 2, 9, 15],
+    }}
+  />
+
+  <CircleLayer
+    {...layerId("context-stats19-points")}
+    sourceLayer="stats19"
+    minzoom={13}
     paint={{
       "circle-color": makeRamp(
         ["get", "severity"],
@@ -184,17 +199,7 @@
         [fatalColor, seriousColor, slightColor],
       ),
       "circle-opacity": 0.9,
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        1,
-        2,
-        8,
-        3,
-        13,
-        15,
-      ],
+      "circle-radius": 13,
       "circle-stroke-color": "black",
       "circle-stroke-width": 0.1,
     }}
