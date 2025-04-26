@@ -32,6 +32,8 @@ export let stats19ColorScale = commonQuintileColorScale.toReversed();
 
 export let poiColorScale = commonQuintileColorScale.toReversed();
 
+// Notice parts of the UI reverse these, to treat lowest ownership as the most
+// important
 export let carOwnershipLimits = [0, 20, 40, 60, 80, 100];
 export let carOwnershipColorScale = commonQuintileColorScale;
 

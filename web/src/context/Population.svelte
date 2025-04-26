@@ -105,8 +105,10 @@
 >
   <div slot="legend">
     <SequentialLegend
-      colorScale={carOwnershipColorScale}
-      labels={{ limits: carOwnershipLimits.map((number) => `${number}%`) }}
+      colorScale={carOwnershipColorScale.toReversed()}
+      labels={{
+        limits: carOwnershipLimits.toReversed().map((number) => `${number}%`),
+      }}
     />
     <div style="display: flex; justify-content: space-between;">
       <span style="text-align: center; width: 100%">
