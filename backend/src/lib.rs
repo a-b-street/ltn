@@ -192,8 +192,7 @@ impl LTN {
             .map(|feature| {
                 let mut polygon = Polygon::try_from(feature).map_err(err_to_js)?;
                 self.map.mercator.to_mercator_in_place(&mut polygon);
-                make_polygon_valid(&mut polygon);
-                Ok(polygon)
+                make_polygon_valid(&polygon).map_err(err_to_js)
             })
             .collect::<Result<Vec<Polygon>, JsValue>>()?;
         let merged_boundary = self

@@ -154,7 +154,7 @@ impl NeighbourhoodDefinition {
         let mut neighbourhood_definition: Self = geojson::de::from_feature(feature)?;
         map.mercator
             .to_mercator_in_place(&mut neighbourhood_definition.geometry);
-        neighbourhood_definition.geometry = make_polygon_valid(&neighbourhood_definition.geometry);
+        neighbourhood_definition.geometry = make_polygon_valid(&neighbourhood_definition.geometry)?;
         Ok(neighbourhood_definition)
     }
 }

@@ -4,6 +4,7 @@ pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 mod roads_along_line;
 pub use roads_along_line::roads_along_line;
 
+use anyhow::Result;
 use geo::line_measures::InterpolatableLine;
 use geo::{
     BooleanOps, BoundingRect, Buffer, Contains, Coord, Distance, Euclidean, Intersects, Length,
@@ -208,23 +209,22 @@ fn euclidean_destination_coord(pt: Coord, angle_degs: f64, dist_away_m: f64) -> 
 
 /// Attempts to make the input polygon valid by union-ing it with itself.
 ///
-/// It hasn't been thoroughly tested.
-pub fn make_polygon_valid(polygon: &Polygon) -> Polygon {
+/// Some edge cases will panic only when built in debug mode.
+pub fn make_polygon_valid(polygon: &Polygon) -> Result<Polygon> {
     let mut valid_multipolygon = polygon.union(polygon);
 
     // I don't think we should get more than one piece back for any sane input, but we'll see...
-    debug_assert!(
-        valid_multipolygon.0.len() == 1,
-        "MultiPolygon not handle yet"
-    );
+    if valid_multipolygon.0.len() != 1 {
+        bail!("MultiPolygon not handled yet");
+    }
 
     let Some(valid_polygon) = valid_multipolygon.0.pop() else {
         debug_assert!(false, "empty valid polygon not handled yet");
-        return polygon.clone();
+        return Ok(polygon.clone());
     };
 
     debug_assert!(valid_polygon.is_valid());
-    valid_polygon
+    Ok(valid_polygon)
 }
 
 // If the line is too short for the thickness, give up
