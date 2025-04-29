@@ -411,7 +411,6 @@
           paint={{
             "line-color": "white",
             "line-width": 8,
-            "line-opacity": 0.7,
           }}
         />
       </GeoJSON>
