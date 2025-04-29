@@ -17,8 +17,9 @@ let commonQuintileColorScale = [
   "#CDE594",
 ];
 
+// The percentiles are [1, 100]. Notice parts of the UI reverse these, to treat
+// most deprived ownership (low values) as the most important.
 export let simdColorScale = commonQuintileColorScale;
-// The percentiles are [1, 100]. The 5 colors cover 4 each.
 export let simdLimits = [0, 20, 40, 60, 80, 100];
 
 export let populationDensityColorScale = commonQuintileColorScale.toReversed();

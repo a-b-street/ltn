@@ -39,12 +39,12 @@
 >
   <div slot="legend">
     <SequentialLegend
-      colorScale={simdColorScale}
-      labels={{ buckets: bucketize(simdLimits) }}
+      colorScale={simdColorScale.toReversed()}
+      labels={{ buckets: bucketize(simdLimits).toReversed() }}
     />
     <div style="display: flex; justify-content: space-between;">
-      <span>More deprived</span>
       <span>Less deprived</span>
+      <span>More deprived</span>
     </div>
   </div>
 
