@@ -92,12 +92,12 @@
   </div>
 {:else if selectedPrioritization == "simd"}
   <SequentialLegend
-    colorScale={simdColorScale}
-    labels={{ buckets: bucketize(simdLimits) }}
+    colorScale={simdColorScale.toReversed()}
+    labels={{ buckets: bucketize(simdLimits).toReversed() }}
   />
   <div class="sub-labels">
-    <span>More deprived</span>
     <span>Less deprived</span>
+    <span>More deprived</span>
   </div>
 {:else if selectedPrioritization == "stats19"}
   <SequentialLegend

@@ -31,9 +31,9 @@
       <th
         >SIMD
         <MetricProgress
-          colorScale={simdColorScale}
+          colorScale={simdColorScale.toReversed()}
           limits={simdLimits}
-          value={neighbourhoodBoundary.properties.simd}
+          value={100 - neighbourhoodBoundary.properties.simd}
         />
       </th>
       <td
