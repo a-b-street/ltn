@@ -14,7 +14,7 @@
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import initLtn from "backend";
   import { House } from "lucide-svelte";
-  import type { LngLatBoundsLike, Map, StyleSpecification } from "maplibre-gl";
+  import type { LngLatBoundsLike, Map } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
   import {
@@ -128,15 +128,16 @@
   if (appFocus == "cnt") {
     initialBounds = [-8.943, 54.631, -0.901, 59.489];
   }
-  async function getStyle(
-    basemap: string,
-  ): Promise<StyleSpecification | string> {
+
+  let style: string | null = null;
+  $: updateStyle($maptilerBasemap);
+  async function updateStyle(basemap: string) {
     // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
     // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
     if (basemap == "streets-v2") {
-      return streetsMapStyleUrl;
+      style = streetsMapStyleUrl;
     } else {
-      return `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
+      style = `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
     }
   }
 </script>
@@ -160,7 +161,7 @@
       <div bind:this={sidebarDiv} />
     </div>
     <div slot="main" style="position: relative; width: 100%; height: 100%;">
-      {#await getStyle($maptilerBasemap) then style}
+      {#if style}
         <MapLibre
           {style}
           hash
@@ -303,7 +304,7 @@
           {/if}
           <DisableInteractiveLayers />
         </MapLibre>
-      {/await}
+      {/if}
     </div>
   </Layout>
 </div>
