@@ -1,13 +1,8 @@
 <script lang="ts">
   import { LineLayer, VectorTileSource } from "svelte-maplibre";
+  import { QualitativeLegend, SequentialLegend } from "svelte-utils";
   import { constructMatchExpression } from "svelte-utils/map";
-  import {
-    ContextLayerButton,
-    layerId,
-    QualitativeLegend,
-    roadLineWidth,
-    SequentialLegend,
-  } from "../common";
+  import { ContextLayerButton, layerId, roadLineWidth } from "../common";
   import { assetUrl } from "../stores";
   import RouteNetwork from "./RouteNetwork.svelte";
 

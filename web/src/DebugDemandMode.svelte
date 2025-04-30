@@ -7,10 +7,11 @@
     hoverStateFilter,
     LineLayer,
   } from "svelte-maplibre";
+  import { SequentialLegend } from "svelte-utils";
   import { emptyGeojson, makeRamp } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, ModeLink, pageTitle, SequentialLegend } from "./common";
+  import { layerId, ModeLink, pageTitle } from "./common";
   import { demandColorScale } from "./common/colors";
   import { backend, mode } from "./stores";
   import type { ZoneDemandProps } from "./wasm";

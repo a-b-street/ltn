@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SequentialLegend } from "../common";
+  import { SequentialLegend } from "svelte-utils";
   import {
     bucketize,
     carOwnershipColorScale,

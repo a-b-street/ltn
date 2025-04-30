@@ -6,8 +6,9 @@
     VectorTileSource,
     type LayerClickInfo,
   } from "svelte-maplibre";
+  import { QualitativeLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import { ContextLayerButton, layerId, QualitativeLegend } from "../common";
+  import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
   let show = false;

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
+  import { QualitativeLegend } from "svelte-utils";
   import { constructMatchExpression, Popup } from "svelte-utils/map";
-  import { ContextLayerButton, layerId, QualitativeLegend } from "../common";
+  import { ContextLayerButton, layerId } from "../common";
   import { backend } from "../stores";
 
   let show = false;

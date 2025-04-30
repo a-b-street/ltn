@@ -10,7 +10,7 @@
     MapEvents,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
+  import { notNull, SequentialLegend } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
@@ -30,7 +30,6 @@
     ModeLink,
     pageTitle,
     roadLineWidth,
-    SequentialLegend,
   } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
   import type { Intersection } from "../common/Intersection";

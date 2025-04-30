@@ -5,13 +5,9 @@
     LineLayer,
     VectorTileSource,
   } from "svelte-maplibre";
+  import { SequentialLegend } from "svelte-utils";
   import { makeRamp, Popup } from "svelte-utils/map";
-  import {
-    ContextLayerButton,
-    layerId,
-    prettyPrintPercent,
-    SequentialLegend,
-  } from "../common";
+  import { ContextLayerButton, layerId, prettyPrintPercent } from "../common";
   import {
     bucketize,
     carOwnershipColorScale,
