@@ -19,6 +19,7 @@ export { default as PrioritizationSelect } from "./PrioritizationSelect.svelte";
 
 export type Prioritization =
   | "none"
+  | "area"
   | "car_ownership"
   | "population_density"
   | "pois"

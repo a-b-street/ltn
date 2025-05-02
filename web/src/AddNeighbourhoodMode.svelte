@@ -429,7 +429,7 @@
         >
           {#if selectedPrioritization != "simd"}
             <Popup openOn="hover" let:props>
-              {#if selectedPrioritization == "none"}
+              {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
                 <b>Area:</b>
                 {props.area_km2.toFixed(1)} km²
               {:else if selectedPrioritization == "car_ownership"}

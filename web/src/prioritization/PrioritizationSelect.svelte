@@ -1,6 +1,8 @@
 <script lang="ts">
   import { SequentialLegend } from "svelte-utils";
   import {
+    areaColorScale,
+    areaLimits,
     bucketize,
     carOwnershipColorScale,
     carOwnershipLimits,
@@ -22,7 +24,9 @@
       "prioritisationMetric",
     );
 
-    if (currentURLParam == "population_density") {
+    if (currentURLParam == "area") {
+      selectedPrioritization = "area";
+    } else if (currentURLParam == "population_density") {
       selectedPrioritization = "population_density";
     } else if (currentURLParam == "simd") {
       selectedPrioritization = "simd";
@@ -59,6 +63,7 @@
   >
   <select id="prioritization-selection" bind:value={selectedPrioritization}>
     <option value="none">None</option>
+    <option value="area">Area</option>
     <option value="simd">SIMD</option>
     <option value="population_density">Population density</option>
     <option value="car_ownership">Car ownership</option>
@@ -68,7 +73,17 @@
   </select>
 </div>
 
-{#if selectedPrioritization == "population_density"}
+{#if selectedPrioritization == "area"}
+  <SequentialLegend
+    colorScale={areaColorScale}
+    labels={{ limits: areaLimits }}
+  />
+  <div class="sub-labels">
+    <span />
+    <span>km²</span>
+    <span />
+  </div>
+{:else if selectedPrioritization == "population_density"}
   <SequentialLegend
     colorScale={populationDensityColorScale}
     labels={{ limits: $metricBuckets.population_density }}
