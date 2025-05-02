@@ -7,6 +7,7 @@
     FillLayer,
     GeoJSON,
     hoverStateFilter,
+          SymbolLayer,
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
@@ -14,6 +15,7 @@
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
+  import Foo from "./Foo.svelte";
   import {
     layerId,
     Loading,
@@ -48,6 +50,7 @@
     GeneratedBoundaryFeature["geometry"],
     GeneratedBoundaryFeature["properties"]
   > = emptyGeojson() as any;
+  let showIDs = false;
 
   let addMode: "choose-area" | "draw-area" = "choose-area";
 
@@ -178,11 +181,27 @@
     }
   }
 
-  function download() {
+  function downloadGJ() {
     downloadGeneratedFile(
       "auto_boundaries.geojson",
       JSON.stringify(generatedBoundaries, null, "  "),
     );
+  }
+
+  function downloadCSV() {
+    let fields = [...Object.keys(generatedBoundaries.features[0].properties)];
+
+    let out = "";
+    out += ["boundary_id", ...fields].join(",") + "\n";
+
+    let id = 1;
+    for (let f of generatedBoundaries.features) {
+      // @ts-expect-error every property exists
+      let row = [id++, ...fields.map((field) => f.properties[field])];
+      out += row.join(",") + "\n";
+    }
+
+    downloadGeneratedFile("auto_boundaries.csv", out);
   }
 
   function fillColor(
@@ -383,11 +402,30 @@
         {/if}
       </div>
     </div>
-    <hr />
 
-    <button class="secondary" on:click={download}
-      >Export metrics to GeoJSON</button
+    <h3>Advanced prioritisation</h3>
+
+    <p>
+      If you want to generate custom prioritisation scores using your own
+      datasets or by combining the metrics shown here with your own weightings,
+      you can download the boundaries with all data. If you have a use case not
+      covered by this tool, please <a href="mailto:dabreegster@gmail.com"
+        >contact the team</a
+      >, so we can consider improvements.
+    </p>
+
+    <button class="secondary" on:click={downloadGJ}
+      >Export prioritisation data as GeoJSON</button
     >
+
+    <button class="secondary" on:click={downloadCSV}
+      >Export prioritisation data as CSV</button
+    >
+
+    <label>
+      <input type="checkbox" bind:checked={showIDs} />
+      Show boundary IDs (for the CSV)
+    </label>
   </div>
 
   <div slot="map">
@@ -470,6 +508,8 @@
             "line-width": 1,
           }}
         />
+
+        <Foo />
       </GeoJSON>
     {/if}
   </div>

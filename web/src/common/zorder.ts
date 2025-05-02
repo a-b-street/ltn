@@ -85,6 +85,7 @@ const layerZorder = [
   "neighbourhood-boundaries-outline",
   "neighbourhood-boundaries-selected-outline-base",
   "neighbourhood-boundaries-selected-outline",
+  "neighbourhood-boundaries-ids",
 
   "debug-borders",
   "debug-filters",
