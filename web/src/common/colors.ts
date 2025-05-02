@@ -26,8 +26,15 @@ export let populationDensityColorScale = commonQuintileColorScale.toReversed();
 
 export let demandColorScale = commonQuintileColorScale.toReversed();
 
-export let areaLimits = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0];
-export let areaColorScale = commonQuintileColorScale.toReversed();
+// From page 7 of https://content.tfl.gov.uk/lsp-app-six-b-strategic-neighbourhoods-analysis-v1.pdf, except removing the smallest bucket to make five
+export let areaLimits = [0.0, 0.25, 0.5, 1, 1.5, 2.0];
+export let areaColorScale = [
+  "#F8E4AF",
+  "#9ECC4E",
+  "#00BB44",
+  "#4ACD8B",
+  "#B9E9E9",
+];
 
 export let stats19ColorScale = commonQuintileColorScale.toReversed();
 

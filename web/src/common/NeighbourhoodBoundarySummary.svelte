@@ -1,6 +1,8 @@
 <script lang="ts">
   import { prettyPrintPercent } from "../common";
   import {
+    areaColorScale,
+    areaLimits,
     carOwnershipColorScale,
     carOwnershipLimits,
     combinedColorScale,
@@ -20,7 +22,14 @@
 
 <table>
   <tr>
-    <th>Area</th>
+    <th
+      >Area
+      <MetricProgress
+        colorScale={areaColorScale}
+        limits={areaLimits}
+        value={neighbourhoodBoundary.properties.area_km2}
+      />
+    </th>
     <td>
       {neighbourhoodBoundary.properties.area_km2.toFixed(1)} km²
     </td>
