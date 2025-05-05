@@ -58,6 +58,7 @@
     thickRoadsForShortcuts,
   } from "../stores";
   import type {
+    AllShortcuts,
     NeighbourhoodBoundaryFeature,
     RenderNeighbourhoodOutput,
   } from "../wasm";
@@ -121,8 +122,11 @@
   let boundary: NeighbourhoodBoundaryFeature | null;
 
   let gj: RenderNeighbourhoodOutput;
-  let allShortcuts = $backend!.getAllShortcuts();
   $: rerender($mutationCounter);
+
+  let allShortcuts = emptyGeojson() as AllShortcuts;
+  let lastShortcutCalculation = 0;
+  $: recalculateShortcuts($mutationCounter, $animateShortcuts);
 
   $: numDisconnectedCells = gj.features.filter(
     (f) =>
@@ -144,9 +148,15 @@
     undoLength = gj.undo_length;
     redoLength = gj.redo_length;
 
-    allShortcuts = $backend!.getAllShortcuts();
-
     saveCurrentProject();
+  }
+
+  function recalculateShortcuts(_x: number, animate: boolean) {
+    if ($mutationCounter == lastShortcutCalculation || !animate) {
+      return;
+    }
+    allShortcuts = $backend!.getAllShortcuts();
+    lastShortcutCalculation = $mutationCounter;
   }
 
   function onClickLine(f: Feature, pt: LngLat) {
