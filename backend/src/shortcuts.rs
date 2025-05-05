@@ -68,6 +68,7 @@ impl Shortcuts {
                             steps_reversed.rev()
                         };
 
+                        let mut shortcut_roads = Vec::new();
                         for (r, _direction) in interior_steps {
                             // For the purpose of counting unique shortcuts, only the first and
                             // final steps should be on main roads.
@@ -82,7 +83,11 @@ impl Shortcuts {
                                 break 'next_road;
                             }
 
-                            let road = map.get_r(*r);
+                            shortcut_roads.push(*r);
+                        }
+
+                        for r in shortcut_roads {
+                            let road = map.get_r(r);
                             *count_per_road.entry(road.id).or_insert(0) += 1;
                             shortcut_length += Euclidean.length(&road.linestring);
                         }
