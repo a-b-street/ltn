@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crate::map_model::Direction;
 use crate::route::Router;
@@ -24,8 +24,6 @@ impl Shortcuts {
         let router_after = Router::new(&router_input_after, 1.0);
         let mut paths = Vec::new();
         let mut count_per_road = HashMap::new();
-        let mut checked_routes: HashSet<(RoadID, RoadID)> = HashSet::new();
-
         for start_i in &neighbourhood.border_intersections {
             let start_intersection = map.get_i(*start_i);
             for start_r in &start_intersection.roads {
@@ -43,13 +41,6 @@ impl Shortcuts {
                         if !neighbourhood.main_roads.contains(end_r) {
                             continue;
                         }
-
-                        // It's possible to repeat the route request when the same road is
-                        // connected to multiple border intersections
-                        if checked_routes.contains(&(*start_r, *end_r)) {
-                            continue;
-                        }
-                        checked_routes.insert((*start_r, *end_r));
 
                         // TODO We could get a little more precision by starting from the correct
                         // end of the road, but it doesn't matter
