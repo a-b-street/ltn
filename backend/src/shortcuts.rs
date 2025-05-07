@@ -86,6 +86,8 @@ impl Shortcuts {
                             shortcut_roads.push(*r);
                         }
 
+                        // Only increase count_per_road after verifying above that the shortcut is
+                        // indeed valid and doesn't cross any main roads
                         for r in shortcut_roads {
                             let road = map.get_r(r);
                             *count_per_road.entry(road.id).or_insert(0) += 1;
