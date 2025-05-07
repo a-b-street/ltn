@@ -69,7 +69,8 @@ impl Shortcuts {
                         };
 
                         let mut shortcut_roads = Vec::new();
-                        for (r, _direction) in interior_steps {
+                        let num_steps = interior_steps.len();
+                        for (idx, (r, _direction)) in interior_steps.enumerate() {
                             // For the purpose of counting unique shortcuts, only the first and
                             // final steps should be on main roads.
                             //
@@ -81,6 +82,20 @@ impl Shortcuts {
                             // shortcuts.
                             if neighbourhood.main_roads.contains(&r) {
                                 break 'next_road;
+                            }
+
+                            // The logic above checks if the candidate shortcut goes along any main
+                            // roads. It's also possible for a route to cross over a main road at
+                            // a border intersection without going along a main road. Also disallow
+                            // that. The first and last interior_steps do use border intersections,
+                            // though.
+                            if idx != 0 && idx != num_steps - 1 {
+                                let road = &map.roads[r.0];
+                                if neighbourhood.border_intersections.contains(&road.src_i)
+                                    || neighbourhood.border_intersections.contains(&road.dst_i)
+                                {
+                                    break 'next_road;
+                                }
                             }
 
                             shortcut_roads.push(*r);
