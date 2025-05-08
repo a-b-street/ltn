@@ -125,7 +125,8 @@ impl RenderCells {
 
         // Color some special cells
         for (idx, cell) in cells.iter().enumerate() {
-            if cell.is_disconnected() {
+            // If there's only one cell, it's not disconnected -- there are likely no main roads
+            if cell.is_disconnected() && cells.len() > 1 {
                 cell_colors[idx] = Color::Disconnected;
             }
         }

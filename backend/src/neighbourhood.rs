@@ -251,13 +251,6 @@ impl Neighbourhood {
             bail!("No roads inside the boundary");
         }
 
-        if main_roads.is_empty() {
-            // App breaks without main roads: without main roads, there's only one cell,
-            // so it counts as disconnected (because it doesn't touch a border intersection), and
-            // thus we can't calculate shortcuts through it without those intersections.
-            bail!("No main roads");
-        }
-
         let t3 = Instant::now();
 
         if true {
