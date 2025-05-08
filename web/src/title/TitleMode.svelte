@@ -21,12 +21,10 @@
     mode,
     projectStorage,
   } from "../stores";
-  import { loadProject } from "./loader";
+  import { loadingMessage, loadingProgress, loadProject } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
   export let wasmReady: boolean;
-
-  let loading = "";
 
   // When other modes reset here, they can't clear state without a race condition
   {
@@ -66,12 +64,7 @@
   function loadProjectFromUrlParam(projectIDParam: string) {
     let projectID = projectIDParam as ProjectID;
     try {
-      let projectName = $projectStorage.projectName(projectID);
-      if (!projectName) {
-        console.error(`Project ${projectID} from URL not found`);
-        return;
-      }
-      projectLoadingScreen(projectID, projectName);
+      openProject(projectID);
     } catch {
       console.error(`Error trying to fetch project from URL: ${projectID}`);
     }
@@ -103,18 +96,13 @@
     }
   }
 
-  async function projectLoadingScreen(
-    projectID: ProjectID,
-    projectName: string,
-  ) {
-    loading = `Loading project ${projectName}`;
+  async function openProject(projectID: ProjectID) {
     await loadProject(projectID);
     $mode = { mode: "pick-neighbourhood" };
-    loading = "";
   }
 </script>
 
-<Loading {loading} />
+<Loading loading={$loadingMessage} progress={$loadingProgress} />
 
 <SplitComponent>
   <div slot="top">
@@ -137,10 +125,7 @@
               {#each projects as { projectID, projectName }}
                 <li class="actionable-cell">
                   <h3>
-                    <Link
-                      on:click={() =>
-                        projectLoadingScreen(projectID, projectName)}
-                    >
+                    <Link on:click={() => openProject(projectID)}>
                       {projectName}
                     </Link>
                   </h3>
@@ -180,9 +165,9 @@
           New project
         </button>
       {:else if $appFocus == "cnt"}
-        <CntChooseArea bind:activityIndicatorText={loading} />
+        <CntChooseArea />
       {/if}
-      <LoadSavedProject bind:loading />
+      <LoadSavedProject />
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}

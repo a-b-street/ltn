@@ -20,6 +20,7 @@
     ModeLink,
     pageTitle,
     prettyPrintPercent,
+    refreshLoadingScreen,
   } from "./common";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
@@ -88,17 +89,7 @@
   }
 
   onMount(async () => {
-    // Make sure the loading indicator has rendered before we generate boundaries.
-    //
-    // NOTE: I thought this is what `svelte.tick` was for, but it doesn't suffice.
-    //     await tick();
-    await new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        // Waiting for one frame also doesn't seem to be enough, so we wait for two. *shrug*
-        requestAnimationFrame(resolve);
-      });
-    });
-
+    await refreshLoadingScreen();
     generatedBoundaries = $backend!.generatedBoundaries();
     loading = "";
   });
@@ -237,6 +228,7 @@
 </script>
 
 <Loading {loading} />
+
 <SplitComponent>
   <div slot="top">
     <nav aria-label="breadcrumb">

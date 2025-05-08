@@ -13,6 +13,7 @@
     ModeLink,
     pageTitle,
     PrevNext,
+    refreshLoadingScreen,
   } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, fastSample, mode } from "./stores";
@@ -30,13 +31,7 @@
 
   let loading = "Finding changes to this road";
   onMount(async () => {
-    // Render the loading screen before starting the calculation. Unsure why Svelte tick() or one frame doesn't work.
-    await new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
-    });
-
+    await refreshLoadingScreen();
     routes = $backend!.getImpactsOnRoad(props.id, $fastSample);
     loading = "";
     if (routes.length == 0) {

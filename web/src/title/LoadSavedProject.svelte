@@ -4,13 +4,10 @@
   import { database, mode, type AppFocus } from "../stores";
   import { loadProject } from "./loader";
 
-  export let loading: string;
-
   let fileInput: HTMLInputElement;
 
   async function loadFile(e: Event) {
     let filename = fileInput.files![0].name;
-    loading = `Loading from file ${filename}`;
 
     let contents = await fileInput.files![0].text();
     let gj = JSON.parse(contents);
@@ -66,7 +63,6 @@
     let projectID = projectStorage.createProject(gj);
     await loadProject(projectID);
     $mode = { mode: "pick-neighbourhood" };
-    loading = "";
   }
 </script>
 

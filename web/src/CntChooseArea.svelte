@@ -14,8 +14,6 @@
   import { mode, projectStorage } from "./stores";
   import { loadProject } from "./title/loader";
 
-  export let activityIndicatorText: string;
-
   let gj: FeatureCollection<
     Polygon | MultiPolygon,
     { kind: "LAD"; name: string }
@@ -65,7 +63,6 @@
         );
         continue;
       }
-      activityIndicatorText = `Loading pre-clipped OSM area ${prettyPrintStudyAreaName(studyAreaName)}`;
       try {
         let projectID = $projectStorage.createEmptyProject(
           projectName,
@@ -77,7 +74,6 @@
       } catch (e) {
         window.alert(e);
       }
-      activityIndicatorText = "";
     }
   }
 </script>
