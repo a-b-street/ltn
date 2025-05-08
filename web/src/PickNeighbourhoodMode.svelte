@@ -44,6 +44,12 @@
   $: neighbourhoods = $backend!.getAllNeighbourhoods();
   $: edits = countEdits(neighbourhoods);
 
+  // If a user loads an empty project or deletes all neighbourhoods, don't show
+  // them an empty pick screen
+  $: if (neighbourhoods.features.length == 0) {
+    $mode = { mode: "add-neighbourhood" };
+  }
+
   let selectedPrioritization: Prioritization =
     $appFocus == "cnt" ? "combined" : "none";
   let hoveredNeighbourhoodFromList: string | null = null;
