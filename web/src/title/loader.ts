@@ -1,9 +1,10 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { RouteTool } from "route-snapper-ts";
+import { fetchWithProgress } from "svelte-utils";
 import { emptyGeojson } from "svelte-utils/map";
 import { overpassQueryForPolygon } from "svelte-utils/overpass";
-import { get, writable } from "svelte/store";
-import { safeFetch } from "../common";
+import { get, writable, type Writable } from "svelte/store";
+import { refreshLoadingScreen, safeFetch } from "../common";
 import { routeTool } from "../common/draw_area/stores";
 import {
   type ProjectFeatureCollection,
@@ -19,8 +20,12 @@ import {
 } from "../stores";
 import { Backend } from "../wasm";
 
+export let loadingMessage = writable("");
+export let loadingProgress: Writable<number | null> = writable(null);
+
 /**
- * Loads an existing project by its ID
+ * Loads an existing project by its ID. Changes loadingMessage and
+ * loadingProgress stores along the way.
  */
 export async function loadProject(projectID: ProjectID) {
   let project = get(projectStorage).project(projectID);
@@ -29,6 +34,11 @@ export async function loadProject(projectID: ProjectID) {
     let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
       await getInputFiles(project);
     console.timeEnd("get input files");
+    loadingMessage.set("Download finished, setting up project");
+    // TODO The animation won't work, because we block the UI thread below
+    loadingProgress.set(100);
+    await refreshLoadingScreen();
+
     console.time("load");
     backend.set(
       new Backend(
@@ -51,15 +61,18 @@ export async function loadProject(projectID: ProjectID) {
     window.alert(`Couldn't open project: ${err}`);
     currentProjectID.set(undefined);
   }
+
+  loadingMessage.set("");
+  loadingProgress.set(null);
 }
 
 // Returns OSM input, optional demand model input, and the boundary polygon,
 // either from pre-hosted files or from Overpass.
 async function getInputFiles(project: ProjectFeatureCollection): Promise<{
-  osmBuffer: ArrayBuffer;
+  osmBuffer: Uint8Array<ArrayBufferLike>;
   boundary: Feature<Polygon | MultiPolygon>;
-  demandBuffer?: ArrayBuffer;
-  contextDataBuffer?: ArrayBuffer;
+  demandBuffer?: Uint8Array<ArrayBufferLike>;
+  contextDataBuffer?: Uint8Array<ArrayBufferLike>;
 }> {
   if (project.app_focus == "cnt") {
     // CNT projects are stored in a different place
@@ -67,43 +80,38 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
       project.study_area_name,
       "CNT projects must have a study area name",
     );
-    let url1 = assetUrl(`cnt_osm/${project.study_area_name}.osm.pbf`);
-    console.log(`Grabbing ${url1}`);
-    let resp1 = await safeFetch(url1);
-    let osmBuffer = await resp1.arrayBuffer();
+
+    let osmBuffer = await download(
+      assetUrl(`cnt_osm/${project.study_area_name}.osm.pbf`),
+    );
 
     let url2 = assetUrl(`cnt_boundaries/${project.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
-    let url3 = assetUrl(`cnt_demand/demand_${project.study_area_name}.bin`);
-    console.log(`Grabbing ${url3}`);
     let demandBuffer = undefined;
     try {
-      let resp3 = await safeFetch(url3);
-      demandBuffer = await resp3.arrayBuffer();
+      demandBuffer = await download(
+        assetUrl(`cnt_demand/demand_${project.study_area_name}.bin`),
+      );
     } catch (err) {
       console.log(`No demand model: ${err}`);
     }
 
-    let url4 = assetUrl(
-      `cnt_prioritization/context_${project.study_area_name}.bin`,
-    );
-    console.log(`Grabbing ${url4}`);
     let contextDataBuffer = undefined;
     try {
-      let resp = await safeFetch(url4);
-      contextDataBuffer = await resp.arrayBuffer();
+      contextDataBuffer = await download(
+        assetUrl(`cnt_prioritization/context_${project.study_area_name}.bin`),
+      );
     } catch (err) {
       console.log(`No context data for prioritization: ${err}`);
     }
 
     return { osmBuffer, boundary, demandBuffer, contextDataBuffer };
   } else if (project.study_area_name) {
-    let url1 = assetUrl(`severance_pbfs/${project.study_area_name}.pbf`);
-    console.log(`Grabbing ${url1}`);
-    let resp1 = await safeFetch(url1);
-    let osmBuffer = await resp1.arrayBuffer();
+    let osmBuffer = await download(
+      assetUrl(`severance_pbfs/${project.study_area_name}.pbf`),
+    );
 
     let url2 = assetUrl(`boundaries/${project.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
@@ -111,14 +119,22 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
 
     return { osmBuffer, boundary };
   } else {
-    console.log(`Grabbing from Overpass`);
+    loadingMessage.set("Grabbing OSM data from Overpass");
+    loadingProgress.set(100);
     let boundary = project.features.find(
       (f: Feature) => f.properties!.kind == "study_area_boundary",
     ) as Feature<Polygon | MultiPolygon>;
     let resp = await safeFetch(overpassQueryForPolygon(boundary));
-    let osmBuffer = await resp.arrayBuffer();
+    // @ts-expect-error TODO The return types are probably wrong
+    let osmBuffer = (await resp.arrayBuffer()) as Uint8Array<ArrayBufferLike>;
     return { osmBuffer, boundary };
   }
+}
+
+async function download(url: string): Promise<Uint8Array> {
+  console.log(`Grabbing ${url}`);
+  loadingMessage.set(`Downloading ${url}`);
+  return await fetchWithProgress(url, (p) => loadingProgress.set(p));
 }
 
 export function afterProjectLoaded(projectID: ProjectID) {

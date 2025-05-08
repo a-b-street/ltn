@@ -15,7 +15,12 @@
     projectStorage,
   } from "../stores";
   import { Backend } from "../wasm";
-  import { afterProjectLoaded, loadProject } from "./loader";
+  import {
+    afterProjectLoaded,
+    loadingMessage,
+    loadingProgress,
+    loadProject,
+  } from "./loader";
 
   let newProjectName = "";
   let example: string | null = null;
@@ -70,12 +75,13 @@
       window.alert(`Couldn't create project: ${err}`);
       return;
     }
-    loading = `Loading pre-clipped OSM area ${example}`;
     await loadProject(projectID);
     $mode = { mode: "add-neighbourhood" };
-    loading = "";
   }
 </script>
+
+<Loading {loading} progress={100} />
+<Loading loading={$loadingMessage} progress={$loadingProgress} />
 
 <SplitComponent>
   <div slot="top">
@@ -98,8 +104,6 @@
     </div>
 
     {#if newProjectName}
-      <Loading {loading} />
-
       <label>
         Load a built-in area:
         <select bind:value={example} on:change={() => loadExample()}>

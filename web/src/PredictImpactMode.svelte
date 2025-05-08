@@ -5,7 +5,13 @@
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
-  import { layerId, Loading, ModeLink, pageTitle } from "./common";
+  import {
+    layerId,
+    Loading,
+    ModeLink,
+    pageTitle,
+    refreshLoadingScreen,
+  } from "./common";
   import { ModalFilterLayer } from "./layers";
   import { backend, fastSample, minImpactCount, mode } from "./stores";
   import type { Impact } from "./wasm";
@@ -34,13 +40,7 @@
 
   async function recalculate(fastSample: boolean) {
     loading = "Calculating impact";
-    // Render the loading screen before starting the calculation. Unsure why Svelte tick() or one frame doesn't work.
-    await new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
-    });
-
+    await refreshLoadingScreen();
     impactGj = $backend!.predictImpact(fastSample);
     loading = "";
   }

@@ -125,7 +125,8 @@ export function mapMetersToPixels(
   ];
 }
 
-// Fetch a URL, throwing if the HTTP response isn't OK.
+// Fetch a URL, throwing if the HTTP response isn't OK. If you want progress
+// updates, use fetchWithProgress.
 export async function safeFetch(url: string): Promise<Response> {
   let response = await fetch(url);
   if (!response.ok) {
@@ -144,4 +145,15 @@ export function stripPrefix(value: string, prefix: string): string {
 
 export function stripSuffix(value: string, suffix: string): string {
   return value.endsWith(suffix) ? value.slice(0, -suffix.length) : value;
+}
+
+// This is a replacement for `svelte.tick`, which doesn't seem to work for some
+// reason. Wait for two frames, to give the Loading component a chance to
+// update, before doing someting blocking on the UI thread.
+export async function refreshLoadingScreen(): Promise<void> {
+  await new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
 }
