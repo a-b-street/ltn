@@ -126,13 +126,17 @@
   </div>
   <div slot="sidebar">
     {#if $map && wasmReady}
+      {#if $appFocus == "cnt"}
+        <h1>The Connected Neighbourhoods Tool</h1>
+      {/if}
+
       {#if studyAreas.length > 0}
-        <h1>Your projects</h1>
+        <h2>Your projects</h2>
         <div class="project-list">
           {#each studyAreas as [studyAreaName, projects]}
-            <h2 class="study-area-name">
+            <h3 class="study-area-name">
               {prettyPrintStudyAreaName(studyAreaName)}
-            </h2>
+            </h3>
             <ul class="navigable-list">
               {#each projects as { projectID, projectName }}
                 <li class="actionable-cell">
@@ -174,7 +178,7 @@
         </div>
       {/if}
 
-      <h1>Start a new project</h1>
+      <h2>Start a new project</h2>
       {#if $appFocus == "global"}
         <button on:click={() => ($mode = { mode: "new-project" })}>
           New project

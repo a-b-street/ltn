@@ -1,10 +1,14 @@
 <script lang="ts">
   import { Modal } from "svelte-utils";
-  import { showAbout } from "./stores";
+  import { appFocus, showAbout } from "./stores";
 </script>
 
 <Modal bind:show={$showAbout}>
-  <h1>The low-traffic neighbourhood (LTN) tool, v2</h1>
+  {#if $appFocus == "cnt"}
+    <h1>The Connected Neighbourhoods Tool</h1>
+  {:else}
+    <h1>The Low-Traffic Neighbourhood (LTN) tool, v2</h1>
+  {/if}
 
   <p>
     This is the second version of the A/B Street LTN tool, <a
