@@ -1,5 +1,5 @@
 use backend::test_fixtures::NeighbourhoodFixture;
-use backend::Shortcuts;
+use backend::{Cell, Shortcuts};
 use criterion::{criterion_group, criterion_main, Criterion};
 
 fn benchmark_shortcuts(c: &mut Criterion) {
@@ -9,12 +9,14 @@ fn benchmark_shortcuts(c: &mut Criterion) {
         NeighbourhoodFixture::STRASBOURG,
     ] {
         let (neighbourhood, map) = neighbourhood_fixture.neighbourhood_map().unwrap();
+        let cells = Cell::find_all(&map, &neighbourhood);
+
         c.bench_function(
             &format!(
                 "shortcuts in {name}",
                 name = neighbourhood_fixture.savefile_name
             ),
-            |b| b.iter(|| Shortcuts::new(&map, &neighbourhood)),
+            |b| b.iter(|| Shortcuts::new(&map, &neighbourhood, &cells)),
         );
     }
 }

@@ -128,12 +128,12 @@ pub struct Neighbourhood {
     pub border_intersections: BTreeSet<IntersectionID>,
     pub boundary: NeighbourhoodBoundary,
     // Updated after mutations
-    derived: Option<DerivedNeighbourhoodState>,
+    pub derived: Option<DerivedNeighbourhoodState>,
 }
 
-struct DerivedNeighbourhoodState {
+pub struct DerivedNeighbourhoodState {
     render_cells: RenderCells,
-    shortcuts: Shortcuts,
+    pub shortcuts: Shortcuts,
 }
 
 impl NeighbourhoodDefinition {
@@ -282,7 +282,7 @@ impl Neighbourhood {
         let t2 = Instant::now();
         let render_cells = RenderCells::new(map, self, &cells);
         let t3 = Instant::now();
-        let shortcuts = Shortcuts::new(map, self);
+        let shortcuts = Shortcuts::new(map, self, &cells);
         let t4 = Instant::now();
         self.derived = Some(DerivedNeighbourhoodState {
             render_cells,

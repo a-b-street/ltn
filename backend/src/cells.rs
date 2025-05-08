@@ -10,13 +10,13 @@ pub struct Cell {
     /// between two cells, and the PercentInterval indicates the split.
     pub roads: BTreeMap<RoadID, PercentInterval>,
     /// Intersections where this cell touches the boundary of the neighbourhood.
-    pub borders: BTreeSet<IntersectionID>,
+    pub border_intersections: BTreeSet<IntersectionID>,
 }
 
 impl Cell {
     /// A cell is disconnected if it's not connected to a perimeter road.
     pub fn is_disconnected(&self) -> bool {
-        self.borders.is_empty()
+        self.border_intersections.is_empty()
     }
 
     /// Find all of the disconnected of reachable areas, bounded by border intersections. This is
@@ -55,7 +55,7 @@ impl Cell {
             if neighbourhood.border_intersections.contains(&road.src_i) {
                 let mut cell = Cell {
                     roads: BTreeMap::new(),
-                    borders: BTreeSet::from([road.src_i]),
+                    border_intersections: BTreeSet::from([road.src_i]),
                 };
                 cell.roads.insert(
                     road.id,
@@ -69,7 +69,7 @@ impl Cell {
             if neighbourhood.border_intersections.contains(&road.dst_i) {
                 let mut cell = Cell {
                     roads: BTreeMap::new(),
-                    borders: BTreeSet::from([road.dst_i]),
+                    border_intersections: BTreeSet::from([road.dst_i]),
                 };
                 cell.roads.insert(
                     road.id,
@@ -175,7 +175,7 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
 
     Cell {
         roads: visited_roads,
-        borders: cell_borders,
+        border_intersections: cell_borders,
     }
 }
 

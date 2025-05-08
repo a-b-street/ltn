@@ -4,7 +4,7 @@ extern crate anyhow;
 extern crate log;
 
 use self::boundary_stats::ContextData;
-use self::cells::Cell;
+pub use self::cells::Cell;
 pub use self::map_model::{
     FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID,
     TravelFlow,
@@ -434,8 +434,16 @@ impl LTN {
 
     #[wasm_bindgen(js_name = getShortcutsCrossingRoad)]
     pub fn get_shortcuts_crossing_road(&self, road: usize) -> Result<String, JsValue> {
+        let derived = self
+            .neighbourhood
+            .as_ref()
+            .unwrap()
+            .derived
+            .as_ref()
+            .expect("neighbourhood has no derived state yet");
         Ok(serde_json::to_string(&GeoJson::from(
-            Shortcuts::new(&self.map, self.neighbourhood.as_ref().unwrap())
+            derived
+                .shortcuts
                 .subset(RoadID(road))
                 .into_iter()
                 .map(|path| path.to_gj(&self.map))
@@ -446,10 +454,18 @@ impl LTN {
 
     #[wasm_bindgen(js_name = getAllShortcuts)]
     pub fn get_all_shortcuts(&self) -> Result<String, JsValue> {
+        let derived = self
+            .neighbourhood
+            .as_ref()
+            .unwrap()
+            .derived
+            .as_ref()
+            .expect("neighbourhood has no derived state yet");
         Ok(serde_json::to_string(&GeoJson::from(
-            Shortcuts::new(&self.map, self.neighbourhood.as_ref().unwrap())
+            derived
+                .shortcuts
                 .paths
-                .into_iter()
+                .iter()
                 .map(|path| path.to_gj(&self.map))
                 .collect::<Vec<_>>(),
         ))

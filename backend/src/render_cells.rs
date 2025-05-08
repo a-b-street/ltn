@@ -206,7 +206,7 @@ fn finalize(
             .push(cell_polygon.intersection(boundary));
         result.colors.push(color);
 
-        for i in &cells[idx].borders {
+        for i in &cells[idx].border_intersections {
             result.colors_per_border.insert(*i, color);
         }
         // For roads crossing cells, arbitrarily overwrite
@@ -256,7 +256,7 @@ fn debug_grid(
         result.polygons_per_cell.push(MultiPolygon::new(squares));
         result.colors.push(color);
 
-        for i in &cells[idx].borders {
+        for i in &cells[idx].border_intersections {
             result.colors_per_border.insert(*i, color);
         }
         // For roads crossing cells, arbitrarily overwrite
