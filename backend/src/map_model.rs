@@ -574,6 +574,21 @@ impl MapModel {
         self.after_edited();
     }
 
+    pub fn erase_all_main_roads(&mut self, neighbourhood: &Neighbourhood) {
+        let cmds = neighbourhood
+            .main_roads
+            .iter()
+            .map(|r| Command::SetMainRoad(*r, false))
+            .collect::<Vec<_>>();
+        if cmds.is_empty() {
+            return;
+        }
+        let undo_cmd = self.do_edit(Command::Multiple(cmds));
+        self.undo_stack.push(undo_cmd);
+        self.redo_stack.clear();
+        self.after_edited();
+    }
+
     // Returns the command to undo this one
     fn do_edit(&mut self, cmd: Command) -> Command {
         match cmd {

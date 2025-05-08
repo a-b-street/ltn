@@ -1,6 +1,13 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, LineString } from "geojson";
-  import { Eraser, Paintbrush, Pointer, Redo, Undo } from "lucide-svelte";
+  import {
+    Eraser,
+    Paintbrush,
+    Pointer,
+    Redo,
+    Trash2,
+    Undo,
+  } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import {
@@ -301,6 +308,11 @@
     }
   }
 
+  function eraseAllMainRoads() {
+    $backend!.eraseAllMainRoads();
+    $mutationCounter++;
+  }
+
   let shortcutDescriptionText =
     "Shortcuts are routes from one main road to another, which cut through the neighborhood's interior.";
   let cellsDescriptionText =
@@ -561,6 +573,12 @@
             <div style="display: flex; align-items: center; gap: 8px;">
               <Eraser />
               <span>Erase main classification</span>
+            </div>
+          </button>
+          <button class:outline={true} on:click={eraseAllMainRoads}>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <Trash2 />
+              <span>Erase all main roads</span>
             </div>
           </button>
         </div>

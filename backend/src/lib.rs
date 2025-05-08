@@ -400,6 +400,14 @@ impl LTN {
         self.after_main_road_edit()
     }
 
+    #[wasm_bindgen(js_name = eraseAllMainRoads)]
+    pub fn erase_all_main_roads(&mut self) -> Result<(), JsValue> {
+        self.map
+            .erase_all_main_roads(self.neighbourhood.as_ref().unwrap());
+        self.after_edit();
+        self.after_main_road_edit()
+    }
+
     pub fn undo(&mut self) -> Result<(), JsValue> {
         let maybe_cmd = self.map.undo();
         self.after_cmd(maybe_cmd)
