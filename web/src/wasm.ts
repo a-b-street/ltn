@@ -339,6 +339,10 @@ export class Backend {
       return null;
     }
   }
+
+  eraseAllMainRoads() {
+    this.inner.eraseAllMainRoads();
+  }
 }
 
 export type Impact = FeatureCollection<
