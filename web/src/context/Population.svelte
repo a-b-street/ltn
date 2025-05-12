@@ -119,7 +119,7 @@
 </ContextLayerButton>
 
 <VectorTileSource
-  url={`pmtiles://${assetUrl("cnt_layers/population.pmtiles")}`}
+  url={`pmtiles://${assetUrl("cnt/layers/population.pmtiles")}`}
 >
   <FillLayer
     {...layerId("context-simd")}

@@ -21,13 +21,11 @@ def main():
     )
     parser.add_argument(
         "--batch_size",
-        default=10,
         help="How many areas to extract in each osmium run. Too many will eat your RAM.",
         type=int,
     )
     parser.add_argument(
         "--output_dir",
-        default="./",
         help="Where to write the .osm output files",
         type=str,
     )

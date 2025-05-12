@@ -94,7 +94,7 @@
   </p>
 </ContextLayerButton>
 
-<VectorTileSource url={`pmtiles://${assetUrl("cnt_layers/cbd.pmtiles")}`}>
+<VectorTileSource url={`pmtiles://${assetUrl("cnt/layers/cbd.pmtiles")}`}>
   <LineLayer
     {...layerId("context-traffic")}
     sourceLayer="cbd_layer"

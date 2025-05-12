@@ -8,6 +8,7 @@ import {
   type Readable,
   type Writable,
 } from "svelte/store";
+import { stripPrefix } from "./common";
 import {
   Database,
   ProjectStorage,
@@ -149,7 +150,15 @@ export function saveCurrentProject() {
 export let useLocalVite: Writable<boolean> = writable(false);
 
 export function assetUrl(path: string): string {
-  return get(useLocalVite) ? `/${path}` : `https://assets.od2net.org/${path}`;
+  if (get(useLocalVite)) {
+    return `/${path}`;
+  }
+
+  if (path.startsWith("cnt/")) {
+    return `https://assets.cnt.scot/prod/${stripPrefix(path, "cnt/")}`;
+  }
+
+  return `https://assets.od2net.org/${path}`;
 }
 
 export function ensurePointInVisibleBounds(point: Writable<LngLat>) {

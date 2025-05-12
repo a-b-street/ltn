@@ -5,6 +5,7 @@ use crate::od::DemandModel;
 use crate::{MapModel, Neighbourhood};
 use anyhow::{Context, Result};
 use geojson::{Feature, FeatureCollection};
+use std::io::{Cursor, Read};
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 pub struct NeighbourhoodFixture {
@@ -68,7 +69,7 @@ impl NeighbourhoodFixture {
 
     fn pbf_path(&self) -> String {
         if self.is_cnt {
-            format!("../web/public/cnt_osm/{}.osm.pbf", self.study_area_name)
+            format!("../web/public/cnt/osm/{}.osm.pbf.gz", self.study_area_name)
         } else {
             format!("../web/public/severance_pbfs/{}.pbf", self.study_area_name)
         }
@@ -77,7 +78,7 @@ impl NeighbourhoodFixture {
     fn boundary_path(&self) -> String {
         if self.is_cnt {
             format!(
-                "../web/public/cnt_boundaries/{}.geojson",
+                "../web/public/cnt/boundaries/{}.geojson",
                 self.study_area_name
             )
         } else {
@@ -85,41 +86,51 @@ impl NeighbourhoodFixture {
         }
     }
 
-    fn context_data_path(&self) -> Option<String> {
-        if self.is_cnt {
-            Some(format!(
-                "../web/public/cnt_prioritization/context_{}.bin",
-                self.study_area_name
-            ))
-        } else {
-            None
-        }
-    }
-
     fn context_data(&self) -> Option<ContextData> {
-        let path = self.context_data_path()?;
-        let context_data_bytes =
-            std::fs::read(&path).expect(&format!("unable to read context_data: {path}"));
-        Some(bincode::deserialize(&context_data_bytes).expect("unable to deserialize context_data"))
+        if !self.is_cnt {
+            return None;
+        }
+        let path = format!(
+            "../web/public/cnt/prioritization/{}.bin.gz",
+            self.study_area_name
+        );
+        let bytes = std::fs::read(&path).expect(&format!("unable to read context_data: {path}"));
+        let mut decoder = flate2::read::GzDecoder::new(Cursor::new(bytes));
+        let mut gunzipped = Vec::new();
+        decoder
+            .read_to_end(&mut gunzipped)
+            .expect("unable to gunzip context_data");
+        Some(bincode::deserialize(&gunzipped).expect("unable to deserialize context_data"))
     }
 
     fn demand_data(&self) -> Option<DemandModel> {
         if !self.is_cnt {
             return None;
         }
-        let path = format!(
-            "../web/public/cnt_demand/demand_{}.bin",
-            self.study_area_name
-        );
+        let path = format!("../web/public/cnt/demand/{}.bin.gz", self.study_area_name);
         let bytes = std::fs::read(&path).expect(&format!("unable to read demand_data: {path}"));
-        Some(bincode::deserialize(&bytes).expect("unable to deserialize demand_data"))
+        let mut decoder = flate2::read::GzDecoder::new(Cursor::new(bytes));
+        let mut gunzipped = Vec::new();
+        decoder
+            .read_to_end(&mut gunzipped)
+            .expect("unable to gunzip demand_data");
+        Some(bincode::deserialize(&gunzipped).expect("unable to deserialize demand_data"))
     }
 
     pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
         let study_area_name = &self.study_area_name;
 
-        let input_bytes = std::fs::read(&self.pbf_path())
-            .context(format!("unable to read '{}'", self.pbf_path()))?;
+        let path = self.pbf_path();
+        let input_bytes = std::fs::read(&path).context(format!("unable to read '{path}'"))?;
+        let mut gunzipped = Vec::new();
+        if path.ends_with(".gz") {
+            let mut decoder = flate2::read::GzDecoder::new(Cursor::new(input_bytes));
+            decoder
+                .read_to_end(&mut gunzipped)
+                .expect("unable to gunzip pbf");
+        } else {
+            gunzipped = input_bytes;
+        }
 
         let boundary: Feature = std::fs::read_to_string(&self.boundary_path())?.parse()?;
         let geometry: geo::Geometry = boundary
@@ -143,7 +154,7 @@ impl NeighbourhoodFixture {
                 db_schema_version: TEST_DB_SCHEMA_VERSION,
             };
             MapModel::new(
-                &input_bytes,
+                &gunzipped,
                 multi_polygon.clone(),
                 project_details,
                 demand,

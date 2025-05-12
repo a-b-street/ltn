@@ -1,9 +1,10 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZone, POI};
 use data_prep::{PopulationZoneInput, StudyArea};
 use geo::{MultiPolygon, Point, Relate};
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::process::Command;
 use std::time::Instant;
 
 fn main() -> Result<()> {
@@ -74,9 +75,8 @@ fn main() -> Result<()> {
             pois,
             metric_buckets,
         };
-        std::fs::create_dir_all("prioritization")?;
         let path = format!(
-            "prioritization/context_{}_{}.bin",
+            "../../web/public/cnt/prioritization/{}_{}.bin",
             study_area.1.kind, study_area.1.name
         );
         std::fs::write(&path, bincode::serialize(&context_data)?)?;
@@ -86,12 +86,16 @@ fn main() -> Result<()> {
             path,
             study_area_start.elapsed()
         );
+
+        println!("Running: gzip {path}");
+        if !Command::new("gzip").arg(&path).status()?.success() {
+            bail!("`gzip {path}` failed");
+        }
     }
 
     println!("Time since start {:?}", start.elapsed());
 
     println!("All done!");
-    println!("Now run:\n  cp prioritization/* ../../web/public/cnt_prioritization");
 
     Ok(())
 }
@@ -125,7 +129,10 @@ impl InputPOI {
             ("tmp/gp_practices.geojson", POIKind::GP),
             ("tmp/hospitals.geojson", POIKind::Hospital),
             ("tmp/schools.geojson", POIKind::School),
-            ("out_layers/recreation.geojson", POIKind::Recreation),
+            (
+                "../../web/public/cnt/layers/recreation.geojson",
+                POIKind::Recreation,
+            ),
         ] {
             let input: Vec<InputPOI> = geojson::de::deserialize_feature_collection_str_to_vec(
                 &fs_err::read_to_string(path).context(format!("opening {path}"))?,

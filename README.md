@@ -31,11 +31,10 @@ Custom areas imported by the user are always retrieved from the Overpass API,
 with the latest OSM data. For speed and for deterministic tests, there are also
 "built-in" study areas, consisting of pre-clipped osm.pbf files that do not
 automatically use the latest OSM data. These are manually managed and hosted by
-Dustin on assets.od2net.org.
+Dustin on assets.od2net.org and assets.cnt.scot.
 
-If you're developing locally, you can avoid hitting od2net.org by running
-`bin/download-local-dev-data.sh` to download some pre-clipped application
-data locally, then the Svelte app will load from localhost, not od2net.org.
+If you're developing locally, you can cache assets locally by running
+`bin/download-local-dev-data.sh`.
 
 ### Tests
 

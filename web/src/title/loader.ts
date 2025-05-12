@@ -82,17 +82,17 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     );
 
     let osmBuffer = await download(
-      assetUrl(`cnt_osm/${project.study_area_name}.osm.pbf`),
+      assetUrl(`cnt/osm/${project.study_area_name}.osm.pbf.gz`),
     );
 
-    let url2 = assetUrl(`cnt_boundaries/${project.study_area_name}.geojson`);
+    let url2 = assetUrl(`cnt/boundaries/${project.study_area_name}.geojson`);
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
     let demandBuffer = undefined;
     try {
       demandBuffer = await download(
-        assetUrl(`cnt_demand/demand_${project.study_area_name}.bin`),
+        assetUrl(`cnt/demand/${project.study_area_name}.bin.gz`),
       );
     } catch (err) {
       console.log(`No demand model: ${err}`);
@@ -101,7 +101,7 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     let contextDataBuffer = undefined;
     try {
       contextDataBuffer = await download(
-        assetUrl(`cnt_prioritization/context_${project.study_area_name}.bin`),
+        assetUrl(`cnt/prioritization/${project.study_area_name}.bin.gz`),
       );
     } catch (err) {
       console.log(`No context data for prioritization: ${err}`);
