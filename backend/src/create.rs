@@ -252,6 +252,7 @@ pub fn create_from_osm(
         context_data,
     };
     if let Some(mut demand) = demand {
+        info!("Load demand data");
         demand.finish_loading(&map);
         map.demand = Some(demand);
     }
@@ -261,9 +262,12 @@ pub fn create_from_osm(
         node_to_pt: graph.node_to_pt,
     };
 
+    info!("Applying existing filters");
     apply_existing_filters(&mut map, osm.barrier_nodes, &graph);
+    info!("Applying existing turn restrictions");
     apply_turn_restrictions(&mut map, osm.turn_restrictions);
 
+    info!("Creating the router");
     let router_before = Router::new(&map.router_input_before(), 1.0);
     map.router_before = router_before;
 
