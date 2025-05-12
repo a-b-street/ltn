@@ -1,6 +1,7 @@
 <script lang="ts">
   import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
+  import favicon from "../assets/favicon.ico?url";
   import diagonalUrl from "../assets/filters/diagonal_filter_icon.png?url";
   import noLeftUrl from "../assets/filters/no_left_turn.png?url";
   import noRightUrl from "../assets/filters/no_right_turn.png?url";
@@ -141,6 +142,10 @@
     }
   }
 </script>
+
+<svelte:head>
+  <link rel="icon" type="image/x-icon" href={favicon} />
+</svelte:head>
 
 <div class="pico">
   <About />
