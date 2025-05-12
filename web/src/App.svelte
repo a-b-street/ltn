@@ -80,7 +80,7 @@
       let resp = await fetch("/severance_pbfs/areas.json");
       if (resp.ok) {
         $useLocalVite = true;
-        console.log("Using local cache, not od2net.org");
+        console.log("Using local asset files");
       }
     } catch (err) {}
 

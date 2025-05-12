@@ -25,7 +25,7 @@
   </p>
 </ContextLayerButton>
 
-<GeoJSON data={assetUrl("cnt_layers/railways.geojson")} generateId>
+<GeoJSON data={assetUrl("cnt/layers/railways.geojson")} generateId>
   <SymbolLayer
     {...layerId("context-railway-stations")}
     layout={{

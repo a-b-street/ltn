@@ -27,12 +27,16 @@ function split_osm {
           time osmium extract -v -c $batch ../scotland-latest.osm.pbf
         done
 
-        cd ../..
+        # Gzip everything
+        cd ../osm_out
+        for x in *; do
+          gzip "$x"
+        done
 }
 
 split_osm
 
-echo "For maintainer only:"
-echo "  mv tmp/osm_out/* ~/cloudflare_sync/cnt_osm/"
-echo "  cp tmp/osmium_inputs/*geojson ~/cloudflare_sync/cnt_boundaries/"
-echo "And then upload"
+echo "To use these files:"
+echo "  mkdir -p ../../web/public/cnt/osm ../../web/public/cnt/boundaries"
+echo "  mv tmp/osm_out/* ../../web/public/cnt/osm/"
+echo "  mv tmp/osmium_inputs/*geojson ../../web/public/cnt/boundaries/"

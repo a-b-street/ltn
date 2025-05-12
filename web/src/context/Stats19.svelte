@@ -175,7 +175,7 @@
   </div>
 </ContextLayerButton>
 
-<VectorTileSource url={`pmtiles://${assetUrl("cnt_layers/stats19.pmtiles")}`}>
+<VectorTileSource url={`pmtiles://${assetUrl("cnt/layers/stats19.pmtiles")}`}>
   <HeatmapLayer
     {...layerId("context-stats19-heatmap")}
     sourceLayer="stats19"

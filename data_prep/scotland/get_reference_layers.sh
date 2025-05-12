@@ -2,7 +2,7 @@
 
 set -e
 set -x
-OUT=out_layers
+OUT=../../web/public/cnt/layers
 mkdir -p $OUT
 
 function route_network {
@@ -245,9 +245,3 @@ download_to_subdir() {
 #bus_routes
 #population
 #stats19
-
-echo "Now, copy any layers you want for your local development:"
-echo "  cp $OUT/* ../../web/public/cnt_layers/"
-echo "For maintainer only:"
-echo "  mv $OUT/* ~/cloudflare_sync/cnt_layers/"
-echo "And then upload"

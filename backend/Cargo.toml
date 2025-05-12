@@ -13,6 +13,7 @@ console_error_panic_hook = "0.1.6"
 console_log = "1.0.0"
 contour = "0.12.0"
 fast_paths = "1.0.0"
+flate2 = "1.1.1"
 geo.workspace = true
 geojson.workspace = true
 itertools = "0.14.0"
@@ -35,9 +36,8 @@ web-sys = { version = "0.3.64", features = ["console"] }
 web-time = "1.0.0"
 
 [dev-dependencies]
-criterion = "0.5.1"
 approx = "0.5.1"
-
+criterion = "0.5.1"
 
 [[bench]]
 name = "boundary_stats"

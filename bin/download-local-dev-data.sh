@@ -22,12 +22,12 @@ cd "${APP_ROOT}/web/public"
 
 # Scotland specific data
 jq '.features[] | .properties.kind + "_" + .properties.name' ../../data_prep/scotland/boundaries.geojson | sed 's/"//g' | while read x; do
-    download_to_subdir cnt_boundaries "https://assets.od2net.org/cnt_boundaries/$x.geojson"
-    download_to_subdir cnt_osm "https://assets.od2net.org/cnt_osm/$x.osm.pbf"
-    download_to_subdir cnt_demand "https://assets.od2net.org/cnt_demand/demand_$x.bin"
-    download_to_subdir cnt_prioritization "https://assets.od2net.org/cnt_prioritization/context_$x.bin"
+    download_to_subdir cnt/boundaries "https://assets.cnt.scot/prod/boundaries/$x.geojson"
+    download_to_subdir cnt/osm "https://assets.cnt.scot/prod/osm/$x.osm.pbf"
+    download_to_subdir cnt/demand "https://assets.cnt.scot/prod/demand/$x.bin"
+    download_to_subdir cnt/prioritization "https://assets.cnt.scot/prod/prioritization/$x.bin"
 done
 
 for x in bus_routes.pmtiles cbd.pmtiles population.pmtiles railways.geojson route_network.pmtiles stats19.pmtiles; do
-    download_to_subdir cnt_layers https://assets.od2net.org/cnt_layers/$x
+    download_to_subdir cnt/layers https://assets.cnt.scot/prod/layers/$x
 done

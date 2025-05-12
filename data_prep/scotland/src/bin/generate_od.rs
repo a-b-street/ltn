@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::process::Command;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use geo::{Intersects, MultiPolygon};
 use serde::Deserialize;
 use utils::Mercator;
@@ -44,13 +45,21 @@ fn main() -> Result<()> {
             desire_lines: subset_desire_lines,
             cached_zone_roads: vec![],
         };
-        let path = format!("demand/demand_{}_{}.bin", study_area.kind, study_area.name);
+        let path = format!(
+            "../../web/public/cnt/demand/{}_{}.bin",
+            study_area.kind, study_area.name
+        );
         println!(
             "Writing {path} with {} matching zones and {} desire lines",
             demand.zones.len(),
             demand.desire_lines.len()
         );
-        std::fs::write(path, bincode::serialize(&demand)?)?;
+        std::fs::write(&path, bincode::serialize(&demand)?)?;
+
+        println!("Running: gzip {path}");
+        if !Command::new("gzip").arg(&path).status()?.success() {
+            bail!("`gzip {path}` failed");
+        }
     }
 
     Ok(())

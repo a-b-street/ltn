@@ -12,7 +12,7 @@ unzip SG_IntermediateZoneBdry_2011.zip
 ogr2ogr zones.geojson -t_srs EPSG:4326 -nlt PROMOTE_TO_MULTI SG_IntermediateZone_Bdry_2011.shp -sql 'SELECT InterZone as name FROM SG_IntermediateZone_Bdry_2011'
 rm -f SG_IntermediateZone_Bdry_2011* SG_IntermediateZoneBdry_2011.zip
 
-mkdir -p demand
+mkdir -p ../../web/public/cnt/demand ../../web/public/cnt/prioritization
 cargo run --release --bin generate_od
 cargo run --release --bin generate_prioritization
 ```

@@ -178,7 +178,7 @@
 </ContextLayerButton>
 
 <VectorTileSource
-  url={`pmtiles://${assetUrl("cnt_layers/route_network.pmtiles")}`}
+  url={`pmtiles://${assetUrl("cnt/layers/route_network.pmtiles")}`}
 >
   <LineLayer
     {...layerId("context-route-network")}
