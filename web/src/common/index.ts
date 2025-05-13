@@ -84,7 +84,8 @@ export function prettyPrintStudyAreaName(studyAreaName: StudyAreaName): string {
   if (!studyAreaName) {
     return "custom area";
   }
-  if (get(appFocus) == "cnt") {
+  let focus = get(appFocus);
+  if (focus == "cnt" || focus == "england") {
     return stripPrefix(studyAreaName, "LAD_");
   } else {
     return studyAreaName;
