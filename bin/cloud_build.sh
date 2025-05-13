@@ -22,3 +22,4 @@ ln -s assets/backend_bg.wasm dist/
 
 # Overwrite the global version of the app with the CNT deployment
 mv -f dist/cnt.html dist/index.html
+rm -f dist/england.html

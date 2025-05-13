@@ -73,7 +73,7 @@ export type Mode =
       mode: "debug-demand";
     };
 
-export type AppFocus = "global" | "cnt";
+export type AppFocus = "global" | "cnt" | "england";
 
 export let map: Writable<Map | null> = writable(null);
 

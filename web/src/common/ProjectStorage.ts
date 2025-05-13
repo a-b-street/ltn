@@ -73,6 +73,7 @@ export class Database {
       console.log(
         `Migrating storage from version ${this.storedSchemaVersion} to ${latestSchemaVersion}`,
       );
+      // Note only these two need migration. Other AppFocuses were added later.
       for (const focus of ["cnt", "global"]) {
         const appFocus = focus as AppFocus;
         const projectStorage = new ProjectStorage(
@@ -124,6 +125,7 @@ export class Database {
     // It also serves as a nice safety point - in the case of a partially successful migration,
     // we can avoid re-migrating projects which were successfully migrated last time.
     if (this.storedSchemaVersion < 2) {
+      // Note only these two need migration. Other AppFocuses were added later.
       for (const focus of ["cnt", "global"]) {
         const appFocus = focus as AppFocus;
         const projectStorage = new ProjectStorage(
@@ -332,7 +334,7 @@ export class ProjectStorage {
   }
 
   projects(): Array<[ProjectID, ProjectFeatureCollection]> {
-    return this.globalAndCntProjectKeys()
+    return this.allProjectKeys()
       .map((key) => {
         let projectID = this.projectIDFromKey(key);
         if (!projectID) {
@@ -354,7 +356,7 @@ export class ProjectStorage {
       .filter((entry) => entry !== null);
   }
 
-  private globalAndCntProjectKeys(): string[] {
+  private allProjectKeys(): string[] {
     const prefix = this.collectionKey;
     let keys = [];
     for (let i = 0; i < localStorage.length; i++) {
