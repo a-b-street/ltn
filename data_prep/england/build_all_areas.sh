@@ -11,9 +11,9 @@ function split_osm {
         mkdir -p tmp
         cd tmp
 
-        # Download Scotland OSM data
-        if [ ! -f scotland-latest.osm.pbf ]; then
-          wget https://download.geofabrik.de/europe/united-kingdom/scotland-latest.osm.pbf
+        # Download England OSM data
+        if [ ! -f england-latest.osm.pbf ]; then
+          wget https://download.geofabrik.de/europe/united-kingdom/england-latest.osm.pbf
         fi
 
         # Generate config for osmium
@@ -24,7 +24,7 @@ function split_osm {
 
         # Create an osm.pbf file per boundary
         for batch in osmium_cfg_*; do
-          time osmium extract -v -c $batch ../scotland-latest.osm.pbf
+          time osmium extract -v -c $batch ../england-latest.osm.pbf
         done
 
         # Gzip everything
@@ -37,6 +37,6 @@ function split_osm {
 split_osm
 
 echo "To use these files:"
-echo "  mkdir -p ../../web/public/cnt/osm ../../web/public/cnt/boundaries"
-echo "  mv tmp/osm_out/* ../../web/public/cnt/osm/"
-echo "  mv tmp/osmium_inputs/*geojson ../../web/public/cnt/boundaries/"
+echo "  mkdir -p ../../web/public/england/osm ../../web/public/england/boundaries"
+echo "  mv tmp/osm_out/* ../../web/public/england/osm/"
+echo "  mv tmp/osmium_inputs/*geojson ../../web/public/england/boundaries/"

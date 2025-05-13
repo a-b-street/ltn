@@ -7,7 +7,10 @@ data_prep/scotland/input
 data_prep/scotland/od.csv
 data_prep/scotland/zones.geojson
 
+data_prep/england/tmp
+
 # Local symlinks to avoid hitting od2net.org and cnt.scot
 web/public/severance_pbfs
 web/public/boundaries
 web/public/cnt
+web/public/england
