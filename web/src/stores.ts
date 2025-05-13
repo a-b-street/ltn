@@ -157,6 +157,9 @@ export function assetUrl(path: string): string {
   if (path.startsWith("cnt/")) {
     return `https://assets.cnt.scot/prod/${stripPrefix(path, "cnt/")}`;
   }
+  if (path.startsWith("england/")) {
+    return `https://assets.od2net.org/ltn/prod/${path}`;
+  }
 
   return `https://assets.od2net.org/${path}`;
 }
