@@ -108,6 +108,18 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     }
 
     return { osmBuffer, boundary, demandBuffer, contextDataBuffer };
+  } else if (project.app_focus == "england") {
+    let osmBuffer = await download(
+      assetUrl(`england/osm/${project.study_area_name}.osm.pbf.gz`),
+    );
+
+    let url2 = assetUrl(
+      `england/boundaries/${project.study_area_name}.geojson`,
+    );
+    let resp2 = await safeFetch(url2);
+    let boundary = await resp2.json();
+
+    return { osmBuffer, boundary };
   } else if (project.study_area_name) {
     let osmBuffer = await download(
       assetUrl(`severance_pbfs/${project.study_area_name}.pbf`),
