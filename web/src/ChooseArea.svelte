@@ -89,7 +89,7 @@
 </script>
 
 <p>Choose a boundary below or on the map to begin:</p>
-<select bind:value={ladChoice} on:change={chooseLAD}>
+<select bind:value={ladChoice} on:change={chooseLAD} style="width: 90%">
   <option value=""></option>
   {#each ladNames as value}
     <option {value}>{value}</option>

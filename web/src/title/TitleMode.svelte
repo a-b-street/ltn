@@ -122,7 +122,9 @@
       {#if $appFocus == "cnt"}
         <h1>The Connected Neighbourhoods Tool</h1>
       {:else}
-        <div style="display: flex; justify-content: space-between;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center"
+        >
           <h1>The LTN Tool</h1>
           <AppFocusSwitcher />
         </div>
