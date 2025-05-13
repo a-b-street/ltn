@@ -9,7 +9,7 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
-  import { Link, prettyPrintStudyAreaName, Style } from "./common";
+  import { prettyPrintStudyAreaName, Style } from "./common";
   import { mode, projectStorage } from "./stores";
   import { loadProject } from "./title/loader";
 
@@ -25,6 +25,7 @@
     features: [],
   };
   let ladNames: string[] = [];
+  let ladChoice = "";
 
   onMount(async () => {
     let resp = await fetch(boundariesUrl);
@@ -79,14 +80,21 @@
       }
     }
   }
+
+  function chooseLAD() {
+    if (ladChoice) {
+      newFile(`LAD_${ladChoice}`);
+    }
+  }
 </script>
 
-<p>Choose a boundary below or on the map to begin sketching:</p>
-<ul style="columns: 3">
-  {#each ladNames as name}
-    <li><Link on:click={() => newFile(`LAD_${name}`)}>{name}</Link></li>
+<p>Choose a boundary below or on the map to begin:</p>
+<select bind:value={ladChoice} on:change={chooseLAD}>
+  <option value=""></option>
+  {#each ladNames as value}
+    <option {value}>{value}</option>
   {/each}
-</ul>
+</select>
 
 <GeoJSON data={gj} generateId>
   <FillLayer
