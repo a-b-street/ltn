@@ -28,8 +28,8 @@
   }
 
   /* 
-  special considerations so that the help button doesn't exapnd the
-  height of the breadcrums
+  special considerations so that the help button doesn't expand the
+  height of the breadcrumbs
   */
   :global(.pico nav[aria-label="breadcrumb"] ul > li) button.help {
     height: 30px;

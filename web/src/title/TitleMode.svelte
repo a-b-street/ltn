@@ -23,6 +23,7 @@
     mode,
     projectStorage,
   } from "../stores";
+  import AppFocusSwitcher from "./AppFocusSwitcher.svelte";
   import { loadingMessage, loadingProgress, loadProject } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
@@ -120,6 +121,11 @@
     {#if $map && wasmReady}
       {#if $appFocus == "cnt"}
         <h1>The Connected Neighbourhoods Tool</h1>
+      {:else}
+        <div style="display: flex; justify-content: space-between;">
+          <h1>The LTN Tool</h1>
+          <AppFocusSwitcher />
+        </div>
       {/if}
 
       {#if studyAreas.length > 0}
