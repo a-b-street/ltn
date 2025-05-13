@@ -75,6 +75,9 @@
     <li>
       <a href="https://github.com/rouelibre1" target="_blank">Rouelibre1</a>
     </li>
+    <li>
+      <a href="https://github.com/TFCx" target="_blank">Jean-David Génevaux</a>
+    </li>
   </ul>
 
   <p>This tool would not be possible without:</p>
