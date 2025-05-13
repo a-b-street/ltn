@@ -67,7 +67,7 @@
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
   import "tippy.js/dist/tippy.css";
 
-  export let appFocus: AppFocus = "global";
+  export let appFocus: AppFocus;
   appFocusStore.set(appFocus);
 
   let wasmReady = false;

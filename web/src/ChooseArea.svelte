@@ -9,11 +9,14 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
-  import boundariesUrl from "../assets/cnt_boundaries.geojson?url";
   import { Link, prettyPrintStudyAreaName, Style } from "./common";
   import { mode, projectStorage } from "./stores";
   import { loadProject } from "./title/loader";
 
+  export let boundariesUrl: string;
+
+  // This component works for both CNT and England, because the boundaries for
+  // both fit this format. We could consider generalizing in the future.
   let gj: FeatureCollection<
     Polygon | MultiPolygon,
     { kind: "LAD"; name: string }

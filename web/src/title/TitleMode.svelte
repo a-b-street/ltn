@@ -2,7 +2,9 @@
   import { FileDown, Pencil, Trash2 } from "lucide-svelte";
   import type { LngLatBoundsLike } from "maplibre-gl";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import CntChooseArea from "../CntChooseArea.svelte";
+  import cntBoundariesUrl from "../../assets/cnt_boundaries.geojson?url";
+  import englandBoundariesUrl from "../../assets/england_boundaries.geojson?url";
+  import ChooseArea from "../ChooseArea.svelte";
   import {
     downloadProject,
     Link,
@@ -54,6 +56,8 @@
       let bounds = [-180, -90, 180, 90] as LngLatBoundsLike;
       if ($appFocus == "cnt") {
         bounds = [-8.943, 54.631, -0.901, 59.489];
+      } else if ($appFocus == "england") {
+        bounds = [-5.96, 49.89, 2.31, 55.94];
       }
       $map.fitBounds(bounds, { duration: 500 });
     }
@@ -169,7 +173,9 @@
           New project
         </button>
       {:else if $appFocus == "cnt"}
-        <CntChooseArea />
+        <ChooseArea boundariesUrl={cntBoundariesUrl} />
+      {:else if $appFocus == "england"}
+        <ChooseArea boundariesUrl={englandBoundariesUrl} />
       {/if}
       <LoadSavedProject />
     {:else}

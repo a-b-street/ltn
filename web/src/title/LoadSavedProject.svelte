@@ -19,7 +19,11 @@
     // modern (v1) save files will have these fields set
     // legacy (v0) save files will not (except study_area_name, which is set *excepting* "global" custom (overpass) areas)
     if (gj.app_focus) {
-      console.assert!(gj.app_focus == "global" || gj.app_focus == "cnt");
+      console.assert!(
+        gj.app_focus == "global" ||
+          gj.app_focus == "cnt" ||
+          gj.app_focus == "england",
+      );
       appFocus = gj.app_focus;
     }
     if (gj.study_area_name) {
@@ -37,6 +41,8 @@
       //
       // Is this a CNT project or a global one?
       if (gj.study_area_name && gj.study_area_name.startsWith("LAD_")) {
+        // Note england projects also have boundaries starting with LAD_, but
+        // they were created after the legacy savefile
         appFocus = "cnt";
         // Parse the project name from the filename, best effort. The user may
         // have renamed the file.
