@@ -16,7 +16,7 @@ pub use self::shortcuts::Shortcuts;
 use crate::geo_helpers::make_polygon_valid;
 use crate::map_model::{Command, ProjectDetails};
 use crate::neighbourhood::WayPoint;
-use geo::{Coord, LineString, Polygon};
+use geo::{Coord, LineString, Point, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
 use std::sync::Once;
@@ -620,6 +620,24 @@ impl LTN {
             return Ok(serde_json::to_string(&context_data.metric_buckets).map_err(err_to_js)?);
         }
         Err(JsValue::from_str("no context_data for this area"))
+    }
+
+    #[wasm_bindgen(js_name = snapPointInNeighbourhood)]
+    pub fn snap_point_in_neighbourhood(&self, lon: f64, lat: f64) -> Vec<f64> {
+        let pt = self.map.mercator.pt_to_mercator(Coord { x: lon, y: lat });
+        let i = self
+            .neighbourhood
+            .as_ref()
+            .unwrap()
+            .closest_intersection
+            .nearest_neighbor(&Point(pt))
+            .unwrap()
+            .data;
+        let snapped = self
+            .map
+            .mercator
+            .pt_to_wgs84(self.map.get_i(i).point.into());
+        vec![snapped.x, snapped.y]
     }
 
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to

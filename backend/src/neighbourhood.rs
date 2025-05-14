@@ -122,11 +122,13 @@ pub struct NeighbourhoodBoundary {
 pub struct Neighbourhood {
     // Immutable once created
     pub interior_roads: BTreeSet<RoadID>,
-    // Immutable once created
     pub main_roads: BTreeSet<RoadID>,
     pub editable_intersections: BTreeSet<IntersectionID>,
     pub border_intersections: BTreeSet<IntersectionID>,
     pub boundary: NeighbourhoodBoundary,
+    // Both editable and border intersections
+    pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
+
     // Updated after mutations
     pub derived: Option<DerivedNeighbourhoodState>,
 }
@@ -247,6 +249,14 @@ impl Neighbourhood {
             }
         }
 
+        let closest_intersection = RTree::bulk_load(
+            editable_intersections
+                .iter()
+                .chain(border_intersections.iter())
+                .map(|i| GeomWithData::new(map.get_i(*i).point, *i))
+                .collect(),
+        );
+
         if interior_roads.is_empty() {
             bail!("No roads inside the boundary");
         }
@@ -263,6 +273,7 @@ impl Neighbourhood {
             boundary,
             editable_intersections,
             border_intersections,
+            closest_intersection,
             derived: None,
         };
         n.after_edit(map);

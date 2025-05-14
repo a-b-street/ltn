@@ -5,6 +5,7 @@
     Paintbrush,
     Pointer,
     Redo,
+    Route,
     Trash2,
     Undo,
   } from "lucide-svelte";
@@ -71,6 +72,7 @@
   } from "../wasm";
   import ChangeFilterModal from "./ChangeFilterModal.svelte";
   import FreehandLine from "./FreehandLine.svelte";
+  import SnapRouteSelector from "./SnapRouteSelector.svelte";
 
   // Caller is responsible for doing backend.setCurrentNeighbourhood
 
@@ -88,7 +90,7 @@
       }
     | {
         kind: "main-roads";
-        tool: "toggle" | "freehand-main" | "freehand-erase";
+        tool: "toggle" | "freehand-main" | "freehand-erase" | "snap-route";
       };
   function startTurnRestrictionAction(): Action {
     return {
@@ -314,6 +316,10 @@
   function eraseAllMainRoads() {
     $backend!.eraseAllMainRoads();
     $mutationCounter++;
+  }
+
+  function finishSnapping(roads: number[]) {
+    window.alert("TODO");
   }
 
   let shortcutDescriptionText =
@@ -551,6 +557,21 @@
               <span>Toggle segment or pan map</span>
             </div>
           </button>
+
+          <button
+            on:click={() => {
+              action = { kind: "main-roads", tool: "snap-route" };
+            }}
+            class:active={action.tool == "snap-route"}
+            class:outline={action.tool != "snap-route"}
+            data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
+          >
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <Route />
+              <span>Mark as main along a route</span>
+            </div>
+          </button>
+
           <button
             on:click={() => {
               action = { kind: "main-roads", tool: "freehand-main" };
@@ -564,6 +585,7 @@
               <span>Mark as main along a line</span>
             </div>
           </button>
+
           <button
             on:click={() => {
               action = { kind: "main-roads", tool: "freehand-erase" };
@@ -577,6 +599,7 @@
               <span>Erase main classification</span>
             </div>
           </button>
+
           <button class:outline={true} on:click={eraseAllMainRoads}>
             <div style="display: flex; align-items: center; gap: 8px;">
               <Trash2 />
@@ -723,6 +746,12 @@
         map={notNull($map)}
         on:done={(e) => paintedRoadClassificationsLine(e, true)}
         on:progress={(e) => paintedRoadClassificationsLine(e, false)}
+      />
+    {:else if action.kind == "main-roads" && action.tool == "snap-route"}
+      <SnapRouteSelector
+        map={notNull($map)}
+        finish={finishSnapping}
+        cancel={() => (action = { kind: "main-roads", tool: "toggle" })}
       />
     {/if}
 

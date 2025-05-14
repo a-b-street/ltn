@@ -343,6 +343,19 @@ export class Backend {
   eraseAllMainRoads() {
     this.inner.eraseAllMainRoads();
   }
+
+  snapPointInNeighbourhood(pt: [number, number]): Waypoint2 {
+    let snapped = Array.from(this.inner.snapPointInNeighbourhood(pt[0], pt[1]));
+    return [snapped[0], snapped[1]];
+  }
+
+  snapRouteInNeighbourhood(waypoints: Waypoint2[]): SnappedRoute {
+    return JSON.parse(this.inner.snapRouteInNeighbourhood(waypoints));
+  }
+
+  getExtraNodes(pt1: Waypoint2, pt2: Waypoint2): Waypoint2[] {
+    return JSON.parse(this.inner.getExtraNodes(pt1, pt2));
+  }
 }
 
 export type Impact = FeatureCollection<
@@ -440,3 +453,7 @@ export interface MetricBuckets {
   collision_density: number[];
   poi_density: number[];
 }
+
+// TODO Consolidate route-snapper backends
+export type Waypoint2 = [number, number];
+export type SnappedRoute = FeatureCollection<LineString> & { roads: number[] };

@@ -152,6 +152,9 @@ const layerZorder = [
 
   "freehand-line",
 
+  "snapper-confirmed",
+  "snapper-preview",
+
   "edit-polygon-fill",
   "edit-polygon-lines",
   "edit-polygon-vertices",
