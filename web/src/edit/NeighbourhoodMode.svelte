@@ -86,7 +86,10 @@
           { road: number; name: string }
         >;
       }
-    | { kind: "main-roads"; freehand: boolean; isMain: boolean };
+    | {
+        kind: "main-roads";
+        tool: "toggle" | "freehand-main" | "freehand-erase";
+      };
   function startTurnRestrictionAction(): Action {
     return {
       kind: "turn_restriction",
@@ -109,14 +112,10 @@
   $: {
     if (
       (action.kind == "filter" && action.freehand) ||
-      (action.kind == "main-roads" && action.freehand && action.isMain)
+      (action.kind == "main-roads" && action.tool == "freehand-main")
     ) {
       $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
-    } else if (
-      action.kind == "main-roads" &&
-      action.freehand &&
-      !action.isMain
-    ) {
+    } else if (action.kind == "main-roads" && action.tool == "freehand-erase") {
       $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
     } else {
       $map!.getCanvas().style.cursor = "";
@@ -173,7 +172,7 @@
     } else if (action.kind == "oneway") {
       $backend!.toggleTravelFlow(f.properties!.road);
       $mutationCounter++;
-    } else if (action.kind == "main-roads" && !action.freehand) {
+    } else if (action.kind == "main-roads" && action.tool == "toggle") {
       $backend!.toggleMainRoad(f.properties!.road);
       $mutationCounter++;
     } else if (action.kind == "turn_restriction") {
@@ -271,7 +270,7 @@
       action = startTurnRestrictionAction();
     }
     if (e.key == "4") {
-      action = { kind: "main-roads", freehand: false, isMain: false };
+      action = { kind: "main-roads", tool: "toggle" };
     }
   }
 
@@ -303,7 +302,11 @@
     }
     let f = e.detail;
     if (f) {
-      $backend!.reclassifyRoadsAlongLine(f, action.isMain, addToUndoStack);
+      $backend!.reclassifyRoadsAlongLine(
+        f,
+        action.tool == "freehand-main",
+        addToUndoStack,
+      );
       $mutationCounter++;
     }
   }
@@ -438,8 +441,7 @@
           <img src={noRightUrl} alt="Restrict turns" />
         </button>
         <button
-          on:click={() =>
-            (action = { kind: "main-roads", freehand: false, isMain: false })}
+          on:click={() => (action = { kind: "main-roads", tool: "toggle" })}
           class="icon-btn"
           class:active={action.kind == "main-roads"}
           data-tippy-content="Reclassify main roads (hotkey 4)"
@@ -538,10 +540,10 @@
         >
           <button
             on:click={() => {
-              action = { kind: "main-roads", freehand: false, isMain: true };
+              action = { kind: "main-roads", tool: "toggle" };
             }}
-            class:active={!action.freehand}
-            class:outline={action.freehand}
+            class:active={action.tool == "toggle"}
+            class:outline={action.tool != "toggle"}
             data-tippy-content="Click a road to reclassify it"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -551,10 +553,10 @@
           </button>
           <button
             on:click={() => {
-              action = { kind: "main-roads", freehand: true, isMain: true };
+              action = { kind: "main-roads", tool: "freehand-main" };
             }}
-            class:active={action.freehand && action.isMain}
-            class:outline={!(action.freehand && action.isMain)}
+            class:active={action.tool == "freehand-main"}
+            class:outline={action.tool != "freehand-main"}
             data-tippy-content="Reclassify multiple roads by drawing a line along them"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -564,10 +566,10 @@
           </button>
           <button
             on:click={() => {
-              action = { kind: "main-roads", freehand: true, isMain: false };
+              action = { kind: "main-roads", tool: "freehand-erase" };
             }}
-            class:active={action.freehand && !action.isMain}
-            class:outline={!(action.freehand && !action.isMain)}
+            class:active={action.tool == "freehand-erase"}
+            class:outline={action.tool != "freehand-erase"}
             data-tippy-content="Reclassify multiple roads by drawing a line along them"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -652,7 +654,7 @@
       <NeighbourhoodRoadLayer
         interactive={(action.kind == "filter" && !action.freehand) ||
           action.kind == "oneway" ||
-          (action.kind == "main-roads" && !action.freehand) ||
+          (action.kind == "main-roads" && action.tool == "toggle") ||
           (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
       >
@@ -682,7 +684,7 @@
               </div>
             {:else if action.kind == "oneway"}
               <p>Click to change direction</p>
-            {:else if action.kind == "main-roads" && !action.freehand}
+            {:else if action.kind == "main-roads" && action.tool == "toggle"}
               <p>Click to designate a main road or not</p>
             {:else if action.kind == "turn_restriction"}
               <p>Click to create a turn restriction from here</p>
@@ -716,7 +718,7 @@
 
     {#if action.kind == "filter" && action.freehand}
       <FreehandLine map={notNull($map)} on:done={paintedModalFiltersLine} />
-    {:else if action.kind == "main-roads" && action.freehand}
+    {:else if action.kind == "main-roads" && (action.tool == "freehand-main" || action.tool == "freehand-erase")}
       <FreehandLine
         map={notNull($map)}
         on:done={(e) => paintedRoadClassificationsLine(e, true)}
