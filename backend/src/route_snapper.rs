@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use geo::{Coord, LineIntersection, LineLocatePoint, Point};
 use route_snapper_graph::{Edge, NodeID, RouteSnapperMap};
 use utils::LineSplit;
+use serde::Deserialize;
 
 use crate::{MapModel, RoadID};
 
@@ -118,6 +119,28 @@ impl MapModel {
             override_forward_costs: Vec::new(),
             override_backward_costs: Vec::new(),
         }
+    }
+
+    // TODO Where should this go?
+    pub fn snap_route_in_neighbourhood(&self, neighbourhood: &Neighbourhood, waypoints: Vec<Coord>) -> Result<String> {
+    }
+
+    pub fn get_extra_nodes(&self, neighbourhood: &Neighbourhood, pt1: Coord, pt2: Coord) -> Result<String> {
+        if let Some(route) = self
+            .router_before_with_penalty
+            .as_ref()
+            .unwrap()
+            .route_from_points(&self.router_input_before(), pt1, pt2)
+        {
+            let (distance, time) = route.get_distance_and_time(self);
+            let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
+
+
+        let i1 = neighbourhood
+            .closest_intersection
+            .nearest_neighbor(&Point(waypt1))
+            .unwrap()
+            .data;
     }
 }
 

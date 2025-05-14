@@ -16,6 +16,7 @@ pub use self::shortcuts::Shortcuts;
 use crate::geo_helpers::make_polygon_valid;
 use crate::map_model::{Command, ProjectDetails};
 use crate::neighbourhood::WayPoint;
+use crate::route_snapper::Waypoint2;
 use geo::{Coord, LineString, Point, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry};
 use serde::Deserialize;
@@ -640,6 +641,19 @@ impl LTN {
         vec![snapped.x, snapped.y]
     }
 
+    #[wasm_bindgen(js_name = snapRouteInNeighbourhood)]
+    pub fn snap_route_in_neighbourhood(&self, input: JsValue) -> Result<String, JsValue> {
+        let waypoints: Vec<Waypoint2> = serde_wasm_bindgen::from_value(input)?;
+        self.map.snap_route_in_neighbourhood(self.neighbourhood.as_ref().unwrap(), waypoints.into_iter().map(|pt| self.waypt_to_pt(pt)).collect()).map_err(err_to_js)
+    }
+
+    #[wasm_bindgen(js_name = getExtraNodes)]
+    pub fn get_extra_nodes(&self, input1: JsValue, input2: JsValue) -> Result<String, JsValue> {
+        let waypt1: Waypoint2 = serde_wasm_bindgen::from_value(input1)?;
+        let waypt2: Waypoint2 = serde_wasm_bindgen::from_value(input2)?;
+        self.map.get_extra_nodes(self.neighbourhood.as_ref().unwrap(), self.waypt_to_pt(waypt1), self.waypt_to_pt(waypt2)).map_err(err_to_js)
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {
@@ -657,6 +671,11 @@ impl LTN {
         }
         Ok(())
     }
+
+    // Returns mercator
+    fn waypt_to_pt(&self, input: Waypoint) -> Coord {
+        self.map.mercator.pt_to_mercator(Coord { x: input.0[0], y: input.0[1]});
+    }
 }
 
 #[derive(Deserialize)]
@@ -664,6 +683,9 @@ struct LngLat {
     lng: f64,
     lat: f64,
 }
+
+#[derive(Deserialize)]
+struct Waypoint2(f64, f64);
 
 fn err_to_js<E: std::fmt::Display>(err: E) -> JsValue {
     JsValue::from_str(&err.to_string())
