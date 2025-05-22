@@ -1,7 +1,8 @@
 use anyhow::{bail, Context, Result};
 use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZone, POI};
-use data_prep::{PopulationZoneInput, StudyArea};
+use common_data_prep::StudyArea;
 use geo::{MultiPolygon, Point, Relate};
+use scotland_data_prep::PopulationZoneInput;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::process::Command;
@@ -13,7 +14,7 @@ fn main() -> Result<()> {
 
     let car_ownership_data_zones = CarOwnershipDataZone::read_all_from_file_as_map()?;
 
-    let study_areas = StudyArea::read_all_prepared_from_file()?;
+    let study_areas = StudyArea::read_all_prepared_from_file("boundaries.geojson")?;
     println!("Time since start {:?}", start.elapsed());
     let population_zone_inputs = PopulationZoneInput::read_all_from_file()?;
     println!("Time since start {:?}", start.elapsed());
@@ -79,7 +80,7 @@ fn main() -> Result<()> {
             "../../web/public/cnt/prioritization/{}_{}.bin",
             study_area.1.kind, study_area.1.name
         );
-        std::fs::write(&path, bincode::serialize(&context_data)?)?;
+        fs_err::write(&path, bincode::serialize(&context_data)?)?;
         println!(
             "Wrote {} population zones to {} (took {:?})",
             context_data.population_zones.len(),

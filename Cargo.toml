@@ -1,7 +1,8 @@
 [workspace]
 members = [
-    "backend",
-    "data_prep/scotland",
+  "backend",
+  "data_prep/common",
+  "data_prep/scotland",
 ]
 
 resolver = "2"
