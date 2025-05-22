@@ -2,19 +2,42 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::process::Command;
 
 use anyhow::{bail, Result};
+use argh::FromArgs;
 use geo::{Intersects, MultiPolygon};
 use serde::Deserialize;
 use utils::Mercator;
 
 use backend::od::{DemandModel, ZoneID};
-use data_prep::StudyArea;
+use common_data_prep::StudyArea;
 
-/// Generate travel demand (OD) model, and write to file
+#[derive(FromArgs)]
+/// Generate travel demand (OD) model
+struct Args {
+    /// path to study area boundaries.geojson, with a `kind` and `name` property
+    #[argh(option)]
+    study_area_boundaries: String,
+
+    /// path to a zones.geojson, with a `name` property
+    #[argh(option)]
+    od_zones: String,
+
+    /// path to an od.csv, with fields `zone1`, `zone2`, `count`
+    #[argh(option)]
+    od_csv: String,
+
+    /// path to the directory where gzipped output will be written, as
+    /// `{study_area.kind}_{study_area.name}.bin.gz`
+    #[argh(option)]
+    out_dir: String,
+}
+
 fn main() -> Result<()> {
-    let study_areas = StudyArea::read_all_from_file()?;
+    let args: Args = argh::from_env();
+
+    let study_areas = StudyArea::read_all_from_file(&args.study_area_boundaries)?;
 
     let input_zones: Vec<Zone> = geojson::de::deserialize_feature_collection_str_to_vec(
-        &std::fs::read_to_string("zones.geojson")?,
+        &fs_err::read_to_string(&args.od_zones)?,
     )?;
     let zones: BTreeMap<String, Zone> = input_zones
         .into_iter()
@@ -22,16 +45,18 @@ fn main() -> Result<()> {
         .collect();
     println!("Read {} zones", zones.len());
 
-    let desire_lines = read_desire_lines("od.csv")?;
+    let desire_lines = read_desire_lines(&args.od_csv)?;
     println!("Read {} desire lines", desire_lines.len());
 
     for study_area in study_areas {
         let subset_zones = find_matching_zones(study_area.geometry, &zones);
 
         let mut subset_desire_lines = Vec::new();
-        for (zone1, zone2, count) in &desire_lines {
-            if let (Some(from), Some(to)) = (subset_zones.get(zone1), subset_zones.get(zone2)) {
-                subset_desire_lines.push((*from, *to, *count));
+        for row in &desire_lines {
+            if let (Some(from), Some(to)) =
+                (subset_zones.get(&row.zone1), subset_zones.get(&row.zone2))
+            {
+                subset_desire_lines.push((*from, *to, row.count));
             }
         }
         let demand = DemandModel {
@@ -46,15 +71,15 @@ fn main() -> Result<()> {
             cached_zone_roads: vec![],
         };
         let path = format!(
-            "../../web/public/cnt/demand/{}_{}.bin",
-            study_area.kind, study_area.name
+            "{}/{}_{}.bin",
+            args.out_dir, study_area.kind, study_area.name
         );
         println!(
             "Writing {path} with {} matching zones and {} desire lines",
             demand.zones.len(),
             demand.desire_lines.len()
         );
-        std::fs::write(&path, bincode::serialize(&demand)?)?;
+        fs_err::write(&path, bincode::serialize(&demand)?)?;
 
         println!("Running: gzip {path}");
         if !Command::new("gzip").arg(&path).status()?.success() {
@@ -72,25 +97,20 @@ struct Zone {
     name: String,
 }
 
-fn read_desire_lines(path: &str) -> Result<Vec<(String, String, usize)>> {
+fn read_desire_lines(path: &str) -> Result<Vec<DesireLineRow>> {
     let mut out = Vec::new();
-    for rec in csv::Reader::from_reader(std::fs::File::open(path)?).deserialize() {
+    for rec in csv::Reader::from_reader(fs_err::File::open(path)?).deserialize() {
         let row: DesireLineRow = rec?;
-        out.push((
-            row.geo_code1,
-            row.geo_code2,
-            row.car_driver + row.car_passenger,
-        ));
+        out.push(row);
     }
     Ok(out)
 }
 
 #[derive(Deserialize)]
 struct DesireLineRow {
-    geo_code1: String,
-    geo_code2: String,
-    car_driver: usize,
-    car_passenger: usize,
+    zone1: String,
+    zone2: String,
+    count: usize,
 }
 
 /// Returns a mapping from original zone name to sequential IDs
