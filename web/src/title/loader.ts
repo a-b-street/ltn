@@ -119,7 +119,16 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     let resp2 = await safeFetch(url2);
     let boundary = await resp2.json();
 
-    return { osmBuffer, boundary };
+    let demandBuffer = undefined;
+    try {
+      demandBuffer = await download(
+        assetUrl(`england/demand/${project.study_area_name}.bin.gz`),
+      );
+    } catch (err) {
+      console.log(`No demand model: ${err}`);
+    }
+
+    return { osmBuffer, boundary, demandBuffer };
   } else if (project.study_area_name) {
     let osmBuffer = await download(
       assetUrl(`severance_pbfs/${project.study_area_name}.pbf`),
