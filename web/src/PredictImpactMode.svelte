@@ -6,6 +6,7 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
+    HelpButton,
     layerId,
     Loading,
     ModeLink,
@@ -13,7 +14,13 @@
     refreshLoadingScreen,
   } from "./common";
   import { ModalFilterLayer } from "./layers";
-  import { backend, fastSample, minImpactCount, mode } from "./stores";
+  import {
+    appFocus,
+    backend,
+    fastSample,
+    minImpactCount,
+    mode,
+  } from "./stores";
   import type { Impact } from "./wasm";
 
   export let prevMode: "pick-neighbourhood" | "neighbourhood";
@@ -83,6 +90,54 @@
         Explore the origin/destination demand data used
       </ModeLink>
     </p>
+
+    <div style="display: flex">
+      {#if $appFocus == "cnt"}
+        <span>About the 2011 home to work data</span>
+        <HelpButton>
+          <p>
+            This region uses preprocessed census data from the <a
+              href="https://nptscot.github.io/data/"
+              target="_blank">NPT project</a
+            >. The data is very outdated. Trips to work are just one purpose,
+            representing a small percent of all trips and with strong spatial
+            biases.
+          </p>
+        </HelpButton>
+      {:else if $appFocus == "england"}
+        <span>About the 2021 home to work data</span>
+        <HelpButton>
+          <p>
+            This region uses the <a
+              href="https://www.nomisweb.co.uk/sources/census_2021_od"
+              target="_blank">ODWP01EW</a
+            >
+            census dataset, with trips from home to work. It was taken during COVID-19,
+            so
+            <a
+              href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/methodologies/userguidetocensus2021origindestinationdataenglandandwales"
+              target="_blank">workplace travel patterns have major caveats</a
+            >. Trips to work are just one purpose, representing a small percent
+            of all trips and with strong spatial biases. This dataset does not
+            distinguish by trip mode, so trips could be made by driving, public
+            transit, cycling, walking, etc.
+          </p>
+        </HelpButton>
+      {:else}
+        <b>About the fake origin/destination data</b>
+        <HelpButton>
+          <p>
+            This region has no available origin/destination data about travel
+            patterns, so a <b>completely random</b> small set of trips are
+            modelled. Contact Dustin at
+            <a href="mailto:dabreegster@gmail.com">dabreegster@gmail.com</a> to set
+            up real data in your region.
+          </p>
+        </HelpButton>
+      {/if}
+    </div>
+
+    <hr />
 
     <fieldset>
       <label>
