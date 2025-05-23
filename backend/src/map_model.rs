@@ -19,6 +19,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt;
 use utils::{osm2graph, Mercator, Tags};
 
+#[derive(Serialize, Deserialize)]
 pub struct MapModel {
     pub roads: Vec<Road>,
     pub intersections: Vec<Intersection>,
@@ -55,11 +56,14 @@ pub struct MapModel {
     pub is_main_road: BTreeMap<RoadID, bool>,
 
     // Not optional, but wrapped for the borrow checker
+    #[serde(skip)]
     pub impact: Option<Impact>,
     pub demand: Option<DemandModel>,
 
     // TODO Keep edits / state here or not?
+    #[serde(skip)]
     pub undo_stack: Vec<Command>,
+    #[serde(skip)]
     pub redo_stack: Vec<Command>,
     pub reclassifications_in_progress: BTreeSet<RoadID>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
@@ -67,15 +71,16 @@ pub struct MapModel {
     // Only present in serialized MapModels
     pub serialized_context_data: Option<ContextData>,
     // Only present after finish_loading
+    #[serde(skip)]
     pub context_data: Option<PreparedContextData>,
 
     // Only present after finish_loading
     pub project_details: Option<ProjectDetails>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct RoadID(pub usize);
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct IntersectionID(pub usize);
 
 impl fmt::Display for RoadID {
@@ -92,7 +97,7 @@ impl fmt::Display for IntersectionID {
 
 /// A segment of a road network - no intersections happen *within* a `Road`.
 /// An osm Way is divided into potentially multiple `Road`s
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Road {
     pub id: RoadID,
     pub src_i: IntersectionID,
@@ -143,7 +148,7 @@ impl Road {
 }
 
 /// Connection between `Road` (segments).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Intersection {
     pub id: IntersectionID,
     pub node: osm_reader::NodeID,
@@ -1175,7 +1180,7 @@ impl Road {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ModalFilter {
     pub kind: FilterKind,
     pub percent_along: f64,
@@ -1191,7 +1196,7 @@ pub struct ModalFilter {
 /// orientation for the diagonal filter, the other orientation would effectively block the intersection.
 /// We could choose to enforce "reasonable" filtering in the UI, or keep the interface consistent
 /// and leave it up to the user to manually ensure the filter is orientated reasonably.
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DiagonalFilter {
     /// Travel within these roads are allowed, but not to the other group.
     pub group_a: Vec<RoadID>,
@@ -1274,7 +1279,7 @@ impl From<&DiagonalFilter> for JsonValue {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum FilterKind {
     WalkCycleOnly,
     NoEntry,

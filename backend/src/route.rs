@@ -1,11 +1,12 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use fast_paths::{FastGraph, InputGraph, PathCalculator};
+use fast_paths::{deserialize_32, serialize_32, FastGraph, InputGraph, PathCalculator};
 use geo::{Coord, Euclidean, Length, LineLocatePoint, LineString};
 use itertools::Itertools;
 use rstar::{primitives::GeomWithData, RTree};
-use utils::{LineSplit, NodeMap};
+use serde::{Deserialize, Serialize};
+use utils::{deserialize_nodemap, LineSplit, NodeMap};
 
 use crate::map_model::{DiagonalFilter, Direction};
 use crate::{
@@ -13,9 +14,13 @@ use crate::{
 };
 
 // For vehicles only
+#[derive(Serialize, Deserialize)]
 pub struct Router {
+    #[serde(serialize_with = "serialize_32", deserialize_with = "deserialize_32")]
     ch: FastGraph,
-    path_calculator: RefCell<PathCalculator>,
+    #[serde(skip_serializing, skip_deserializing)]
+    path_calculator: RefCell<Option<PathCalculator>>,
+    #[serde(deserialize_with = "deserialize_nodemap")]
     node_map: NodeMap<(RoadID, Direction)>,
     pub main_road_penalty: f64,
 }
@@ -23,7 +28,7 @@ pub struct Router {
 impl Clone for Router {
     fn clone(&self) -> Self {
         let ch = self.ch.clone();
-        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let path_calculator = RefCell::new(Some(fast_paths::create_calculator(&ch)));
         let node_map = self.node_map.clone();
         let main_road_penalty = self.main_road_penalty;
         Self {
@@ -81,7 +86,7 @@ impl Router {
         let node_map = NodeMap::new();
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
-        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let path_calculator = RefCell::new(Some(fast_paths::create_calculator(&ch)));
 
         Self {
             ch,
@@ -133,7 +138,7 @@ impl Router {
         }
         input_graph.freeze();
         let ch = fast_paths::prepare(&input_graph);
-        let path_calculator = RefCell::new(fast_paths::create_calculator(&ch));
+        let path_calculator = RefCell::new(Some(fast_paths::create_calculator(&ch)));
 
         Self {
             ch,
@@ -282,6 +287,8 @@ impl Router {
         let shortest_path = self
             .path_calculator
             .borrow_mut()
+            // This'll be empty right after loading a serialized MapModel
+            .get_or_insert_with(|| fast_paths::create_calculator(&self.ch))
             .calc_path_multiple_sources_and_targets(&self.ch, start_nodes, end_nodes)?;
 
         let mut steps = Vec::new();

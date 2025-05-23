@@ -12,7 +12,6 @@ pub struct ZoneID(pub usize);
 #[derive(Serialize, Deserialize)]
 pub struct DemandModel {
     pub zones: Vec<Zone>,
-    #[serde(skip)]
     pub cached_zone_roads: Vec<Vec<RoadID>>,
     // (zone1, zone2, count), with count being the number of trips from zone1 to zone2
     pub desire_lines: Vec<(ZoneID, ZoneID, usize)>,
