@@ -13,8 +13,8 @@ use utils::{
 
 use crate::boundary_stats::{ContextData, POIKind, POI};
 use crate::{
-    impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
-    RoadID, Router, TravelFlow,
+    od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road, RoadID, Router,
+    TravelFlow,
 };
 
 #[derive(Default)]
@@ -239,7 +239,7 @@ pub fn create_from_osm(
         travel_flows,
         is_main_road,
 
-        impact: Some(Impact::default()),
+        impact: None,
         demand: None,
 
         undo_stack: Vec::new(),

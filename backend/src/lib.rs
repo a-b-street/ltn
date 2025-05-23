@@ -53,11 +53,12 @@ pub struct LTN {
 
 #[wasm_bindgen]
 impl LTN {
-    /// Call with bytes of an osm.pbf or osm.xml string
+    /// Either pass in map_model_input_bytes or the other 4 (context and demand optional)
     #[wasm_bindgen(constructor)]
     pub fn new(
-        input_bytes: &[u8],
         // Option doesn't work; the caller should just pass in 0 bytes to mean empty
+        map_model_input_bytes: &[u8],
+        osm_input_bytes: &[u8],
         demand_bytes: &[u8],
         context_data_bytes: &[u8],
         boundary_input: JsValue,
@@ -72,29 +73,34 @@ impl LTN {
             console_log::init_with_level(log::Level::Info).unwrap();
         });
 
-        let boundary: Feature = serde_wasm_bindgen::from_value(boundary_input)?;
-        let boundary_geom: geo::Geometry = boundary.try_into().map_err(err_to_js)?;
-        let multi_polygon = match boundary_geom {
-            geo::Geometry::Polygon(p) => p.into(),
-            geo::Geometry::MultiPolygon(mp) => mp,
-            _ => {
-                return Err(JsValue::from_str("unexpected boundary geometry type"));
-            }
-        };
-
-        let mut demand = None;
-        if demand_bytes.len() > 0 {
-            demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
-        }
-
-        let context_data: Option<ContextData> = if context_data_bytes.len() > 0 {
-            Some(bincode::deserialize(context_data_bytes).map_err(err_to_js)?)
+        let mut map = if map_model_input_bytes.len() > 0 {
+            info!("Deserializing {} bytes", map_model_input_bytes.len());
+            bincode::deserialize(map_model_input_bytes).map_err(err_to_js)?
         } else {
-            None
+            let boundary: Feature = serde_wasm_bindgen::from_value(boundary_input)?;
+            let boundary_geom: geo::Geometry = boundary.try_into().map_err(err_to_js)?;
+            let multi_polygon = match boundary_geom {
+                geo::Geometry::Polygon(p) => p.into(),
+                geo::Geometry::MultiPolygon(mp) => mp,
+                _ => {
+                    return Err(JsValue::from_str("unexpected boundary geometry type"));
+                }
+            };
+
+            let mut demand = None;
+            if demand_bytes.len() > 0 {
+                demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
+            }
+
+            let context_data: Option<ContextData> = if context_data_bytes.len() > 0 {
+                Some(bincode::deserialize(context_data_bytes).map_err(err_to_js)?)
+            } else {
+                None
+            };
+
+            MapModel::create_serialized(osm_input_bytes, multi_polygon, demand, context_data)
+                .map_err(err_to_js)?
         };
-
-        let mut map = MapModel::create_serialized(input_bytes, multi_polygon, demand, context_data)
-            .map_err(err_to_js)?;
         map.finish_loading(ProjectDetails {
             app_focus,
             study_area_name,
@@ -102,29 +108,6 @@ impl LTN {
             db_schema_version,
         });
 
-        Ok(LTN {
-            map,
-            neighbourhood: None,
-        })
-    }
-
-    /// Call with bytes of a serialized MapModel
-    #[wasm_bindgen(js_name = newFromFile)]
-    pub fn new_from_file(
-        input_bytes: &[u8],
-        app_focus: String,
-        study_area_name: Option<String>,
-        project_name: String,
-        db_schema_version: u32,
-    ) -> Result<LTN, JsValue> {
-        info!("Deserializing {} bytes", input_bytes.len());
-        let mut map: MapModel = bincode::deserialize(input_bytes).map_err(err_to_js)?;
-        map.finish_loading(ProjectDetails {
-            app_focus,
-            study_area_name,
-            project_name,
-            db_schema_version,
-        });
         Ok(LTN {
             map,
             neighbourhood: None,

@@ -306,6 +306,8 @@ impl MapModel {
             info!("Preparing context data");
             self.context_data = Some(context_data_wgs84.into_prepared(&self.mercator));
         }
+
+        self.impact = Some(Impact::default());
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
