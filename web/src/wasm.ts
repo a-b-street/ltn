@@ -57,25 +57,40 @@ export class Backend {
   inner: LTN;
 
   constructor(
-    osmInput: Uint8Array,
-    demandInput: Uint8Array | undefined,
-    contextDataInput: Uint8Array | undefined,
-    boundary: Feature<Polygon | MultiPolygon>,
+    input:
+      | {
+          kind: "individual";
+          osmInput: Uint8Array;
+          demandInput: Uint8Array | undefined;
+          contextDataInput: Uint8Array | undefined;
+          boundary: Feature<Polygon | MultiPolygon>;
+        }
+      | { kind: "bundle"; mapModelInput: Uint8Array },
     appFocus: AppFocus,
     studyAreaName: StudyAreaName,
     projectName: string,
     dbSchemaVersion: number,
   ) {
-    this.inner = new LTN(
-      osmInput,
-      demandInput || new Uint8Array(),
-      contextDataInput || new Uint8Array(),
-      boundary,
-      appFocus,
-      studyAreaName,
-      projectName,
-      dbSchemaVersion,
-    );
+    if (input.kind == "individual") {
+      this.inner = new LTN(
+        input.osmInput,
+        input.demandInput || new Uint8Array(),
+        input.contextDataInput || new Uint8Array(),
+        input.boundary,
+        appFocus,
+        studyAreaName,
+        projectName,
+        dbSchemaVersion,
+      );
+    } else {
+      this.inner = LTN.newFromFile(
+        input.mapModelInput,
+        appFocus,
+        studyAreaName,
+        projectName,
+        dbSchemaVersion,
+      );
+    }
   }
 
   getInvertedBoundary(): Feature<Polygon> {

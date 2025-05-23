@@ -108,6 +108,29 @@ impl LTN {
         })
     }
 
+    /// Call with bytes of a serialized MapModel
+    #[wasm_bindgen(js_name = newFromFile)]
+    pub fn new_from_file(
+        input_bytes: &[u8],
+        app_focus: String,
+        study_area_name: Option<String>,
+        project_name: String,
+        db_schema_version: u32,
+    ) -> Result<LTN, JsValue> {
+        info!("Deserializing {} bytes", input_bytes.len());
+        let mut map: MapModel = bincode::deserialize(input_bytes).map_err(err_to_js)?;
+        map.finish_loading(ProjectDetails {
+            app_focus,
+            study_area_name,
+            project_name,
+            db_schema_version,
+        });
+        Ok(LTN {
+            map,
+            neighbourhood: None,
+        })
+    }
+
     #[wasm_bindgen(js_name = getInvertedBoundary)]
     pub fn get_inverted_boundary(&self) -> Result<String, JsValue> {
         let f = Feature::from(Geometry::from(&self.map.invert_study_area_boundary()));
