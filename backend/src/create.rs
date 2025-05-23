@@ -12,7 +12,6 @@ use utils::{
 };
 
 use crate::boundary_stats::{ContextData, POIKind, POI};
-use crate::map_model::ProjectDetails;
 use crate::{
     impact::Impact, od::DemandModel, FilterKind, Intersection, IntersectionID, MapModel, Road,
     RoadID, Router, TravelFlow,
@@ -144,19 +143,17 @@ impl OsmReader for Osm {
 pub fn create_from_osm(
     input_bytes: &[u8],
     boundary_wgs84: MultiPolygon,
-    project_details: ProjectDetails,
     demand: Option<DemandModel>,
-    context_data_wgs84: Option<ContextData>,
+    mut serialized_context_data: Option<ContextData>,
 ) -> Result<MapModel> {
     let mut osm = Osm::default();
     let mut graph = Graph::new(input_bytes, is_road, &mut osm)?;
     remove_disconnected_components(&mut graph);
     graph.compact_ids();
 
-    let context_data = context_data_wgs84.map(|mut context_data_wgs84| {
-        context_data_wgs84.pois.extend(osm.pois);
-        context_data_wgs84.into_prepared(&graph.mercator)
-    });
+    if let Some(ref mut serialized_context_data) = serialized_context_data {
+        serialized_context_data.pois.extend(osm.pois);
+    }
 
     // Add in a bit
     let roads: Vec<Road> = graph
@@ -217,7 +214,7 @@ pub fn create_from_osm(
         bus_routes_on_roads: osm.bus_routes_on_roads,
         mercator: graph.mercator,
         boundary_wgs84,
-        project_details,
+        project_details: None,
         closest_road,
         closest_intersection,
 
@@ -249,7 +246,8 @@ pub fn create_from_osm(
         redo_stack: Vec::new(),
         reclassifications_in_progress: BTreeSet::new(),
         boundaries: BTreeMap::new(),
-        context_data,
+        serialized_context_data,
+        context_data: None,
     };
     if let Some(mut demand) = demand {
         info!("Load demand data");

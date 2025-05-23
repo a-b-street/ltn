@@ -38,18 +38,18 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
     let context_data = None;
     // No test cases need this
     let boundary_wgs84 = MultiPolygon::new(Vec::new());
-    let project_details = ProjectDetails {
+    let mut map = MapModel::create_serialized(
+        &std::fs::read(path).unwrap(),
+        boundary_wgs84,
+        demand,
+        context_data,
+    )
+    .unwrap();
+    map.finish_loading(ProjectDetails {
         project_name: "test-project".to_string(),
         study_area_name: None,
         app_focus: "global".to_string(),
         db_schema_version: TEST_DB_SCHEMA_VERSION,
-    };
-    MapModel::new(
-        &std::fs::read(path).unwrap(),
-        boundary_wgs84,
-        project_details,
-        demand,
-        context_data,
-    )
-    .unwrap()
+    });
+    map
 }

@@ -93,20 +93,15 @@ impl LTN {
             None
         };
 
-        let project_details = ProjectDetails {
+        let mut map = MapModel::create_serialized(input_bytes, multi_polygon, demand, context_data)
+            .map_err(err_to_js)?;
+        map.finish_loading(ProjectDetails {
             app_focus,
             study_area_name,
             project_name,
             db_schema_version,
-        };
-        let map = MapModel::new(
-            input_bytes,
-            multi_polygon,
-            project_details,
-            demand,
-            context_data,
-        )
-        .map_err(err_to_js)?;
+        });
+
         Ok(LTN {
             map,
             neighbourhood: None,

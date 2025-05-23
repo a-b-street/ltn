@@ -147,19 +147,19 @@ impl NeighbourhoodFixture {
         Ok(move || {
             let demand = self.demand_data();
             let context_data = self.context_data();
-            let project_details = ProjectDetails {
+            let mut map = MapModel::create_serialized(
+                &gunzipped,
+                multi_polygon.clone(),
+                demand,
+                context_data,
+            )?;
+            map.finish_loading(ProjectDetails {
                 project_name: self.savefile_name.to_string(),
                 study_area_name: Some(study_area_name.to_string()),
                 app_focus: "global".to_string(),
                 db_schema_version: TEST_DB_SCHEMA_VERSION,
-            };
-            MapModel::new(
-                &gunzipped,
-                multi_polygon.clone(),
-                project_details,
-                demand,
-                context_data,
-            )
+            });
+            Ok(map)
         })
     }
 

@@ -25,7 +25,6 @@ pub struct MapModel {
     pub bus_routes_on_roads: HashMap<osm_reader::WayID, Vec<String>>,
     // All geometry stored in worldspace, including rtrees
     pub mercator: Mercator,
-    pub project_details: ProjectDetails,
     pub boundary_wgs84: MultiPolygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
     pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
@@ -65,7 +64,13 @@ pub struct MapModel {
     pub reclassifications_in_progress: BTreeSet<RoadID>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
+    // Only present in serialized MapModels
+    pub serialized_context_data: Option<ContextData>,
+    // Only present after finish_loading
     pub context_data: Option<PreparedContextData>,
+
+    // Only present after finish_loading
+    pub project_details: Option<ProjectDetails>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
@@ -273,21 +278,29 @@ pub struct ProjectDetails {
 }
 
 impl MapModel {
-    /// Call with bytes of an osm.pbf or osm.xml string
-    pub fn new(
+    /// Call with bytes of an osm.pbf or osm.xml string. This returns a serializable form of
+    /// MapModel, not ready for use until `finish_loading`.
+    pub fn create_serialized(
         input_bytes: &[u8],
         boundary_wgs84: MultiPolygon,
-        project_details: ProjectDetails,
         demand: Option<DemandModel>,
         context_data: Option<ContextData>,
     ) -> Result<MapModel> {
-        crate::create::create_from_osm(
-            input_bytes,
-            boundary_wgs84,
-            project_details,
-            demand,
-            context_data,
-        )
+        crate::create::create_from_osm(input_bytes, boundary_wgs84, demand, context_data)
+    }
+
+    /// After deserializing, this must be called before the MapModel can be fully used.
+    pub fn finish_loading(&mut self, project_details: ProjectDetails) {
+        assert!(
+            self.project_details.is_none(),
+            "finish_loading called twice"
+        );
+        self.project_details = Some(project_details);
+
+        if let Some(context_data_wgs84) = self.serialized_context_data.take() {
+            info!("Preparing context data");
+            self.context_data = Some(context_data_wgs84.into_prepared(&self.mercator));
+        }
     }
 
     pub fn get_r(&self, r: RoadID) -> &Road {
@@ -786,10 +799,13 @@ impl MapModel {
         gj.foreign_members = Some(
             // The features are elements within the study area, we store properties of the
             // project itself as foreign members.
-            serde_json::json!(&self.project_details)
-                .as_object()
-                .unwrap()
-                .to_owned(),
+            serde_json::json!(self
+                .project_details
+                .as_ref()
+                .expect("finish_loading never called"))
+            .as_object()
+            .unwrap()
+            .to_owned(),
         );
         gj
     }
