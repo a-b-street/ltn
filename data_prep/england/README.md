@@ -12,17 +12,18 @@ ogr2ogr boundaries.geojson -nlt PROMOTE_TO_MULTI tmp.geojson
 rm -f tmp.geojson
 ```
 
-## OD data
+## Generating map model files
 
 ```
 ./get_input.sh
 
-mkdir -p ../../web/public/england/demand
+mkdir -p ../../web/public/england/maps_v1
 
 # If needed, `cd ../common; cargo build --release; cd ../england`
-../../target/release/generate_od \
+../../target/release/generate_map_models \
   --study-area-boundaries boundaries.geojson \
+  --osm-input-dir tmp/osm_out/ \
   --od-zones zones.geojson \
   --od-csv od.csv \
-  --out-dir ../../web/public/england/demand/
+  --out-dir ../../web/public/england/maps_v1/
 ```

@@ -7,15 +7,23 @@ use geo::{Intersects, MultiPolygon};
 use serde::Deserialize;
 use utils::Mercator;
 
-use backend::od::{DemandModel, ZoneID};
+use backend::{
+    od::{DemandModel, ZoneID},
+    MapModel,
+};
 use common_data_prep::StudyArea;
 
 #[derive(FromArgs)]
-/// Generate travel demand (OD) model
+/// Generate MapModel files with travel demand (OD) data
 struct Args {
     /// path to study area boundaries.geojson, with a `kind` and `name` property
     #[argh(option)]
     study_area_boundaries: String,
+
+    /// path to the directory where osm.pbf input files exist, in the form
+    /// `{study_area.kind}_{study_area.name}.osm.pbf`
+    #[argh(option)]
+    osm_input_dir: String,
 
     /// path to a zones.geojson, with a `name` property
     #[argh(option)]
@@ -49,7 +57,7 @@ fn main() -> Result<()> {
     println!("Read {} desire lines", desire_lines.len());
 
     for study_area in study_areas {
-        let subset_zones = find_matching_zones(study_area.geometry, &zones);
+        let subset_zones = find_matching_zones(&study_area.geometry, &zones);
 
         let mut subset_desire_lines = Vec::new();
         for row in &desire_lines {
@@ -70,16 +78,24 @@ fn main() -> Result<()> {
             desire_lines: subset_desire_lines,
             cached_zone_roads: vec![],
         };
+
+        let context_data = None;
+        let map = MapModel::create_serialized(
+            &fs_err::read(format!(
+                "{}/{}_{}.osm.pbf",
+                args.osm_input_dir, study_area.kind, study_area.name
+            ))?,
+            study_area.geometry,
+            Some(demand),
+            context_data,
+        )?;
+
         let path = format!(
             "{}/{}_{}.bin",
             args.out_dir, study_area.kind, study_area.name
         );
-        println!(
-            "Writing {path} with {} matching zones and {} desire lines",
-            demand.zones.len(),
-            demand.desire_lines.len()
-        );
-        fs_err::write(&path, bincode::serialize(&demand)?)?;
+        println!("Writing {path}");
+        fs_err::write(&path, bincode::serialize(&map)?)?;
 
         println!("Running: gzip {path}");
         if !Command::new("gzip").arg(&path).status()?.success() {
@@ -115,12 +131,12 @@ struct DesireLineRow {
 
 /// Returns a mapping from original zone name to sequential IDs
 fn find_matching_zones(
-    boundary_wgs84: MultiPolygon,
+    boundary_wgs84: &MultiPolygon,
     zones: &BTreeMap<String, Zone>,
 ) -> BTreeMap<String, ZoneID> {
     let mut matches = BTreeSet::new();
     let mercator = Mercator::from(boundary_wgs84.clone()).unwrap();
-    let boundary_mercator = mercator.to_mercator(&boundary_wgs84);
+    let boundary_mercator = mercator.to_mercator(boundary_wgs84);
 
     for zone in zones.values() {
         let zone_mercator = mercator.to_mercator(&zone.geometry);
