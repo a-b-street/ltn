@@ -31,8 +31,13 @@ export async function loadProject(projectID: ProjectID) {
   let project = get(projectStorage).project(projectID);
   try {
     console.time("get input files");
-    let { osmBuffer, demandBuffer, contextDataBuffer, boundary } =
-      await getInputFiles(project);
+    let {
+      osmBuffer,
+      demandBuffer,
+      contextDataBuffer,
+      boundary,
+      mapModelBuffer,
+    } = await getInputFiles(project);
     console.timeEnd("get input files");
     loadingMessage.set("Download finished, setting up project");
     // TODO The animation won't work, because we block the UI thread below
@@ -42,10 +47,19 @@ export async function loadProject(projectID: ProjectID) {
     console.time("load");
     backend.set(
       new Backend(
-        new Uint8Array(osmBuffer),
-        demandBuffer ? new Uint8Array(demandBuffer) : undefined,
-        contextDataBuffer ? new Uint8Array(contextDataBuffer) : undefined,
-        boundary,
+        mapModelBuffer
+          ? { kind: "bundle", mapModelInput: mapModelBuffer }
+          : {
+              kind: "individual",
+              osmInput: new Uint8Array(osmBuffer!),
+              demandInput: demandBuffer
+                ? new Uint8Array(demandBuffer)
+                : undefined,
+              contextDataInput: contextDataBuffer
+                ? new Uint8Array(contextDataBuffer)
+                : undefined,
+              boundary: boundary!,
+            },
         project.app_focus,
         project.study_area_name,
         project.project_name,
@@ -66,13 +80,16 @@ export async function loadProject(projectID: ProjectID) {
   loadingProgress.set(null);
 }
 
-// Returns OSM input, optional demand model input, and the boundary polygon,
-// either from pre-hosted files or from Overpass.
+// Returns input needed to set up the LTN backend, either from pre-hosted files
+// or from Overpass.
 async function getInputFiles(project: ProjectFeatureCollection): Promise<{
-  osmBuffer: Uint8Array<ArrayBufferLike>;
-  boundary: Feature<Polygon | MultiPolygon>;
+  osmBuffer?: Uint8Array<ArrayBufferLike>;
+  boundary?: Feature<Polygon | MultiPolygon>;
   demandBuffer?: Uint8Array<ArrayBufferLike>;
   contextDataBuffer?: Uint8Array<ArrayBufferLike>;
+
+  // This one bundled version replaces all the others
+  mapModelBuffer?: Uint8Array<ArrayBufferLike>;
 }> {
   if (project.app_focus == "cnt") {
     // CNT projects are stored in a different place
@@ -109,26 +126,10 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
 
     return { osmBuffer, boundary, demandBuffer, contextDataBuffer };
   } else if (project.app_focus == "england") {
-    let osmBuffer = await download(
-      assetUrl(`england/osm/${project.study_area_name}.osm.pbf.gz`),
+    let mapModelBuffer = await download(
+      assetUrl(`england/maps_v1/${project.study_area_name}.bin.gz`),
     );
-
-    let url2 = assetUrl(
-      `england/boundaries/${project.study_area_name}.geojson`,
-    );
-    let resp2 = await safeFetch(url2);
-    let boundary = await resp2.json();
-
-    let demandBuffer = undefined;
-    try {
-      demandBuffer = await download(
-        assetUrl(`england/demand/${project.study_area_name}.bin.gz`),
-      );
-    } catch (err) {
-      console.log(`No demand model: ${err}`);
-    }
-
-    return { osmBuffer, boundary, demandBuffer };
+    return { mapModelBuffer };
   } else if (project.study_area_name) {
     let osmBuffer = await download(
       assetUrl(`severance_pbfs/${project.study_area_name}.pbf`),
