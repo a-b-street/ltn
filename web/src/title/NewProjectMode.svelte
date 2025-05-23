@@ -39,13 +39,11 @@
     try {
       let studyAreaName = undefined;
       $backend = new Backend(
-        {
-          kind: "individual",
-          osmInput: new TextEncoder().encode(e.detail.xml),
-          demandInput: undefined,
-          contextDataInput: undefined,
-          boundary: e.detail.boundary,
-        },
+        undefined,
+        new TextEncoder().encode(e.detail.xml),
+        undefined,
+        undefined,
+        e.detail.boundary,
         $appFocus,
         studyAreaName,
         newProjectName,

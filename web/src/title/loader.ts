@@ -47,19 +47,11 @@ export async function loadProject(projectID: ProjectID) {
     console.time("load");
     backend.set(
       new Backend(
-        mapModelBuffer
-          ? { kind: "bundle", mapModelInput: mapModelBuffer }
-          : {
-              kind: "individual",
-              osmInput: new Uint8Array(osmBuffer!),
-              demandInput: demandBuffer
-                ? new Uint8Array(demandBuffer)
-                : undefined,
-              contextDataInput: contextDataBuffer
-                ? new Uint8Array(contextDataBuffer)
-                : undefined,
-              boundary: boundary!,
-            },
+        mapModelBuffer ? new Uint8Array(mapModelBuffer) : undefined,
+        osmBuffer ? new Uint8Array(osmBuffer) : undefined,
+        demandBuffer ? new Uint8Array(demandBuffer) : undefined,
+        contextDataBuffer ? new Uint8Array(contextDataBuffer) : undefined,
+        boundary,
         project.app_focus,
         project.study_area_name,
         project.project_name,
