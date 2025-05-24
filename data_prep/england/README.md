@@ -19,8 +19,7 @@ rm -f tmp.geojson
 
 mkdir -p ../../web/public/england/maps_v1
 
-# If needed, `cd ../common; cargo build --release; cd ../england`
-../../target/release/generate_map_models \
+cargo run --release --
   --study-area-boundaries boundaries.geojson \
   --osm-input-dir tmp/osm_out/ \
   --od-zones zones.geojson \
