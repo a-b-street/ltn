@@ -52,7 +52,7 @@ pub struct LTN {
 
 #[wasm_bindgen]
 impl LTN {
-    /// Either pass in map_model_input_bytes or the other 4 (context and demand optional)
+    /// Either pass in `map_model_input_bytes` or `osm_input_bytes` and `boundary_input`
     #[wasm_bindgen(constructor)]
     pub fn new(
         // Option doesn't work; the caller should just pass in 0 bytes to mean empty
