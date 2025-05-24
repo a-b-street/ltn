@@ -1,50 +1,61 @@
-use anyhow::{bail, Context, Result};
+use crate::StudyArea;
+use anyhow::{Context, Result};
 use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZone, POI};
-use common_data_prep::StudyArea;
-use geo::{MultiPolygon, Point, Relate};
-use scotland_data_prep::PopulationZoneInput;
-use serde::Deserialize;
+use geo::{MultiPolygon, Point, PreparedGeometry, Relate};
+use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
-use std::process::Command;
 use std::time::Instant;
 
-fn main() -> Result<()> {
-    println!("Generating prioritization code");
-    let start = Instant::now();
+pub struct BuildContextData {
+    car_ownership_data_zones: HashMap<String, CarOwnershipDataZone>,
+    population_zone_inputs: Vec<PopulationZoneInput>,
+    stats19_collisions_input: Vec<Stats19Input>,
+    pois_input: Vec<POI>,
+    all_settlements: HashMap<String, SettlementsInput>,
+}
 
-    let car_ownership_data_zones = CarOwnershipDataZone::read_all_from_file_as_map()?;
+impl BuildContextData {
+    pub fn new() -> Result<Self> {
+        let start = Instant::now();
+        let car_ownership_data_zones = CarOwnershipDataZone::read_all_from_file_as_map()?;
 
-    let study_areas = StudyArea::read_all_prepared_from_file("boundaries.geojson")?;
-    println!("Time since start {:?}", start.elapsed());
-    let population_zone_inputs = PopulationZoneInput::read_all_from_file()?;
-    println!("Time since start {:?}", start.elapsed());
-    let stats19_collisions_input = Stats19Input::read_all_from_file()?;
-    let pois_input = InputPOI::read_all_from_files()?;
+        println!("Time since start {:?}", start.elapsed());
+        let population_zone_inputs = PopulationZoneInput::read_all_from_file()?;
+        println!("Time since start {:?}", start.elapsed());
+        let stats19_collisions_input = Stats19Input::read_all_from_file()?;
+        let pois_input = InputPOI::read_all_from_files()?;
 
-    let mut all_settlements = SettlementsInput::read_all_from_file()?;
+        let all_settlements = SettlementsInput::read_all_from_file()?;
 
-    for (idx, study_area) in study_areas.iter().enumerate() {
-        let study_area_start = Instant::now();
-        println!(
-            "Starting {} ({} / {})",
-            study_area.1.name,
-            idx + 1,
-            study_areas.len()
-        );
+        Ok(Self {
+            car_ownership_data_zones,
+            population_zone_inputs,
+            stats19_collisions_input,
+            pois_input,
+            all_settlements,
+        })
+    }
 
-        let settlements = all_settlements.remove(&study_area.1.name).unwrap().geometry;
+    pub fn build_for_area(&self, study_area: &StudyArea) -> Result<ContextData> {
+        let prepared_study_area = PreparedGeometry::from(study_area.geometry.clone());
+
+        let settlements = self
+            .all_settlements
+            .get(&study_area.name)
+            .unwrap()
+            .geometry
+            .clone();
         let mut population_zones = Vec::new();
         let mut stats19_collisions = Vec::new();
         let mut pois = Vec::new();
 
         // Store the area per population zone temporarily, to calculate buckets
-        for population_zone_input in &population_zone_inputs {
-            if study_area
-                .0
+        for population_zone_input in &self.population_zone_inputs {
+            if prepared_study_area
                 .relate(&population_zone_input.geometry)
                 .is_intersects()
             {
-                let car_ownership = &car_ownership_data_zones[&population_zone_input.id];
+                let car_ownership = &self.car_ownership_data_zones[&population_zone_input.id];
                 population_zones.push(PopulationZone {
                     geometry: population_zone_input.geometry.geometry().clone(),
                     imd_percentile: population_zone_input.imd_percentile,
@@ -55,50 +66,73 @@ fn main() -> Result<()> {
             }
         }
 
-        for pt in &stats19_collisions_input {
-            if study_area.0.relate(&pt.geometry).is_contains() {
+        for pt in &self.stats19_collisions_input {
+            if prepared_study_area.relate(&pt.geometry).is_contains() {
                 stats19_collisions.push(pt.geometry);
             }
         }
 
-        for poi in &pois_input {
-            if study_area.0.relate(&poi.point).is_contains() {
+        for poi in &self.pois_input {
+            if prepared_study_area.relate(&poi.point).is_contains() {
                 pois.push(poi.clone());
             }
         }
 
         let metric_buckets =
-            calculate_metric_buckets(&population_zone_inputs, &stats19_collisions, &pois)?;
-        let context_data = ContextData {
+            calculate_metric_buckets(&self.population_zone_inputs, &stats19_collisions, &pois)?;
+        Ok(ContextData {
             settlements,
             population_zones,
             stats19_collisions,
             pois,
             metric_buckets,
-        };
-        let path = format!(
-            "../../web/public/cnt/prioritization/{}_{}.bin",
-            study_area.1.kind, study_area.1.name
-        );
-        fs_err::write(&path, bincode::serialize(&context_data)?)?;
-        println!(
-            "Wrote {} population zones to {} (took {:?})",
-            context_data.population_zones.len(),
-            path,
-            study_area_start.elapsed()
-        );
+        })
+    }
+}
 
-        println!("Running: gzip {path}");
-        if !Command::new("gzip").arg(&path).status()?.success() {
-            bail!("`gzip {path}` failed");
-        }
+#[derive(Deserialize)]
+struct PopulationZoneInput {
+    #[serde(deserialize_with = "deserialize_prepared_multipolygon")]
+    geometry: PreparedGeometry<'static, MultiPolygon>,
+
+    // "id": "S01006506",
+    id: String,
+
+    // "imd_rank": 4691,
+    // (unused)
+
+    // "imd_percentile": 68,
+    imd_percentile: u8,
+
+    // "population": 894,
+    population: u32,
+
+    // "area": 4388802.1221970674
+    area: f64,
+}
+
+fn deserialize_prepared_multipolygon<'de, D>(
+    deserializer: D,
+) -> std::result::Result<PreparedGeometry<'static, MultiPolygon>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let multi_polygon: MultiPolygon = geojson::de::deserialize_geometry(deserializer)?;
+    Ok(PreparedGeometry::from(multi_polygon))
+}
+
+impl PopulationZoneInput {
+    fn read_all_from_file() -> Result<Vec<Self>> {
+        let population_zones = geojson::de::deserialize_feature_collection_str_to_vec(
+            &fs_err::read_to_string("tmp/population.geojson")?,
+        )?;
+        println!("Read {} population zones", population_zones.len());
+        Ok(population_zones)
     }
 
-    println!("Time since start {:?}", start.elapsed());
-
-    println!("All done!");
-
-    Ok(())
+    fn area_km2(&self) -> f64 {
+        self.area / 1000.0 / 1000.0
+    }
 }
 
 // Ignore all properties
@@ -119,8 +153,8 @@ impl Stats19Input {
 #[derive(Deserialize)]
 struct InputPOI {
     #[serde(deserialize_with = "geojson::de::deserialize_geometry")]
-    pub geometry: Point,
-    pub name: Option<String>,
+    geometry: Point,
+    name: Option<String>,
 }
 
 impl InputPOI {
