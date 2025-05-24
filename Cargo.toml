@@ -1,8 +1,5 @@
 [workspace]
-members = [
-  "backend",
-  "data_prep/common",
-]
+members = ["backend", "data_prep"]
 
 resolver = "2"
 

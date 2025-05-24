@@ -4,7 +4,6 @@ use backend::boundary_stats::{ContextData, MetricBuckets, POIKind, PopulationZon
 use geo::{MultiPolygon, Point, PreparedGeometry, Relate};
 use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
-use std::time::Instant;
 
 pub struct BuildContextData {
     car_ownership_data_zones: HashMap<String, CarOwnershipDataZone>,
@@ -15,13 +14,11 @@ pub struct BuildContextData {
 }
 
 impl BuildContextData {
+    // The input paths are all baked in
     pub fn new() -> Result<Self> {
-        let start = Instant::now();
         let car_ownership_data_zones = CarOwnershipDataZone::read_all_from_file_as_map()?;
 
-        println!("Time since start {:?}", start.elapsed());
         let population_zone_inputs = PopulationZoneInput::read_all_from_file()?;
-        println!("Time since start {:?}", start.elapsed());
         let stats19_collisions_input = Stats19Input::read_all_from_file()?;
         let pois_input = InputPOI::read_all_from_files()?;
 

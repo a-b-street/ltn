@@ -4,7 +4,7 @@ This code is specific to Scotland, adapted from the Network Planning Tool projec
 
 `boundaries.geojson` comes from <https://github.com/nptscot/npw/tree/main/data_prep>, turning polygons into multipolygons by doing `ogr2ogr boundaries.geojson -nlt PROMOTE_TO_MULTI path/to/npw/boundaries.geojson`
 
-## OD data
+## Prepare OD data
 
 ```
 # Install https://github.com/medialab/xan if needed
@@ -19,20 +19,25 @@ wget https://maps.gov.scot/ATOM/shapefiles/SG_IntermediateZoneBdry_2011.zip
 unzip SG_IntermediateZoneBdry_2011.zip
 ogr2ogr zones.geojson -t_srs EPSG:4326 -nlt PROMOTE_TO_MULTI SG_IntermediateZone_Bdry_2011.shp -sql 'SELECT InterZone as name FROM SG_IntermediateZone_Bdry_2011'
 rm -f SG_IntermediateZone_Bdry_2011* SG_IntermediateZoneBdry_2011.zip
+```
 
-mkdir -p ../../web/public/cnt/demand
+## Prepare other input data
 
-# If needed, `cd ../common; cargo build --release; cd ../scotland`
-../../target/release/generate_od \
+```
+./get_reference_layers.sh
+./build_cnt_lad_settlements.sh
+```
+
+## Generating map model files
+
+```
+mkdir -p ../../web/public/cnt/maps_v1
+
+cargo run --release -- \
   --study-area-boundaries boundaries.geojson \
+  --osm-input-dir tmp/osm_out/ \
   --od-zones zones.geojson \
   --od-csv od.csv \
-  --out-dir ../../web/public/cnt/demand/
-```
-
-## Prioritization data
-
-```
-mkdir -p ../../web/public/cnt/prioritization
-cargo run --release --bin generate_prioritization
+  --scotland-context-data \
+  --out-dir ../../web/public/cnt/maps_v1/
 ```

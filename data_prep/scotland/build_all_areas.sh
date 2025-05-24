@@ -26,17 +26,6 @@ function split_osm {
         for batch in osmium_cfg_*; do
           time osmium extract -v -c $batch ../scotland-latest.osm.pbf
         done
-
-        # Gzip everything
-        cd ../osm_out
-        for x in *; do
-          gzip "$x"
-        done
 }
 
 split_osm
-
-echo "To use these files:"
-echo "  mkdir -p ../../web/public/cnt/osm ../../web/public/cnt/boundaries"
-echo "  mv tmp/osm_out/* ../../web/public/cnt/osm/"
-echo "  mv tmp/osmium_inputs/*geojson ../../web/public/cnt/boundaries/"
