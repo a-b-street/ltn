@@ -3,7 +3,6 @@ extern crate anyhow;
 #[macro_use]
 extern crate log;
 
-use self::boundary_stats::ContextData;
 pub use self::cells::Cell;
 pub use self::map_model::{
     FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID,
@@ -59,8 +58,6 @@ impl LTN {
         // Option doesn't work; the caller should just pass in 0 bytes to mean empty
         map_model_input_bytes: &[u8],
         osm_input_bytes: &[u8],
-        demand_bytes: &[u8],
-        context_data_bytes: &[u8],
         boundary_input: JsValue,
         app_focus: String,
         study_area_name: Option<String>,
@@ -87,17 +84,8 @@ impl LTN {
                 }
             };
 
-            let mut demand = None;
-            if demand_bytes.len() > 0 {
-                demand = Some(bincode::deserialize(demand_bytes).map_err(err_to_js)?);
-            }
-
-            let context_data: Option<ContextData> = if context_data_bytes.len() > 0 {
-                Some(bincode::deserialize(context_data_bytes).map_err(err_to_js)?)
-            } else {
-                None
-            };
-
+            let demand = None;
+            let context_data = None;
             MapModel::create_serialized(osm_input_bytes, multi_polygon, demand, context_data)
                 .map_err(err_to_js)?
         };

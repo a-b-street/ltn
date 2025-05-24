@@ -59,8 +59,6 @@ export class Backend {
   constructor(
     mapModelInput: Uint8Array | undefined,
     osmInput: Uint8Array | undefined,
-    demandInput: Uint8Array | undefined,
-    contextDataInput: Uint8Array | undefined,
     boundary: Feature<Polygon | MultiPolygon> | undefined,
     appFocus: AppFocus,
     studyAreaName: StudyAreaName,
@@ -70,8 +68,6 @@ export class Backend {
     this.inner = new LTN(
       mapModelInput || new Uint8Array(),
       osmInput || new Uint8Array(),
-      demandInput || new Uint8Array(),
-      contextDataInput || new Uint8Array(),
       boundary,
       appFocus,
       studyAreaName,

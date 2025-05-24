@@ -41,8 +41,6 @@
       $backend = new Backend(
         undefined,
         new TextEncoder().encode(e.detail.xml),
-        undefined,
-        undefined,
         e.detail.boundary,
         $appFocus,
         studyAreaName,
