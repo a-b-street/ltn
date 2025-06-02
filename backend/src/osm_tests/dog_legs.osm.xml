@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version="0.6" generator="osmium/1.14.0">
+  <node id="-1" lat="55.7044659" lon="-0.1155036"/>
+  <node id="-2" lat="55.7044407" lon="-0.1120972"/>
+  <node id="-3" lat="55.7044632" lon="-0.1151368"/>
+  <node id="-4" lat="55.7048387" lon="-0.115137"/>
+  <node id="-5" lat="55.7044626" lon="-0.1151036"/>
+  <node id="-6" lat="55.7041602" lon="-0.1150517"/>
+  <node id="-7" lat="55.704458" lon="-0.114435"/>
+  <node id="-8" lat="55.7042162" lon="-0.1144258"/>
+  <node id="-9" lat="55.7044576" lon="-0.1143798"/>
+  <node id="-10" lat="55.7042193" lon="-0.1143725"/>
+  <way id="-1">
+    <nd ref="-1"/>
+    <nd ref="-3"/>
+    <nd ref="-5"/>
+    <nd ref="-7"/>
+    <nd ref="-9"/>
+    <nd ref="-2"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="main"/>
+  </way>
+  <way id="-2">
+    <nd ref="-3"/>
+    <nd ref="-4"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="dog-leg 1"/>
+  </way>
+  <way id="-3">
+    <nd ref="-5"/>
+    <nd ref="-6"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="dog-leg 2"/>
+  </way>
+  <way id="-4">
+    <nd ref="-7"/>
+    <nd ref="-8"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="dont transform 1"/>
+  </way>
+  <way id="-5">
+    <nd ref="-9"/>
+    <nd ref="-10"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="dont transform 2"/>
+  </way>
+</osm>

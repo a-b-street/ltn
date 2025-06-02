@@ -1,6 +1,6 @@
 use crate::map_model::ProjectDetails;
 use crate::test_fixtures::TEST_DB_SCHEMA_VERSION;
-use crate::MapModel;
+use crate::{Intersection, MapModel};
 use geo::MultiPolygon;
 
 #[test]
@@ -29,6 +29,38 @@ fn test_no_left_turn() {
     assert!(map.get_r(restrictions[0].1).tags.is("name", "west"));
 }
 
+#[test]
+fn test_dog_legs() {
+    let map = load_osm_xml("dog_legs");
+
+    // There should be one 4-way intersection
+    let four_ways = map
+        .intersections
+        .iter()
+        .filter(|i| i.roads.len() == 4)
+        .collect::<Vec<_>>();
+    assert_eq!(four_ways.len(), 1);
+    assert_eq!(
+        get_connected_roads(four_ways[0], &map),
+        vec!["dog-leg 1", "dog-leg 2", "main", "main"]
+    );
+
+    // There should be two 3-way intersections
+    let three_ways = map
+        .intersections
+        .iter()
+        .filter(|i| i.roads.len() == 3)
+        .collect::<Vec<_>>();
+    assert_eq!(three_ways.len(), 2);
+    for three_way in three_ways {
+        let names = get_connected_roads(three_way, &map);
+        assert!(
+            names == vec!["dont transform 1", "main", "main"]
+                || names == vec!["dont transform 2", "main", "main"]
+        );
+    }
+}
+
 pub fn load_osm_xml(filename: &str) -> MapModel {
     let path = format!(
         "{}/src/osm_tests/{filename}.osm.xml",
@@ -52,4 +84,14 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
         db_schema_version: TEST_DB_SCHEMA_VERSION,
     });
     map
+}
+
+fn get_connected_roads<'a>(intersection: &'a Intersection, map: &'a MapModel) -> Vec<&'a String> {
+    let mut names: Vec<&String> = intersection
+        .roads
+        .iter()
+        .map(|r| map.get_r(*r).tags.get("name").unwrap())
+        .collect();
+    names.sort();
+    names
 }
