@@ -517,7 +517,7 @@ dependencies = [
 [[package]]
 name = "geojson"
 version = "0.24.2"
-source = "git+https://github.com/georust/geojson#5380bfded95dd5c020ddd62b0769899b50fab42a"
+source = "git+https://github.com/georust/geojson#7d5f52b69536408ee528fb9590d062cbbb03593f"
 dependencies = [
  "geo-types",
  "log",
@@ -1244,7 +1244,7 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#2e724ae0378250f4580dd002c91fce0ed2d3d223"
+source = "git+https://github.com/a-b-street/utils#e345a9cb753717c883b0f300f53486c7a20aeb55"
 dependencies = [
  "anyhow",
  "fast_paths",
