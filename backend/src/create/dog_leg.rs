@@ -31,6 +31,9 @@ fn detect_dog_leg(graph: &Graph, e: EdgeID) -> Option<(EdgeID, EdgeID)> {
     if Euclidean.length(&edge.linestring) > 5.0 {
         return None;
     }
+    if !edge.osm_tags.has("name") {
+        return None;
+    }
     let src_i = &graph.intersections[&edge.src];
     let dst_i = &graph.intersections[&edge.dst];
     let mut src_edges = src_i.edges.clone();

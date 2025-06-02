@@ -53,6 +53,7 @@ fn main() -> Result<()> {
     };
 
     for study_area in study_areas {
+        println!("Working on {}", study_area.name);
         let demand_data = Some(demand_models.build_for_area(&study_area));
         let context_data = match context_data_builder {
             Some(ref context_data_builder) => {
@@ -74,10 +75,10 @@ fn main() -> Result<()> {
             "{}/{}_{}.bin",
             args.out_dir, study_area.kind, study_area.name
         );
-        println!("Writing {path}");
+        println!("  Writing {path}");
         fs_err::write(&path, bincode::serialize(&map)?)?;
 
-        println!("Running: gzip {path}");
+        println!("  Running: gzip {path}");
         if !Command::new("gzip").arg(&path).status()?.success() {
             bail!("`gzip {path}` failed");
         }
@@ -96,9 +97,10 @@ struct StudyArea {
 
 impl StudyArea {
     fn read_all_from_file(path: &str) -> Result<Vec<Self>> {
-        let study_areas =
+        let mut study_areas: Vec<StudyArea> =
             geojson::de::deserialize_feature_collection_str_to_vec(&fs_err::read_to_string(path)?)?;
         println!("Read {} study area boundaries", study_areas.len());
+        study_areas.sort_by_key(|s| s.name.clone());
         Ok(study_areas)
     }
 }

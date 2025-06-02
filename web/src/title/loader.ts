@@ -75,12 +75,12 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
 }> {
   if (project.app_focus == "cnt") {
     let mapModelBuffer = await download(
-      assetUrl(`cnt/maps_v1/${project.study_area_name}.bin.gz`),
+      assetUrl(`cnt/maps_v2/${project.study_area_name}.bin.gz`),
     );
     return { mapModelBuffer };
   } else if (project.app_focus == "england") {
     let mapModelBuffer = await download(
-      assetUrl(`england/maps_v1/${project.study_area_name}.bin.gz`),
+      assetUrl(`england/maps_v2/${project.study_area_name}.bin.gz`),
     );
     return { mapModelBuffer };
   } else if (project.study_area_name) {
