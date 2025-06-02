@@ -14,6 +14,7 @@ use crate::{
     RoadID, Router, TravelFlow,
 };
 
+mod dog_leg;
 mod parse;
 
 pub fn create_from_osm(
@@ -25,6 +26,8 @@ pub fn create_from_osm(
     let mut osm = parse::Osm::default();
     let mut graph = Graph::new(input_bytes, parse::is_road, &mut osm)?;
     remove_disconnected_components(&mut graph);
+    info!("Collapsing dog-leg intersections");
+    dog_leg::collapse_dog_legs(&mut graph);
     graph.compact_ids();
 
     if let Some(ref mut serialized_context_data) = serialized_context_data {
