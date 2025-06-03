@@ -14,7 +14,6 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {
     downloadProject,
-    HelpButton,
     layerId,
     Link,
     ModeLink,
@@ -170,19 +169,6 @@
         </li>
         <li>
           {pageTitle($mode.mode)}
-          <HelpButton>
-            <p>
-              Inside the neighbourhood you define, the goal is to eliminate (or
-              deliberately permit) through-traffic. An appropriate neighbourhood
-              boundary depends on many factors. The simplest approach is to find
-              the area bounded on all sides by "main" roads, which are designed
-              for higher traffic volumes. There are many other considerations,
-              though -- maybe severances like rivers or rail should be part of a
-              boundary. Bridges and tunnels near a boundary may be confusing as
-              well. And note that your boundary may not match the conventional
-              definition of "neighbourhood."
-            </p>
-          </HelpButton>
         </li>
       </ul>
     </nav>

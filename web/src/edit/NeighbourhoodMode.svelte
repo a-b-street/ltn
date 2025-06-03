@@ -31,7 +31,6 @@
   import mainRoadIconUrl from "../../assets/traffic_1.svg?url";
   import AnimatePaths from "../AnimatePaths.svelte";
   import {
-    HelpButton,
     initTooltips,
     layerId,
     ModeLink,
@@ -341,15 +340,6 @@
         </li>
         <li>
           {pageTitle($mode.mode)}
-          <HelpButton>
-            <p>
-              Now that you've defined a neighbourhood boundary, you can see the
-              possible shortcuts that vehicles are currently able to take
-              through it. You can add a new modal filter to try and solve this.
-              The colored "cell" areas show what's reachable for drivers without
-              leaving the boundary you've drawn.
-            </p>
-          </HelpButton>
         </li>
       </ul>
     </nav>
