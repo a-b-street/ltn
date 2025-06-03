@@ -14,7 +14,7 @@
   import ContextualLayers from "./context/ContextualLayers.svelte";
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import initLtn from "backend";
-  import { House } from "lucide-svelte";
+  import { CircleHelp, House } from "lucide-svelte";
   import type { LngLatBoundsLike, Map } from "maplibre-gl";
   import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
@@ -170,6 +170,13 @@
         <img src={logo} style="height: 32px;" alt="A/B Street logo" />
       </button>
       <span bind:this={topDiv} style="width: 100%" />
+      <button
+        class="icon-btn"
+        title="User guide"
+        on:click={() => window.open("user_guide.html", "_blank")}
+      >
+        <CircleHelp color="black" />
+      </button>
     </div>
     <div class="pico" slot="left">
       <div bind:this={sidebarDiv} />

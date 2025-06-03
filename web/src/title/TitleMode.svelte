@@ -130,6 +130,8 @@
         </div>
       {/if}
 
+      <a href="user_guide.html" target="_blank">Read the user guide</a>
+
       {#if studyAreas.length > 0}
         <h2>Your projects</h2>
         <div class="project-list">

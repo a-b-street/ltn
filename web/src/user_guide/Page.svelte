@@ -37,7 +37,7 @@
 
 <div class="container">
   <div class="contents">
-    <h1>User guide for the Low-Traffic Neighbourhood Tool</h1>
+    <h1>User guide for the Connected Neighbourhood Tool</h1>
 
     <h2 id="overview">Overview</h2>
     <p>
@@ -487,7 +487,7 @@
     <h3 id="changelog">Changelog</h3>
     <p>As this tool is updated, changes will be described here:</p>
     <ul>
-      <li>v1, XX June 2025 - first main release</li>
+      <li>v1, 4 June 2025 - first main release</li>
     </ul>
 
     <h3 id="credits">Credits</h3>
