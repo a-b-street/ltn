@@ -101,9 +101,6 @@ export let projectStorage: Readable<ProjectStorage> = derived(
 
 export let firstTimeLoadProjectFromURL = writable(true);
 
-// False until user activates
-export let showAbout: Writable<boolean> = writable(false);
-
 export let backend: Writable<Backend | null> = writable(null);
 // This changes alongside the backend and isn't valid for non-CNT areas. Rather
 // than express `| null` in TS and deal with it everywhere, just set default

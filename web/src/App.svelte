@@ -28,7 +28,7 @@
     NavigationControl,
     ScaleControl,
   } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
+  import { Modal, notNull } from "svelte-utils";
   import { Geocoder } from "svelte-utils/map";
   import {
     Layout,
@@ -58,7 +58,6 @@
     maptilerApiKey,
     maptilerBasemap,
     mode,
-    showAbout,
     useLocalVite,
     type AppFocus,
   } from "./stores";
@@ -141,6 +140,8 @@
       style = `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
     }
   }
+
+  let showAbout = false;
 </script>
 
 <svelte:head>
@@ -148,7 +149,15 @@
 </svelte:head>
 
 <div class="pico">
-  <About />
+  <Modal bind:show={showAbout}>
+    {#if appFocus == "cnt"}
+      <h1>The Connected Neighbourhoods Tool</h1>
+    {:else}
+      <h1>The Low-Traffic Neighbourhood (LTN) tool, v2</h1>
+    {/if}
+
+    <About />
+  </Modal>
 </div>
 <div class="app-focus-{$appFocusStore}">
   <Layout>
@@ -157,7 +166,7 @@
       class="pico"
       style="display: flex; align-items: center; gap: 8px;"
     >
-      <button class="outline" on:click={() => ($showAbout = true)}>
+      <button class="outline" on:click={() => (showAbout = true)}>
         <img src={logo} style="height: 32px;" alt="A/B Street logo" />
       </button>
       <span bind:this={topDiv} style="width: 100%" />
