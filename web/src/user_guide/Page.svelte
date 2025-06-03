@@ -1,4 +1,7 @@
 <script lang="ts">
+  import "@picocss/pico/css/pico.conditional.jade.min.css";
+  import Toc from "svelte-toc";
+  import About from "../About.svelte";
   import image01 from "./image01.webp?url";
   import image02 from "./image02.webp?url";
   import image03 from "./image03.webp?url";
@@ -30,8 +33,6 @@
   import image29 from "./image29.webp?url";
   import image30 from "./image30.webp?url";
   import image31 from "./image31.webp?url";
-  import "@picocss/pico/css/pico.conditional.jade.min.css";
-  import Toc from "svelte-toc";
 </script>
 
 <div class="container">
@@ -490,7 +491,7 @@
     </ul>
 
     <h3 id="credits">Credits</h3>
-    <p>TODO share</p>
+    <About />
   </div>
   <div class="toc">
     <Toc title="Table of Contents" />
