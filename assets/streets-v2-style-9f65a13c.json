@@ -1603,6 +1603,89 @@
       ]
     },
     {
+      "id": "Bridge outline",
+      "type": "line",
+      "source": "maptiler_planet",
+      "source-layer": "transportation",
+      "minzoom": 13,
+      "maxzoom": 17,
+      "layout": {
+        "line-cap": "butt",
+        "line-join": "round",
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "hsl(43, 50%, 93%)",
+        "line-opacity": 0.5,
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          13,
+          [
+            "match",
+            [
+              "get",
+              "class"
+            ],
+            [
+              "trunk",
+              "primary"
+            ],
+            5,
+            8
+          ],
+          15,
+          [
+            "match",
+            [
+              "get",
+              "class"
+            ],
+            [
+              "trunk",
+              "primary"
+            ],
+            15,
+            22
+          ],
+          17,
+          [
+            "match",
+            [
+              "get",
+              "class"
+            ],
+            [
+              "trunk",
+              "primary"
+            ],
+            20,
+            24
+          ]
+        ]
+      },
+      "filter": [
+        "all",
+        [
+          "!=",
+          "brunnel",
+          "tunnel"
+        ],
+        [
+          "in",
+          "class",
+          "motorway",
+          "primary",
+          "trunk"
+        ]
+      ]
+    },
+    {
       "id": "Bridge",
       "type": "fill",
       "source": "maptiler_planet",
@@ -1792,7 +1875,7 @@
         "visibility": "visible"
       },
       "paint": {
-        "line-color": "hsl(0,0%,20%)",
+        "line-color": "hsl(0, 0%, 20%)",
         "line-opacity": 1,
         "line-width": [
           "interpolate",
@@ -3889,8 +3972,8 @@
             "zoom"
           ],
           250,
-          22,
-          500
+          21,
+          1000
         ],
         "text-allow-overlap": false,
         "text-anchor": "center",
@@ -4650,8 +4733,11 @@
           [
             "image",
             [
-              "get",
-              "subclass"
+              "to-string",
+              [
+                "get",
+                "subclass"
+              ]
             ]
           ],
           [
@@ -5303,8 +5389,11 @@
           [
             "image",
             [
-              "get",
-              "subclass"
+              "to-string",
+              [
+                "get",
+                "subclass"
+              ]
             ]
           ],
           [
@@ -5556,8 +5645,11 @@
           [
             "image",
             [
-              "get",
-              "subclass"
+              "to-string",
+              [
+                "get",
+                "subclass"
+              ]
             ]
           ],
           [
@@ -8030,15 +8122,5 @@
     0,
     0
   ],
-  "zoom": 1,
-  "light": {
-    "anchor": "viewport",
-    "color": "#FFFFFF",
-    "intensity": 0.5,
-    "position": [
-      1.15,
-      180,
-      0
-    ]
-  }
+  "zoom": 1
 }
