@@ -742,6 +742,7 @@
         map={notNull($map)}
         finish={finishSnapping}
         cancel={() => (action = { kind: "main-roads", tool: "toggle" })}
+        waypoints={[]}
       />
     {/if}
 

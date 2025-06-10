@@ -118,6 +118,9 @@ const layerZorder = [
   "draw-area-area",
   "draw-area-lines-preview",
 
+  "draw-route-lines",
+  "draw-route-preview",
+
   "debug-demand-fill",
   "debug-demand-outline",
 
