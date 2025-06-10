@@ -540,17 +540,6 @@ impl LTN {
         )
     }
 
-    #[wasm_bindgen(js_name = getAllNeighbourhoods)]
-    pub fn get_all_neighbourhoods(&self) -> Result<String, JsValue> {
-        let features = self
-            .map
-            .boundaries
-            .values()
-            .map(|neighbourhood| neighbourhood.to_feature(&self.map));
-        let fc = FeatureCollection::from_iter(features);
-        Ok(serde_json::to_string(&fc).map_err(err_to_js)?)
-    }
-
     #[wasm_bindgen(js_name = getAllIntersections)]
     pub fn get_all_intersections(&self) -> Result<String, JsValue> {
         Ok(serde_json::to_string(&GeoJson::from(

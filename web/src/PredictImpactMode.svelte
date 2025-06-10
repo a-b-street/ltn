@@ -36,7 +36,7 @@
     max_count: 1,
   };
   $: recalculate($fastSample);
-  let neighbourhoods = $backend!.getAllNeighbourhoods();
+  let neighbourhoods = $backend!.toSavefile();
 
   let minRoadWidth = 3;
   let maxRoadWidth = 10;

@@ -35,13 +35,18 @@
     devMode,
     metricBuckets,
     mode,
+    mutationCounter,
     saveCurrentProject,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: neighbourhoods = $backend!.getAllNeighbourhoods();
-  $: edits = countEdits(neighbourhoods);
+  $: gj = $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson();
+  $: neighbourhoods = {
+    type: "FeatureCollection",
+    features: gj.features.filter((f) => f.properties.kind == "boundary"),
+  };
+  $: edits = countEdits(gj);
 
   // If a user loads an empty project or deletes all neighbourhoods, don't show
   // them an empty pick screen
@@ -70,8 +75,7 @@
       $backend!.deleteNeighbourhoodBoundary(name);
       console.assert(!currentNeighbourhoodName);
       saveCurrentProject();
-      // TODO Improve perf, don't call this twice
-      neighbourhoods = $backend!.getAllNeighbourhoods();
+      $mutationCounter++;
     }
   }
 
@@ -85,7 +89,7 @@
       $backend!.renameNeighbourhoodBoundary(name, newName);
       $currentNeighbourhoodName = newName;
       saveCurrentProject();
-      neighbourhoods = $backend!.getAllNeighbourhoods();
+      $mutationCounter++;
     }
   }
 
