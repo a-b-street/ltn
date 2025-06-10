@@ -1,8 +1,13 @@
 # Low-traffic neighbourhood tool v2
 
-This is a new version of [ltn.abstreet.org](https://ltn.abstreet.org). It
-doesn't have all features from v1 yet, but it solves many problems with the
-original. Please try both versions and give feedback.
+LTNs are a traffic management measure to stop excessive through-traffic cutting
+through residential streets. This is an interactive web app for rapidly
+exploring their design.
+
+- Global version: https://a-b-street.github.io/ltn (import anywhere from OpenStreetMap)
+- England: https://a-b-street.github.io/ltn/england.html
+- Scotland: https://cnt.scot
+- Read the user guide: https://a-b-street.github.io/ltn/user_guide.html
 
 ## Developer docs
 
