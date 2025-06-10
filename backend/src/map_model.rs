@@ -615,7 +615,7 @@ impl MapModel {
             Command::SetModalFilter(r, filter) => {
                 let prev = self.modal_filters.get(&r).cloned();
                 if let Some(filter) = filter {
-                    info!("added a filter to {r} at {}%", filter.percent_along);
+                    info!("added a filter to {r} at {:.1}%", filter.percent_along);
                     self.modal_filters.insert(r, filter);
                 } else {
                     info!("deleted a filter from {r}");
