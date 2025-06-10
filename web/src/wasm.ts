@@ -298,13 +298,6 @@ export class Backend {
     );
   }
 
-  getAllNeighbourhoods(): FeatureCollection<
-    NeighbourhoodBoundaryFeature["geometry"],
-    NeighbourhoodBoundaryFeature["properties"]
-  > {
-    return JSON.parse(this.inner.getAllNeighbourhoods());
-  }
-
   getAllIntersections(): FeatureCollection<
     Point,
     { intersection_id: number; has_turn_restrictions: boolean; osm: string }
