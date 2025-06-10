@@ -485,7 +485,12 @@
 
     <h2 id="appendix">Appendix</h2>
     <h3 id="changelog">Changelog</h3>
-    <p>As this tool is updated, changes will be described here:</p>
+    <p>
+      As this tool is updated, major changes will be described here. See <a
+        href="https://github.com/a-b-street/ltn/commits/main/"
+        target="_blank">Github</a
+      > for detailed changes.
+    </p>
     <ul>
       <li>v1, 4 June 2025 - first main release</li>
     </ul>

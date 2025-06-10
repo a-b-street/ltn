@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FeatureCollection } from "geojson";
+  import type { FeatureCollection, Polygon } from "geojson";
   import { CirclePlus, FileDown, Pencil, Trash2 } from "lucide-svelte";
   import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
@@ -10,7 +10,7 @@
     LineLayer,
   } from "svelte-maplibre";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
+  import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import {
     downloadProject,
@@ -43,9 +43,9 @@
   // Note we do this to trigger a refresh when loading stuff
   $: gj = $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson();
   $: neighbourhoods = {
-    type: "FeatureCollection",
-    features: gj.features.filter((f) => f.properties.kind == "boundary"),
-  };
+    type: "FeatureCollection" as const,
+    features: gj.features.filter((f) => f.properties!.kind == "boundary"),
+  } as FeatureCollection<Polygon, { name: string }>;
   $: edits = countEdits(gj);
 
   // If a user loads an empty project or deletes all neighbourhoods, don't show
