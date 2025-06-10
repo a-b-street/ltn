@@ -2,13 +2,15 @@ name: Deploy web
 
 on:
   push:
-    branches: [main]
+    branches: [main, before_after_V2]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install node
         uses: actions/setup-node@v3
@@ -29,16 +31,34 @@ jobs:
       - name: Build web app
         run: |
           cd web
-          npm ci
-          npm run wasm-release
-          npm run build --if-present -- --base=/ltn/
+          mkdir deployme
+          for branch in main before_after_V2; do
+            echo "Building $branch"
+            git checkout $branch
 
-          # TODO Vite suddenly broke and I have no idea why. Hack around it.
-          # new URL('backend_bg.wasm', import.meta.url) doesn't exist at build time, it will remain unchanged to be resolved at runtime
-          ln -s assets/backend_bg.wasm dist/
+            npm ci
+            npm run wasm-release
+            if [ "$branch" == "main" ]; then
+              npm run build --if-present -- --base=/ltn/
+            else
+              npm run build --if-present -- --base=/ltn/$branch
+            fi
+
+            # TODO Vite suddenly broke and I have no idea why. Hack around it.
+            # new URL('backend_bg.wasm', import.meta.url) doesn't exist at build time, it will remain unchanged to be resolved at runtime
+            ln -s assets/backend_bg.wasm dist/
+
+            if [ "$branch" == "main" ]; then
+              mv dist/* deployme
+            else
+              mv dist deployme/$branch
+            fi
+          done
+
+          ls -R deployme
 
       - name: Publish
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web/dist/
+          publish_dir: ./web/deployme/
