@@ -227,7 +227,7 @@
   }
 
   function onKeyDown(e: KeyboardEvent) {
-    if (neighbourhoodBoundary) {
+    if (e.key == "Enter" && neighbourhoodBoundary) {
       createNeighbourhood(neighbourhoodBoundary);
     }
   }

@@ -430,7 +430,7 @@
   }
 
   /* Form Controls */
-  :global(#app .pico [type="checkbox", role!="switch"]),
+  :global(#app .pico [type="checkbox"] :not([role="switch"])),
   :global(#app .pico [type="radio"]) {
     width: 1em;
     height: 1em;
