@@ -225,7 +225,15 @@
     drawnBoundary = null;
     neighbourhoodBoundary = null;
   }
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (neighbourhoodBoundary) {
+      createNeighbourhood(neighbourhoodBoundary);
+    }
+  }
 </script>
+
+<svelte:window on:keydown={onKeyDown} />
 
 <Loading {loading} />
 
