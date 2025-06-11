@@ -317,8 +317,10 @@
     $mutationCounter++;
   }
 
-  function finishSnapping(roads: number[]) {
-    window.alert("TODO");
+  function finishSnapping(intersections: number[]) {
+    $backend!.setMainRoads(intersections);
+    $mutationCounter++;
+    action = { kind: "main-roads", tool: "toggle" };
   }
 
   let shortcutDescriptionText =

@@ -5,8 +5,8 @@
   import { onDestroy } from "svelte";
   import { GeoJSON, LineLayer, MapEvents, Marker } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
-  import { routeTool, type Waypoint } from "../common/draw_area/stores";
   import { layerId } from "../common";
+  import { routeTool, type Waypoint } from "../common/draw_area/stores";
 
   export let map: Map;
   export let waypoints: Waypoint[];
@@ -95,6 +95,7 @@
     hoveringOnMarker = false;
   }
 
+  // TODO Types are wrong
   function calculateRoutes(
     routeTool: RouteTool | null,
     waypoints: Waypoint[],
@@ -192,7 +193,19 @@
     captureUndoState();
     draggingMarker = true;
   }
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key == "Escape") {
+      cancel();
+    }
+    if (e.key == "Enter" && waypoints.length > 1) {
+      let gj = calculateRoutes($routeTool, waypoints);
+      finish(gj.properties.full_path.map((step) => step.snapped));
+    }
+  }
 </script>
+
+<svelte:window on:keydown={onKeyDown} />
 
 <MapEvents on:click={onMapClick} on:mousemove={onMouseMove} />
 
