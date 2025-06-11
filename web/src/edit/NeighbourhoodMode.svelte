@@ -255,6 +255,18 @@
     if ((e.target as HTMLElement).tagName == "INPUT") {
       return;
     }
+
+    // In the middle of more complex interactions, don't allow any keypresses
+    if (action.kind == "filter" && action.freehand) {
+      return;
+    }
+    if (action.kind == "main-roads" && action.tool != "toggle") {
+      return;
+    }
+    if (action.kind == "turn_restriction" && action.from_road_id != null) {
+      return;
+    }
+
     if (e.ctrlKey && e.key == "z") {
       undo();
     }
