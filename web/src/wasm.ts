@@ -210,6 +210,10 @@ export class Backend {
     this.inner.reclassifyRoadsAlongLine(line, isMain, addToUndoStack);
   }
 
+  setMainRoads(intersections: number[]) {
+    this.inner.setMainRoads(new Uint32Array(intersections));
+  }
+
   addTurnRestriction(from_road: number, to_road: number) {
     this.inner.addTurnRestriction(from_road, to_road);
   }

@@ -389,6 +389,21 @@ impl LTN {
         self.after_main_road_edit()
     }
 
+    #[wasm_bindgen(js_name = setMainRoads)]
+    pub fn set_main_roads(&mut self, intersections: Vec<usize>) -> Result<(), JsValue> {
+        // Beyond map.intersections.length, these represent synthetic, planar nodes created by
+        // route_snapper.
+        let intersection_ids: Vec<IntersectionID> = intersections
+            .into_iter()
+            .filter(|i| *i < self.map.intersections.len())
+            .map(|i| IntersectionID(i))
+            .collect();
+        self.map
+            .set_main_roads(self.neighbourhood.as_ref().unwrap(), intersection_ids);
+        self.after_edit();
+        self.after_main_road_edit()
+    }
+
     #[wasm_bindgen(js_name = eraseAllMainRoads)]
     pub fn erase_all_main_roads(&mut self) -> Result<(), JsValue> {
         self.map

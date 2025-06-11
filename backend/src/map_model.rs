@@ -15,7 +15,7 @@ use geo::{
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fmt;
 use utils::{osm2graph, Mercator, Tags};
 
@@ -594,6 +594,35 @@ impl MapModel {
         self.after_edited();
     }
 
+    pub fn set_main_roads(
+        &mut self,
+        neighbourhood: &Neighbourhood,
+        intersections: Vec<IntersectionID>,
+    ) {
+        let mut roads = HashSet::new();
+        for pair in intersections.windows(2) {
+            if let Some(road) = self.find_road_between(pair[0], pair[1]) {
+                roads.insert(road.id);
+            }
+        }
+
+        // These roads could go outside this neighbourhood. Just intersect with this
+        // neighbourhood's interior roads to find the ones to turn into main roads.
+        let cmds = neighbourhood
+            .interior_roads
+            .iter()
+            .filter(|r| roads.contains(r))
+            .map(|r| Command::SetMainRoad(*r, true))
+            .collect::<Vec<_>>();
+        if cmds.is_empty() {
+            return;
+        }
+        let undo_cmd = self.do_edit(Command::Multiple(cmds));
+        self.undo_stack.push(undo_cmd);
+        self.redo_stack.clear();
+        self.after_edited();
+    }
+
     pub fn erase_all_main_roads(&mut self, neighbourhood: &Neighbourhood) {
         let cmds = neighbourhood
             .main_roads
@@ -1158,6 +1187,26 @@ impl MapModel {
     pub fn get_bus_routes_on_road(&self, r: RoadID) -> Option<&Vec<String>> {
         let way = self.get_r(r).way;
         self.bus_routes_on_roads.get(&way)
+    }
+
+    /// Find the shortest Road going from `i1` to `i2` or vice versa. When there are multiple roads
+    /// between the intersections, return the shortest.
+    fn find_road_between(&self, i1: IntersectionID, i2: IntersectionID) -> Option<&Road> {
+        // TODO Maybe disallow this entirely
+        if i1 == i2 {
+            return None;
+        }
+
+        let mut candidates = Vec::new();
+        for r in &self.get_i(i1).roads {
+            let road = self.get_r(*r);
+            if road.src_i == i2 || road.dst_i == i2 {
+                candidates.push(road);
+            }
+        }
+        candidates
+            .into_iter()
+            .min_by_key(|road| (Euclidean.length(&road.linestring) * 1000.0) as usize)
     }
 }
 
