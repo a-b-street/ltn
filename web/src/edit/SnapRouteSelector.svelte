@@ -178,6 +178,7 @@
     let gj = calculateRoute($routeTool, waypoints);
     if (gj) {
       finish(gj.properties.full_path.map((step) => step.snapped));
+      waypoints = [];
     } else {
       cancel();
     }
