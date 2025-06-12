@@ -242,9 +242,11 @@
     <ol>
       <li>Find all entrances and exits onto streets from the main roads</li>
       <li>
-        For every combination, calculate the shortest driving route, restricted
-        to not cross a main road
+        For every combination, calculate the fastest driving route, using the
+        speed limit and length of each road. Main roads are penalised as having
+        half their speed limit, to simulate delays in heavy traffic conditions.
       </li>
+      <li>Any route that crosses a main road is discarded</li>
       <li>Count the number of routes crossing each street segment</li>
     </ol>
     <p>
@@ -493,6 +495,12 @@
     </p>
     <ul>
       <li>v1, 4 June 2025 - first main release</li>
+      <li>
+        12 June 2025 - detecting more shortcuts, see <a
+          href="https://github.com/a-b-street/ltn/pull/381"
+          target="_blank">details</a
+        >
+      </li>
     </ul>
 
     <h3 id="credits">Credits</h3>

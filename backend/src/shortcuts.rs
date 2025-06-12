@@ -21,7 +21,8 @@ impl Shortcuts {
     pub fn new(map: &MapModel, neighbourhood: &Neighbourhood, cells: &Vec<Cell>) -> Self {
         let router_input_after = neighbourhood.shortcuts_router_input_after(map);
         let router_input_before = neighbourhood.shortcuts_router_input_before(map);
-        let router_after = Router::new(&router_input_after, 1.0);
+        // Heavily penalize using main roads, so more shortcuts use local roads.
+        let router_after = Router::new(&router_input_after, 2.0);
 
         let mut paths = Vec::new();
         let mut count_per_road = HashMap::new();
