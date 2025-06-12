@@ -2,7 +2,7 @@ name: Deploy web
 
 on:
   push:
-    branches: [main, before_after_V2, shortcut_calculation, mark_main_roads_route_snapper_V2]
+    branches: [main, before_after_V2]
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
         run: |
           cd web
           mkdir deployme
-          for branch in main before_after_V2 shortcut_calculation mark_main_roads_route_snapper_V2; do
+          for branch in main before_after_V2; do
             echo "Building $branch"
             git checkout $branch
 
