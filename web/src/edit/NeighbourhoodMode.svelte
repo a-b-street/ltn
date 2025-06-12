@@ -307,7 +307,6 @@
       action.kind == "main-roads" && action.tool == "snap-route-main";
     $backend!.setMainRoads(intersections, makeMainRoad);
     $mutationCounter++;
-    action = { kind: "main-roads", tool: "toggle" };
   }
 
   let shortcutDescriptionText =
