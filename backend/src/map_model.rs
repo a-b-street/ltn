@@ -1192,7 +1192,6 @@ impl MapModel {
     /// Find the shortest Road going from `i1` to `i2` or vice versa. When there are multiple roads
     /// between the intersections, return the shortest.
     fn find_road_between(&self, i1: IntersectionID, i2: IntersectionID) -> Option<&Road> {
-        // TODO Maybe disallow this entirely
         if i1 == i2 {
             return None;
         }

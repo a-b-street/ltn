@@ -363,9 +363,10 @@
       sense in the context of a larger circulation plan, a redesign to the
       strategic road network in the wider area, or when the main road is a high
       street with heavy foot and cycling traffic. No matter the reason, you can
-      mark new main roads or erase main roads using one of the tools. After
-      removing those two interior main roads, the neighbourhood looks like one
-      big cell:
+      mark new main roads or erase main roads using one of the tools. In complex
+      areas, it may be simplest to first <i>Erase all main roads</i> and then
+      <i>Mark as main along a route</i>. After removing those two interior main
+      roads, the neighbourhood looks like one big cell:
     </p>
     <img alt="" src={image25} />
     <p>

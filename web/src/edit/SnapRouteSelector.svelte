@@ -3,7 +3,13 @@
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { RouteTool } from "route-snapper-ts";
   import { onDestroy } from "svelte";
-  import { GeoJSON, LineLayer, MapEvents, Marker } from "svelte-maplibre";
+  import {
+    GeoJSON,
+    LineLayer,
+    MapEvents,
+    Marker,
+    Popup,
+  } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { routeTool, type Waypoint } from "../common/draw_area/stores";
@@ -158,12 +164,22 @@
       cancel();
     }
     if (e.key == "Enter" && waypoints.length > 1) {
-      let gj = calculateRoute($routeTool, waypoints);
-      if (gj) {
-        finish(gj.properties.full_path.map((step) => step.snapped));
-      } else {
-        cancel();
-      }
+      finishDrawing();
+    }
+  }
+
+  function clickWaypoint(idx: number) {
+    if (waypoints.length > 1 && idx == waypoints.length - 1) {
+      finishDrawing();
+    }
+  }
+
+  function finishDrawing() {
+    let gj = calculateRoute($routeTool, waypoints);
+    if (gj) {
+      finish(gj.properties.full_path.map((step) => step.snapped));
+    } else {
+      cancel();
     }
   }
 </script>
@@ -194,6 +210,7 @@
   <Marker
     draggable
     bind:lngLat={waypt.point}
+    on:click={() => clickWaypoint(idx)}
     on:contextmenu={() => removeWaypoint(idx)}
     on:mouseenter={() => (hoveringOnMarker = true)}
     on:mouseleave={() => (hoveringOnMarker = false)}
@@ -202,6 +219,21 @@
     zIndex={1}
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
+    <Popup openOn="hover" popupClass="waypoint-popup">
+      <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
+        <li>
+          <b>Click and drag</b>
+          to move
+        </li>
+        <li>
+          <b>Right click</b>
+          to delete
+        </li>
+        {#if waypoints.length > 1 && idx == waypoints.length - 1}
+          <li><b>Click</b> to mark everything highlighted as a main road</li>
+        {/if}
+      </ul>
+    </Popup>
   </Marker>
 {/each}
 
@@ -212,7 +244,7 @@
   <LineLayer
     {...layerId("draw-route-lines")}
     paint={{
-      "line-color": "black",
+      "line-color": "purple",
       "line-width": 10,
     }}
   />
@@ -253,9 +285,9 @@
 
   .free-node,
   .snapped-node {
-    width: 20px;
-    height: 20px;
-    background-color: grey;
+    width: 10px;
+    height: 10px;
+    background-color: white;
   }
 
   .snapped-node:hover {
@@ -268,5 +300,11 @@
 
   .hide {
     visibility: hidden;
+  }
+
+  /* See comments in AreaControls for rationale */
+  :global(.waypoint-popup) {
+    padding-bottom: 16px;
+    z-index: 2;
   }
 </style>
