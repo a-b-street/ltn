@@ -230,7 +230,7 @@
           to delete
         </li>
         {#if waypoints.length > 1 && idx == waypoints.length - 1}
-          <li><b>Click</b> to mark everything highlighted as a main road</li>
+          <li><b>Click</b> to reclassify everything highlighted</li>
         {/if}
       </ul>
     </Popup>

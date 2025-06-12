@@ -1,9 +1,6 @@
 mod slice_nearest_boundary;
 pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 
-mod roads_along_line;
-pub use roads_along_line::roads_along_line;
-
 use anyhow::Result;
 use geo::line_measures::InterpolatableLine;
 use geo::{

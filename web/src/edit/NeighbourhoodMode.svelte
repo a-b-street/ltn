@@ -1,14 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, LineString } from "geojson";
-  import {
-    Eraser,
-    Paintbrush,
-    Pointer,
-    Redo,
-    Route,
-    Trash2,
-    Undo,
-  } from "lucide-svelte";
+  import { Eraser, Pointer, Redo, Route, Trash2, Undo, Paintbrush } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import {
@@ -89,7 +81,7 @@
       }
     | {
         kind: "main-roads";
-        tool: "toggle" | "freehand-main" | "freehand-erase" | "snap-route";
+        tool: "toggle" | "snap-route-main" | "snap-route-erase";
       };
   function startTurnRestrictionAction(): Action {
     return {
@@ -111,12 +103,12 @@
   }
 
   $: {
-    if (
-      (action.kind == "filter" && action.freehand) ||
-      (action.kind == "main-roads" && action.tool == "freehand-main")
-    ) {
+    if (action.kind == "filter" && action.freehand) {
       $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
-    } else if (action.kind == "main-roads" && action.tool == "freehand-erase") {
+    } else if (
+      action.kind == "main-roads" &&
+      action.tool == "snap-route-erase"
+    ) {
       $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
     } else {
       $map!.getCanvas().style.cursor = "";
@@ -305,32 +297,15 @@
     action = { kind: "filter", freehand: false };
   }
 
-  function paintedRoadClassificationsLine(
-    e: CustomEvent<Feature<LineString> | null>,
-    addToUndoStack: boolean,
-  ) {
-    if (action.kind != "main-roads") {
-      console.assert(false, "cant paint line unless in main-roads mode");
-      return;
-    }
-    let f = e.detail;
-    if (f) {
-      $backend!.reclassifyRoadsAlongLine(
-        f,
-        action.tool == "freehand-main",
-        addToUndoStack,
-      );
-      $mutationCounter++;
-    }
-  }
-
   function eraseAllMainRoads() {
     $backend!.eraseAllMainRoads();
     $mutationCounter++;
   }
 
   function finishSnapping(intersections: number[]) {
-    $backend!.setMainRoads(intersections);
+    let makeMainRoad =
+      action.kind == "main-roads" && action.tool == "snap-route-main";
+    $backend!.setMainRoads(intersections, makeMainRoad);
     $mutationCounter++;
     action = { kind: "main-roads", tool: "toggle" };
   }
@@ -564,10 +539,10 @@
 
           <button
             on:click={() => {
-              action = { kind: "main-roads", tool: "snap-route" };
+              action = { kind: "main-roads", tool: "snap-route-main" };
             }}
-            class:active={action.tool == "snap-route"}
-            class:outline={action.tool != "snap-route"}
+            class:active={action.tool == "snap-route-main"}
+            class:outline={action.tool != "snap-route-main"}
             data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -578,25 +553,11 @@
 
           <button
             on:click={() => {
-              action = { kind: "main-roads", tool: "freehand-main" };
+              action = { kind: "main-roads", tool: "snap-route-erase" };
             }}
-            class:active={action.tool == "freehand-main"}
-            class:outline={action.tool != "freehand-main"}
-            data-tippy-content="Reclassify multiple roads by drawing a line along them"
-          >
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <Paintbrush />
-              <span>Mark as main along a line</span>
-            </div>
-          </button>
-
-          <button
-            on:click={() => {
-              action = { kind: "main-roads", tool: "freehand-erase" };
-            }}
-            class:active={action.tool == "freehand-erase"}
-            class:outline={action.tool != "freehand-erase"}
-            data-tippy-content="Reclassify multiple roads by drawing a line along them"
+            class:active={action.tool == "snap-route-erase"}
+            class:outline={action.tool != "snap-route-erase"}
+            data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <Eraser />
@@ -745,13 +706,7 @@
 
     {#if action.kind == "filter" && action.freehand}
       <FreehandLine map={notNull($map)} on:done={paintedModalFiltersLine} />
-    {:else if action.kind == "main-roads" && (action.tool == "freehand-main" || action.tool == "freehand-erase")}
-      <FreehandLine
-        map={notNull($map)}
-        on:done={(e) => paintedRoadClassificationsLine(e, true)}
-        on:progress={(e) => paintedRoadClassificationsLine(e, false)}
-      />
-    {:else if action.kind == "main-roads" && action.tool == "snap-route"}
+    {:else if action.kind == "main-roads" && action.tool != "toggle"}
       <SnapRouteSelector
         map={notNull($map)}
         finish={finishSnapping}
