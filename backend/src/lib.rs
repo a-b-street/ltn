@@ -366,31 +366,12 @@ impl LTN {
         self.after_main_road_edit()
     }
 
-    /// Takes a LineString feature
-    #[wasm_bindgen(js_name = reclassifyRoadsAlongLine)]
-    pub fn reclassify_roads_along_line(
-        &mut self,
-        input: JsValue,
-        is_main_road: bool,
-        add_to_undo_stack: bool,
-    ) -> Result<(), JsValue> {
-        let gj: Feature = serde_wasm_bindgen::from_value(input)?;
-        let mut line: LineString = gj.try_into().map_err(err_to_js)?;
-        debug_assert!(!line.0.is_empty());
-        self.map.mercator.to_mercator_in_place(&mut line);
-        self.map.reclassify_roads_along_line(
-            self.neighbourhood.as_ref().unwrap(),
-            line,
-            is_main_road,
-            add_to_undo_stack,
-        );
-
-        self.after_edit();
-        self.after_main_road_edit()
-    }
-
     #[wasm_bindgen(js_name = setMainRoads)]
-    pub fn set_main_roads(&mut self, intersections: Vec<usize>) -> Result<(), JsValue> {
+    pub fn set_main_roads(
+        &mut self,
+        intersections: Vec<usize>,
+        make_main_road: bool,
+    ) -> Result<(), JsValue> {
         // Beyond map.intersections.length, these represent synthetic, planar nodes created by
         // route_snapper.
         let intersection_ids: Vec<IntersectionID> = intersections
@@ -398,8 +379,11 @@ impl LTN {
             .filter(|i| *i < self.map.intersections.len())
             .map(|i| IntersectionID(i))
             .collect();
-        self.map
-            .set_main_roads(self.neighbourhood.as_ref().unwrap(), intersection_ids);
+        self.map.set_main_roads(
+            self.neighbourhood.as_ref().unwrap(),
+            intersection_ids,
+            make_main_road,
+        );
         self.after_edit();
         self.after_main_road_edit()
     }

@@ -1,6 +1,6 @@
 use crate::boundary_stats::{ContextData, PreparedContextData};
 use crate::geo_helpers::{
-    aabb, angle_between_bearings, angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb,
+    angle_between_bearings, angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb,
     invert_multi_polygon, limit_angle, linestring_intersection, split_bearing,
 };
 use crate::impact::Impact;
@@ -10,7 +10,7 @@ use crate::{od::DemandModel, Neighbourhood, Router};
 use anyhow::Result;
 use geo::{
     line_measures::InterpolatableLine, Closest, ClosestPoint, Coord, Distance, Euclidean, Length,
-    LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Simplify,
+    LineLocatePoint, LineString, MultiPolygon, Point, Polygon,
 };
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, JsonValue};
 use rstar::{primitives::GeomWithData, RTree, AABB};
@@ -65,6 +65,7 @@ pub struct MapModel {
     pub undo_stack: Vec<Command>,
     #[serde(skip)]
     pub redo_stack: Vec<Command>,
+    // TODO Remove old field and regenerate files
     pub reclassifications_in_progress: BTreeSet<RoadID>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
@@ -538,66 +539,11 @@ impl MapModel {
         self.after_edited();
     }
 
-    fn roads_along_line(
-        &self,
-        neighbourhood: &Neighbourhood,
-        line_string: LineString,
-    ) -> Vec<RoadID> {
-        let line_string = line_string.simplify(&0.5);
-        let bbox = aabb(&line_string);
-        let buffered_bbox = buffer_aabb(bbox, 20.);
-        let road_iter = self
-            .closest_road
-            .locate_in_envelope_intersecting(&buffered_bbox)
-            .filter(|r| {
-                neighbourhood.interior_roads.contains(&r.data)
-                    || neighbourhood.main_roads.contains(&r.data)
-            })
-            .map(|road_node| self.get_r(road_node.data));
-
-        crate::geo_helpers::roads_along_line(road_iter, &line_string)
-    }
-
-    pub fn reclassify_roads_along_line(
-        &mut self,
-        neighbourhood: &Neighbourhood,
-        line_string: LineString,
-        is_main_road: bool,
-        add_to_undo_stack: bool,
-    ) {
-        let roads_along = self.roads_along_line(neighbourhood, line_string);
-        for r in roads_along {
-            if self.is_main_road[&r] == is_main_road {
-                // It's important that these no-ops don't get added to the undo stack
-                continue;
-            }
-            self.reclassifications_in_progress.insert(r);
-        }
-
-        if self.reclassifications_in_progress.is_empty() {
-            return;
-        }
-
-        let cmds = self
-            .reclassifications_in_progress
-            .iter()
-            .map(|r| Command::SetMainRoad(*r, is_main_road))
-            .collect();
-        let cmd = Command::Multiple(cmds);
-
-        let undo_cmd = self.do_edit(cmd);
-        if add_to_undo_stack {
-            self.undo_stack.push(undo_cmd);
-            self.redo_stack.clear();
-            self.reclassifications_in_progress.clear();
-        }
-        self.after_edited();
-    }
-
     pub fn set_main_roads(
         &mut self,
         neighbourhood: &Neighbourhood,
         intersections: Vec<IntersectionID>,
+        make_main_road: bool,
     ) {
         let mut roads = HashSet::new();
         for pair in intersections.windows(2) {
@@ -607,13 +553,22 @@ impl MapModel {
         }
 
         // These roads could go outside this neighbourhood. Just intersect with this
-        // neighbourhood's interior roads to find the ones to turn into main roads.
-        let cmds = neighbourhood
-            .interior_roads
-            .iter()
-            .filter(|r| roads.contains(r))
-            .map(|r| Command::SetMainRoad(*r, true))
-            .collect::<Vec<_>>();
+        // neighbourhood's main or interior roads to find the ones to change.
+        let cmds = if make_main_road {
+            neighbourhood
+                .interior_roads
+                .iter()
+                .filter(|r| roads.contains(r))
+                .map(|r| Command::SetMainRoad(*r, true))
+                .collect::<Vec<_>>()
+        } else {
+            neighbourhood
+                .main_roads
+                .iter()
+                .filter(|r| roads.contains(r))
+                .map(|r| Command::SetMainRoad(*r, false))
+                .collect::<Vec<_>>()
+        };
         if cmds.is_empty() {
             return;
         }

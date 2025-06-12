@@ -202,16 +202,8 @@ export class Backend {
     this.inner.toggleMainRoad(road);
   }
 
-  reclassifyRoadsAlongLine(
-    line: Feature<LineString>,
-    isMain: boolean,
-    addToUndoStack: boolean,
-  ) {
-    this.inner.reclassifyRoadsAlongLine(line, isMain, addToUndoStack);
-  }
-
-  setMainRoads(intersections: number[]) {
-    this.inner.setMainRoads(new Uint32Array(intersections));
+  setMainRoads(intersections: number[], makeMainRoad: boolean) {
+    this.inner.setMainRoads(new Uint32Array(intersections), makeMainRoad);
   }
 
   addTurnRestriction(from_road: number, to_road: number) {
