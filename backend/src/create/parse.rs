@@ -23,7 +23,7 @@ impl OsmReader for Osm {
         // https://wiki.openstreetmap.org/wiki/Key:barrier is proper reference.
         if let Some(kind) = tags.get("barrier") {
             // Bristol has many gates that don't seem as relevant
-            if kind != "gate" {
+            if kind != "gate" && kind != "kerb" {
                 self.barrier_nodes.insert(id);
             }
         }

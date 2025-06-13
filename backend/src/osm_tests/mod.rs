@@ -1,6 +1,6 @@
 use crate::map_model::ProjectDetails;
 use crate::test_fixtures::TEST_DB_SCHEMA_VERSION;
-use crate::{Intersection, MapModel};
+use crate::{FilterKind, Intersection, MapModel, RoadID};
 use geo::MultiPolygon;
 
 #[test]
@@ -61,6 +61,31 @@ fn test_dog_legs() {
     }
 }
 
+#[test]
+fn test_modal_filters() {
+    let map = load_osm_xml("modal_filters");
+
+    assert!(map
+        .modal_filters
+        .contains_key(&get_road_by_name(&map, "has barrier")));
+    assert!(map
+        .modal_filters
+        .contains_key(&get_road_by_name(&map, "pedestrianized")));
+    assert_eq!(
+        FilterKind::BusGate,
+        map.modal_filters[&get_road_by_name(&map, "bus only")].kind
+    );
+
+    assert!(!map
+        .modal_filters
+        .contains_key(&get_road_by_name(&map, "has kerb")));
+    assert!(!map
+        .modal_filters
+        .contains_key(&get_road_by_name(&map, "not filtered")));
+
+    assert_eq!(3, map.modal_filters.len());
+}
+
 pub fn load_osm_xml(filename: &str) -> MapModel {
     let path = format!(
         "{}/src/osm_tests/{filename}.osm.xml",
@@ -84,6 +109,14 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
         db_schema_version: TEST_DB_SCHEMA_VERSION,
     });
     map
+}
+
+fn get_road_by_name(map: &MapModel, name: &str) -> RoadID {
+    map.roads
+        .iter()
+        .find(|r| r.tags.is("name", name))
+        .expect(&format!("no road named {name}"))
+        .id
 }
 
 fn get_connected_roads<'a>(intersection: &'a Intersection, map: &'a MapModel) -> Vec<&'a String> {
