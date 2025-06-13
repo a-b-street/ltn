@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { FeatureCollection } from "geojson";
   import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
@@ -11,6 +12,8 @@
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
+  export let modalFilterGj: FeatureCollection | null = null;
+  export let turnRestrictionGj: FeatureCollection | null = null;
   export let onClickModalFilter: (
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
@@ -19,16 +22,20 @@
   ) => void = () => {};
 
   export let interactive: boolean;
+  export let show = true;
+  export let prefix = "";
 
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj =
-    $mutationCounter > 0 ? $backend!.renderModalFilters() : emptyGeojson();
+    $mutationCounter > 0 && modalFilterGj == null
+      ? $backend!.renderModalFilters()
+      : emptyGeojson();
 </script>
 
-<GeoJSON data={gj} generateId>
+<GeoJSON data={modalFilterGj || gj} generateId>
   <SymbolLayer
-    {...layerId("modal-filters")}
+    {...layerId(prefix + "modal-filters")}
     {interactive}
     filter={[
       "all",
@@ -41,6 +48,7 @@
       "icon-rotate": ["get", "angle"],
       "icon-allow-overlap": true,
       "icon-size": 0.1,
+      visibility: show ? "visible" : "none",
     }}
     paint={{
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
@@ -50,7 +58,7 @@
     <slot name="modal-filter" />
   </SymbolLayer>
   <SymbolLayer
-    {...layerId("intersection-filters")}
+    {...layerId(prefix + "intersection-filters")}
     filter={["==", ["get", "filter_kind"], "diagonal_filter"]}
     {minzoom}
     layout={{
@@ -58,11 +66,17 @@
       "icon-rotate": ["get", "angle", ["get", "filter"]],
       "icon-allow-overlap": true,
       "icon-size": 0.07,
+      visibility: show ? "visible" : "none",
     }}
     interactive={false}
   />
 </GeoJSON>
 
-<TurnRestrictionLayer {onClickTurnRestriction}>
+<TurnRestrictionLayer
+  {show}
+  {prefix}
+  {turnRestrictionGj}
+  {onClickTurnRestriction}
+>
   <slot name="turn-restriction" />
 </TurnRestrictionLayer>

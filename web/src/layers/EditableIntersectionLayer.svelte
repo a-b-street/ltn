@@ -13,6 +13,7 @@
     getContext("neighbourhoodGj");
   export let onClickIntersection = (intersection: Intersection) => {};
   export let interactive: boolean = false;
+  export let show = true;
 
   /// NOTE: this takes the intersection's index in the neighborhood FeatureCollection, *not* the intersectionId!
   function getIntersectionByFeatureIndex(
@@ -55,6 +56,9 @@
     "circle-stroke-color": Style.mapFeature.hover.backgroundColor,
     "circle-stroke-opacity": 0.8,
     "circle-stroke-width": hoverStateFilter(0, 3),
+  }}
+  layout={{
+    visibility: show ? "visible" : "none",
   }}
   minzoom={13}
   {interactive}

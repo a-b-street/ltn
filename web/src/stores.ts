@@ -121,6 +121,7 @@ export let mutationCounter: Writable<number> = writable(1);
 export let mode: Writable<Mode> = writable({ mode: "title", firstLoad: true });
 
 // Settings
+export let showBeforeEdits: Writable<boolean> = writable(false);
 export let devMode: Writable<boolean> = writable(false);
 export let maptilerBasemap: Writable<string> = writable("streets-v2");
 export let currentFilterType: Writable<string> = writable("walk_cycle_only");

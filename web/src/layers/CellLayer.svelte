@@ -5,6 +5,9 @@
   import { layerId } from "../common";
   import { drawBorderEntries, roadStyle } from "../stores";
 
+  export let show = true;
+  export let prefix = "";
+
   function borderEntryIconSize(
     scale: number,
   ): DataDrivenPropertyValueSpecification<number> {
@@ -30,10 +33,10 @@
 </script>
 
 <FillLayer
-  {...layerId("cells")}
+  {...layerId(prefix + "cells")}
   filter={["==", ["get", "kind"], "cell"]}
   layout={{
-    visibility: $roadStyle == "cells" ? "none" : "visible",
+    visibility: !show || $roadStyle == "cells" ? "none" : "visible",
   }}
   paint={{
     "fill-color": colorByCellColor(),
@@ -43,7 +46,7 @@
 />
 
 <SymbolLayer
-  {...layerId("border-entries")}
+  {...layerId(prefix + "border-entries")}
   filter={["==", ["get", "kind"], "border_entry"]}
   layout={{
     "icon-image": "border_entry_arrow",
@@ -56,7 +59,7 @@
     // Using bearing is arbitrary, but it's already available and seems to work in practice.
     // Any number which is unique between overlapping icons should suffice.
     "symbol-sort-key": ["get", "bearing_upon_entry"],
-    visibility: $drawBorderEntries ? "visible" : "none",
+    visibility: show && $drawBorderEntries ? "visible" : "none",
   }}
   paint={{
     "icon-color": colorByCellColor(),

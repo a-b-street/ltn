@@ -1,6 +1,14 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, LineString } from "geojson";
-  import { Eraser, Pointer, Redo, Route, Trash2, Undo, Paintbrush } from "lucide-svelte";
+  import {
+    Eraser,
+    Paintbrush,
+    Pointer,
+    Redo,
+    Route,
+    Trash2,
+    Undo,
+  } from "lucide-svelte";
   import type { LngLat, MapMouseEvent } from "maplibre-gl";
   import { onDestroy, onMount } from "svelte";
   import {
@@ -31,6 +39,7 @@
     roadLineWidth,
   } from "../common";
   import { speedColorScale, speedLimits } from "../common/colors";
+  import type { Waypoint } from "../common/draw_area/stores";
   import type { Intersection } from "../common/Intersection";
   import { ModalFilterType } from "../common/ModalFilterType";
   import NeighbourhoodBoundarySummary from "../common/NeighbourhoodBoundarySummary.svelte";
@@ -54,6 +63,7 @@
     mutationCounter,
     roadStyle,
     saveCurrentProject,
+    showBeforeEdits,
     thickRoadsForShortcuts,
   } from "../stores";
   import type {
@@ -63,6 +73,7 @@
   } from "../wasm";
   import ChangeFilterModal from "./ChangeFilterModal.svelte";
   import FreehandLine from "./FreehandLine.svelte";
+  import ShowBeforeEdits from "./ShowBeforeEdits.svelte";
   import SnapRouteSelector from "./SnapRouteSelector.svelte";
 
   // Caller is responsible for doing backend.setCurrentNeighbourhood
@@ -82,6 +93,8 @@
     | {
         kind: "main-roads";
         tool: "toggle" | "snap-route-main" | "snap-route-erase";
+        // Only used for snap-route-main or snap-route-erase
+        waypoints: Waypoint[];
       };
   function startTurnRestrictionAction(): Action {
     return {
@@ -242,20 +255,34 @@
     }
   }
 
+  function currentlyDoingMultiStepInteraction(action: Action): boolean {
+    if (action.kind == "filter" && action.freehand) {
+      return true;
+    }
+    if (
+      action.kind == "main-roads" &&
+      action.tool != "toggle" &&
+      action.waypoints.length > 0
+    ) {
+      return true;
+    }
+    if (action.kind == "turn_restriction" && action.from_road_id != null) {
+      return true;
+    }
+    return false;
+  }
+
   function onKeyDown(e: KeyboardEvent) {
+    if ($showBeforeEdits) {
+      return;
+    }
     // Ignore keypresses if we're not focused on the map
     if ((e.target as HTMLElement).tagName == "INPUT") {
       return;
     }
 
     // In the middle of more complex interactions, don't allow any keypresses
-    if (action.kind == "filter" && action.freehand) {
-      return;
-    }
-    if (action.kind == "main-roads" && action.tool != "toggle") {
-      return;
-    }
-    if (action.kind == "turn_restriction" && action.from_road_id != null) {
+    if (currentlyDoingMultiStepInteraction(action)) {
       return;
     }
 
@@ -275,7 +302,7 @@
       action = startTurnRestrictionAction();
     }
     if (e.key == "4") {
-      action = { kind: "main-roads", tool: "toggle" };
+      action = { kind: "main-roads", tool: "toggle", waypoints: [] };
     }
   }
 
@@ -374,212 +401,237 @@
     </nav>
   </div>
   <div slot="sidebar">
-    <h2>Editing tools</h2>
     <div
-      class="tool-palette"
-      style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"
+      style="display: flex; justify-content: space-between; align-items: center"
     >
+      <h2>Editing tools</h2>
+      <label>
+        <input
+          type="checkbox"
+          role="switch"
+          bind:checked={$showBeforeEdits}
+          disabled={currentlyDoingMultiStepInteraction(action)}
+        />
+        Show before edits
+      </label>
+    </div>
+    <div class:edits-disabled={$showBeforeEdits}>
       <div
-        style="height: 50px; display: flex; justify-content: left; gap: 6px;"
+        class="tool-palette"
+        style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;"
       >
-        <button
-          on:click={() => (action = { kind: "filter", freehand: false })}
-          class="icon-btn"
-          class:active={action.kind == "filter"}
-          data-tippy-content="Add a modal filter (hotkey 1)"
+        <div
+          style="height: 50px; display: flex; justify-content: left; gap: 6px;"
         >
-          <img
-            src={notNull(ModalFilterType.getFilter($currentFilterType)).iconURL}
-            alt="Add a modal filter"
-          />
-        </button>
-        <button
-          on:click={() => (action = { kind: "oneway" })}
-          class="icon-btn"
-          class:active={action.kind == "oneway"}
-          data-tippy-content="Toggle one-way (hotkey 2)"
-        >
-          <!-- 
+          <button
+            on:click={() => (action = { kind: "filter", freehand: false })}
+            class="icon-btn"
+            class:active={action.kind == "filter"}
+            data-tippy-content="Add a modal filter (hotkey 1)"
+          >
+            <img
+              src={notNull(ModalFilterType.getFilter($currentFilterType))
+                .iconURL}
+              alt="Add a modal filter"
+            />
+          </button>
+          <button
+            on:click={() => (action = { kind: "oneway" })}
+            class="icon-btn"
+            class:active={action.kind == "oneway"}
+            data-tippy-content="Toggle one-way (hotkey 2)"
+          >
+            <!-- 
          cheat the default padding just a bit with negative placement, 
          these small circles crowd each other more than they crowd their container
          -->
-          <div style="height: 100%; width: 100%; position: relative;">
-            <img
-              style="position: absolute; width: 60%; height: 60%; top: -1px; left: -1px;"
-              src={onewayArrowUrl}
-              alt="Reverse directions"
-            />
-            <img
-              style="position: absolute; width: 60%; height: 60%; bottom: -1px; right: -1px; transform: rotate(180deg);"
-              src={onewayArrowUrl}
-              alt="Reverse directions"
-            />
-          </div>
-        </button>
-        <button
-          on:click={() => (action = startTurnRestrictionAction())}
-          class="icon-btn"
-          class:active={action.kind == "turn_restriction"}
-          data-tippy-content="Restrict turns (hotkey 3)"
+            <div style="height: 100%; width: 100%; position: relative;">
+              <img
+                style="position: absolute; width: 60%; height: 60%; top: -1px; left: -1px;"
+                src={onewayArrowUrl}
+                alt="Reverse directions"
+              />
+              <img
+                style="position: absolute; width: 60%; height: 60%; bottom: -1px; right: -1px; transform: rotate(180deg);"
+                src={onewayArrowUrl}
+                alt="Reverse directions"
+              />
+            </div>
+          </button>
+          <button
+            on:click={() => (action = startTurnRestrictionAction())}
+            class="icon-btn"
+            class:active={action.kind == "turn_restriction"}
+            data-tippy-content="Restrict turns (hotkey 3)"
+          >
+            <img src={noRightUrl} alt="Restrict turns" />
+          </button>
+          <button
+            on:click={() =>
+              (action = { kind: "main-roads", tool: "toggle", waypoints: [] })}
+            class="icon-btn"
+            class:active={action.kind == "main-roads"}
+            data-tippy-content="Reclassify main roads (hotkey 4)"
+          >
+            <img src={mainRoadIconUrl} alt="Change main/minor roads" />
+          </button>
+        </div>
+        <div
+          style="height: 50px; display: flex; justify-content: right; gap: 6px;"
         >
-          <img src={noRightUrl} alt="Restrict turns" />
-        </button>
-        <button
-          on:click={() => (action = { kind: "main-roads", tool: "toggle" })}
-          class="icon-btn"
-          class:active={action.kind == "main-roads"}
-          data-tippy-content="Reclassify main roads (hotkey 4)"
-        >
-          <img src={mainRoadIconUrl} alt="Change main/minor roads" />
-        </button>
+          <button
+            class="outline icon-btn"
+            disabled={undoLength == 0}
+            on:click={undo}
+            data-tippy-content={undoLength == 0
+              ? "Undo Ctrl+Z"
+              : `Undo (${undoLength}) Ctrl+Z`}
+          >
+            <Undo />
+          </button>
+          <button
+            class="outline icon-btn"
+            disabled={redoLength == 0}
+            on:click={redo}
+            data-tippy-content={redoLength == 0
+              ? "Redo Ctrl+Y"
+              : `Redo (${redoLength}) Ctrl+Y`}
+          >
+            <Redo />
+          </button>
+        </div>
       </div>
+
       <div
-        style="height: 50px; display: flex; justify-content: right; gap: 6px;"
+        style="min-height: 200px; padding-bottom: 16px; border-bottom: solid var(--pico-muted-border-color) 1px;"
       >
-        <button
-          class="outline icon-btn"
-          disabled={undoLength == 0}
-          on:click={undo}
-          data-tippy-content={undoLength == 0
-            ? "Undo Ctrl+Z"
-            : `Undo (${undoLength}) Ctrl+Z`}
-        >
-          <Undo />
-        </button>
-        <button
-          class="outline icon-btn"
-          disabled={redoLength == 0}
-          on:click={redo}
-          data-tippy-content={redoLength == 0
-            ? "Redo Ctrl+Y"
-            : `Redo (${redoLength}) Ctrl+Y`}
-        >
-          <Redo />
-        </button>
+        {#if action.kind == "filter"}
+          <h3>Add modal filter</h3>
+          <p>
+            Modal filters restrict what kind of traffic can pass through a road
+            segment. Place them strategically to deter shortcuts through your
+            neighbourhood.
+          </p>
+          <ChangeFilterModal bind:show={settingFilterType} />
+          <div
+            style="display: flex; gap: 8px; align-items: leading; flex-direction: column; width: fit-content;"
+          >
+            <button class="outline" on:click={() => (settingFilterType = true)}>
+              Change modal filter type
+            </button>
+
+            <button
+              on:click={action.freehand
+                ? () => (action = { kind: "filter", freehand: false })
+                : () => (action = { kind: "filter", freehand: true })}
+              class:active={action.freehand}
+              class:outline={!action.freehand}
+              data-tippy-content="Add many modal filters along a line"
+            >
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <Paintbrush />
+                <span>Add along a line</span>
+              </div>
+            </button>
+          </div>
+        {:else if action.kind == "oneway"}
+          <h3>Toggle one-way</h3>
+          <p>
+            Click on a road segment to toggle its direction. This will change
+            the direction of traffic flow on that road.
+          </p>
+        {:else if action.kind == "turn_restriction"}
+          <h3>Restrict turns</h3>
+          <p>
+            To restrict certain turns, first click on the source road, then the
+            destination road. Traffic will no longer be able to turn from the
+            source road to the destination road.
+          </p>
+        {:else if action.kind == "main-roads"}
+          <h3>Reclassify main roads</h3>
+          <p>
+            <i>Main roads</i>, drawn in grey, were classified automatically
+            using data from
+            <a href="https://openstreetmap.org/about" target="_blank"
+              >OpenStreetMap</a
+            >, but you can reclassify a road segment by clicking on it.
+          </p>
+
+          <p>
+            Main roads are typically better suited to support higher levels of
+            traffic than neighbourhood roads.
+          </p>
+          <div
+            class="classification-buttons"
+            style="display: flex; flex-direction: column; gap: 8px; justify-content: left;"
+          >
+            <button
+              on:click={() => {
+                action = { kind: "main-roads", tool: "toggle", waypoints: [] };
+              }}
+              class:active={action.tool == "toggle"}
+              class:outline={action.tool != "toggle"}
+              data-tippy-content="Click a road to reclassify it"
+            >
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <Pointer />
+                <span>Toggle segment</span>
+              </div>
+            </button>
+
+            <button
+              on:click={() => {
+                action = {
+                  kind: "main-roads",
+                  tool: "snap-route-main",
+                  waypoints: [],
+                };
+              }}
+              class:active={action.tool == "snap-route-main"}
+              class:outline={action.tool != "snap-route-main"}
+              data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
+            >
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <Route />
+                <span>Mark as main along a route</span>
+              </div>
+            </button>
+
+            <button
+              on:click={() => {
+                action = {
+                  kind: "main-roads",
+                  tool: "snap-route-erase",
+                  waypoints: [],
+                };
+              }}
+              class:active={action.tool == "snap-route-erase"}
+              class:outline={action.tool != "snap-route-erase"}
+              data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
+            >
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <Eraser />
+                <span>Erase main classification</span>
+              </div>
+            </button>
+
+            <button class:outline={true} on:click={eraseAllMainRoads}>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <Trash2 />
+                <span>Erase all main roads</span>
+              </div>
+            </button>
+          </div>
+        {/if}
       </div>
-    </div>
 
-    <div
-      style="min-height: 200px; padding-bottom: 16px; border-bottom: solid var(--pico-muted-border-color) 1px;"
-    >
-      {#if action.kind == "filter"}
-        <h3>Add modal filter</h3>
-        <p>
-          Modal filters restrict what kind of traffic can pass through a road
-          segment. Place them strategically to deter shortcuts through your
-          neighbourhood.
-        </p>
-        <ChangeFilterModal bind:show={settingFilterType} />
-        <div
-          style="display: flex; gap: 8px; align-items: leading; flex-direction: column; width: fit-content;"
-        >
-          <button class="outline" on:click={() => (settingFilterType = true)}>
-            Change modal filter type
-          </button>
-
-          <button
-            on:click={action.freehand
-              ? () => (action = { kind: "filter", freehand: false })
-              : () => (action = { kind: "filter", freehand: true })}
-            class:active={action.freehand}
-            class:outline={!action.freehand}
-            data-tippy-content="Add many modal filters along a line"
-          >
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <Paintbrush />
-              <span>Add along a line</span>
-            </div>
-          </button>
-        </div>
-      {:else if action.kind == "oneway"}
-        <h3>Toggle one-way</h3>
-        <p>
-          Click on a road segment to toggle its direction. This will change the
-          direction of traffic flow on that road.
-        </p>
-      {:else if action.kind == "turn_restriction"}
-        <h3>Restrict turns</h3>
-        <p>
-          To restrict certain turns, first click on the source road, then the
-          destination road. Traffic will no longer be able to turn from the
-          source road to the destination road.
-        </p>
-      {:else if action.kind == "main-roads"}
-        <h3>Reclassify main roads</h3>
-        <p>
-          <i>Main roads</i>, drawn in grey, were classified automatically using
-          data from
-          <a href="https://openstreetmap.org/about" target="_blank"
-            >OpenStreetMap</a
-          >, but you can reclassify a road segment by clicking on it.
-        </p>
-
-        <p>
-          Main roads are typically better suited to support higher levels of
-          traffic than neighbourhood roads.
-        </p>
-        <div
-          class="classification-buttons"
-          style="display: flex; flex-direction: column; gap: 8px; justify-content: left;"
-        >
-          <button
-            on:click={() => {
-              action = { kind: "main-roads", tool: "toggle" };
-            }}
-            class:active={action.tool == "toggle"}
-            class:outline={action.tool != "toggle"}
-            data-tippy-content="Click a road to reclassify it"
-          >
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <Pointer />
-              <span>Toggle segment or pan map</span>
-            </div>
-          </button>
-
-          <button
-            on:click={() => {
-              action = { kind: "main-roads", tool: "snap-route-main" };
-            }}
-            class:active={action.tool == "snap-route-main"}
-            class:outline={action.tool != "snap-route-main"}
-            data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
-          >
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <Route />
-              <span>Mark as main along a route</span>
-            </div>
-          </button>
-
-          <button
-            on:click={() => {
-              action = { kind: "main-roads", tool: "snap-route-erase" };
-            }}
-            class:active={action.tool == "snap-route-erase"}
-            class:outline={action.tool != "snap-route-erase"}
-            data-tippy-content="Reclassify multiple roads by drawing a route crossing them"
-          >
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <Eraser />
-              <span>Erase main classification</span>
-            </div>
-          </button>
-
-          <button class:outline={true} on:click={eraseAllMainRoads}>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <Trash2 />
-              <span>Erase all main roads</span>
-            </div>
-          </button>
-        </div>
+      {#if numDisconnectedCells > 0}
+        <mark>
+          Some parts of the neighbourhood aren't reachable by drivers, shown in
+          red
+        </mark>
       {/if}
     </div>
-
-    {#if numDisconnectedCells > 0}
-      <mark>
-        Some parts of the neighbourhood aren't reachable by drivers, shown in
-        red
-      </mark>
-    {/if}
 
     <h2>Map style</h2>
     <label>
@@ -633,12 +685,15 @@
   <div slot="map">
     <MapEvents on:click={onMapClick} />
 
+    <ShowBeforeEdits />
+
     <RenderNeighbourhood input={gj}>
       <HighlightBoundaryLayer />
-      <CellLayer />
-      <OneWayLayer />
+      <CellLayer show={!$showBeforeEdits} />
+      <OneWayLayer show={!$showBeforeEdits} />
 
       <NeighbourhoodRoadLayer
+        show={!$showBeforeEdits}
         interactive={(action.kind == "filter" && !action.freehand) ||
           action.kind == "oneway" ||
           (action.kind == "main-roads" && action.tool == "toggle") ||
@@ -680,6 +735,7 @@
         </div>
       </NeighbourhoodRoadLayer>
       <EditableIntersectionLayer
+        show={!$showBeforeEdits}
         interactive={action.kind == "filter"}
         neighbourhood={gj}
         {onClickIntersection}
@@ -691,6 +747,7 @@
     {/if}
 
     <ModalFilterLayer
+      show={!$showBeforeEdits}
       onClickModalFilter={deleteModalFilter}
       onClickTurnRestriction={deleteTurnRestriction}
       interactive={action.kind == "filter"}
@@ -709,8 +766,9 @@
       <SnapRouteSelector
         map={notNull($map)}
         finish={finishSnapping}
-        cancel={() => (action = { kind: "main-roads", tool: "toggle" })}
-        waypoints={[]}
+        cancel={() =>
+          (action = { kind: "main-roads", tool: "toggle", waypoints: [] })}
+        bind:waypoints={action.waypoints}
       />
     {/if}
 
@@ -757,5 +815,11 @@
     position: relative;
     top: -12px;
     left: 4px;
+  }
+
+  .edits-disabled {
+    opacity: 0.5;
+    background-color: grey;
+    pointer-events: none;
   }
 </style>

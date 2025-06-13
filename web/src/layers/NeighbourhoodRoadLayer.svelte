@@ -25,6 +25,8 @@
   // When disabled, can't click lines or filters, no slots, no hoverCursor
   export let interactive = true;
   export let onClickLine = (f: Feature, pt: LngLat) => {};
+  export let show = true;
+  export let prefix = "";
 
   function roadLineColor(
     style: "shortcuts" | "cells" | "edits" | "speeds",
@@ -92,17 +94,20 @@
 </script>
 
 <LineLayer
-  {...layerId("interior-roads-outlines")}
+  {...layerId(prefix + "interior-roads-outlines")}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 1),
     "line-color": "black",
   }}
+  layout={{
+    visibility: show ? "visible" : "none",
+  }}
   minzoom={13}
 />
 
 <LineLayer
-  {...layerId("interior-roads")}
+  {...layerId(prefix + "interior-roads")}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
@@ -111,6 +116,7 @@
   }}
   layout={{
     "line-sort-key": ["get", "shortcuts"],
+    visibility: show ? "visible" : "none",
   }}
   minzoom={13}
   on:click={(e) =>
@@ -124,17 +130,20 @@
 </LineLayer>
 
 <LineLayer
-  {...layerId("main-roads-outlines")}
+  {...layerId(prefix + "main-roads-outlines")}
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 6),
     "line-color": "black",
   }}
+  layout={{
+    visibility: show ? "visible" : "none",
+  }}
   minzoom={13}
 />
 
 <LineLayer
-  {...layerId("main-roads")}
+  {...layerId(prefix + "main-roads")}
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),
@@ -146,6 +155,7 @@
   }}
   layout={{
     "line-sort-key": ["get", "shortcuts"],
+    visibility: show ? "visible" : "none",
   }}
   minzoom={13}
   on:click={(e) =>

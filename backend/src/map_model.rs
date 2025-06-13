@@ -805,6 +805,7 @@ impl MapModel {
         // Clear previous state
         self.boundaries.clear();
         self.modal_filters = self.original_modal_filters.clone();
+        self.diagonal_filters.clear();
         self.turn_restrictions = self.original_turn_restrictions.clone();
         for (r, dir) in &mut self.travel_flows {
             *dir = TravelFlow::from_osm(&self.roads[r.0].tags);
