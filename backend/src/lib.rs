@@ -149,9 +149,23 @@ impl LTN {
         Ok(serde_json::to_string(&self.map.filters_to_gj()).map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = renderModalFiltersBeforeEdits)]
+    pub fn render_modal_filters_before_edits(&mut self) -> Result<String, JsValue> {
+        self.run_before_edits(|ltn| {
+            serde_json::to_string(&ltn.map.filters_to_gj()).map_err(err_to_js)
+        })
+    }
+
     #[wasm_bindgen(js_name = renderTurnRestrictions)]
     pub fn render_turn_restrictions(&self) -> Result<String, JsValue> {
         Ok(serde_json::to_string(&self.map.turn_restrictions_to_gj()).map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = renderTurnRestrictionsBeforeEdits)]
+    pub fn render_turn_restrictions_before_edits(&mut self) -> Result<String, JsValue> {
+        self.run_before_edits(|ltn| {
+            serde_json::to_string(&ltn.map.turn_restrictions_to_gj()).map_err(err_to_js)
+        })
     }
 
     #[wasm_bindgen(js_name = renderNeighbourhood)]
@@ -160,6 +174,19 @@ impl LTN {
             serde_json::to_string(&self.neighbourhood.as_ref().unwrap().to_gj(&self.map))
                 .map_err(err_to_js)?,
         )
+    }
+
+    #[wasm_bindgen(js_name = renderNeighbourhoodBeforeEdits)]
+    pub fn render_neighbourhood_before_edits(&mut self) -> Result<String, JsValue> {
+        self.run_before_edits(|ltn| {
+            let Some(name) = ltn.neighbourhood.as_ref().map(|n| n.name()) else {
+                return Err("no current neighbourhood".into());
+            };
+            let boundary = ltn.map.boundaries.get(name).unwrap();
+            let neighbourhood =
+                Neighbourhood::new(&ltn.map, boundary.clone()).map_err(err_to_js)?;
+            serde_json::to_string(&neighbourhood.to_gj(&ltn.map)).map_err(err_to_js)
+        })
     }
 
     #[wasm_bindgen(js_name = generatedBoundaries)]
@@ -468,6 +495,28 @@ impl LTN {
         .map_err(err_to_js)?)
     }
 
+    #[wasm_bindgen(js_name = getAllShortcutsBeforeEdits)]
+    pub fn get_all_shortcuts_before_edits(&mut self) -> Result<String, JsValue> {
+        self.run_before_edits(|ltn| {
+            let derived = ltn
+                .neighbourhood
+                .as_ref()
+                .expect("no neighbourhood")
+                .derived
+                .as_ref()
+                .expect("neighbourhood has no derived state yet");
+            Ok(serde_json::to_string(&GeoJson::from(
+                derived
+                    .shortcuts
+                    .paths
+                    .iter()
+                    .map(|path| path.to_gj(&ltn.map))
+                    .collect::<Vec<_>>(),
+            ))
+            .map_err(err_to_js)?)
+        })
+    }
+
     /// GJ with modal filters and named boundaries. This is meant for savefiles, so existing
     /// filters aren't included (and deletions of existing are included)
     #[wasm_bindgen(js_name = toSavefile)]
@@ -615,6 +664,42 @@ impl LTN {
                 Some(Neighbourhood::new(&self.map, boundary.clone()).map_err(err_to_js)?);
         }
         Ok(())
+    }
+
+    /// Has no permanent stateful effect; it's mut only temporarily
+    fn run_before_edits<F: Fn(&LTN) -> Result<String, JsValue>>(
+        &mut self,
+        cb: F,
+    ) -> Result<String, JsValue> {
+        // Preserve the edited state
+        let modal_filters = self.map.modal_filters.clone();
+        let diagonal_filters = self.map.diagonal_filters.clone();
+        let turn_restrictions = self.map.turn_restrictions.clone();
+        let travel_flows = self.map.travel_flows.clone();
+        let is_main_road = self.map.is_main_road.clone();
+
+        // Revert to the original
+        self.map.modal_filters = self.map.original_modal_filters.clone();
+        self.map.diagonal_filters.clear();
+        self.map.turn_restrictions = self.map.original_turn_restrictions.clone();
+        for (r, dir) in &mut self.map.travel_flows {
+            *dir = TravelFlow::from_osm(&self.map.roads[r.0].tags);
+        }
+        for (r, is_main_road) in &mut self.map.is_main_road {
+            *is_main_road = self.map.roads[r.0].is_severance();
+        }
+
+        // Run the callback
+        let output = cb(self);
+
+        // Restore the edited state
+        self.map.modal_filters = modal_filters;
+        self.map.diagonal_filters = diagonal_filters;
+        self.map.turn_restrictions = turn_restrictions;
+        self.map.travel_flows = travel_flows;
+        self.map.is_main_road = is_main_road;
+
+        output
     }
 }
 

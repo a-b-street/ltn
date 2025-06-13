@@ -103,21 +103,16 @@ export class Backend {
     return JSON.parse(this.inner.renderModalFilters());
   }
 
-  renderTurnRestrictions(): FeatureCollection<
-    Point,
-    {
-      kind: TurnRestrictionKind;
-      icon_angle: number;
-      // GeoJSON geometries stringified
-      from_geometry: string;
-      to_geometry: string;
-      edited: boolean;
-      intersection: number;
-      from_road: number;
-      to_road: number;
-    }
-  > {
+  renderModalFiltersBeforeEdits(): FeatureCollection {
+    return JSON.parse(this.inner.renderModalFiltersBeforeEdits());
+  }
+
+  renderTurnRestrictions(): TurnRestrictions {
     return JSON.parse(this.inner.renderTurnRestrictions());
+  }
+
+  renderTurnRestrictionsBeforeEdits(): TurnRestrictions {
+    return JSON.parse(this.inner.renderTurnRestrictionsBeforeEdits());
   }
 
   // This adds a 'color' property to all cells. It's nicer to keep this on the
@@ -125,6 +120,21 @@ export class Backend {
   renderNeighbourhood(): RenderNeighbourhoodOutput {
     let gj: RenderNeighbourhoodOutput = JSON.parse(
       this.inner.renderNeighbourhood(),
+    );
+    gj.maxShortcuts =
+      Math.max(
+        ...gj.features.map((f) =>
+          f.properties.kind == "interior_road" ? f.properties.shortcuts : 0,
+        ),
+      ) ?? 0;
+    return gj;
+  }
+
+  // This adds a 'color' property to all cells. It's nicer to keep this on the
+  // frontend, since it's about styling.
+  renderNeighbourhoodBeforeEdits(): RenderNeighbourhoodOutput {
+    let gj: RenderNeighbourhoodOutput = JSON.parse(
+      this.inner.renderNeighbourhoodBeforeEdits(),
     );
     gj.maxShortcuts =
       Math.max(
@@ -241,6 +251,10 @@ export class Backend {
 
   getAllShortcuts(): AllShortcuts {
     return JSON.parse(this.inner.getAllShortcuts());
+  }
+
+  getAllShortcutsBeforeEdits(): AllShortcuts {
+    return JSON.parse(this.inner.getAllShortcutsBeforeEdits());
   }
 
   toSavefile(): ProjectFeatureCollection {
@@ -427,3 +441,18 @@ export interface MetricBuckets {
   collision_density: number[];
   poi_density: number[];
 }
+
+export type TurnRestrictions = FeatureCollection<
+  Point,
+  {
+    kind: TurnRestrictionKind;
+    icon_angle: number;
+    // GeoJSON geometries stringified
+    from_geometry: string;
+    to_geometry: string;
+    edited: boolean;
+    intersection: number;
+    from_road: number;
+    to_road: number;
+  }
+>;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Feature, Geometry } from "geojson";
+  import type { Feature, FeatureCollection, Geometry } from "geojson";
   import {
     GeoJSON,
     LineLayer,
@@ -14,6 +14,9 @@
     showExistingFiltersAndTRs,
   } from "../stores";
 
+  export let turnRestrictionGj: FeatureCollection | null = null;
+  export let show = true;
+  export let prefix = "";
   export let onClickTurnRestriction: (
     e: CustomEvent<LayerClickInfo>,
   ) => void = () => {};
@@ -44,12 +47,14 @@
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
   $: gj =
-    $mutationCounter > 0 ? $backend!.renderTurnRestrictions() : emptyGeojson();
+    $mutationCounter > 0 && turnRestrictionGj == null
+      ? $backend!.renderTurnRestrictions()
+      : emptyGeojson();
 </script>
 
-<GeoJSON data={gj} generateId>
+<GeoJSON data={turnRestrictionGj || gj} generateId>
   <SymbolLayer
-    {...layerId("turn-restrictions")}
+    {...layerId(prefix + "turn-restrictions")}
     minzoom={13}
     filter={$showExistingFiltersAndTRs ? undefined : ["get", "edited"]}
     layout={{
@@ -57,6 +62,7 @@
       "icon-rotate": ["get", "icon_angle"],
       "icon-allow-overlap": true,
       "icon-size": 0.05,
+      visibility: show ? "visible" : "none",
     }}
     paint={{
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
@@ -70,11 +76,14 @@
 
 <GeoJSON data={showArrow}>
   <LineLayer
-    {...layerId("turn-restrictions-debug-arrows")}
+    {...layerId(prefix + "turn-restrictions-debug-arrows")}
     interactive={false}
     paint={{
       "line-width": 4,
       "line-color": "red",
+    }}
+    layout={{
+      visibility: show ? "visible" : "none",
     }}
   />
 </GeoJSON>

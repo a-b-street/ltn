@@ -90,10 +90,15 @@ const layerZorder = [
   "debug-filters",
 
   "cells",
+  "before-edits-cells",
   "interior-roads-outlines",
+  "before-edits-interior-roads-outlines",
   "interior-roads",
+  "before-edits-interior-roads",
   "main-roads-outlines",
+  "before-edits-main-roads-outlines",
   "main-roads",
+  "before-edits-main-roads",
   "turn-restriction-targets",
   "debug-intersections",
   "debug-movements-outline",
@@ -101,8 +106,10 @@ const layerZorder = [
   "debug-editable-intersections",
   "editable-intersections",
   "intersection-filters",
+  "before-edits-intersection-filters",
 
   "border-entries",
+  "before-edits-border-entries",
 
   "compare-route",
 
@@ -125,6 +132,7 @@ const layerZorder = [
   "debug-demand-outline",
 
   "one-ways",
+  "before-edits-one-ways",
 
   // Contextual layers cover up most things
   "context-population-car-ownership",
@@ -147,8 +155,11 @@ const layerZorder = [
   "animate-shortcuts",
 
   "modal-filters",
+  "before-edits-modal-filters",
   "turn-restrictions",
+  "before-edits-turn-restrictions",
   "turn-restrictions-debug-arrows",
+  "before-edits-turn-restrictions-debug-arrows",
 
   "boundary",
   "neighbourhood-boundary",
