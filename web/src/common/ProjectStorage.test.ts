@@ -237,6 +237,27 @@ describe("ProjectStorage", () => {
     });
   });
 
+  describe("copyProject", () => {
+    it("should copy a project by updating the projectSummary", () => {
+      let { projectStorage } = mockProjectStorage();
+      let id1 = projectStorage.createEmptyProject("Original Name", "TestArea");
+      expect(projectStorage.projectName(id1)).toBe("Original Name");
+
+      let id2 = projectStorage.copyProject(id1, "New Name");
+      expect(projectStorage.projectName(id1)).toBe("Original Name");
+      expect(projectStorage.projectName(id2)).toBe("New Name");
+    });
+
+    it("should throw error when project doesn't exist", () => {
+      let { projectStorage } = mockProjectStorage();
+      expect(() =>
+        projectStorage.copyProject("ce-nest-pas-un-uuid", "New Name"),
+      ).toThrow("Cannot get project: no project found for ce-nest-pas-un-uuid");
+    });
+
+    // TODO new name already exists? just copy twice??
+  });
+
   describe("projectNameAlreadyExists", () => {
     it("should return true if project name already exists", () => {
       let { projectStorage } = mockProjectStorage();
