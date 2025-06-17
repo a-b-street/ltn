@@ -53,7 +53,6 @@
   import {
     appFocus as appFocusStore,
     backend,
-    devMode,
     map as mapStore,
     maptilerApiKey,
     maptilerBasemap,
@@ -83,17 +82,6 @@
         console.log("Using local asset files");
       }
     } catch (err) {}
-
-    let devParam = new URLSearchParams(window.location.search).get("dev");
-    if (devParam === "true" || devParam === "") {
-      $devMode = true;
-    } else {
-      console.assert(
-        devParam === null || devParam == "false",
-        `unknown dev mode value: ${devParam}, should be "true", "false", or empty`,
-      );
-      $devMode = false;
-    }
   });
 
   let map: Map | null = null;
