@@ -5,6 +5,7 @@
   import {
     appFocus,
     backend,
+    devMode,
     maptilerBasemap,
     showExistingFiltersAndTRs,
   } from "../stores";
@@ -77,6 +78,8 @@
           <option value="hybrid">MapTiler Satellite</option>
           <option value="uk-openzoomstack-light">OS Open Zoomstack</option>
         </select>
+
+        <ContextLayerButton label="Debugging tools" bind:show={$devMode} />
       </div>
     </div>
   </div>
