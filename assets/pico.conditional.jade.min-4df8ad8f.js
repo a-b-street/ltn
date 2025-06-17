@@ -5,7 +5,7 @@ var gt=Object.defineProperty;var mt=(t,e,n)=>e in t?gt(t,e,{enumerable:!0,config
   <a href="https://www.transport.gov.scot/" target="_blank">Transport Scotland</a>
   and designed by
   <a href="https://www.sustrans.org.uk" target="_blank">Sustrans Scotland</a>.
-  The team includes:`,n=A(),s=E("ul"),s.innerHTML=`<li>Dustin Carlino, lead developer and director of <a href="https://find-and-update.company-information.service.gov.uk/company/16217327" target="_blank">A/B Street Ltd</a></li> <li><a href="https://github.com/michaelkirk/" target="_blank">Michael Kirk</a>,
+  The team includes:`,n=A(),s=E("ul"),s.innerHTML=`<li>Dustin Carlino, lead developer and director of <a href="https://abstreet.uk" target="_blank">A/B Street Ltd</a></li> <li><a href="https://github.com/michaelkirk/" target="_blank">Michael Kirk</a>,
     software developer</li> <li>Sustrans Scotland
     <ul><li><a href="https://www.linkedin.com/in/congying-hu/" target="_blank">Congying (Cici) Hu</a>, mobility planner</li> <li><a href="https://www.linkedin.com/in/angus-calder-a69543206" target="_blank">Angus Calder</a>, senior mobility planner</li> <li>Michael Naysmith, senior mobility planner (project manager)</li> <li><a href="https://www.linkedin.com/in/matthew-davis-6b3a8124/" target="_blank">Matthew Davis</a>, principal mobility planner</li></ul></li>`,i=A(),o=E("p"),o.innerHTML=`This second version of the tool is an evolution from the original A/B Street
   tool, with <a href="https://a-b-street.github.io/docs/software/ltn/index.html#credits" target="_blank">many people</a> to thank there. Of the dozens of users giving excellent feedback and shaping
