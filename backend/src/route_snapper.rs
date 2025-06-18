@@ -7,7 +7,10 @@ use utils::LineSplit;
 use crate::{MapModel, RoadID};
 
 impl MapModel {
-    pub fn to_route_snapper_graph(&self) -> route_snapper_graph::RouteSnapperMap {
+    pub fn to_route_snapper_graph(
+        &self,
+        dont_make_planar: bool,
+    ) -> route_snapper_graph::RouteSnapperMap {
         let mut nodes = Vec::new();
         for i in &self.intersections {
             nodes.push(self.mercator.to_wgs84(&i.point).into());
@@ -26,6 +29,16 @@ impl MapModel {
                 forward_cost: None,
                 backward_cost: None,
             });
+        }
+
+        // TODO Workaround https://github.com/a-b-street/ltn/issues/393
+        if dont_make_planar {
+            return RouteSnapperMap {
+                nodes,
+                edges,
+                override_forward_costs: Vec::new(),
+                override_backward_costs: Vec::new(),
+            };
         }
 
         // TODO This should be a method on RouteSnapperMap, but we'll have to project to mercator

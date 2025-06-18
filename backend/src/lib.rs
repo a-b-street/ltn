@@ -117,13 +117,25 @@ impl LTN {
 
     #[wasm_bindgen(js_name = toRouteSnapper)]
     pub fn to_route_snapper(&self) -> Vec<u8> {
-        let graph = self.map.to_route_snapper_graph();
+        let dont_make_planar = self
+            .map
+            .project_details
+            .as_ref()
+            .map(|p| p.study_area_name == Some("LAD_Perth and Kinross".to_string()))
+            .unwrap_or(false);
+        let graph = self.map.to_route_snapper_graph(dont_make_planar);
         bincode::serialize(&graph).unwrap()
     }
 
     #[wasm_bindgen(js_name = toRouteSnapperGj)]
     pub fn to_route_snapper_gj(&self) -> Result<String, JsValue> {
-        let graph = self.map.to_route_snapper_graph();
+        let dont_make_planar = self
+            .map
+            .project_details
+            .as_ref()
+            .map(|p| p.study_area_name == Some("LAD_Perth and Kinross".to_string()))
+            .unwrap_or(false);
+        let graph = self.map.to_route_snapper_graph(dont_make_planar);
 
         let mut features = Vec::new();
         for (idx, edge) in graph.edges.iter().enumerate() {
