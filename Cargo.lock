@@ -478,7 +478,7 @@ dependencies = [
 [[package]]
 name = "geo"
 version = "0.30.0"
-source = "git+https://github.com/georust/geo?branch=mkirk%2Fgeo-ltn#6ce58f2eda1f06b1596fcabf9e62068bcef09dde"
+source = "git+https://github.com/georust/geo?branch=mkirk%2Fgeo-buffer#27f754f9cd49573be749a3136c545f31ae3027e4"
 dependencies = [
  "earcutr",
  "float_next_after",

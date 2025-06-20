@@ -1,5 +1,5 @@
+use geo::buffer::{BufferStyle, LineJoin};
 use geo::{Area, BooleanOps, Buffer, MultiPolygon, Point, Polygon, PreparedGeometry, Relate};
-use i_overlay::mesh::style::{LineJoin, OutlineStyle};
 use serde::{Deserialize, Serialize};
 use utils::Mercator;
 
@@ -94,7 +94,7 @@ impl BoundaryStats {
             // Conclusion: To count incidents on the perimeter, we should buffer a bit more than 1/2
             // the expected road width.
             let buffer_meters = 10.0;
-            let style = OutlineStyle::new(buffer_meters).line_join(LineJoin::Bevel);
+            let style = BufferStyle::new(buffer_meters).line_join(LineJoin::Bevel);
             let buffered_polygon = polygon.buffer_with_style(style);
             let prepared_buffered_polygon = PreparedGeometry::from(&buffered_polygon);
             for pt in &context_data.stats19_collisions {

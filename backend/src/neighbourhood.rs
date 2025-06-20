@@ -90,7 +90,7 @@ impl MapCoordsInPlace<f64> for WayPoints {
 
 impl WayPoint {
     pub fn waypoints_for_ring(ring: &LineString) -> WayPoints {
-        let simplified = ring.simplify(&5.0);
+        let simplified = ring.simplify(5.0);
 
         // ring is closed, so skip the first point, which is redundant with the last
         let coords_iter = simplified.0.iter().skip(1);
