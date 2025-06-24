@@ -924,6 +924,15 @@ impl MapModel {
         self.do_edit(Command::Multiple(cmds));
         self.after_edited();
 
+        // finish_loading sets the project_details for the initial load, but if the user switches
+        // projects in the same study area, we need to overwrite these.
+        let Some(json) = gj.foreign_members.as_ref() else {
+            bail!("Savefile is missing project details");
+        };
+        let details: ProjectDetails =
+            serde_json::from_value(serde_json::Value::Object(json.clone()))?;
+        self.project_details = Some(details);
+
         Ok(())
     }
 
