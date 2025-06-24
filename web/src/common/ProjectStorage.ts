@@ -404,6 +404,24 @@ export class ProjectStorage {
     this.saveProject(projectID, project);
   }
 
+  copyProject(projectID: ProjectID, newName: string): ProjectID {
+    let project = this.project(projectID);
+    if (!project) {
+      throw new Error(
+        `Cannot copy project: no existing project found for ${projectID}`,
+      );
+    }
+    if (this.projectNameAlreadyExists(newName)) {
+      throw new Error(
+        `Project name ${newName} already taken. Choose a different name.`,
+      );
+    }
+    let newProjectID = crypto.randomUUID();
+    project.project_name = newName;
+    this.saveProject(newProjectID, project);
+    return newProjectID;
+  }
+
   project(projectID: ProjectID): ProjectFeatureCollection {
     let key = this.projectKey(projectID);
     let projectString = window.localStorage.getItem(key);

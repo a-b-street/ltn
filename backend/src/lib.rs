@@ -545,6 +545,15 @@ impl LTN {
         Ok(())
     }
 
+    #[wasm_bindgen(js_name = changeProjectName)]
+    pub fn change_project_name(&mut self, name: String) {
+        self.map
+            .project_details
+            .as_mut()
+            .expect("changeProjectName called when no project is loaded")
+            .project_name = name;
+    }
+
     /// Returns GJ with two LineStrings, before and after
     #[wasm_bindgen(js_name = compareRoute)]
     pub fn compare_route(

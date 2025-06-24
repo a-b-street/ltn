@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FileDown, Pencil, Trash2 } from "lucide-svelte";
+  import { Copy, FileDown, Pencil, Trash2 } from "lucide-svelte";
   import type { LngLatBoundsLike } from "maplibre-gl";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import cntBoundariesUrl from "../../assets/cnt_boundaries.geojson?url";
@@ -101,6 +101,21 @@
     }
   }
 
+  function copyProject(projectID: ProjectID, existingName: string) {
+    let newName = window.prompt(
+      `Please name this copy of project ${existingName}`,
+      $projectStorage.nextAvailableProjectName(existingName),
+    );
+    if (newName) {
+      try {
+        $projectStorage.copyProject(projectID, newName);
+      } catch (e) {
+        window.alert(`Couldn't copy project: ${e}`);
+      }
+      studyAreas = $projectStorage.studyAreaProjects();
+    }
+  }
+
   async function openProject(projectID: ProjectID) {
     await loadProject(projectID);
     $mode = { mode: "pick-neighbourhood" };
@@ -161,6 +176,13 @@
                       on:click={() => renameProject(projectID, projectName)}
                     >
                       <Pencil color="black" />
+                    </button>
+                    <button
+                      class="outline icon-btn"
+                      title="Copy project"
+                      on:click={() => copyProject(projectID, projectName)}
+                    >
+                      <Copy color="black" />
                     </button>
                     <button
                       class="icon-btn destructive"
