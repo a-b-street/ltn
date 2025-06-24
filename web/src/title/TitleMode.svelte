@@ -157,7 +157,7 @@
             <ul class="navigable-list">
               {#each projects as { projectID, projectName }}
                 <li class="actionable-cell">
-                  <h3>
+                  <h3 class="project-name">
                     <Link on:click={() => openProject(projectID)}>
                       {projectName}
                     </Link>
@@ -225,5 +225,9 @@
   }
   .project-list li {
     padding-left: 1em;
+  }
+
+  .project-name {
+    overflow-wrap: anywhere;
   }
 </style>
