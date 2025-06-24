@@ -265,6 +265,10 @@ export class Backend {
     this.inner.loadSavefile(gj);
   }
 
+  changeProjectName(name: string) {
+    this.inner.changeProjectName(name);
+  }
+
   compareRoute(
     pt1: LngLat,
     pt2: LngLat,

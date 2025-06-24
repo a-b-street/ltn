@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection, Polygon } from "geojson";
-  import { CirclePlus, FileDown, Pencil, Trash2 } from "lucide-svelte";
+  import { CirclePlus, Copy, FileDown, Pencil, Trash2 } from "lucide-svelte";
   import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
     FillLayer,
@@ -31,11 +31,13 @@
     appFocus,
     backend,
     currentNeighbourhoodName,
+    currentProject,
     currentProjectID,
     devMode,
     metricBuckets,
     mode,
     mutationCounter,
+    projectStorage,
     saveCurrentProject,
   } from "./stores";
   import type { NeighbourhoodBoundaryFeature } from "./wasm";
@@ -90,6 +92,33 @@
       $currentNeighbourhoodName = newName;
       saveCurrentProject();
       $mutationCounter++;
+    }
+  }
+
+  function copyProject() {
+    let existingName = $currentProject!.project_name;
+    let newName = window.prompt(
+      `Please name this copy of project ${existingName}`,
+      $projectStorage.nextAvailableProjectName(existingName),
+    );
+    if (newName) {
+      try {
+        let newID = $projectStorage.copyProject($currentProjectID!, newName);
+        // Open this new project. We don't need to swap out much state in the
+        // backend or reset zoom or the usual things, since we've just
+        // made an exact copy of something.
+        $currentProjectID = newID;
+        $backend!.changeProjectName(newName);
+
+        // Update the URL
+        let url = new URL(window.location.href);
+        url.searchParams.set("project", newID);
+        window.history.replaceState(null, "", url.toString());
+
+        window.alert(`Done, you are now working on project ${newName}`);
+      } catch (e) {
+        window.alert(`Couldn't copy project: ${e}`);
+      }
     }
   }
 
@@ -196,29 +225,7 @@
   </div>
 
   <div slot="sidebar">
-    <div
-      style="display: flex; justify-content: space-between; align-items: center; gap: 16px;"
-    >
-      <h2>Neighbourhoods</h2>
-      <button
-        class="outline"
-        style="margin-right: 8px;"
-        title="Download project as GeoJSON"
-        on:click={() => downloadProject(notNull($currentProjectID))}
-      >
-        <div
-          style="display: flex; align-items: center; gap: 8px; color: black;"
-        >
-          <FileDown />
-          <!-- 
-            The text feels a little crowded aginst the right edge. 
-            Currently this is the only place we use an icon+text button like this.
-            But if we do more, we might want to pattern something out.
-          -->
-          <span style="margin-right: 2px;">Export</span>
-        </div>
-      </button>
-    </div>
+    <h2>Neighbourhoods</h2>
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
         <li
@@ -264,6 +271,47 @@
       <PrioritizationSelect bind:selectedPrioritization />
       <hr />
     {/if}
+
+    <h2>Project: {notNull($currentProject).project_name}</h2>
+    <div style="display: flex; gap: 8px">
+      <button
+        class="outline"
+        style="margin-right: 8px;"
+        title="Download project as GeoJSON"
+        on:click={() => downloadProject(notNull($currentProjectID))}
+      >
+        <div
+          style="display: flex; align-items: center; gap: 8px; color: black;"
+        >
+          <FileDown />
+          <!-- 
+            The text feels a little crowded aginst the right edge. 
+            Currently this is the only place we use an icon+text button like this.
+            But if we do more, we might want to pattern something out.
+          -->
+          <span style="margin-right: 2px;">Export</span>
+        </div>
+      </button>
+
+      <button
+        class="outline"
+        style="margin-right: 8px;"
+        title="Make a copy of this project"
+        on:click={() => copyProject()}
+      >
+        <div
+          style="display: flex; align-items: center; gap: 8px; color: black;"
+        >
+          <Copy />
+          <!-- 
+            The text feels a little crowded aginst the right edge. 
+            Currently this is the only place we use an icon+text button like this.
+            But if we do more, we might want to pattern something out.
+          -->
+          <span style="margin-right: 2px;">Copy project</span>
+        </div>
+      </button>
+    </div>
 
     <p>
       {edits.modalFilters} new modal filter(s) added
