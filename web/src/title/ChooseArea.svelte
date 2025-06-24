@@ -9,9 +9,9 @@
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { Popup } from "svelte-utils/map";
-  import { prettyPrintStudyAreaName, Style } from "./common";
-  import { mode, projectStorage } from "./stores";
-  import { loadProject } from "./title/loader";
+  import { prettyPrintStudyAreaName, Style } from "../common";
+  import { mode, projectStorage } from "../stores";
+  import { loadProject } from "./loader";
 
   export let boundariesUrl: string;
 

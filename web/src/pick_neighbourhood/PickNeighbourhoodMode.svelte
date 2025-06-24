@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection, Polygon } from "geojson";
-  import { CirclePlus, Copy, FileDown, Pencil, Trash2 } from "lucide-svelte";
+  import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
   import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
     FillLayer,
@@ -9,38 +9,30 @@
     JoinedData,
     LineLayer,
   } from "svelte-maplibre";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
+  import { notNull } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import {
-    downloadProject,
-    layerId,
-    Link,
-    ModeLink,
-    pageTitle,
-    Style,
-  } from "./common";
-  import { pickNeighbourhoodName } from "./common/pick_names";
-  import { ModalFilterLayer } from "./layers";
+  import { layerId, Link, ModeLink, pageTitle, Style } from "../common";
+  import { pickNeighbourhoodName } from "../common/pick_names";
+  import { ModalFilterLayer } from "../layers";
   import {
     prioritizationFillColor,
     PrioritizationSelect,
     type Prioritization,
-  } from "./prioritization";
+  } from "../prioritization";
   import {
     appFocus,
     backend,
     currentNeighbourhoodName,
-    currentProject,
     currentProjectID,
     devMode,
     metricBuckets,
     mode,
     mutationCounter,
-    projectStorage,
     saveCurrentProject,
-  } from "./stores";
-  import type { NeighbourhoodBoundaryFeature } from "./wasm";
+  } from "../stores";
+  import type { NeighbourhoodBoundaryFeature } from "../wasm";
+  import ManageProject from "./ManageProject.svelte";
 
   // Note we do this to trigger a refresh when loading stuff
   $: gj = $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson();
@@ -48,7 +40,6 @@
     type: "FeatureCollection" as const,
     features: gj.features.filter((f) => f.properties!.kind == "boundary"),
   } as FeatureCollection<Polygon, { name: string }>;
-  $: edits = countEdits(gj);
 
   // If a user loads an empty project or deletes all neighbourhoods, don't show
   // them an empty pick screen
@@ -93,60 +84,6 @@
       saveCurrentProject();
       $mutationCounter++;
     }
-  }
-
-  function copyProject() {
-    let existingName = $currentProject!.project_name;
-    let newName = window.prompt(
-      `Please name this copy of project ${existingName}`,
-      $projectStorage.nextAvailableProjectName(existingName),
-    );
-    if (newName) {
-      try {
-        let newID = $projectStorage.copyProject($currentProjectID!, newName);
-        // Open this new project. We don't need to swap out much state in the
-        // backend or reset zoom or the usual things, since we've just
-        // made an exact copy of something.
-        $currentProjectID = newID;
-        $backend!.changeProjectName(newName);
-
-        // Update the URL
-        let url = new URL(window.location.href);
-        url.searchParams.set("project", newID);
-        window.history.replaceState(null, "", url.toString());
-
-        window.alert(`Done, you are now working on project ${newName}`);
-      } catch (e) {
-        window.alert(`Couldn't copy project: ${e}`);
-      }
-    }
-  }
-
-  function debugRouteSnapper() {
-    downloadGeneratedFile(
-      "debug_route_snapper.geojson",
-      $backend!.toRouteSnapperGj(),
-    );
-  }
-
-  function countEdits(gj: FeatureCollection): {
-    modalFilters: number;
-    deletedModalFilters: number;
-    travelFlows: number;
-  } {
-    let modalFilters = 0;
-    let deletedModalFilters = 0;
-    let travelFlows = 0;
-    for (let f of gj.features) {
-      if (f.properties!.kind == "modal_filter") {
-        modalFilters++;
-      } else if (f.properties!.kind == "deleted_existing_modal_filter") {
-        deletedModalFilters++;
-      } else if (f.properties!.kind == "travel_flow") {
-        travelFlows++;
-      }
-    }
-    return { modalFilters, deletedModalFilters, travelFlows };
   }
 
   function fillColor(
@@ -201,7 +138,9 @@
           <ModeLink mode={{ mode: "title" }} />
         </li>
         <li>
-          {pageTitle($mode.mode)}
+          {#key $currentProjectID}
+            {pageTitle($mode.mode)}
+          {/key}
         </li>
       </ul>
     </nav>
@@ -272,61 +211,7 @@
       <hr />
     {/if}
 
-    <h2>Project: {notNull($currentProject).project_name}</h2>
-    <div style="display: flex; gap: 8px">
-      <button
-        class="outline"
-        style="margin-right: 8px;"
-        title="Download project as GeoJSON"
-        on:click={() => downloadProject(notNull($currentProjectID))}
-      >
-        <div
-          style="display: flex; align-items: center; gap: 8px; color: black;"
-        >
-          <FileDown />
-          <!-- 
-            The text feels a little crowded aginst the right edge. 
-            Currently this is the only place we use an icon+text button like this.
-            But if we do more, we might want to pattern something out.
-          -->
-          <span style="margin-right: 2px;">Export</span>
-        </div>
-      </button>
-
-      <button
-        class="outline"
-        style="margin-right: 8px;"
-        title="Make a copy of this project"
-        on:click={() => copyProject()}
-      >
-        <div
-          style="display: flex; align-items: center; gap: 8px; color: black;"
-        >
-          <Copy />
-          <!-- 
-            The text feels a little crowded aginst the right edge. 
-            Currently this is the only place we use an icon+text button like this.
-            But if we do more, we might want to pattern something out.
-          -->
-          <span style="margin-right: 2px;">Copy project</span>
-        </div>
-      </button>
-    </div>
-
-    <p>
-      {edits.modalFilters} new modal filter(s) added
-    </p>
-    <p>
-      {edits.deletedModalFilters}
-      existing modal filter(s) removed
-    </p>
-    <p>{edits.travelFlows} road segment direction(s) changed</p>
-
-    {#if $devMode}
-      <button class="secondary" on:click={debugRouteSnapper}>
-        Debug route-snapper
-      </button>
-    {/if}
+    <ManageProject projectGj={gj} />
   </div>
 
   <div slot="map">

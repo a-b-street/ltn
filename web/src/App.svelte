@@ -46,7 +46,7 @@
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactDetailMode from "./ImpactDetailMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
-  import PickNeighbourhoodMode from "./PickNeighbourhoodMode.svelte";
+  import PickNeighbourhoodMode from "./pick_neighbourhood/PickNeighbourhoodMode.svelte";
   import PredictImpactMode from "./PredictImpactMode.svelte";
   import RouteMode from "./RouteMode.svelte";
   import SetBoundaryMode from "./SetBoundaryMode.svelte";

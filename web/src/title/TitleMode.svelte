@@ -4,7 +4,6 @@
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import cntBoundariesUrl from "../../assets/cnt_boundaries.geojson?url";
   import englandBoundariesUrl from "../../assets/england_boundaries.geojson?url";
-  import ChooseArea from "../ChooseArea.svelte";
   import {
     downloadProject,
     Link,
@@ -24,6 +23,7 @@
     projectStorage,
   } from "../stores";
   import AppFocusSwitcher from "./AppFocusSwitcher.svelte";
+  import ChooseArea from "./ChooseArea.svelte";
   import { loadingMessage, loadingProgress, loadProject } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
