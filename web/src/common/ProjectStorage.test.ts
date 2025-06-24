@@ -254,8 +254,6 @@ describe("ProjectStorage", () => {
         projectStorage.copyProject("ce-nest-pas-un-uuid", "New Name"),
       ).toThrow("Cannot get project: no project found for ce-nest-pas-un-uuid");
     });
-
-    // TODO new name already exists? just copy twice??
   });
 
   describe("projectNameAlreadyExists", () => {
