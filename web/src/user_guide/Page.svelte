@@ -2,6 +2,7 @@
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import Toc from "svelte-toc";
   import About from "../About.svelte";
+  import exportProject from "./export_project.webp?url";
   import image01 from "./image01.webp?url";
   import image02 from "./image02.webp?url";
   import image03 from "./image03.webp?url";
@@ -31,8 +32,8 @@
   import image27 from "./image27.webp?url";
   import image28 from "./image28.webp?url";
   import image29 from "./image29.webp?url";
-  import image30 from "./image30.webp?url";
   import image31 from "./image31.webp?url";
+  import multipleProposals from "./multiple_proposals.webp?url";
 </script>
 
 <div class="container">
@@ -478,13 +479,21 @@
       will not see your old projects. At any time, you can export a project to a
       file from the main screen:
     </p>
-    <img alt="" src={image30} />
+    <img alt="" src={exportProject} />
     <p>
       This will download a GeoJSON file. You can email this, copy to Sharepoint,
       or otherwise transfer to somebody else. At the bottom of the very first
       Choose Project screen, you can then load this project from its file:
     </p>
     <img alt="" src={image31} />
+
+    <h3 id="multiple-proposals">Multiple proposals</h3>
+    <p>
+      You may want to try a few different proposals for an LTN. Each alternate
+      proposal will be in its own project. From the main screen, you can quickly
+      copy a project and switch between projects.
+    </p>
+    <img alt="" src={multipleProposals} />
 
     <h2 id="appendix">Appendix</h2>
     <h3 id="changelog">Changelog</h3>
@@ -497,10 +506,25 @@
     <ul>
       <li>v1, 4 June 2025 - first main release</li>
       <li>
-        12 June 2025 - detecting more shortcuts, see <a
+        12 June 2025 - detecting more shortcuts (see <a
           href="https://github.com/a-b-street/ltn/pull/381"
           target="_blank">details</a
-        >
+        >) and more conveniently reclassify main roads along a route (see
+        <a href="https://github.com/a-b-street/ltn/pull/382" target="_blank"
+          >details</a
+        >)
+      </li>
+      <li>
+        16 June 2025 - show a neighbourhood before any edits (see <a
+          href="https://github.com/a-b-street/ltn/pull/379"
+          target="_blank">details</a
+        >)
+      </li>
+      <li>
+        30 June 2025 - copy and switch projects quickly (see <a
+          href="https://github.com/a-b-street/ltn/pull/394"
+          target="_blank">details</a
+        >)
       </li>
     </ul>
 
