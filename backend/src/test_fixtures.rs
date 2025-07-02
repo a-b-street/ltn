@@ -1,7 +1,5 @@
-use crate::boundary_stats::ContextData;
 use crate::map_model::ProjectDetails;
 use crate::neighbourhood::NeighbourhoodBoundary;
-use crate::od::DemandModel;
 use crate::{MapModel, Neighbourhood};
 use anyhow::{Context, Result};
 use geojson::{Feature, FeatureCollection};
@@ -67,100 +65,59 @@ impl NeighbourhoodFixture {
         Ok((neighbourhood, map))
     }
 
-    fn pbf_path(&self) -> String {
+    pub fn map_model_builder(&self) -> Result<Box<dyn Fn() -> Result<MapModel>>> {
+        let project_details = ProjectDetails {
+            project_name: self.savefile_name.to_string(),
+            study_area_name: Some(self.study_area_name.to_string()),
+            app_focus: if self.is_cnt {
+                "cnt".to_string()
+            } else {
+                "global".to_string()
+            },
+            db_schema_version: TEST_DB_SCHEMA_VERSION,
+        };
+
+        // CNT files are pre-built with everything already
         if self.is_cnt {
-            format!("../web/public/cnt/osm/{}.osm.pbf.gz", self.study_area_name)
-        } else {
-            format!("../web/public/severance_pbfs/{}.pbf", self.study_area_name)
-        }
-    }
-
-    fn boundary_path(&self) -> String {
-        if self.is_cnt {
-            format!(
-                "../web/public/cnt/boundaries/{}.geojson",
-                self.study_area_name
-            )
-        } else {
-            format!("../web/public/boundaries/{}.geojson", self.study_area_name)
-        }
-    }
-
-    fn context_data(&self) -> Option<ContextData> {
-        if !self.is_cnt {
-            return None;
-        }
-        let path = format!(
-            "../web/public/cnt/prioritization/{}.bin.gz",
-            self.study_area_name
-        );
-        let bytes = std::fs::read(&path).expect(&format!("unable to read context_data: {path}"));
-        let mut decoder = flate2::read::GzDecoder::new(Cursor::new(bytes));
-        let mut gunzipped = Vec::new();
-        decoder
-            .read_to_end(&mut gunzipped)
-            .expect("unable to gunzip context_data");
-        Some(bincode::deserialize(&gunzipped).expect("unable to deserialize context_data"))
-    }
-
-    fn demand_data(&self) -> Option<DemandModel> {
-        if !self.is_cnt {
-            return None;
-        }
-        let path = format!("../web/public/cnt/demand/{}.bin.gz", self.study_area_name);
-        let bytes = std::fs::read(&path).expect(&format!("unable to read demand_data: {path}"));
-        let mut decoder = flate2::read::GzDecoder::new(Cursor::new(bytes));
-        let mut gunzipped = Vec::new();
-        decoder
-            .read_to_end(&mut gunzipped)
-            .expect("unable to gunzip demand_data");
-        Some(bincode::deserialize(&gunzipped).expect("unable to deserialize demand_data"))
-    }
-
-    pub fn map_model_builder(&self) -> Result<impl Fn() -> Result<MapModel> + use<'_>> {
-        let study_area_name = &self.study_area_name;
-
-        let path = self.pbf_path();
-        let input_bytes = std::fs::read(&path).context(format!("unable to read '{path}'"))?;
-        let mut gunzipped = Vec::new();
-        if path.ends_with(".gz") {
+            let path = format!("../web/public/cnt/maps_v2/{}.bin.gz", self.study_area_name);
+            let input_bytes = std::fs::read(&path).context(format!("unable to read '{path}'"))?;
+            let mut gunzipped = Vec::new();
             let mut decoder = flate2::read::GzDecoder::new(Cursor::new(input_bytes));
             decoder
                 .read_to_end(&mut gunzipped)
                 .expect("unable to gunzip pbf");
-        } else {
-            gunzipped = input_bytes;
+
+            return Ok(Box::new(move || {
+                let mut map: MapModel = bincode::deserialize(&gunzipped)?;
+                map.finish_loading(project_details.clone());
+                Ok(map)
+            }));
         }
 
-        let boundary: Feature = std::fs::read_to_string(&self.boundary_path())?.parse()?;
-        let geometry: geo::Geometry = boundary
+        let pbf_path = format!("../web/public/severance_pbfs/{}.pbf", self.study_area_name);
+        let pbf_bytes = std::fs::read(&pbf_path).context(format!("unable to read '{pbf_path}'"))?;
+
+        let boundary_path = format!("../web/public/boundaries/{}.geojson", self.study_area_name);
+        let boundary: Feature = std::fs::read_to_string(&boundary_path)?.parse()?;
+        // Non-CNT boundaries are polygons
+        let geometry: geo::Polygon = boundary
             .geometry
             .expect("missing geometry in test fixture")
             .try_into()?;
-        let multi_polygon = match geometry {
-            // CNT boundaries are MultiPolygons.
-            geo::Geometry::MultiPolygon(g) => g,
-            // Historically other boundaries were polygons.
-            geo::Geometry::Polygon(single_polygon) => single_polygon.into(),
-            other => bail!("unexpected geometry type {other:?}"),
-        };
-        Ok(move || {
-            let demand = self.demand_data();
-            let context_data = self.context_data();
+        let multi_polygon = geo::MultiPolygon(vec![geometry]);
+
+        Ok(Box::new(move || {
+            let demand = None;
+            let context_data = None;
             let mut map = MapModel::create_serialized(
-                &gunzipped,
+                &pbf_bytes,
                 multi_polygon.clone(),
                 demand,
                 context_data,
             )?;
-            map.finish_loading(ProjectDetails {
-                project_name: self.savefile_name.to_string(),
-                study_area_name: Some(study_area_name.to_string()),
-                app_focus: "global".to_string(),
-                db_schema_version: TEST_DB_SCHEMA_VERSION,
-            });
+            map.finish_loading(project_details.clone());
             Ok(map)
-        })
+        }))
     }
 
     pub fn bench_sample_size(&self) -> usize {
