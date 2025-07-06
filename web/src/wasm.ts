@@ -390,7 +390,7 @@ export interface RenderNeighbourhoodOutput {
           travel_flow_edited: boolean;
           edited: boolean;
           road: number;
-          cell_color: "disconnected" | number;
+          cell_color: "disconnected" | "pedestrianized" | number;
           speed_mph: number;
           // Populated by setCellColors, not in the Rust backend
           color: string;
@@ -409,7 +409,7 @@ export interface RenderNeighbourhoodOutput {
         Point,
         {
           kind: "border_entry";
-          cell_color: "disconnected" | number;
+          cell_color: "disconnected" | "pedestrianized" | number;
           bearing_upon_entry: number;
         }
       >
@@ -417,7 +417,7 @@ export interface RenderNeighbourhoodOutput {
         MultiPolygon,
         {
           kind: "cell";
-          cell_color: "disconnected" | number;
+          cell_color: "disconnected" | "pedestrianized" | number;
           // Populated by setCellColors, not in the Rust backend
           color: string;
         }
