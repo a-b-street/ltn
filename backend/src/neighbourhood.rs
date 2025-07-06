@@ -380,6 +380,18 @@ impl Neighbourhood {
             if let Some(color) = derived.render_cells.colors_per_road.get(&r) {
                 f.set_property("cell_color", *color);
             }
+            f.set_property(
+                "road_kind",
+                if road.tags.is("access", "private") {
+                    "private"
+                } else if road.tags.is("highway", "pedestrian") {
+                    "pedestrian"
+                } else if road.tags.is("highway", "service") {
+                    "service"
+                } else {
+                    "normal"
+                },
+            );
 
             features.push(f);
         }

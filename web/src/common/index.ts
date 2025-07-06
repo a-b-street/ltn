@@ -34,8 +34,10 @@ export function gjPosition(pt: number[]): [number, number] {
 export function initTooltips() {
   tippy("[data-tippy-content]");
 }
-// Zoom-dependant line width, adapted from from the Minor road layer (secondary
-// road class) from https://api.maptiler.com/maps/streets-v2/style.json.
+
+// Zoom-dependant line width, adapted from from the Minor road layer from
+// https://api.maptiler.com/maps/streets-v2/style.json. If there's a road_kind
+// property, this is used to thin out some lines.
 export function roadLineWidth(extraWidth: number): ExpressionSpecification {
   return [
     "interpolate",
@@ -46,13 +48,23 @@ export function roadLineWidth(extraWidth: number): ExpressionSpecification {
     10,
     1 + extraWidth,
     12,
-    1.5 + extraWidth,
+    byClass(1.5 + extraWidth, 1 + extraWidth),
     14,
-    4 + extraWidth,
+    byClass(4 + extraWidth, 2 + extraWidth),
     16,
-    7 + extraWidth,
+    byClass(7 + extraWidth, 4 + extraWidth),
     20,
-    24 + extraWidth,
+    byClass(24 + extraWidth, 16 + extraWidth),
+  ];
+}
+
+function byClass(thick: number, thin: number): ExpressionSpecification {
+  return [
+    "match",
+    ["get", "road_kind"],
+    ["private", "pedestrian", "service"],
+    thin,
+    thick,
   ];
 }
 
