@@ -62,7 +62,15 @@ fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
         ) {
             let props = f.properties.as_mut().unwrap();
             props.retain(|k, _| {
-                ["travel_flow", "kind", "pct", "shortcuts", "way", "road_kind"].contains(&k.as_str())
+                [
+                    "travel_flow",
+                    "kind",
+                    "pct",
+                    "shortcuts",
+                    "way",
+                    "road_kind",
+                ]
+                .contains(&k.as_str())
             });
         }
     }

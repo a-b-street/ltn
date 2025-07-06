@@ -12,6 +12,7 @@ const RESOLUTION_M: f64 = 10.0;
 #[derive(Debug, Clone, Copy)]
 pub enum Color {
     Disconnected,
+    Pedestrianized,
     Cell(usize),
 }
 
@@ -24,6 +25,7 @@ impl Serialize for Color {
     {
         match self {
             Color::Disconnected => "disconnected".serialize(serializer),
+            Color::Pedestrianized => "pedestrianized".serialize(serializer),
             Color::Cell(idx) => idx.serialize(serializer),
         }
     }
@@ -35,6 +37,7 @@ impl Into<geojson::JsonValue> for Color {
     fn into(self) -> geojson::JsonValue {
         match self {
             Color::Disconnected => "disconnected".into(),
+            Color::Pedestrianized => "pedestrianized".into(),
             Color::Cell(idx) => idx.into(),
         }
     }
@@ -127,7 +130,16 @@ impl RenderCells {
         for (idx, cell) in cells.iter().enumerate() {
             // If there's only one cell, it's not disconnected -- there are likely no main roads
             if cell.is_disconnected() && cells.len() > 1 {
-                cell_colors[idx] = Color::Disconnected;
+                // Communicate pedestrianized differently
+                if cell.roads.keys().all(|r| {
+                    map.get_r(*r)
+                        .tags
+                        .is_any("highway", vec!["pedestrian", "service"])
+                }) {
+                    cell_colors[idx] = Color::Pedestrianized;
+                } else {
+                    cell_colors[idx] = Color::Disconnected;
+                }
             }
         }
 

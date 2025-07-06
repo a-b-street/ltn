@@ -526,6 +526,12 @@
           target="_blank">details</a
         >)
       </li>
+      <li>
+        6 July 2025 - improve styling for pedestrianized areas (see <a
+          href="https://github.com/a-b-street/ltn/pull/397"
+          target="_blank">details</a
+        >)
+      </li>
     </ul>
 
     <h3 id="credits">Credits</h3>

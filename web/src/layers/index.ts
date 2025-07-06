@@ -13,6 +13,8 @@ export function colorByCellColor(): DataDrivenPropertyValueSpecification<string>
     ["get", "cell_color"],
     "disconnected",
     "red",
+    "pedestrianized",
+    "#dddde8",
     // For numeric values, need to use a step function with % operation
     [
       "let",
