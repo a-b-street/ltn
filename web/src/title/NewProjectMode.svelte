@@ -24,6 +24,7 @@
 
   let newProjectName = "";
   let example: string | null = null;
+  // TODO Changes
   let exampleAreas: [string, [string, string][]][] = [];
   let loading = "";
 
@@ -38,10 +39,13 @@
     loading = "Loading OSM";
     try {
       let studyAreaName = undefined;
+      // Assume everything from Overpass is about 5 minutes stale. It returns something specific in the XML response, but it's not worth digging for this.
+      let osmTimestamp = Date.now() - 5 * 60 * 1000;
       $backend = new Backend(
         undefined,
         new TextEncoder().encode(e.detail.xml),
         e.detail.boundary,
+        osmTimestamp,
         $appFocus,
         studyAreaName,
         newProjectName,

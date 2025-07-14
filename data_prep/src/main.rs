@@ -22,6 +22,11 @@ struct Args {
     #[argh(option)]
     osm_input_dir: String,
 
+    /// a unix timestamp in milliseconds representing how recent the OSM input data is. Use `osmium
+    /// fileinfo` and then something like JS `Date.parse()`.
+    #[argh(option)]
+    osm_timestamp: usize,
+
     /// path to a zones.geojson used for travel demand data, with a `name` property
     #[argh(option)]
     od_zones: String,
@@ -67,6 +72,7 @@ fn main() -> Result<()> {
                 args.osm_input_dir, study_area.kind, study_area.name
             ))?,
             study_area.geometry,
+            Some(args.osm_timestamp),
             demand_data,
             context_data,
         )?;

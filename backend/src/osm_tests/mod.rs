@@ -95,9 +95,11 @@ pub fn load_osm_xml(filename: &str) -> MapModel {
     let context_data = None;
     // No test cases need this
     let boundary_wgs84 = MultiPolygon::new(Vec::new());
+    let osm_timestamp = None;
     let mut map = MapModel::create_serialized(
         &std::fs::read(path).unwrap(),
         boundary_wgs84,
+        osm_timestamp,
         demand,
         context_data,
     )

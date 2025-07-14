@@ -147,9 +147,11 @@ impl NeighbourhoodFixture {
         Ok(move || {
             let demand = self.demand_data();
             let context_data = self.context_data();
+            let osm_timestamp = None;
             let mut map = MapModel::create_serialized(
                 &gunzipped,
                 multi_polygon.clone(),
+                osm_timestamp,
                 demand,
                 context_data,
             )?;

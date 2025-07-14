@@ -31,7 +31,8 @@ export async function loadProject(projectID: ProjectID) {
   let project = get(projectStorage).project(projectID);
   try {
     console.time("get input files");
-    let { osmBuffer, boundary, mapModelBuffer } = await getInputFiles(project);
+    let { osmBuffer, boundary, osmTimestamp, mapModelBuffer } =
+      await getInputFiles(project);
     console.timeEnd("get input files");
     loadingMessage.set("Download finished, setting up project");
     // TODO The animation won't work, because we block the UI thread below
@@ -44,6 +45,7 @@ export async function loadProject(projectID: ProjectID) {
         mapModelBuffer ? new Uint8Array(mapModelBuffer) : undefined,
         osmBuffer ? new Uint8Array(osmBuffer) : undefined,
         boundary,
+        osmTimestamp,
         project.app_focus,
         project.study_area_name,
         project.project_name,
@@ -67,9 +69,10 @@ export async function loadProject(projectID: ProjectID) {
 // Returns input needed to set up the LTN backend, either from pre-hosted files
 // or from Overpass.
 async function getInputFiles(project: ProjectFeatureCollection): Promise<{
-  // Either these two are present
+  // Either these three are present
   osmBuffer?: Uint8Array<ArrayBufferLike>;
   boundary?: Feature<Polygon | MultiPolygon>;
+  osmTimestamp?: number;
   // Or this one
   mapModelBuffer?: Uint8Array<ArrayBufferLike>;
 }> {
@@ -84,6 +87,8 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     );
     return { mapModelBuffer };
   } else if (project.study_area_name) {
+    // TODO Plumb the example areas from NewProjectMode
+    // TODO Handle the two level lookup
     let osmBuffer = await download(
       assetUrl(`severance_pbfs/${project.study_area_name}.pbf`),
     );
@@ -103,7 +108,9 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     let resp = await safeFetch(overpassQueryForPolygon(boundary));
     // @ts-expect-error TODO The return types are probably wrong
     let osmBuffer = (await resp.arrayBuffer()) as Uint8Array<ArrayBufferLike>;
-    return { osmBuffer, boundary };
+    // Assume everything from Overpass is about 5 minutes stale. It returns something specific in the XML response, but it's not worth digging for this.
+    let osmTimestamp = Date.now() - 5 * 60 * 1000;
+    return { osmBuffer, boundary, osmTimestamp };
   }
 }
 

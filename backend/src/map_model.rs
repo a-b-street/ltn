@@ -29,6 +29,8 @@ pub struct MapModel {
     pub boundary_wgs84: MultiPolygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
     pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
+    // Millieconds since unix epoch of the OSM data, if known
+    pub osm_timestamp: Option<usize>,
 
     // Only those acting as severances; above or belowground don't count
     pub railways: Vec<LineString>,
@@ -289,10 +291,17 @@ impl MapModel {
     pub fn create_serialized(
         input_bytes: &[u8],
         boundary_wgs84: MultiPolygon,
+        osm_timestamp: Option<usize>,
         demand: Option<DemandModel>,
         context_data: Option<ContextData>,
     ) -> Result<MapModel> {
-        crate::create::create_from_osm(input_bytes, boundary_wgs84, demand, context_data)
+        crate::create::create_from_osm(
+            input_bytes,
+            boundary_wgs84,
+            osm_timestamp,
+            demand,
+            context_data,
+        )
     }
 
     /// After deserializing, this must be called before the MapModel can be fully used.

@@ -20,6 +20,7 @@ mod parse;
 pub fn create_from_osm(
     input_bytes: &[u8],
     boundary_wgs84: MultiPolygon,
+    osm_timestamp: Option<usize>,
     demand: Option<DemandModel>,
     mut serialized_context_data: Option<ContextData>,
 ) -> Result<MapModel> {
@@ -96,6 +97,7 @@ pub fn create_from_osm(
         project_details: None,
         closest_road,
         closest_intersection,
+        osm_timestamp,
 
         railways: osm.railways,
         waterways: osm.waterways,

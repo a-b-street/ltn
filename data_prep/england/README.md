@@ -22,6 +22,7 @@ mkdir -p ../../web/public/england/maps_v2
 cargo run --release -- \
   --study-area-boundaries boundaries.geojson \
   --osm-input-dir tmp/osm_out/ \
+  --osm-timestamp "results from doing: osmium fileinfo tmp/england-latest.osm.pbf | grep ' timestamp'"
   --od-zones zones.geojson \
   --od-csv od.csv \
   --out-dir ../../web/public/england/maps_v2/

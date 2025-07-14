@@ -52,13 +52,15 @@ pub struct LTN {
 
 #[wasm_bindgen]
 impl LTN {
-    /// Either pass in `map_model_input_bytes` or `osm_input_bytes` and `boundary_input`
+    /// Either pass in `map_model_input_bytes` or `osm_input_bytes`, `boundary_input`, and
+    /// `osm_timestamp`
     #[wasm_bindgen(constructor)]
     pub fn new(
         // Option doesn't work; the caller should just pass in 0 bytes to mean empty
         map_model_input_bytes: &[u8],
         osm_input_bytes: &[u8],
         boundary_input: JsValue,
+        osm_timestamp: Option<usize>,
         app_focus: String,
         study_area_name: Option<String>,
         project_name: String,
@@ -86,8 +88,14 @@ impl LTN {
 
             let demand = None;
             let context_data = None;
-            MapModel::create_serialized(osm_input_bytes, multi_polygon, demand, context_data)
-                .map_err(err_to_js)?
+            MapModel::create_serialized(
+                osm_input_bytes,
+                multi_polygon,
+                osm_timestamp,
+                demand,
+                context_data,
+            )
+            .map_err(err_to_js)?
         };
         map.finish_loading(ProjectDetails {
             app_focus,
