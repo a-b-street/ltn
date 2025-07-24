@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use geo::{Coord, Line, LineIntersection, LineLocatePoint, Point};
 use route_snapper_graph::{Edge, NodeID, RouteSnapperMap};
@@ -31,11 +31,9 @@ impl MapModel {
         // TODO This should be a method on RouteSnapperMap, but we'll have to project to mercator
         // and back
         let mut all_lines = Vec::new();
-        let mut line_to_road = HashMap::new();
         for r in &self.roads {
             for line in r.linestring.lines() {
-                all_lines.push(line);
-                line_to_road.insert(hashify_line(line), r.id);
+                all_lines.push(LineWithData { line, road: r.id });
             }
         }
 
@@ -45,7 +43,7 @@ impl MapModel {
             pt_to_node_id.insert(hashify_point(i.point.into()), NodeID(i.id.0 as u32));
         }
         let mut split_roads_at: BTreeMap<RoadID, Vec<f64>> = BTreeMap::new();
-        for (line1, line2, cross) in geo::sweep::Intersections::from_iter(all_lines) {
+        for (r1, r2, cross) in geo::sweep::Intersections::<_>::from_iter(all_lines) {
             if let LineIntersection::SinglePoint {
                 intersection,
                 is_proper,
@@ -53,27 +51,25 @@ impl MapModel {
             {
                 // Intersections are expected constantly at endpoints, so ignore those
                 if is_proper {
-                    let r1 = line_to_road[&hashify_line(line1)];
-                    let r2 = line_to_road[&hashify_line(line2)];
                     pt_to_node_id.insert(hashify_point(intersection), NodeID(nodes.len() as u32));
                     nodes.push(self.mercator.to_wgs84(&Point::from(intersection)).into());
 
                     let r1_dist = self
-                        .get_r(r1)
+                        .get_r(r1.road)
                         .linestring
                         .line_locate_point(&intersection.into())
                         .unwrap();
                     let r2_dist = self
-                        .get_r(r2)
+                        .get_r(r2.road)
                         .linestring
                         .line_locate_point(&intersection.into())
                         .unwrap();
                     split_roads_at
-                        .entry(r1)
+                        .entry(r1.road)
                         .or_insert_with(Vec::new)
                         .push(r1_dist);
                     split_roads_at
-                        .entry(r2)
+                        .entry(r2.road)
                         .or_insert_with(Vec::new)
                         .push(r2_dist);
                 }
@@ -125,11 +121,21 @@ impl MapModel {
     }
 }
 
+#[derive(Clone, Debug)]
+struct LineWithData {
+    line: Line,
+    road: RoadID,
+}
+
+impl geo::sweep::Cross for LineWithData {
+    type Scalar = f64;
+
+    fn line(&self) -> Line {
+        self.line
+    }
+}
+
 fn hashify_point(pt: Coord) -> (isize, isize) {
     // cm resolution
     ((pt.x * 100.0) as isize, (pt.y * 100.0) as isize)
-}
-
-fn hashify_line(line: Line) -> ((isize, isize), (isize, isize)) {
-    (hashify_point(line.start), hashify_point(line.end))
 }

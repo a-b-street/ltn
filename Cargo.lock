@@ -478,7 +478,7 @@ dependencies = [
 [[package]]
 name = "geo"
 version = "0.30.0"
-source = "git+https://github.com/georust/geo#b77b0a9ecaaaf8b0fb93733380a64f7ac4280dcc"
+source = "git+https://github.com/georust/geo#56ca824cbb9bfdc37a6b35c88388a072586f73b4"
 dependencies = [
  "earcutr",
  "float_next_after",
