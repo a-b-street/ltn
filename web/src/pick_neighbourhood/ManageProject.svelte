@@ -2,7 +2,7 @@
   import type { FeatureCollection } from "geojson";
   import { Copy, FileDown, FolderOpen } from "lucide-svelte";
   import { downloadGeneratedFile, notNull } from "svelte-utils";
-  import { downloadProject, Link } from "../common";
+  import { downloadProject, HelpButton, Link } from "../common";
   import { type ProjectID } from "../common/ProjectStorage";
   import {
     backend,
@@ -19,6 +19,8 @@
 
   let showPickProject = false;
   $: otherProjects = listOtherProjects(notNull($currentProjectID));
+
+  let osmTimestamp = $backend!.getOsmTimestamp();
 
   function listOtherProjects(currentID: ProjectID): Array<{
     projectID: ProjectID;
@@ -171,6 +173,19 @@
   existing modal filter(s) removed
 </p>
 <p>{edits.travelFlows} road segment direction(s) changed</p>
+
+{#if osmTimestamp}
+  <div style="display: flex">
+    <i>Map data is from {osmTimestamp.toDateString()}</i>
+    <HelpButton>
+      <p>
+        If this area has changed since then, please contact <a
+          href="mailto:dabreegster@gmail.com">dabreegster@gmail.com</a
+        > to use newer OpenStreetMap data.
+      </p>
+    </HelpButton>
+  </div>
+{/if}
 
 {#if $devMode}
   <button class="secondary" on:click={debugRouteSnapper}>

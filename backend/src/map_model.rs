@@ -29,6 +29,8 @@ pub struct MapModel {
     pub boundary_wgs84: MultiPolygon,
     pub closest_road: RTree<GeomWithData<LineString, RoadID>>,
     pub closest_intersection: RTree<GeomWithData<Point, IntersectionID>>,
+    /// Seconds since the epoch
+    pub osm_timestamp: Option<i64>,
 
     // Only those acting as severances; above or belowground don't count
     pub railways: Vec<LineString>,

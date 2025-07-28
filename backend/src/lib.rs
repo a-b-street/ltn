@@ -657,6 +657,11 @@ impl LTN {
         Err(JsValue::from_str("no context_data for this area"))
     }
 
+    #[wasm_bindgen(js_name = getOsmTimestamp)]
+    pub fn get_osm_timestamp(&self) -> Option<i64> {
+        self.map.osm_timestamp
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {
