@@ -96,6 +96,7 @@ pub fn create_from_osm(
         project_details: None,
         closest_road,
         closest_intersection,
+        osm_timestamp: graph.timestamp,
 
         railways: osm.railways,
         waterways: osm.waterways,

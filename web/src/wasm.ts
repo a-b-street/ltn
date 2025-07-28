@@ -348,6 +348,14 @@ export class Backend {
   eraseAllMainRoads() {
     this.inner.eraseAllMainRoads();
   }
+
+  getOsmTimestamp(): Date | null {
+    let t = this.inner.getOsmTimestamp();
+    if (t) {
+      return new Date(1000 * Number(t));
+    }
+    return null;
+  }
 }
 
 export type Impact = FeatureCollection<
