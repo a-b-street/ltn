@@ -48,6 +48,10 @@
       we assume you are already familiar with the concept and purpose of LTNs.
       If you have any trouble using the tool, please email the maintainer at <a
         href="mailto:dabreegster@gmail.com">dabreegster@gmail.com</a
+      >
+      or
+      <a href="https://github.com/a-b-street/ltn/issues" target="_blank"
+        >create a Github issue</a
       >.
     </p>
     <p>The overall process of using the CNT looks like this:</p>
