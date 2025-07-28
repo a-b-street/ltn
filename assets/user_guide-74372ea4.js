@@ -2,7 +2,9 @@ import{S as ln,i as rn,s as ht,a as nn,b as wi,P as i,f as _i,g as q,h as t,l as
       Neighbourhood (LTN). This guide is written specifically for the Scottish
       version of the tool, but most of it applies elsewhere too. In this guide,
       we assume you are already familiar with the concept and purpose of LTNs.
-      If you have any trouble using the tool, please email the maintainer at <a href="mailto:dabreegster@gmail.com">dabreegster@gmail.com</a>.`,h=a(),g=s("p"),g.textContent="The overall process of using the CNT looks like this:",m=a(),p=s("ol"),p.innerHTML=`<li>Choose your study area</li> <li>Add one or more neighbourhood boundaries</li> <li>Design your LTN with modal filters, one-way streets, turn restrictions,
+      If you have any trouble using the tool, please email the maintainer at <a href="mailto:dabreegster@gmail.com">dabreegster@gmail.com</a>
+      or
+      <a href="https://github.com/a-b-street/ltn/issues" target="_blank">create a Github issue</a>.`,h=a(),g=s("p"),g.textContent="The overall process of using the CNT looks like this:",m=a(),p=s("ol"),p.innerHTML=`<li>Choose your study area</li> <li>Add one or more neighbourhood boundaries</li> <li>Design your LTN with modal filters, one-way streets, turn restrictions,
         and sometimes by reclassifying main roads</li> <li>Explore the effects of your proposal</li> <li>Share your work with a colleague</li>`,y=a(),_=s("h2"),_.textContent="Adding a neighbourhood",v=a(),k=s("p"),k.innerHTML=`Start using the tool by going to <a href="https://cnt.scot/">https://cnt.scot/</a>
       and picking your study area on the map or from the list. The study areas are
       defined by Local Authority Districts.`,He=a(),C=s("img"),D=a(),z=s("p"),z.textContent=`To design an LTN, you first need to specify its boundary. Unless you’re
