@@ -17,12 +17,12 @@ rm -f tmp.geojson
 ```
 ./get_input.sh
 
-mkdir -p ../../web/public/england/maps_v2
+mkdir -p ../../web/public/england/maps_v3
 
 cargo run --release -- \
   --study-area-boundaries boundaries.geojson \
   --osm-input-dir tmp/osm_out/ \
   --od-zones zones.geojson \
   --od-csv od.csv \
-  --out-dir ../../web/public/england/maps_v2/
+  --out-dir ../../web/public/england/maps_v3/
 ```
