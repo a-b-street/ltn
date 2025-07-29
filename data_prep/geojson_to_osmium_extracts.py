@@ -45,7 +45,11 @@ def main():
                 {
                     "output": f"{name}.osm.pbf",
                     "output_format": "pbf,add_metadata=false",
-                    "polygon": {"file_name": f"{name}.geojson", "file_type": "geojson"},
+                    "output_header": {"osmosis_replication_timestamp": None},
+                    "polygon": {
+                        "file_name": f"{name}.geojson",
+                        "file_type": "geojson",
+                    },
                 }
             )
             if len(config["extracts"]) == args.batch_size:
