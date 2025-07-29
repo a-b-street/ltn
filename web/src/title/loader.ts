@@ -85,7 +85,7 @@ async function getInputFiles(project: ProjectFeatureCollection): Promise<{
     return { mapModelBuffer };
   } else if (project.study_area_name) {
     let osmBuffer = await download(
-      assetUrl(`severance_pbfs/${project.study_area_name}.pbf`),
+      assetUrl(`severance_pbfs/v2/${project.study_area_name}.osm.pbf`),
     );
 
     let resp = await safeFetch(

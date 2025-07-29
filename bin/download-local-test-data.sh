@@ -23,6 +23,6 @@ download_to_subdir severance_pbfs https://assets.od2net.org/severance_pbfs/areas
 # Global data used for tests and demo data
 AREAS="bristol edinburgh strasbourg ut_dallas"
 for x in $AREAS; do
-    download_to_subdir severance_pbfs "https://assets.od2net.org/severance_pbfs/$x.pbf"
+    download_to_subdir severance_pbfs/v2 "https://assets.od2net.org/severance_pbfs/v2/$x.osm.pbf"
     download_to_subdir boundaries "https://assets.od2net.org/boundaries/$x.geojson"
 done
