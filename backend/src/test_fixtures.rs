@@ -94,7 +94,7 @@ impl NeighbourhoodFixture {
             }));
         }
 
-        let pbf_path = format!("../web/public/severance_pbfs/{}.pbf", self.study_area_name);
+        let pbf_path = format!("../web/public/severance_pbfs/v2/{}.osm.pbf", self.study_area_name);
         let pbf_bytes = std::fs::read(&pbf_path).context(format!("unable to read '{pbf_path}'"))?;
 
         let boundary_path = format!("../web/public/boundaries/{}.geojson", self.study_area_name);
