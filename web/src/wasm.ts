@@ -1,4 +1,3 @@
-import { LTN } from "backend";
 import type {
   Feature,
   FeatureCollection,
@@ -9,6 +8,7 @@ import type {
 } from "geojson";
 import type { LngLat } from "maplibre-gl";
 import type { Waypoint } from "route-snapper-ts";
+import * as backendPkg from "../../backend/pkg";
 import { sum } from "./common";
 import type { Intersection, IntersectionFeature } from "./common/Intersection";
 import type {
@@ -54,7 +54,7 @@ export type GeneratedBoundaryFeature = Feature<
 >;
 
 export class Backend {
-  inner: LTN;
+  inner: backendPkg.LTN;
 
   constructor(
     mapModelInput: Uint8Array | undefined,
@@ -65,7 +65,7 @@ export class Backend {
     projectName: string,
     dbSchemaVersion: number,
   ) {
-    this.inner = new LTN(
+    this.inner = new backendPkg.LTN(
       mapModelInput || new Uint8Array(),
       osmInput || new Uint8Array(),
       boundary,
