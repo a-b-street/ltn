@@ -1,7 +1,7 @@
-import { defineConfig } from "vite";
 import { resolve } from "path";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import wasmPack from "vite-plugin-wasm-pack";
+import { defineConfig } from "vite";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
   build: {
@@ -18,11 +18,20 @@ export default defineConfig({
   plugins: [
     // disable hot module reloading during test runs
     svelte({ hot: !process.env.VITEST }),
-    wasmPack(["../backend"], ["route-snapper"])
+    wasm(),
   ],
+  server: {
+    fs: {
+      allow: ["./", "../backend/pkg"],
+    },
+  },
   // @ts-ignore - The works, but type checking fails. Not sure why.
   test: {
-    environment: 'jsdom',
-    setupFiles: ['./vitest.setup.ts'],
-  }
-})
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
+  },
+  optimizeDeps: {
+    // Something breaks WASM import
+    exclude: ["route-snapper"],
+  },
+});

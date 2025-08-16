@@ -13,10 +13,8 @@
   import About from "./About.svelte";
   import ContextualLayers from "./context/ContextualLayers.svelte";
   import "@picocss/pico/css/pico.conditional.jade.min.css";
-  import initLtn from "backend";
   import { CircleHelp, House } from "lucide-svelte";
   import type { LngLatBoundsLike, Map } from "maplibre-gl";
-  import { init as initRouteSnapper } from "route-snapper-ts";
   import { onMount } from "svelte";
   import {
     Control,
@@ -36,6 +34,8 @@
     sidebarContents,
     topContents,
   } from "svelte-utils/top_bar_layout";
+  import * as backendPkg from "../../backend/pkg";
+  import * as routeSnapperPkg from "route-snapper";
   import streetsMapStyleUrl from "../assets/map-styles/streets-v2-style.json?url";
   import AddNeighbourhoodMode from "./AddNeighbourhoodMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
@@ -70,8 +70,8 @@
 
   let wasmReady = false;
   onMount(async () => {
-    await initLtn();
-    await initRouteSnapper();
+    await backendPkg.default();
+    await routeSnapperPkg.default();
     wasmReady = true;
 
     // When running locally if a vite public/ directory is set up, load from that for speed
