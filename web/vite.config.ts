@@ -1,6 +1,7 @@
-import { defineConfig } from "vite";
 import { resolve } from "path";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { wuchale } from "@wuchale/vite-plugin";
+import { defineConfig } from "vite";
 import wasmPack from "vite-plugin-wasm-pack";
 
 export default defineConfig({
@@ -16,13 +17,14 @@ export default defineConfig({
     },
   },
   plugins: [
+    wuchale(),
     // disable hot module reloading during test runs
     svelte({ hot: !process.env.VITEST }),
-    wasmPack(["../backend"], ["route-snapper"])
+    wasmPack(["../backend"], ["route-snapper"]),
   ],
   // @ts-ignore - The works, but type checking fails. Not sure why.
   test: {
-    environment: 'jsdom',
-    setupFiles: ['./vitest.setup.ts'],
-  }
-})
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
+  },
+});

@@ -1,0 +1,76 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-16T17:28:33.939Z\n"
+"PO-Revision-Date: 2025-08-16T17:28:33.939Z\n"
+"Last-Translator: \n"
+"Language: fr\n"
+"Language-Team: \n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
+"MIME-Version: 1.0\n"
+
+#: src/context/RouteNetwork.svelte
+msgid "Estimated cycling demand"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Data from NPT"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Trip purpose: <0/>"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Scenario: <0/>"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Network type: <0/>"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Color by: <0/>"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Cyclists: {0}"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Gradient: {0}%"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Cycle-friendliness: {0}%"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "All network details"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Fast/Direct network"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+#: src/context/RouteNetwork.svelte
+msgid "Baseline"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+#: src/context/RouteNetwork.svelte
+msgid "Go Dutch"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+#: src/context/RouteNetwork.svelte
+msgid "E-bikes"
+msgstr ""
+
+#: src/context/RouteNetwork.svelte
+msgid "Quiet/Indirect network"
+msgstr ""
