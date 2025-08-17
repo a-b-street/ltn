@@ -53,7 +53,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -68,9 +68,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     {#if state.state == "neutral"}
@@ -100,9 +100,9 @@
         the length of the shortest route using all roads, not just this neighbourhood
       </p>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />
@@ -171,5 +171,5 @@
     {/if}
 
     <ModalFilterLayer interactive={false} />
-  </div>
+  {/snippet}
 </SplitComponent>

@@ -70,7 +70,7 @@
 <Loading {loading} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -90,9 +90,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "predict-impact", prevMode: prevPrevMode }} />
 
     <p>
@@ -132,9 +132,9 @@
         </p>
       {/if}
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     {#if routes.length > 0}
       <GeoJSON data={gj(idx)}>
         <LineLayer
@@ -172,5 +172,5 @@
     {/if}
 
     <ModalFilterLayer interactive={false} />
-  </div>
+  {/snippet}
 </SplitComponent>

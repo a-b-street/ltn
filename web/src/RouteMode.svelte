@@ -48,7 +48,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -65,8 +65,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
-  <div slot="sidebar">
+  {/snippet}
+
+  {#snippet left()}
     <BackButton mode={{ mode: prevMode }} />
 
     <p>Drag markers for a route</p>
@@ -115,9 +116,9 @@
       Increase to see how drivers may detour in heavy traffic. 1 means
       free-flow.
     </i>
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     {#if prevMode == "neighbourhood"}
       <RenderNeighbourhood>
         <HighlightBoundaryLayer />
@@ -148,5 +149,5 @@
 
     <DotMarker bind:lngLat={$routePtA} draggable>A</DotMarker>
     <DotMarker bind:lngLat={$routePtB} draggable>B</DotMarker>
-  </div>
+  {/snippet}
 </SplitComponent>

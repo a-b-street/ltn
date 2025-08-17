@@ -125,14 +125,15 @@
 <Loading loading={$loadingMessage} progress={$loadingProgress} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
-  <div slot="sidebar">
+  {/snippet}
+
+  {#snippet left()}
     {#if $map && wasmReady}
       {#if $appFocus == "cnt"}
         <h1>The Connected Neighbourhoods Tool</h1>
@@ -213,7 +214,7 @@
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>

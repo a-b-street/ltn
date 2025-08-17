@@ -353,54 +353,57 @@
 <svelte:window onkeydown={onKeyDown} />
 
 <SplitComponent>
-  <div slot="top" style="display: flex; justify-content: space-between;">
-    <nav aria-label="breadcrumb">
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "title" }} />
-        </li>
-        <li>
-          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
-        </li>
-        <li>
-          {pageTitle($mode.mode)}
-        </li>
-      </ul>
-    </nav>
-    <nav>
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "view-shortcuts" }} />
-        </li>
-        <li>
-          <ModeLink mode={{ mode: "route", prevMode: "neighbourhood" }} />
-        </li>
-        <li>
-          <ModeLink
-            mode={{ mode: "predict-impact", prevMode: "neighbourhood" }}
-          />
-        </li>
-        <li>
-          <ModeLink mode={{ mode: "impact-one-destination" }} />
-        </li>
-        <li>
-          <ModeLink
-            mode={{
-              mode: "set-boundary",
-              name: boundary!.properties.name,
-              existing: boundary!,
-            }}
-          />
-        </li>
-        {#if $devMode}
+  {#snippet top()}
+    <div style="display: flex; justify-content: space-between;">
+      <nav aria-label="breadcrumb">
+        <ul>
           <li>
-            <ModeLink mode={{ mode: "debug-neighbourhood" }}>Debug</ModeLink>
+            <ModeLink mode={{ mode: "title" }} />
           </li>
-        {/if}
-      </ul>
-    </nav>
-  </div>
-  <div slot="sidebar">
+          <li>
+            <ModeLink mode={{ mode: "pick-neighbourhood" }} />
+          </li>
+          <li>
+            {pageTitle($mode.mode)}
+          </li>
+        </ul>
+      </nav>
+      <nav>
+        <ul>
+          <li>
+            <ModeLink mode={{ mode: "view-shortcuts" }} />
+          </li>
+          <li>
+            <ModeLink mode={{ mode: "route", prevMode: "neighbourhood" }} />
+          </li>
+          <li>
+            <ModeLink
+              mode={{ mode: "predict-impact", prevMode: "neighbourhood" }}
+            />
+          </li>
+          <li>
+            <ModeLink mode={{ mode: "impact-one-destination" }} />
+          </li>
+          <li>
+            <ModeLink
+              mode={{
+                mode: "set-boundary",
+                name: boundary!.properties.name,
+                existing: boundary!,
+              }}
+            />
+          </li>
+          {#if $devMode}
+            <li>
+              <ModeLink mode={{ mode: "debug-neighbourhood" }}>Debug</ModeLink>
+            </li>
+          {/if}
+        </ul>
+      </nav>
+    </div>
+  {/snippet}
+
+  {#snippet left()}
     <div
       style="display: flex; justify-content: space-between; align-items: center"
     >
@@ -679,9 +682,9 @@
     {/if}
     <h2>Neighbourhood stats</h2>
     <NeighbourhoodBoundarySummary neighbourhoodBoundary={boundary!} />
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <MapEvents onclick={onMapClick} />
 
     <ShowBeforeEdits />
@@ -797,7 +800,7 @@
         </LineLayer>
       </GeoJSON>
     {/if}
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>

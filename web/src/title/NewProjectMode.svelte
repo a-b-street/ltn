@@ -81,7 +81,7 @@
 <Loading loading={$loadingMessage} progress={$loadingProgress} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -90,9 +90,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <div>
       <label>
         Project name:
@@ -126,9 +126,9 @@
         />
       </div>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <PolygonToolLayer />
-  </div>
+  {/snippet}
 </SplitComponent>

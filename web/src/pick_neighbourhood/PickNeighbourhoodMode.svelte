@@ -130,39 +130,43 @@
 </script>
 
 <SplitComponent>
-  <div slot="top" style="display: flex; justify-content: space-between;">
-    <nav aria-label="breadcrumb">
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "title" }} />
-        </li>
-        <li>
-          {#key $currentProjectID}
-            {pageTitle($mode.mode)}
-          {/key}
-        </li>
-      </ul>
-    </nav>
-    <nav>
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "route", prevMode: "pick-neighbourhood" }} />
-        </li>
-        <li>
-          <ModeLink
-            mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
-          />
-        </li>
-        {#if $devMode}
+  {#snippet top()}
+    <div style="display: flex; justify-content: space-between;">
+      <nav aria-label="breadcrumb">
+        <ul>
           <li>
-            <ModeLink mode={{ mode: "debug-intersections" }} />
+            <ModeLink mode={{ mode: "title" }} />
           </li>
-        {/if}
-      </ul>
-    </nav>
-  </div>
+          <li>
+            {#key $currentProjectID}
+              {pageTitle($mode.mode)}
+            {/key}
+          </li>
+        </ul>
+      </nav>
+      <nav>
+        <ul>
+          <li>
+            <ModeLink
+              mode={{ mode: "route", prevMode: "pick-neighbourhood" }}
+            />
+          </li>
+          <li>
+            <ModeLink
+              mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
+            />
+          </li>
+          {#if $devMode}
+            <li>
+              <ModeLink mode={{ mode: "debug-intersections" }} />
+            </li>
+          {/if}
+        </ul>
+      </nav>
+    </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <h2>Neighbourhoods</h2>
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
@@ -211,9 +215,9 @@
     {/if}
 
     <ManageProject projectGj={gj} />
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <GeoJSON data={neighbourhoods} promoteId="name">
       <JoinedData
         data={hoveredNeighbourhoodFromList
@@ -273,7 +277,7 @@
     </GeoJSON>
 
     <ModalFilterLayer interactive={false} />
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>

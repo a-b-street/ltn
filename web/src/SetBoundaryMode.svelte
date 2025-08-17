@@ -59,7 +59,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -74,8 +74,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
-  <div slot="sidebar">
+  {/snippet}
+
+  {#snippet left()}
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     <h1>Adjust boundary</h1>
@@ -86,5 +87,5 @@
       <button onclick={finish} disabled={waypoints.length < 3}>Finish</button>
       <button class="secondary" onclick={cancel}>Cancel</button>
     </div>
-  </div>
+  {/snippet}
 </SplitComponent>

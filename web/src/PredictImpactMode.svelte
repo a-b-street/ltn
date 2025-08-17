@@ -61,7 +61,7 @@
 <Loading {loading} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -78,9 +78,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: prevMode }} />
 
     <p>
@@ -175,9 +175,9 @@
       colorScale={divergingScale}
       labels={{ limits: ["0%", "50%", "same", "150%", "200%"] }}
     />
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <GeoJSON data={neighbourhoods}>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
@@ -264,5 +264,5 @@
     </GeoJSON>
 
     <ModalFilterLayer interactive={false} />
-  </div>
+  {/snippet}
 </SplitComponent>

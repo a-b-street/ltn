@@ -72,7 +72,7 @@
 <MapEvents oncontextmenu={onRightClick} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -87,9 +87,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     <p>
@@ -130,9 +130,9 @@
     {:else}
       <p>Hover on a road to compare</p>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <RenderNeighbourhood>
       <FillLayer
         {...layerId("cells")}
@@ -190,5 +190,5 @@
     <ModalFilterLayer interactive={false} />
 
     <DotMarker bind:lngLat={$oneDestination} draggable>X</DotMarker>
-  </div>
+  {/snippet}
 </SplitComponent>

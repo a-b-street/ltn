@@ -24,7 +24,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -36,9 +36,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "pick-neighbourhood" }} />
 
     <p>Purple intersections have some kind of turn restriction.</p>
@@ -53,9 +53,9 @@
     {#if currentOsm}
       <a href={currentOsm} target="_blank">Open OSM</a>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <GeoJSON data={$backend!.getAllIntersections()} generateId>
       <CircleLayer
         {...layerId("debug-intersections")}
@@ -91,5 +91,5 @@
         }}
       />
     </GeoJSON>
-  </div>
+  {/snippet}
 </SplitComponent>

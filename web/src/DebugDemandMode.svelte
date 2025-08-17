@@ -74,7 +74,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -91,9 +91,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton
       mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
     />
@@ -131,9 +131,9 @@
     {:else}
       <p>Hover on a zone</p>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <GeoJSON data={gj} generateId>
       <FillLayer
         {...layerId("debug-demand-fill")}
@@ -153,5 +153,5 @@
         }}
       />
     </GeoJSON>
-  </div>
+  {/snippet}
 </SplitComponent>

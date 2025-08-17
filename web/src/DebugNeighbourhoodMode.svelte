@@ -47,7 +47,7 @@
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -62,9 +62,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     <h4>Roads</h4>
@@ -89,9 +89,9 @@
     {:else}
       <p>Click an intersection to inspect its movements.</p>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />
@@ -178,7 +178,7 @@
         />
       </GeoJSON>
     {/if}
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>

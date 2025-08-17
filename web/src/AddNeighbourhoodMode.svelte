@@ -238,7 +238,7 @@
 <Loading {loading} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -250,9 +250,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "pick-neighbourhood" }} />
     {#if $appFocus == "cnt"}
       <h3>Prioritisation</h3>
@@ -388,9 +388,9 @@
     <button class="secondary" onclick={download}
       >Export metrics to GeoJSON</button
     >
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet map()}
     {#if neighbourhoodBoundary}
       <GeoJSON
         data={{
@@ -472,7 +472,7 @@
         />
       </GeoJSON>
     {/if}
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>
