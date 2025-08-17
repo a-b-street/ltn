@@ -133,7 +133,7 @@
     {/if}
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <GeoJSON data={gj} generateId>
       <FillLayer
         {...layerId("debug-demand-fill")}

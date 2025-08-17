@@ -217,7 +217,7 @@
     <ManageProject projectGj={gj} />
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <GeoJSON data={neighbourhoods} promoteId="name">
       <JoinedData
         data={hoveredNeighbourhoodFromList

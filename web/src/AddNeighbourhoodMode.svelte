@@ -390,7 +390,7 @@
     >
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     {#if neighbourhoodBoundary}
       <GeoJSON
         data={{

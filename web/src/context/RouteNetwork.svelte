@@ -203,46 +203,54 @@
 
           <p>Fast/Direct network</p>
           <table>
-            <tr>
-              <td />
-              <th>Baseline</th>
-              <th>Go Dutch</th>
-              <th>E-bikes</th>
-            </tr>
-            {#each purposes as [value, label]}
+            <tbody>
               <tr>
-                <th>{label}</th>
-                <td>{props[`${value}_fastest_bicycle`].toLocaleString()}</td>
-                <td>
-                  {props[`${value}_fastest_bicycle_go_dutch`].toLocaleString()}
-                </td>
-                <td>
-                  {props[`${value}_fastest_bicycle_ebike`].toLocaleString()}
-                </td>
+                <td></td>
+                <th>Baseline</th>
+                <th>Go Dutch</th>
+                <th>E-bikes</th>
               </tr>
-            {/each}
+              {#each purposes as [value, label]}
+                <tr>
+                  <th>{label}</th>
+                  <td>{props[`${value}_fastest_bicycle`].toLocaleString()}</td>
+                  <td>
+                    {props[
+                      `${value}_fastest_bicycle_go_dutch`
+                    ].toLocaleString()}
+                  </td>
+                  <td>
+                    {props[`${value}_fastest_bicycle_ebike`].toLocaleString()}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
           </table>
 
           <p>Quiet/Indirect network</p>
           <table>
-            <tr>
-              <td />
-              <th>Baseline</th>
-              <th>Go Dutch</th>
-              <th>E-bikes</th>
-            </tr>
-            {#each purposes as [value, label]}
+            <tbody>
               <tr>
-                <th>{label}</th>
-                <td>{props[`${value}_quietest_bicycle`].toLocaleString()}</td>
-                <td>
-                  {props[`${value}_quietest_bicycle_go_dutch`].toLocaleString()}
-                </td>
-                <td>
-                  {props[`${value}_quietest_bicycle_ebike`].toLocaleString()}
-                </td>
+                <td></td>
+                <th>Baseline</th>
+                <th>Go Dutch</th>
+                <th>E-bikes</th>
               </tr>
-            {/each}
+              {#each purposes as [value, label]}
+                <tr>
+                  <th>{label}</th>
+                  <td>{props[`${value}_quietest_bicycle`].toLocaleString()}</td>
+                  <td>
+                    {props[
+                      `${value}_quietest_bicycle_go_dutch`
+                    ].toLocaleString()}
+                  </td>
+                  <td>
+                    {props[`${value}_quietest_bicycle_ebike`].toLocaleString()}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
           </table>
         </details>
       </div>

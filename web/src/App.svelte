@@ -31,9 +31,9 @@
   import { Geocoder } from "svelte-utils/map";
   import {
     Layout,
-    mapContents,
-    sidebarContents,
-    topContents,
+    leftTarget,
+    mainTarget,
+    topTarget,
   } from "svelte-utils/top_bar_layout";
   import * as backendPkg from "../../backend/pkg";
   import streetsMapStyleUrl from "../assets/map-styles/streets-v2-style.json?url";
@@ -84,7 +84,7 @@
     } catch (err) {}
   });
 
-  let map: Map | null = null;
+  let map: Map | undefined = undefined;
   $: if (map) {
     map.keyboard.disableRotation();
     map.dragRotate.disable();
@@ -94,22 +94,6 @@
 
   function zoomToFit(animate: boolean) {
     $mapStore!.fitBounds($backend!.getBounds(), { animate });
-  }
-
-  let topDiv: HTMLSpanElement;
-  let sidebarDiv: HTMLDivElement;
-  let mapDiv: HTMLDivElement;
-  $: if (topDiv && $topContents) {
-    topDiv.innerHTML = "";
-    topDiv.appendChild($topContents);
-  }
-  $: if (sidebarDiv && $sidebarContents) {
-    sidebarDiv.innerHTML = "";
-    sidebarDiv.appendChild($sidebarContents);
-  }
-  $: if (mapDiv && $mapContents) {
-    mapDiv.innerHTML = "";
-    mapDiv.appendChild($mapContents);
   }
 
   let initialBounds: LngLatBoundsLike | undefined = undefined;
@@ -147,173 +131,178 @@
     <About />
   </Modal>
 </div>
+
 <div class="app-focus-{$appFocusStore}">
   <Layout>
-    <div
-      slot="top"
-      class="pico"
-      style="display: flex; align-items: center; gap: 8px;"
-    >
-      <button class="outline" onclick={() => (showAbout = true)}>
-        <img src={logo} style="height: 32px;" alt="A/B Street logo" />
-      </button>
-      <span bind:this={topDiv} style="width: 100%"></span>
-      <button
-        class="icon-btn"
-        title="User guide"
-        onclick={() => window.open("user_guide.html", "_blank")}
-      >
-        <CircleHelp color="black" />
-      </button>
-    </div>
-    <div class="pico" slot="left">
-      <div bind:this={sidebarDiv}></div>
-    </div>
-    <div slot="main" style="position: relative; width: 100%; height: 100%;">
-      {#if style}
-        <MapLibre
-          {style}
-          hash
-          bind:map
-          bounds={initialBounds}
-          maxZoom={19}
-          onerror={(e) => {
-            console.log(e.error);
-          }}
-          images={[
-            {
-              id: ModalFilterType.walkCycleOnly.filterType,
-              url: ModalFilterType.walkCycleOnly.iconURL,
-            },
-            {
-              id: ModalFilterType.noEntry.filterType,
-              url: ModalFilterType.noEntry.iconURL,
-            },
-            {
-              id: ModalFilterType.busGate.filterType,
-              url: ModalFilterType.busGate.iconURL,
-            },
-            {
-              id: ModalFilterType.schoolStreet.filterType,
-              url: ModalFilterType.schoolStreet.iconURL,
-            },
-            {
-              id: "diagonal_filter",
-              url: diagonalUrl,
-            },
-            {
-              id: "no_straight_turn",
-              url: noStraightUrl,
-            },
-            {
-              id: "no_left_turn",
-              url: noLeftUrl,
-            },
-            {
-              id: "no_right_turn",
-              url: noRightUrl,
-            },
-            {
-              id: "no_u_left_to_right_turn",
-              url: noUTurnLtrUrl,
-            },
-            {
-              id: "no_u_right_to_left_turn",
-              url: noUTurnRtlUrl,
-            },
-            {
-              id: "oneway_arrow",
-              url: onewayArrowUrl,
-            },
-            {
-              id: "border_entry_arrow",
-              url: borderEntryArrorUrl,
-              options: { sdf: true },
-            },
-            {
-              id: "national_rail",
-              url: nationalRailUrl,
-            },
-          ]}
+    {#snippet top()}
+      <div class="pico" style="display: flex; align-items: center; gap: 8px;">
+        <button class="outline" onclick={() => (showAbout = true)}>
+          <img src={logo} style="height: 32px;" alt="A/B Street logo" />
+        </button>
+        <span bind:this={topTarget.value} style="width: 100%"></span>
+        <button
+          class="icon-btn"
+          title="User guide"
+          onclick={() => window.open("user_guide.html", "_blank")}
         >
-          <NavigationControl showCompass={false} />
+          <CircleHelp color="black" />
+        </button>
+      </div>
+    {/snippet}
 
-          {#if $backend}
-            <Control position="top-left">
-              <ControlGroup>
-                <ControlButton
-                  title="Zoom to fit study area"
-                  onclick={() => zoomToFit(true)}
-                >
-                  <div class="ltn-map-btn zoom-to-fit-btn">
-                    <House />
-                  </div>
-                </ControlButton>
-              </ControlGroup>
-            </Control>
-            <Control position="top-left">
-              <ControlGroup>
-                <StreetView
-                  map={$mapStore!}
-                  maptilerBasemap={$maptilerBasemap}
-                />
-              </ControlGroup>
-            </Control>
-          {/if}
+    {#snippet left()}
+      <div class="pico">
+        <div bind:this={leftTarget.value}></div>
+      </div>
+    {/snippet}
 
-          <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
+    {#snippet main()}
+      <div style="position: relative; width: 100%; height: 100%;">
+        {#if style}
+          <MapLibre
+            {style}
+            hash
+            bind:map
+            bounds={initialBounds}
+            maxZoom={19}
+            onerror={(e) => {
+              console.log(e.error);
+            }}
+            images={[
+              {
+                id: ModalFilterType.walkCycleOnly.filterType,
+                url: ModalFilterType.walkCycleOnly.iconURL,
+              },
+              {
+                id: ModalFilterType.noEntry.filterType,
+                url: ModalFilterType.noEntry.iconURL,
+              },
+              {
+                id: ModalFilterType.busGate.filterType,
+                url: ModalFilterType.busGate.iconURL,
+              },
+              {
+                id: ModalFilterType.schoolStreet.filterType,
+                url: ModalFilterType.schoolStreet.iconURL,
+              },
+              {
+                id: "diagonal_filter",
+                url: diagonalUrl,
+              },
+              {
+                id: "no_straight_turn",
+                url: noStraightUrl,
+              },
+              {
+                id: "no_left_turn",
+                url: noLeftUrl,
+              },
+              {
+                id: "no_right_turn",
+                url: noRightUrl,
+              },
+              {
+                id: "no_u_left_to_right_turn",
+                url: noUTurnLtrUrl,
+              },
+              {
+                id: "no_u_right_to_left_turn",
+                url: noUTurnRtlUrl,
+              },
+              {
+                id: "oneway_arrow",
+                url: onewayArrowUrl,
+              },
+              {
+                id: "border_entry_arrow",
+                url: borderEntryArrorUrl,
+                options: { sdf: true },
+              },
+              {
+                id: "national_rail",
+                url: nationalRailUrl,
+              },
+            ]}
+          >
+            <NavigationControl showCompass={false} />
 
-          <ScaleControl />
-
-          <div bind:this={mapDiv}></div>
-
-          {#if $mode.mode == "title"}
-            <TitleMode {wasmReady} />
-          {:else if $mode.mode == "new-project"}
-            <NewProjectMode />
-          {/if}
-
-          <ContextualLayers />
-          {#if $backend}
-            <GeoJSON data={$backend.getInvertedBoundary()}>
-              <FillLayer
-                {...layerId("boundary")}
-                paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
-              />
-            </GeoJSON>
-            {#if $mode.mode == "pick-neighbourhood"}
-              <PickNeighbourhoodMode />
-            {:else if $mode.mode == "set-boundary"}
-              <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
-            {:else if $mode.mode == "add-neighbourhood"}
-              <AddNeighbourhoodMode />
-            {:else if $mode.mode == "neighbourhood"}
-              <NeighbourhoodMode />
-            {:else if $mode.mode == "view-shortcuts"}
-              <ViewShortcutsMode />
-            {:else if $mode.mode == "impact-one-destination"}
-              <ImpactOneDestinationMode />
-            {:else if $mode.mode == "route"}
-              <RouteMode prevMode={$mode.prevMode} />
-            {:else if $mode.mode == "predict-impact"}
-              <PredictImpactMode prevMode={$mode.prevMode} />
-            {:else if $mode.mode == "impact-detail"}
-              <ImpactDetailMode
-                road={$mode.road}
-                prevPrevMode={$mode.prevPrevMode}
-              />
-            {:else if $mode.mode == "debug-neighbourhood"}
-              <DebugNeighbourhoodMode />
-            {:else if $mode.mode == "debug-intersections"}
-              <DebugIntersectionsMode />
-            {:else if $mode.mode == "debug-demand"}
-              <DebugDemandMode />
+            {#if $backend}
+              <Control position="top-left">
+                <ControlGroup>
+                  <ControlButton
+                    title="Zoom to fit study area"
+                    onclick={() => zoomToFit(true)}
+                  >
+                    <div class="ltn-map-btn zoom-to-fit-btn">
+                      <House />
+                    </div>
+                  </ControlButton>
+                </ControlGroup>
+              </Control>
+              <Control position="top-left">
+                <ControlGroup>
+                  <StreetView
+                    map={$mapStore!}
+                    maptilerBasemap={$maptilerBasemap}
+                  />
+                </ControlGroup>
+              </Control>
             {/if}
-          {/if}
-          <DisableInteractiveLayers />
-        </MapLibre>
-      {/if}
-    </div>
+
+            <Geocoder {map} />
+
+            <ScaleControl />
+
+            <div bind:this={mainTarget.value}></div>
+
+            {#if $mode.mode == "title"}
+              <TitleMode {wasmReady} />
+            {:else if $mode.mode == "new-project"}
+              <NewProjectMode />
+            {/if}
+
+            <ContextualLayers />
+            {#if $backend}
+              <GeoJSON data={$backend.getInvertedBoundary()}>
+                <FillLayer
+                  {...layerId("boundary")}
+                  paint={{ "fill-color": "black", "fill-opacity": 0.3 }}
+                />
+              </GeoJSON>
+              {#if $mode.mode == "pick-neighbourhood"}
+                <PickNeighbourhoodMode />
+              {:else if $mode.mode == "set-boundary"}
+                <SetBoundaryMode name={$mode.name} existing={$mode.existing} />
+              {:else if $mode.mode == "add-neighbourhood"}
+                <AddNeighbourhoodMode />
+              {:else if $mode.mode == "neighbourhood"}
+                <NeighbourhoodMode />
+              {:else if $mode.mode == "view-shortcuts"}
+                <ViewShortcutsMode />
+              {:else if $mode.mode == "impact-one-destination"}
+                <ImpactOneDestinationMode />
+              {:else if $mode.mode == "route"}
+                <RouteMode prevMode={$mode.prevMode} />
+              {:else if $mode.mode == "predict-impact"}
+                <PredictImpactMode prevMode={$mode.prevMode} />
+              {:else if $mode.mode == "impact-detail"}
+                <ImpactDetailMode
+                  road={$mode.road}
+                  prevPrevMode={$mode.prevPrevMode}
+                />
+              {:else if $mode.mode == "debug-neighbourhood"}
+                <DebugNeighbourhoodMode />
+              {:else if $mode.mode == "debug-intersections"}
+                <DebugIntersectionsMode />
+              {:else if $mode.mode == "debug-demand"}
+                <DebugDemandMode />
+              {/if}
+            {/if}
+            <DisableInteractiveLayers />
+          </MapLibre>
+        {/if}
+      </div>
+    {/snippet}
   </Layout>
 </div>
 

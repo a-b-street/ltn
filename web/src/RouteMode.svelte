@@ -118,7 +118,7 @@
     </i>
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     {#if prevMode == "neighbourhood"}
       <RenderNeighbourhood>
         <HighlightBoundaryLayer />

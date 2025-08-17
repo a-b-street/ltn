@@ -17,7 +17,7 @@
     style="aspect-ratio: 1.0"
     type="checkbox"
     bind:checked={show}
-    on:change={onChange}
+    onchange={onChange}
   />
   {label}
   {#if $$slots.help}

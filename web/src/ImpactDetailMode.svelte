@@ -134,7 +134,7 @@
     {/if}
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     {#if routes.length > 0}
       <GeoJSON data={gj(idx)}>
         <LineLayer

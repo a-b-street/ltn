@@ -177,7 +177,7 @@
     />
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <GeoJSON data={neighbourhoods}>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}

@@ -128,7 +128,7 @@
     {/if}
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <PolygonToolLayer />
   {/snippet}
 </SplitComponent>

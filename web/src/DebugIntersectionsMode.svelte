@@ -55,7 +55,7 @@
     {/if}
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <GeoJSON data={$backend!.getAllIntersections()} generateId>
       <CircleLayer
         {...layerId("debug-intersections")}

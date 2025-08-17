@@ -684,7 +684,7 @@
     <NeighbourhoodBoundarySummary neighbourhoodBoundary={boundary!} />
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <MapEvents onclick={onMapClick} />
 
     <ShowBeforeEdits />
@@ -719,7 +719,7 @@
             {#if action.kind == "filter"}
               <div>
                 <img
-                  src={ModalFilterType.getFilter($currentFilterType).iconURL}
+                  src={ModalFilterType.getFilter($currentFilterType)!.iconURL}
                   width="20"
                   alt="Add modal filter"
                 />

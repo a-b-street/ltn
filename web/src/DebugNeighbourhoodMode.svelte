@@ -91,7 +91,7 @@
     {/if}
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />

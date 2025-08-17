@@ -132,7 +132,7 @@
     {/if}
   {/snippet}
 
-  {#snippet map()}
+  {#snippet main()}
     <RenderNeighbourhood>
       <FillLayer
         {...layerId("cells")}
