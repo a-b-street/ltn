@@ -3,10 +3,11 @@
     FillLayer,
     hoverStateFilter,
     LineLayer,
+    Popup,
     VectorTileSource,
   } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { makeRamp } from "svelte-utils/map";
   import { ContextLayerButton, layerId, prettyPrintPercent } from "../common";
   import {
     bucketize,
@@ -137,13 +138,16 @@
       visibility: showSIMD ? "visible" : "none",
     }}
   >
-    <Popup openOn="hover" let:props>
-      <p>
-        Data zone {props.id}
-        has {props.population.toLocaleString()}
-        people, and a SIMD rank of {props.imd_rank}, making it less deprived
-        than {props.imd_percentile}% of data zones.
-      </p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <p>
+          Data zone {props.id}
+          has {props.population.toLocaleString()}
+          people, and a SIMD rank of {props.imd_rank}, making it less deprived
+          than {props.imd_percentile}% of data zones.
+        </p>
+      {/snippet}
     </Popup>
   </FillLayer>
 
@@ -171,15 +175,18 @@
       visibility: showCarOwnership ? "visible" : "none",
     }}
   >
-    <Popup openOn="hover" let:props>
-      <p>
-        In data zone {props.id}
-        {prettyPrintPercent(
-          props.households_with_cars_or_vans,
-          props.total_households,
-        )} of approximately {props.total_households.toLocaleString()}
-        households have at least one car or van.
-      </p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <p>
+          In data zone {props.id}
+          {prettyPrintPercent(
+            props.households_with_cars_or_vans,
+            props.total_households,
+          )} of approximately {props.total_households.toLocaleString()}
+          households have at least one car or van.
+        </p>
+      {/snippet}
     </Popup>
   </FillLayer>
 
@@ -199,14 +206,17 @@
       visibility: showPopulationDensity ? "visible" : "none",
     }}
   >
-    <Popup openOn="hover" let:props>
-      <p>
-        Data zone {props.id}
-        has {props.population.toLocaleString()}
-        people, with a density of {Math.round(
-          props.population / (props.area / 1e6),
-        ).toLocaleString()} people per square kilometer
-      </p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <p>
+          Data zone {props.id}
+          has {props.population.toLocaleString()}
+          people, with a density of {Math.round(
+            props.population / (props.area / 1e6),
+          ).toLocaleString()} people per square kilometer
+        </p>
+      {/snippet}
     </Popup>
   </FillLayer>
 

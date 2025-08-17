@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
+  import { FillLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -253,12 +252,15 @@
         hoverCursor="pointer"
         onclick={(e) => pickRoad(e.features[0])}
       >
-        <Popup openOn="hover" let:props>
-          <p>
-            {props.before.toLocaleString()} before, {props.after.toLocaleString()}
-            after
-          </p>
-          <p>{Math.round((100 * props.after) / props.before)}%</p>
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            {@const props = data!.properties!}
+            <p>
+              {props.before.toLocaleString()} before, {props.after.toLocaleString()}
+              after
+            </p>
+            <p>{Math.round((100 * props.after) / props.before)}%</p>
+          {/snippet}
         </Popup>
       </LineLayer>
     </GeoJSON>

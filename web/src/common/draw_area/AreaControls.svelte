@@ -274,20 +274,22 @@
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
     <Popup openOn="hover" popupClass="edit-waypoint-popup">
-      <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
-        <li>
-          <b>Click and drag</b>
-          to move
-        </li>
-        <li>
-          <b>Click</b>
-          to toggle snapping
-        </li>
-        <li>
-          <b>Right click</b>
-          to delete
-        </li>
-      </ul>
+      {#snippet children({ data })}
+        <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
+          <li>
+            <b>Click and drag</b>
+            to move
+          </li>
+          <li>
+            <b>Click</b>
+            to toggle snapping
+          </li>
+          <li>
+            <b>Right click</b>
+            to delete
+          </li>
+        </ul>
+      {/snippet}
     </Popup>
   </Marker>
 {/each}

@@ -6,9 +6,9 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
+    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { Popup } from "svelte-utils/map";
   import { prettyPrintStudyAreaName, Style } from "../common";
   import { mode, projectStorage } from "../stores";
   import { loadProject } from "./loader";
@@ -108,8 +108,10 @@
     hoverCursor="pointer"
     onclick={onClick}
   >
-    <Popup openOn="hover" let:props>
-      <p>Click to start a new project in {props.name}</p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        <p>Click to start a new project in {data!.properties!.name}</p>
+      {/snippet}
     </Popup>
   </FillLayer>
 

@@ -3,11 +3,12 @@
   import {
     CircleLayer,
     HeatmapLayer,
+    Popup,
     VectorTileSource,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { QualitativeLegend } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { makeRamp } from "svelte-utils/map";
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
@@ -211,31 +212,34 @@
     hoverCursor="pointer"
     onclick={onClick}
   >
-    <Popup let:props>
-      <p>
-        Year: <b>{props.year}</b>
-      </p>
-      <p>
-        Severity: <b>{severity[props.severity]}</b>
-      </p>
-      <p>
-        Casualties: <b>{casualtyTypes(props)}</b>
-      </p>
-      {#if props.pedestrian_location}
+    <Popup openOn="click">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
         <p>
-          Pedestrian location: <b>
-            {pedestrianLocation[props.pedestrian_location]}
-          </b>
+          Year: <b>{props.year}</b>
         </p>
-      {/if}
-      {#if props.pedestrian_movement}
         <p>
-          Pedestrian movement: <b>
-            {pedestrianMovement[props.pedestrian_movement]}
-          </b>
+          Severity: <b>{severity[props.severity]}</b>
         </p>
-      {/if}
-      <p>Click to open full report in CycleStreets</p>
+        <p>
+          Casualties: <b>{casualtyTypes(props)}</b>
+        </p>
+        {#if props.pedestrian_location}
+          <p>
+            Pedestrian location: <b>
+              {pedestrianLocation[props.pedestrian_location]}
+            </b>
+          </p>
+        {/if}
+        {#if props.pedestrian_movement}
+          <p>
+            Pedestrian movement: <b>
+              {pedestrianMovement[props.pedestrian_movement]}
+            </b>
+          </p>
+        {/if}
+        <p>Click to open full report in CycleStreets</p>
+      {/snippet}
     </Popup>
   </CircleLayer>
 </VectorTileSource>

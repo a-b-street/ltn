@@ -6,10 +6,10 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
+    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { PropertiesTable } from "svelte-utils";
-  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -105,8 +105,10 @@
           "circle-color": "green",
         }}
       >
-        <Popup openOn="hover" let:props>
-          <PropertiesTable properties={props} />
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            <PropertiesTable properties={data!.properties!} />
+          {/snippet}
         </Popup>
       </CircleLayer>
 
@@ -115,8 +117,10 @@
         onClickLine={(f, _) => window.open(f.properties!.way, "_blank")}
       >
         <div slot="line-popup">
-          <Popup openOn="hover" let:props>
-            <PropertiesTable properties={props} />
+          <Popup openOn="hover">
+            {#snippet children({ data })}
+              <PropertiesTable properties={data!.properties!} />
+            {/snippet}
           </Popup>
         </div>
       </NeighbourhoodRoadLayer>
@@ -124,8 +128,10 @@
 
     <ModalFilterLayer interactive={true}>
       <!-- Note: This popup is currently broken (it was before this commit too). -->
-      <Popup openOn="hover" let:props>
-        <PropertiesTable properties={props} />
+      <Popup openOn="hover">
+        {#snippet children({ data })}
+          <PropertiesTable properties={data!.properties!} />
+        {/snippet}
       </Popup>
     </ModalFilterLayer>
 
@@ -153,8 +159,10 @@
         hoverCursor="pointer"
         onclick={pickIntersection}
       >
-        <Popup openOn="hover" let:props>
-          <PropertiesTable properties={props} />
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            <PropertiesTable properties={data!.properties!} />
+          {/snippet}
         </Popup>
       </CircleLayer>
     </GeoJSON>

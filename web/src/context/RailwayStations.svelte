@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { GeoJSON, SymbolLayer } from "svelte-maplibre";
-  import { Popup } from "svelte-utils/map";
+  import { GeoJSON, Popup, SymbolLayer } from "svelte-maplibre";
   import nationalRailUrl from "../../assets/national_rail.png?url";
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
@@ -35,8 +34,10 @@
       visibility: show ? "visible" : "none",
     }}
   >
-    <Popup let:props>
-      <p>{props.name ?? "Unnamed railway station"}</p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        <p>{data!.properties!.name ?? "Unnamed railway station"}</p>
+      {/snippet}
     </Popup>
   </SymbolLayer>
 </GeoJSON>

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON } from "svelte-maplibre";
+  import { CircleLayer, GeoJSON, Popup } from "svelte-maplibre";
   import { QualitativeLegend } from "svelte-utils";
-  import { constructMatchExpression, Popup } from "svelte-utils/map";
+  import { constructMatchExpression } from "svelte-utils/map";
   import { ContextLayerButton, layerId } from "../common";
   import { backend } from "../stores";
 
@@ -72,8 +72,11 @@
         visibility: show ? "visible" : "none",
       }}
     >
-      <Popup openOn="hover" let:props>
-        {props.name || `unnamed ${props.kind}`}
+      <Popup openOn="hover">
+        {#snippet children({ data })}
+          {@const props = data!.properties!}
+          {props.name || `unnamed ${props.kind}`}
+        {/snippet}
       </Popup>
     </CircleLayer>
   </GeoJSON>

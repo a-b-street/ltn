@@ -16,10 +16,11 @@
     hoverStateFilter,
     LineLayer,
     MapEvents,
+    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
   import paintbrushCursorURL from "../../assets/cursors/paintbrush.svg?url";
@@ -703,35 +704,38 @@
         {onClickLine}
       >
         <div slot="line-popup">
-          <Popup openOn="hover" let:props>
-            {#if props.kind == "interior_road"}
-              <p>
-                {props.shortcuts} shortcuts through {props.name ??
-                  "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
-              </p>
-            {:else if props.kind == "main_road"}
-              <p>
-                Main road: {props.name ?? "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
-              </p>
-            {/if}
-            {#if action.kind == "filter"}
-              <div>
-                <img
-                  src={ModalFilterType.getFilter($currentFilterType)!.iconURL}
-                  width="20"
-                  alt="Add modal filter"
-                />
-                Click to add modal filter
-              </div>
-            {:else if action.kind == "oneway"}
-              <p>Click to change direction</p>
-            {:else if action.kind == "main-roads" && action.tool == "toggle"}
-              <p>Click to designate a main road or not</p>
-            {:else if action.kind == "turn_restriction"}
-              <p>Click to create a turn restriction from here</p>
-            {/if}
+          <Popup openOn="click">
+            {#snippet children({ data })}
+              {@const props = data!.properties!}
+              {#if props.kind == "interior_road"}
+                <p>
+                  {props.shortcuts} shortcuts through {props.name ??
+                    "unnamed road"}
+                  ({Math.round(props.speed_mph)} mph)
+                </p>
+              {:else if props.kind == "main_road"}
+                <p>
+                  Main road: {props.name ?? "unnamed road"}
+                  ({Math.round(props.speed_mph)} mph)
+                </p>
+              {/if}
+              {#if action.kind == "filter"}
+                <div>
+                  <img
+                    src={ModalFilterType.getFilter($currentFilterType)!.iconURL}
+                    width="20"
+                    alt="Add modal filter"
+                  />
+                  Click to add modal filter
+                </div>
+              {:else if action.kind == "oneway"}
+                <p>Click to change direction</p>
+              {:else if action.kind == "main-roads" && action.tool == "toggle"}
+                <p>Click to designate a main road or not</p>
+              {:else if action.kind == "turn_restriction"}
+                <p>Click to create a turn restriction from here</p>
+              {/if}
+            {/snippet}
           </Popup>
         </div>
       </NeighbourhoodRoadLayer>
@@ -754,6 +758,7 @@
       interactive={action.kind == "filter"}
     >
       <div slot="modal-filter">
+        <!-- TODO do these work? -->
         <Popup openOn="hover">Click to delete filter</Popup>
       </div>
       <div slot="turn-restriction">
@@ -785,17 +790,20 @@
           }}
           onclick={createTurnRestriction}
         >
-          <Popup openOn="hover" let:props>
-            <div>
-              <img
-                src={turnRestrictionUrls[props.kind]}
-                width="20"
-                alt="Add turn restriction"
-              />
+          <Popup openOn="hover">
+            {#snippet children({ data })}
+              {@const props = data!.properties!}
+              <div>
+                <img
+                  src={turnRestrictionUrls[props.kind]}
+                  width="20"
+                  alt="Add turn restriction"
+                />
 
-              Create a turn restriction from {action.from_road_name} to {props.name ||
-                "unnamed road"}
-            </div>
+                Create a turn restriction from {action.from_road_name} to {props.name ||
+                  "unnamed road"}
+              </div>
+            {/snippet}
           </Popup>
         </LineLayer>
       </GeoJSON>

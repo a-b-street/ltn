@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import type { LngLat } from "maplibre-gl";
-  import { GeoJSON, LineLayer } from "svelte-maplibre";
-  import { Popup } from "svelte-utils/map";
+  import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -111,17 +110,20 @@
       {#if state.state == "neutral"}
         <NeighbourhoodRoadLayer onClickLine={choseRoad}>
           <div slot="line-popup">
-            <Popup openOn="hover" let:props>
-              {#if props.kind == "interior_road"}
-                <p>
-                  {props.shortcuts} shortcuts through {props.name ??
-                    "unnamed road"}
-                </p>
-              {:else if props.kind == "main_road"}
-                <p>
-                  Main road: {props.name ?? "unnamed road"}
-                </p>
-              {/if}
+            <Popup openOn="hover">
+              {#snippet children({ data })}
+                {@const props = data!.properties!}
+                {#if props.kind == "interior_road"}
+                  <p>
+                    {props.shortcuts} shortcuts through {props.name ??
+                      "unnamed road"}
+                  </p>
+                {:else if props.kind == "main_road"}
+                  <p>
+                    Main road: {props.name ?? "unnamed road"}
+                  </p>
+                {/if}
+              {/snippet}
             </Popup>
           </div>
         </NeighbourhoodRoadLayer>

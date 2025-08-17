@@ -67,9 +67,11 @@
   onclick={(event) =>
     onClickIntersection(getIntersectionFromFeatures(event.features))}
 >
-  <Popup openOn="hover" let:features>
-    <EditIntersectionPopup
-      intersection={getIntersectionFromFeatures(features)}
-    />
+  <Popup openOn="hover">
+    {#snippet children({ features })}
+      <EditIntersectionPopup
+        intersection={getIntersectionFromFeatures(features)}
+      />
+    {/snippet}
   </Popup>
 </CircleLayer>

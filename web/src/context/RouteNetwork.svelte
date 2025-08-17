@@ -3,8 +3,8 @@
     DataDrivenPropertyValueSpecification,
     ExpressionSpecification,
   } from "maplibre-gl";
-  import { LineLayer, VectorTileSource } from "svelte-maplibre";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { LineLayer, Popup, VectorTileSource } from "svelte-maplibre";
+  import { makeRamp } from "svelte-utils/map";
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
@@ -192,68 +192,76 @@
     }}
     hoverCursor="pointer"
   >
-    <Popup openOn="click" let:props>
-      <div style="max-width: 30vw; max-height: 60vh; overflow: auto;">
-        <p>Cyclists: {props[key].toLocaleString()}</p>
-        <p>Gradient: {props.gradient}%</p>
-        <p>Cycle-friendliness: {props.quietness}%</p>
+    <Popup openOn="click">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <div style="max-width: 30vw; max-height: 60vh; overflow: auto;">
+          <p>Cyclists: {props[key].toLocaleString()}</p>
+          <p>Gradient: {props.gradient}%</p>
+          <p>Cycle-friendliness: {props.quietness}%</p>
 
-        <details>
-          <summary>All network details</summary>
+          <details>
+            <summary>All network details</summary>
 
-          <p>Fast/Direct network</p>
-          <table>
-            <tbody>
-              <tr>
-                <td></td>
-                <th>Baseline</th>
-                <th>Go Dutch</th>
-                <th>E-bikes</th>
-              </tr>
-              {#each purposes as [value, label]}
+            <p>Fast/Direct network</p>
+            <table>
+              <tbody>
                 <tr>
-                  <th>{label}</th>
-                  <td>{props[`${value}_fastest_bicycle`].toLocaleString()}</td>
-                  <td>
-                    {props[
-                      `${value}_fastest_bicycle_go_dutch`
-                    ].toLocaleString()}
-                  </td>
-                  <td>
-                    {props[`${value}_fastest_bicycle_ebike`].toLocaleString()}
-                  </td>
+                  <td></td>
+                  <th>Baseline</th>
+                  <th>Go Dutch</th>
+                  <th>E-bikes</th>
                 </tr>
-              {/each}
-            </tbody>
-          </table>
+                {#each purposes as [value, label]}
+                  <tr>
+                    <th>{label}</th>
+                    <td>{props[`${value}_fastest_bicycle`].toLocaleString()}</td
+                    >
+                    <td>
+                      {props[
+                        `${value}_fastest_bicycle_go_dutch`
+                      ].toLocaleString()}
+                    </td>
+                    <td>
+                      {props[`${value}_fastest_bicycle_ebike`].toLocaleString()}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
 
-          <p>Quiet/Indirect network</p>
-          <table>
-            <tbody>
-              <tr>
-                <td></td>
-                <th>Baseline</th>
-                <th>Go Dutch</th>
-                <th>E-bikes</th>
-              </tr>
-              {#each purposes as [value, label]}
+            <p>Quiet/Indirect network</p>
+            <table>
+              <tbody>
                 <tr>
-                  <th>{label}</th>
-                  <td>{props[`${value}_quietest_bicycle`].toLocaleString()}</td>
-                  <td>
-                    {props[
-                      `${value}_quietest_bicycle_go_dutch`
-                    ].toLocaleString()}
-                  </td>
-                  <td>
-                    {props[`${value}_quietest_bicycle_ebike`].toLocaleString()}
-                  </td>
+                  <td></td>
+                  <th>Baseline</th>
+                  <th>Go Dutch</th>
+                  <th>E-bikes</th>
                 </tr>
-              {/each}
-            </tbody>
-          </table>
-        </details>
-      </div>
+                {#each purposes as [value, label]}
+                  <tr>
+                    <th>{label}</th>
+                    <td
+                      >{props[`${value}_quietest_bicycle`].toLocaleString()}</td
+                    >
+                    <td>
+                      {props[
+                        `${value}_quietest_bicycle_go_dutch`
+                      ].toLocaleString()}
+                    </td>
+                    <td>
+                      {props[
+                        `${value}_quietest_bicycle_ebike`
+                      ].toLocaleString()}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </details>
+        </div>
+      {/snippet}
     </Popup>
   </LineLayer>
 </VectorTileSource>

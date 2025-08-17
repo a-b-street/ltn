@@ -2,12 +2,14 @@
   import type { Feature } from "geojson";
   import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import { onMount } from "svelte";
-  import { FillLayer, GeoJSON, LineLayer, MapEvents } from "svelte-maplibre";
   import {
-    constructMatchExpression,
-    emptyGeojson,
+    FillLayer,
+    GeoJSON,
+    LineLayer,
+    MapEvents,
     Popup,
-  } from "svelte-utils/map";
+  } from "svelte-maplibre";
+  import { constructMatchExpression, emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -163,8 +165,13 @@
         onclick={(e) => compareRoute(e.features[0])}
         bind:hovered
       >
-        <Popup openOn="hover" let:props>
-          <p>Time ratio: {(props.time_after / props.time_before).toFixed(1)}</p>
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            {@const props = data!.properties!}
+            <p>
+              Time ratio: {(props.time_after / props.time_before).toFixed(1)}
+            </p>
+          {/snippet}
         </Popup>
       </LineLayer>
     </GeoJSON>

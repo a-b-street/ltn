@@ -8,10 +8,11 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
+    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { downloadGeneratedFile } from "svelte-utils";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -428,37 +429,43 @@
           onclick={clickedBoundary}
         >
           {#if selectedPrioritization != "simd"}
-            <Popup openOn="hover" let:props>
-              {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
-                <b>Area:</b>
-                {props.area_km2.toFixed(1)} km²
-              {:else if selectedPrioritization == "car_ownership"}
-                <b>Car or van ownership</b>
-                <br />
-                {prettyPrintPercent(
-                  props.households_with_cars_or_vans,
-                  props.total_households,
-                )} of approximately {props.total_households.toLocaleString()}
-                households have at least one car or van.
-              {:else if selectedPrioritization == "population_density"}
-                <b>Population density</b>
-                <br />
-                {Math.round(props.population / props.area_km2).toLocaleString()}
-                people / km²
-              {:else if selectedPrioritization == "stats19"}
-                <b>Pedestrian and cyclist collisions</b>
-                <br />
-                {(props.number_stats19_collisions / props.area_km2).toFixed(1)} /
-                km²
-              {:else if selectedPrioritization == "pois"}
-                <b>Points of interest</b>
-                <br />
-                {(props.number_pois / props.area_km2).toFixed(1)} / km²
-              {:else if selectedPrioritization == "combined"}
-                <b>Combined score</b>
-                <br />
-                {props.combined_score}
-              {/if}
+            <Popup openOn="hover">
+              {#snippet children({ data })}
+                {@const props = data!.properties!}
+                {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
+                  <b>Area:</b>
+                  {props.area_km2.toFixed(1)} km²
+                {:else if selectedPrioritization == "car_ownership"}
+                  <b>Car or van ownership</b>
+                  <br />
+                  {prettyPrintPercent(
+                    props.households_with_cars_or_vans,
+                    props.total_households,
+                  )} of approximately {props.total_households.toLocaleString()}
+                  households have at least one car or van.
+                {:else if selectedPrioritization == "population_density"}
+                  <b>Population density</b>
+                  <br />
+                  {Math.round(
+                    props.population / props.area_km2,
+                  ).toLocaleString()}
+                  people / km²
+                {:else if selectedPrioritization == "stats19"}
+                  <b>Pedestrian and cyclist collisions</b>
+                  <br />
+                  {(props.number_stats19_collisions / props.area_km2).toFixed(
+                    1,
+                  )} / km²
+                {:else if selectedPrioritization == "pois"}
+                  <b>Points of interest</b>
+                  <br />
+                  {(props.number_pois / props.area_km2).toFixed(1)} / km²
+                {:else if selectedPrioritization == "combined"}
+                  <b>Combined score</b>
+                  <br />
+                  {props.combined_score}
+                {/if}
+              {/snippet}
             </Popup>
           {/if}
         </FillLayer>

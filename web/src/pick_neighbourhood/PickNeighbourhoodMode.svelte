@@ -8,8 +8,9 @@
     hoverStateFilter,
     JoinedData,
     LineLayer,
+    Popup,
   } from "svelte-maplibre";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { layerId, Link, ModeLink, pageTitle, Style } from "../common";
   import { pickNeighbourhoodName } from "../common/pick_names";
@@ -258,20 +259,23 @@
         hoverCursor="pointer"
         onclick={(e) => pickNeighbourhood(e.features[0].properties!.name)}
       >
-        <Popup openOn="hover" let:props>
-          <h2>{props.name}</h2>
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            {@const props = data!.properties!}
+            <h2>{props.name}</h2>
 
-          {#if selectedPrioritization == "population_density"}
-            <b>Population density:</b>
-            {Math.round(props.population / props.area_km2).toLocaleString()} people
-            / km²
-          {:else if selectedPrioritization == "stats19"}
-            <b>Pedestrian and cyclist collisions:</b>
-            {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
-          {:else if selectedPrioritization == "pois"}
-            <b>Points of interest:</b>
-            {(props.number_pois / props.area_km2).toFixed(1)} / km²
-          {/if}
+            {#if selectedPrioritization == "population_density"}
+              <b>Population density:</b>
+              {Math.round(props.population / props.area_km2).toLocaleString()} people
+              / km²
+            {:else if selectedPrioritization == "stats19"}
+              <b>Pedestrian and cyclist collisions:</b>
+              {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
+            {:else if selectedPrioritization == "pois"}
+              <b>Points of interest:</b>
+              {(props.number_pois / props.area_km2).toFixed(1)} / km²
+            {/if}
+          {/snippet}
         </Popup>
       </FillLayer>
     </GeoJSON>
