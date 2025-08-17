@@ -79,9 +79,9 @@
     labels={{ limits: areaLimits }}
   />
   <div class="sub-labels">
-    <span />
+    <span></span>
     <span>km²</span>
-    <span />
+    <span></span>
   </div>
 {:else if selectedPrioritization == "population_density"}
   <SequentialLegend

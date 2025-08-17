@@ -203,7 +203,7 @@
       class:snapped-node={node.snapped}
       class:free-node={!node.snapped}
       class:hide={draggingExtraNode}
-    />
+    ></span>
   </Marker>
 {/each}
 

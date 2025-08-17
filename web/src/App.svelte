@@ -157,7 +157,7 @@
       <button class="outline" on:click={() => (showAbout = true)}>
         <img src={logo} style="height: 32px;" alt="A/B Street logo" />
       </button>
-      <span bind:this={topDiv} style="width: 100%" />
+      <span bind:this={topDiv} style="width: 100%"></span>
       <button
         class="icon-btn"
         title="User guide"
@@ -167,7 +167,7 @@
       </button>
     </div>
     <div class="pico" slot="left">
-      <div bind:this={sidebarDiv} />
+      <div bind:this={sidebarDiv}></div>
     </div>
     <div slot="main" style="position: relative; width: 100%; height: 100%;">
       {#if style}
@@ -266,7 +266,7 @@
 
           <ScaleControl />
 
-          <div bind:this={mapDiv} />
+          <div bind:this={mapDiv}></div>
 
           {#if $mode.mode == "title"}
             <TitleMode {wasmReady} />

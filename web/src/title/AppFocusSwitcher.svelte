@@ -20,6 +20,7 @@
     class="outline icon-btn"
     on:click={() => (window.location.href = "cnt.html")}
     data-tippy-content="Scotland"
+    aria-label="Scotland"
     disabled={$appFocus == "cnt"}><span class="fi fi-gb-sct"></span></button
   >
 
@@ -27,6 +28,7 @@
     class="outline icon-btn"
     on:click={() => (window.location.href = "england.html")}
     data-tippy-content="England"
+    aria-label="England"
     disabled={$appFocus == "england"}><span class="fi fi-gb-eng"></span></button
   >
 
