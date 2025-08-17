@@ -38,13 +38,10 @@
     "flag-icons": "^7.5.0",
     "lucide-svelte": "^0.539.0",
     "route-snapper": "^0.4.9",
-    "route-snapper-ts": "^0.0.8",
+    "route-snapper-ts": "^0.0.9",
     "svelte-maplibre": "^1.2.0",
     "svelte-toc": "^0.6.2",
     "svelte-utils": "github:a-b-street/svelte-utils",
     "tippy.js": "^6.3.7"
-  },
-  "overrides": {
-    "maplibre-gl": "^5.6.1"
   }
 }
