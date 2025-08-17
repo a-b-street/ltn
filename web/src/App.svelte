@@ -15,6 +15,7 @@
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import { CircleHelp, House } from "lucide-svelte";
   import type { LngLatBoundsLike, Map } from "maplibre-gl";
+  import * as routeSnapperPkg from "route-snapper";
   import { onMount } from "svelte";
   import {
     Control,
@@ -35,7 +36,6 @@
     topContents,
   } from "svelte-utils/top_bar_layout";
   import * as backendPkg from "../../backend/pkg";
-  import * as routeSnapperPkg from "route-snapper";
   import streetsMapStyleUrl from "../assets/map-styles/streets-v2-style.json?url";
   import AddNeighbourhoodMode from "./AddNeighbourhoodMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
