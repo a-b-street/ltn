@@ -704,7 +704,7 @@
         {onClickLine}
       >
         <div slot="line-popup">
-          <Popup openOn="click">
+          <Popup openOn="hover">
             {#snippet children({ data })}
               {@const props = data!.properties!}
               {#if props.kind == "interior_road"}
@@ -758,7 +758,6 @@
       interactive={action.kind == "filter"}
     >
       <div slot="modal-filter">
-        <!-- TODO do these work? -->
         <Popup openOn="hover">Click to delete filter</Popup>
       </div>
       <div slot="turn-restriction">

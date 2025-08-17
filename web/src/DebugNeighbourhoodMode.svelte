@@ -127,12 +127,21 @@
     </RenderNeighbourhood>
 
     <ModalFilterLayer interactive={true}>
-      <!-- Note: This popup is currently broken (it was before this commit too). -->
-      <Popup openOn="hover">
-        {#snippet children({ data })}
-          <PropertiesTable properties={data!.properties!} />
-        {/snippet}
-      </Popup>
+      <div slot="modal-filter">
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            <PropertiesTable properties={data!.properties!} />
+          {/snippet}
+        </Popup>
+      </div>
+
+      <div slot="turn-restriction">
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            <PropertiesTable properties={data!.properties!} />
+          {/snippet}
+        </Popup>
+      </div>
     </ModalFilterLayer>
 
     <GeoJSON data={$backend!.getAllIntersections()} generateId>
