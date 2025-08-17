@@ -27,7 +27,7 @@
     NavigationControl,
     ScaleControl,
   } from "svelte-maplibre";
-  import { Modal, notNull } from "svelte-utils";
+  import { Modal } from "svelte-utils";
   import { Geocoder } from "svelte-utils/map";
   import {
     Layout,
@@ -254,7 +254,7 @@
             <Control position="top-left">
               <ControlGroup>
                 <StreetView
-                  map={notNull($mapStore)}
+                  map={$mapStore!}
                   maptilerBasemap={$maptilerBasemap}
                 />
               </ControlGroup>

@@ -8,7 +8,7 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull, PropertiesTable } from "svelte-utils";
+  import { PropertiesTable } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -112,7 +112,7 @@
 
       <NeighbourhoodRoadLayer
         interactive
-        onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
+        onClickLine={(f, _) => window.open(f.properties!.way, "_blank")}
       >
         <div slot="line-popup">
           <Popup openOn="hover" let:props>
@@ -129,7 +129,7 @@
       </Popup>
     </ModalFilterLayer>
 
-    <GeoJSON data={notNull($backend).getAllIntersections()} generateId>
+    <GeoJSON data={$backend!.getAllIntersections()} generateId>
       <CircleLayer
         {...layerId("debug-intersections")}
         paint={{

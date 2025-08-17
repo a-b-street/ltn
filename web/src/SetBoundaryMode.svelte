@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
   import type { AreaProps } from "route-snapper-ts";
-  import { notNull } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { ModeLink, pageTitle } from "./common";
@@ -81,11 +80,7 @@
 
     <h1>Adjust boundary</h1>
 
-    <AreaControls
-      map={notNull($map)}
-      bind:waypoints
-      bind:drawnShapeOut={drawnShape}
-    />
+    <AreaControls map={$map!} bind:waypoints bind:drawnShapeOut={drawnShape} />
 
     <div style="display: flex; gap: 16px;">
       <button onclick={finish} disabled={waypoints.length < 3}>Finish</button>

@@ -18,7 +18,7 @@
     MapEvents,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull, SequentialLegend } from "svelte-utils";
+  import { SequentialLegend } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
@@ -387,8 +387,8 @@
           <ModeLink
             mode={{
               mode: "set-boundary",
-              name: notNull(boundary).properties.name,
-              existing: notNull(boundary),
+              name: boundary!.properties.name,
+              existing: boundary!,
             }}
           />
         </li>
@@ -430,8 +430,7 @@
             data-tippy-content="Add a modal filter (hotkey 1)"
           >
             <img
-              src={notNull(ModalFilterType.getFilter($currentFilterType))
-                .iconURL}
+              src={ModalFilterType.getFilter($currentFilterType)!.iconURL}
               alt="Add a modal filter"
             />
           </button>
@@ -679,7 +678,7 @@
       />
     {/if}
     <h2>Neighbourhood stats</h2>
-    <NeighbourhoodBoundarySummary neighbourhoodBoundary={notNull(boundary)} />
+    <NeighbourhoodBoundarySummary neighbourhoodBoundary={boundary!} />
   </div>
 
   <div slot="map">
@@ -717,8 +716,7 @@
             {#if action.kind == "filter"}
               <div>
                 <img
-                  src={notNull(ModalFilterType.getFilter($currentFilterType))
-                    .iconURL}
+                  src={ModalFilterType.getFilter($currentFilterType).iconURL}
                   width="20"
                   alt="Add modal filter"
                 />
@@ -761,10 +759,10 @@
     </ModalFilterLayer>
 
     {#if action.kind == "filter" && action.freehand}
-      <FreehandLine map={notNull($map)} on:done={paintedModalFiltersLine} />
+      <FreehandLine map={$map!} on:done={paintedModalFiltersLine} />
     {:else if action.kind == "main-roads" && action.tool != "toggle"}
       <SnapRouteSelector
-        map={notNull($map)}
+        map={$map!}
         finish={finishSnapping}
         cancel={() =>
           (action = { kind: "main-roads", tool: "toggle", waypoints: [] })}

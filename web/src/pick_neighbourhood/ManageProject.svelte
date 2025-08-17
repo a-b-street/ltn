@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { Copy, FileDown, FolderOpen } from "lucide-svelte";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
+  import { downloadGeneratedFile } from "svelte-utils";
   import { downloadProject, HelpButton, Link } from "../common";
   import { type ProjectID } from "../common/ProjectStorage";
   import {
@@ -18,7 +18,7 @@
   $: edits = countEdits(projectGj);
 
   let showPickProject = false;
-  $: otherProjects = listOtherProjects(notNull($currentProjectID));
+  $: otherProjects = listOtherProjects($currentProjectID!);
 
   let osmTimestamp = $backend!.getOsmTimestamp();
 
@@ -105,13 +105,13 @@
   }
 </script>
 
-<h2>Project: {notNull($currentProject).project_name}</h2>
+<h2>Project: {$currentProject!.project_name}</h2>
 <div style="display: flex; gap: 8px">
   <button
     class="outline"
     style="margin-right: 8px;"
     title="Download project as GeoJSON"
-    onclick={() => downloadProject(notNull($currentProjectID))}
+    onclick={() => downloadProject($currentProjectID!)}
   >
     <div style="display: flex; align-items: center; gap: 8px; color: black;">
       <FileDown />
@@ -142,7 +142,7 @@
   </button>
 </div>
 
-{#if notNull($currentProject).study_area_name && otherProjects.length > 0}
+{#if $currentProject!.study_area_name && otherProjects.length > 0}
   <details
     class="dropdown"
     style="display: inline-block; margin-top: 8px"

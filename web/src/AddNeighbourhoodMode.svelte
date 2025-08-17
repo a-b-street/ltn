@@ -10,7 +10,7 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
+  import { downloadGeneratedFile } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -319,7 +319,7 @@
           <h3>1. Draw your neighbourhood</h3>
         </div>
         <AreaControls
-          map={notNull($map)}
+          map={$map!}
           bind:waypoints
           bind:drawnShapeOut={drawnShape}
         />
@@ -345,7 +345,7 @@
         style="display: flex; gap: 16px; justify-content: space-between; margin-bottom: 16px;"
       >
         <button
-          onclick={() => createNeighbourhood(notNull(neighbourhoodBoundary))}
+          onclick={() => createNeighbourhood(neighbourhoodBoundary!)}
           disabled={!neighbourhoodBoundary}
         >
           Create neighborhood

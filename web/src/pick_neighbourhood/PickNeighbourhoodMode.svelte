@@ -9,7 +9,6 @@
     JoinedData,
     LineLayer,
   } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import { emptyGeojson, Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { layerId, Link, ModeLink, pageTitle, Style } from "../common";
@@ -253,8 +252,7 @@
         manageHoverState
         bind:hovered={hoveredMapFeature}
         hoverCursor="pointer"
-        onclick={(e) =>
-          pickNeighbourhood(notNull(e.features[0].properties).name)}
+        onclick={(e) => pickNeighbourhood(e.features[0].properties!.name)}
       >
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>

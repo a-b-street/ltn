@@ -6,7 +6,6 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -57,7 +56,7 @@
   </div>
 
   <div slot="map">
-    <GeoJSON data={notNull($backend).getAllIntersections()} generateId>
+    <GeoJSON data={$backend!.getAllIntersections()} generateId>
       <CircleLayer
         {...layerId("debug-intersections")}
         paint={{

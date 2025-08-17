@@ -2,7 +2,6 @@
   import type { Feature } from "geojson";
   import type { LngLat } from "maplibre-gl";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
@@ -94,9 +93,9 @@
 
       <p>
         This shortcut is <b>
-          {notNull(
-            state.gj.features[state.shortcutIndex].properties,
-          ).directness.toFixed(1)}x
+          {state.gj.features[
+            state.shortcutIndex
+          ].properties!.directness.toFixed(1)}x
         </b>
         the length of the shortest route using all roads, not just this neighbourhood
       </p>
