@@ -91,6 +91,7 @@
     map.touchZoomRotate.disableRotation();
     mapStore.set(map);
   }
+  let loaded = false;
 
   function zoomToFit(animate: boolean) {
     $mapStore!.fitBounds($backend!.getBounds(), { animate });
@@ -139,7 +140,7 @@
         <button class="outline" onclick={() => (showAbout = true)}>
           <img src={logo} style="height: 32px;" alt="A/B Street logo" />
         </button>
-        <span bind:this={topTarget.value} style="width: 100%"></span>
+        <div bind:this={topTarget.value} style="width: 100%"></div>
         <button
           class="icon-btn"
           title="User guide"
@@ -163,6 +164,7 @@
             {style}
             hash
             bind:map
+            bind:loaded
             bounds={initialBounds}
             maxZoom={19}
             onerror={(e) => {
@@ -249,7 +251,7 @@
               </Control>
             {/if}
 
-            <Geocoder {map} />
+            <Geocoder {map} {loaded} />
 
             <ScaleControl />
 

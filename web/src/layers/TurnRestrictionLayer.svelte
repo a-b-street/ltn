@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, Geometry } from "geojson";
+  import type { MapGeoJSONFeature } from "maplibre-gl";
   import {
     GeoJSON,
     LineLayer,
@@ -19,9 +20,9 @@
   export let prefix = "";
   export let onClickTurnRestriction: (e: LayerClickInfo) => void = () => {};
 
-  let hoveredIcon: Feature | null = null;
+  let hoveredIcon: (Feature & MapGeoJSONFeature) | undefined = undefined;
   $: showArrow =
-    hoveredIcon == null
+    hoveredIcon == undefined
       ? emptyGeojson()
       : {
           type: "FeatureCollection" as const,

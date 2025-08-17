@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, MultiPolygon } from "geojson";
-  import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
+  import type {
+    DataDrivenPropertyValueSpecification,
+    MapGeoJSONFeature,
+  } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -26,8 +29,8 @@
 
   let showTo = false;
 
-  let hovered: Feature | null = null;
-  $: hoveredId = hovered == null ? null : (hovered.id as number);
+  let hovered: (Feature & MapGeoJSONFeature) | undefined = undefined;
+  $: hoveredId = hovered ? (hovered.id as number) : null;
   // MapLibre doesn't preserve the arrays in properties, so use the original version
   $: current = hoveredId != null ? gj.features[hoveredId] : null;
 

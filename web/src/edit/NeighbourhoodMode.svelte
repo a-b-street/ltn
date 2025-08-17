@@ -800,8 +800,10 @@
                   alt="Add turn restriction"
                 />
 
-                Create a turn restriction from {action.from_road_name} to {props.name ||
-                  "unnamed road"}
+                Create a turn restriction from {action.kind ==
+                "turn_restriction"
+                  ? action.from_road_name
+                  : "???"} to {props.name || "unnamed road"}
               </div>
             {/snippet}
           </Popup>

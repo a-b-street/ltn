@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { FeatureCollection, Polygon } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
-  import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
+  import type {
+    DataDrivenPropertyValueSpecification,
+    MapGeoJSONFeature,
+  } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -50,7 +53,9 @@
   let selectedPrioritization: Prioritization =
     $appFocus == "cnt" ? "combined" : "none";
   let hoveredNeighbourhoodFromList: string | null = null;
-  let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
+  let hoveredMapFeature:
+    | (NeighbourhoodBoundaryFeature & MapGeoJSONFeature)
+    | undefined = undefined;
   $currentNeighbourhoodName = undefined;
 
   function pickNeighbourhood(name: string) {

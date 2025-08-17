@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import { LngLat, type MapMouseEvent } from "maplibre-gl";
+  import {
+    LngLat,
+    type MapGeoJSONFeature,
+    type MapMouseEvent,
+  } from "maplibre-gl";
   import { onMount } from "svelte";
   import {
     FillLayer,
@@ -33,7 +37,7 @@
 
   $: perRoadGj = $backend!.impactToOneDestination($oneDestination);
 
-  let hovered: Feature | null = null;
+  let hovered: (Feature & MapGeoJSONFeature) | undefined = undefined;
 
   $: routeGj = previewRoutes(hovered);
   $: routeBefore = routeGj.features.find((f) => f.properties.kind == "before");
@@ -48,7 +52,7 @@
     }, 10);
   });
 
-  function previewRoutes(hovered: Feature | null): CompareRoute {
+  function previewRoutes(hovered: Feature | undefined): CompareRoute {
     if (!hovered) {
       return emptyGeojson() as CompareRoute;
     }
