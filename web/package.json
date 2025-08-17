@@ -43,5 +43,8 @@
     "svelte-toc": "^0.6.2",
     "svelte-utils": "github:a-b-street/svelte-utils",
     "tippy.js": "^6.3.7"
+  },
+  "overrides": {
+    "maplibre-gl": "^5.6.1"
   }
 }
