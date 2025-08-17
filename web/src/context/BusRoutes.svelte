@@ -7,7 +7,7 @@
 </script>
 
 <ContextLayerButton bind:show label="Bus routes">
-  <p slot="help">
+  {#snippet help()}
     These are all <a
       href="https://wiki.openstreetmap.org/wiki/Tag:route%3Dbus"
       target="_blank"
@@ -15,7 +15,7 @@
       bus routes
     </a>
     according to OpenStreetMap.
-  </p>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource

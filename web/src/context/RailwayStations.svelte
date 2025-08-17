@@ -8,12 +8,14 @@
 </script>
 
 <ContextLayerButton bind:show label="Railway stations">
-  <div slot="legend" style="display: flex; gap: 8px; align-items: center;">
-    <img src={nationalRailUrl} alt="National Rail logo" />
-    Station
-  </div>
+  {#snippet legend()}
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <img src={nationalRailUrl} alt="National Rail logo" />
+      Station
+    </div>
+  {/snippet}
 
-  <p slot="help">
+  {#snippet help()}
     These are all <a
       href="https://wiki.openstreetmap.org/wiki/Tag:railway%3Dstation"
       target="_blank"
@@ -21,7 +23,7 @@
       railway stations
     </a>
     according to OpenStreetMap.
-  </p>
+  {/snippet}
 </ContextLayerButton>
 
 <GeoJSON data={assetUrl("cnt/layers/railways.geojson")} generateId>

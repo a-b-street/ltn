@@ -1,9 +1,12 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { HelpButton } from "../common";
 
   export let label: string;
   export let show = false;
   export let onChange: () => void = () => {};
+  export let help: Snippet | undefined = undefined;
+  export let legend: Snippet | undefined = undefined;
 </script>
 
 <button
@@ -20,20 +23,20 @@
     onchange={onChange}
   />
   {label}
-  {#if $$slots.help}
+  {#if help}
     <span style="margin-left: auto"
       ><HelpButton>
         <div class="context-layer-help-content">
-          <slot name="help" />
+          {@render help()}
         </div>
       </HelpButton></span
     >
   {/if}
 </button>
 
-{#if show && $$slots.legend}
+{#if show && legend}
   <div class="legend">
-    <slot name="legend" />
+    {@render legend()}
   </div>
 {/if}
 

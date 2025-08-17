@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
+  import type { Snippet } from "svelte";
   import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
@@ -16,6 +17,8 @@
   export let turnRestrictionGj: FeatureCollection | null = null;
   export let onClickModalFilter: (e: LayerClickInfo) => void = () => {};
   export let onClickTurnRestriction: (e: LayerClickInfo) => void = () => {};
+  export let modalFilterPopup: Snippet | undefined = undefined;
+  export let turnRestrictionPopup: Snippet | undefined = undefined;
 
   export let interactive: boolean;
   export let show = true;
@@ -51,7 +54,7 @@
     }}
     onclick={onClickModalFilter}
   >
-    <slot name="modal-filter" />
+    {@render modalFilterPopup?.()}
   </SymbolLayer>
   <SymbolLayer
     {...layerId(prefix + "intersection-filters")}
@@ -74,5 +77,5 @@
   {turnRestrictionGj}
   {onClickTurnRestriction}
 >
-  <slot name="turn-restriction" />
+  {@render turnRestrictionPopup?.()}
 </TurnRestrictionLayer>

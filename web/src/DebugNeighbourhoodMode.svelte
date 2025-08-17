@@ -116,32 +116,32 @@
         interactive
         onClickLine={(f, _) => window.open(f.properties!.way, "_blank")}
       >
-        <div slot="line-popup">
+        {#snippet linePopup()}
           <Popup openOn="hover">
             {#snippet children({ data })}
               <PropertiesTable properties={data!.properties!} />
             {/snippet}
           </Popup>
-        </div>
+        {/snippet}
       </NeighbourhoodRoadLayer>
     </RenderNeighbourhood>
 
     <ModalFilterLayer interactive={true}>
-      <div slot="modal-filter">
+      {#snippet modalFilterPopup()}
         <Popup openOn="hover">
           {#snippet children({ data })}
             <PropertiesTable properties={data!.properties!} />
           {/snippet}
         </Popup>
-      </div>
+      {/snippet}
 
-      <div slot="turn-restriction">
+      {#snippet turnRestrictionPopup()}
         <Popup openOn="hover">
           {#snippet children({ data })}
             <PropertiesTable properties={data!.properties!} />
           {/snippet}
         </Popup>
-      </div>
+      {/snippet}
     </ModalFilterLayer>
 
     <GeoJSON data={$backend!.getAllIntersections()} generateId>

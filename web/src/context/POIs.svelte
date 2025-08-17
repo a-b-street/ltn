@@ -19,11 +19,11 @@
 </script>
 
 <ContextLayerButton label="POIs" bind:show>
-  <div slot="legend">
+  {#snippet legend()}
     <QualitativeLegend {labelColors} swatchClass="circle" />
-  </div>
+  {/snippet}
 
-  <p slot="help">
+  {#snippet help()}
     See Scottish data sources for
     <a
       href="https://www.data.gov.uk/dataset/9a6f9d86-9698-4a5d-a2c8-89f3b212c52c/scottish-school-roll-and-locations"
@@ -50,7 +50,7 @@
       OpenStreetMap
     </a>
     .
-  </p>
+  {/snippet}
 </ContextLayerButton>
 
 {#if $backend}

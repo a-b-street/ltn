@@ -703,7 +703,7 @@
           (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
       >
-        <div slot="line-popup">
+        {#snippet linePopup()}
           <Popup openOn="hover">
             {#snippet children({ data })}
               {@const props = data!.properties!}
@@ -737,7 +737,7 @@
               {/if}
             {/snippet}
           </Popup>
-        </div>
+        {/snippet}
       </NeighbourhoodRoadLayer>
       <EditableIntersectionLayer
         show={!$showBeforeEdits}
@@ -757,12 +757,12 @@
       onClickTurnRestriction={deleteTurnRestriction}
       interactive={action.kind == "filter"}
     >
-      <div slot="modal-filter">
+      {#snippet modalFilterPopup()}
         <Popup openOn="hover">Click to delete filter</Popup>
-      </div>
-      <div slot="turn-restriction">
+      {/snippet}
+      {#snippet turnRestrictionPopup()}
         <Popup openOn="hover">Click to delete turn restriction</Popup>
-      </div>
+      {/snippet}
     </ModalFilterLayer>
 
     {#if action.kind == "filter" && action.freehand}

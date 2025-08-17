@@ -34,7 +34,7 @@
     }
   }}
 >
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={simdColorScale.toReversed()}
       labels={{ buckets: bucketize(simdLimits).toReversed() }}
@@ -43,9 +43,9 @@
       <span>Less deprived</span>
       <span>More deprived</span>
     </div>
-  </div>
+  {/snippet}
 
-  <p slot="help">
+  {#snippet help()}
     This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
       href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
       target="_blank"
@@ -54,7 +54,7 @@
     </a>
     . SIMD combines different domains: income; employment; health; education, skills
     and training; geographic access to services; crime; and housing.
-  </p>
+  {/snippet}
 </ContextLayerButton>
 
 <ContextLayerButton
@@ -67,7 +67,7 @@
     }
   }}
 >
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={populationDensityColorScale}
       labels={{ limits: $metricBuckets.population_density }}
@@ -77,9 +77,9 @@
       <span>people / km²</span>
       <span>More dense</span>
     </div>
-  </div>
+  {/snippet}
 
-  <p slot="help">
+  {#snippet help()}
     This shows population data from <a
       href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
       target="_blank"
@@ -87,7 +87,7 @@
       2020 data
     </a>
     .
-  </p>
+  {/snippet}
 </ContextLayerButton>
 
 <ContextLayerButton
@@ -100,7 +100,7 @@
     }
   }}
 >
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={carOwnershipColorScale.toReversed()}
       labels={{
@@ -112,11 +112,11 @@
         Households with at least one car or van
       </span>
     </div>
-  </div>
+  {/snippet}
 
-  <p slot="help">
+  {#snippet help()}
     Show households from the Scottish census with at least one car.
-  </p>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource

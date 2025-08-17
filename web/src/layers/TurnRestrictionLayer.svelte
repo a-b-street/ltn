@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, Geometry } from "geojson";
   import type { MapGeoJSONFeature } from "maplibre-gl";
+  import type { Snippet } from "svelte";
   import {
     GeoJSON,
     LineLayer,
@@ -15,6 +16,7 @@
     showExistingFiltersAndTRs,
   } from "../stores";
 
+  export let children: Snippet | undefined = undefined;
   export let turnRestrictionGj: FeatureCollection | null = null;
   export let show = true;
   export let prefix = "";
@@ -69,7 +71,7 @@
     bind:hovered={hoveredIcon}
     onclick={onClickTurnRestriction}
   >
-    <slot />
+    {@render children?.()}
   </SymbolLayer>
 </GeoJSON>
 

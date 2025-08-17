@@ -99,7 +99,7 @@
 </script>
 
 <ContextLayerButton bind:show label="Collisions">
-  <div slot="help">
+  {#snippet help()}
     <p>
       This layer shows collisions recorded in the <a
         href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data"
@@ -146,8 +146,9 @@
       </a>
       . Contains OS data &copy; Crown copyright and database right 2025.
     </p>
-  </div>
-  <div slot="legend">
+  {/snippet}
+
+  {#snippet legend()}
     <fieldset style="display: flex; gap: 3em;">
       <label>
         <input type="checkbox" bind:checked={state.pedestrians} />
@@ -173,7 +174,7 @@
       swatchClass="circle"
       itemsPerRow={3}
     />
-  </div>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt/layers/stats19.pmtiles")}`}>

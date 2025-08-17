@@ -6,7 +6,7 @@
     ExpressionSpecification,
     LngLat,
   } from "maplibre-gl";
-  import { getContext } from "svelte";
+  import { getContext, type Snippet } from "svelte";
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { makeRamp } from "svelte-utils/map";
   import { colorByCellColor } from ".";
@@ -22,8 +22,9 @@
 
   let gj: RenderNeighbourhoodOutput = getContext("neighbourhoodGj");
 
-  // When disabled, can't click lines or filters, no slots, no hoverCursor
+  // When disabled, can't click lines or filters, no linePopup, no hoverCursor
   export let interactive = true;
+  export let linePopup: Snippet | undefined = undefined;
   export let onClickLine = (f: Feature, pt: LngLat) => {};
   export let show = true;
   export let prefix = "";
@@ -124,7 +125,7 @@
   hoverCursor={interactive ? "pointer" : undefined}
 >
   {#if interactive}
-    <slot name="line-popup" />
+    {@render linePopup?.()}
   {/if}
 </LineLayer>
 
@@ -162,6 +163,6 @@
   hoverCursor={interactive ? "pointer" : undefined}
 >
   {#if interactive}
-    <slot name="line-popup" />
+    {@render linePopup?.()}
   {/if}
 </LineLayer>

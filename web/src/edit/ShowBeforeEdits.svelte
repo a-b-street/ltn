@@ -30,7 +30,7 @@
     <OneWayLayer show={$showBeforeEdits} {prefix} />
 
     <NeighbourhoodRoadLayer show={$showBeforeEdits} {prefix} interactive={true}>
-      <div slot="line-popup">
+      {#snippet linePopup()}
         <Popup openOn="hover">
           {#snippet children({ data })}
             {@const props = data!.properties!}
@@ -48,7 +48,7 @@
             {/if}
           {/snippet}
         </Popup>
-      </div>
+      {/snippet}
     </NeighbourhoodRoadLayer>
   </RenderNeighbourhood>
 {/if}

@@ -1,11 +1,13 @@
 <script lang="ts">
   // This launches a modal when clicked. The user should put the modal contents
-  // as a slot beneath this component.
+  // as the child snippet beneath this component.
   import { CircleHelp } from "lucide-svelte";
+  import type { Snippet } from "svelte";
   import { Modal } from "svelte-utils";
 
   let show = false;
   export let color = "black";
+  export let children: Snippet | undefined = undefined;
 </script>
 
 <button
@@ -18,7 +20,7 @@
 
 <Modal bind:show>
   <h2>Help</h2>
-  <slot />
+  {@render children?.()}
 </Modal>
 
 <style>

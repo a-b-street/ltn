@@ -109,7 +109,7 @@
 
       {#if state.state == "neutral"}
         <NeighbourhoodRoadLayer onClickLine={choseRoad}>
-          <div slot="line-popup">
+          {#snippet linePopup()}
             <Popup openOn="hover">
               {#snippet children({ data })}
                 {@const props = data!.properties!}
@@ -125,7 +125,7 @@
                 {/if}
               {/snippet}
             </Popup>
-          </div>
+          {/snippet}
         </NeighbourhoodRoadLayer>
       {:else if state.state == "chose-road"}
         <NeighbourhoodRoadLayer interactive={false} />

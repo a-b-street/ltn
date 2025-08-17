@@ -132,13 +132,13 @@
 </script>
 
 <ContextLayerButton bind:show label="Estimated cycling demand">
-  <p slot="help">
+  {#snippet help()}
     <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
       Data from NPT
     </a>
-  </p>
+  {/snippet}
 
-  <div slot="legend">
+  {#snippet legend()}
     <label>
       Trip purpose:
       <select bind:value={purpose}>
@@ -174,7 +174,7 @@
         {/each}
       </select>
     </label>
-  </div>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource
