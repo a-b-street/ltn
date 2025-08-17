@@ -546,4 +546,11 @@
     width: auto;
     margin-top: 2px;
   }
+
+  /* Put geocoder to the right of the zoom buttons */
+  :global(.maplibregl-ctrl-geocoder) {
+    position: absolute;
+    top: 10px;
+    left: 50px;
+  }
 </style>
