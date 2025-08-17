@@ -63,13 +63,13 @@
     $mode = { mode: "route", prevMode: "impact-one-destination" };
   }
 
-  function onRightClick(e: CustomEvent<MapMouseEvent>) {
+  function onRightClick(e: MapMouseEvent) {
     // Move the first marker, for convenience
-    $oneDestination = e.detail.lngLat;
+    $oneDestination = e.lngLat;
   }
 </script>
 
-<MapEvents on:contextmenu={onRightClick} />
+<MapEvents oncontextmenu={onRightClick} />
 
 <SplitComponent>
   <div slot="top">
@@ -160,7 +160,7 @@
           "line-width": 5,
         }}
         manageHoverState
-        on:click={(e) => compareRoute(e.detail.features[0])}
+        onclick={(e) => compareRoute(e.features[0])}
         bind:hovered
       >
         <Popup openOn="hover" let:props>

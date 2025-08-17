@@ -28,7 +28,7 @@
     <button
       class="show-layers-button icon-btn {expand ? 'expanded' : ''}"
       aria-label="Layers"
-      on:click={() => (expand = !expand)}
+      onclick={() => (expand = !expand)}
     >
       <div
         style="display: flex; gap: 12px; color: #333; align-items: center; justify-content: center;"

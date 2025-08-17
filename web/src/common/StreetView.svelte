@@ -67,11 +67,11 @@
   }
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <ControlButton>
   <button
-    on:click={() => {
+    onclick={() => {
       expanded = !expanded;
       expanded ? start() : stop();
     }}

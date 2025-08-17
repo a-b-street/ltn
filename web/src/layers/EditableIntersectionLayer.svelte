@@ -64,8 +64,8 @@
   {interactive}
   manageHoverState
   hoverCursor="pointer"
-  on:click={(event) =>
-    onClickIntersection(getIntersectionFromFeatures(event.detail.features))}
+  onclick={(event) =>
+    onClickIntersection(getIntersectionFromFeatures(event.features))}
 >
   <Popup openOn="hover" let:features>
     <EditIntersectionPopup

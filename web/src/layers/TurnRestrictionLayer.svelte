@@ -17,9 +17,7 @@
   export let turnRestrictionGj: FeatureCollection | null = null;
   export let show = true;
   export let prefix = "";
-  export let onClickTurnRestriction: (
-    e: CustomEvent<LayerClickInfo>,
-  ) => void = () => {};
+  export let onClickTurnRestriction: (e: LayerClickInfo) => void = () => {};
 
   let hoveredIcon: Feature | null = null;
   $: showArrow =
@@ -68,7 +66,7 @@
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
     bind:hovered={hoveredIcon}
-    on:click={onClickTurnRestriction}
+    onclick={onClickTurnRestriction}
   >
     <slot />
   </SymbolLayer>

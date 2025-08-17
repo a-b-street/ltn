@@ -97,21 +97,21 @@
     undoStates = [...undoStates, JSON.parse(JSON.stringify(waypoints))];
   }
 
-  function onMapClick(e: CustomEvent<MapMouseEvent>) {
+  function onMapClick(e: MapMouseEvent) {
     if (waypoints.length >= 3) {
       return;
     }
     captureUndoState();
     waypoints.push({
-      point: e.detail.lngLat.toArray(),
+      point: e.lngLat.toArray(),
       snapped: snapMode == "snap",
     });
     waypoints = waypoints;
   }
 
-  function onMouseMove(e: CustomEvent<MapMouseEvent>) {
+  function onMouseMove(e: MapMouseEvent) {
     cursor = {
-      point: e.detail.lngLat.toArray(),
+      point: e.lngLat.toArray(),
       snapped: snapMode == "snap",
     };
   }
@@ -227,7 +227,7 @@
     />
     Snap boundary to roads
   </label>
-  <button class="secondary" disabled={undoStates.length == 0} on:click={undo}>
+  <button class="secondary" disabled={undoStates.length == 0} onclick={undo}>
     {#if undoStates.length == 0}
       Undo
     {:else}
@@ -236,16 +236,16 @@
   </button>
 </div>
 
-<MapEvents on:click={onMapClick} on:mousemove={onMouseMove} />
+<MapEvents onclick={onMapClick} onmousemove={onMouseMove} />
 
 {#each extraNodes as node}
   <Marker
     draggable
     bind:lngLat={node.point}
-    on:dragstart={() => addNode(node)}
-    on:drag={() => updateDrag(node)}
-    on:dragend={finalizeDrag}
-    on:click={() => {
+    ondragstart={() => addNode(node)}
+    ondrag={() => updateDrag(node)}
+    ondragend={finalizeDrag}
+    onclick={() => {
       addNode(node);
       draggingExtraNode = false;
     }}
@@ -264,12 +264,12 @@
   <Marker
     draggable
     bind:lngLat={waypt.point}
-    on:click={() => toggleSnapped(idx)}
-    on:contextmenu={() => removeWaypoint(idx)}
-    on:mouseenter={() => (hoveringOnMarker = true)}
-    on:mouseleave={() => (hoveringOnMarker = false)}
-    on:dragstart={startDraggingWaypoint}
-    on:dragend={() => (draggingMarker = false)}
+    onclick={() => toggleSnapped(idx)}
+    oncontextmenu={() => removeWaypoint(idx)}
+    onmouseenter={() => (hoveringOnMarker = true)}
+    onmouseleave={() => (hoveringOnMarker = false)}
+    ondragstart={startDraggingWaypoint}
+    ondragend={() => (draggingMarker = false)}
     zIndex={1}
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>

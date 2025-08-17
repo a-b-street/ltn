@@ -88,8 +88,8 @@
     />
 
     <div style="display: flex; gap: 16px;">
-      <button on:click={finish} disabled={waypoints.length < 3}>Finish</button>
-      <button class="secondary" on:click={cancel}>Cancel</button>
+      <button onclick={finish} disabled={waypoints.length < 3}>Finish</button>
+      <button class="secondary" onclick={cancel}>Cancel</button>
     </div>
   </div>
 </SplitComponent>

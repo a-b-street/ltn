@@ -12,6 +12,6 @@
   }
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <Link on:click={() => ($storedMode = mode)}>Back</Link>

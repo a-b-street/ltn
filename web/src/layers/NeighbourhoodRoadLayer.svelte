@@ -119,8 +119,7 @@
     visibility: show ? "visible" : "none",
   }}
   minzoom={13}
-  on:click={(e) =>
-    interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
+  onclick={(e) => interactive && onClickLine(e.features[0], e.event.lngLat)}
   manageHoverState={interactive}
   hoverCursor={interactive ? "pointer" : undefined}
 >
@@ -158,8 +157,7 @@
     visibility: show ? "visible" : "none",
   }}
   minzoom={13}
-  on:click={(e) =>
-    interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
+  onclick={(e) => interactive && onClickLine(e.features[0], e.event.lngLat)}
   manageHoverState={interactive}
   hoverCursor={interactive ? "pointer" : undefined}
 >

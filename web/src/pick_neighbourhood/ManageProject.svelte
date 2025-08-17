@@ -111,7 +111,7 @@
     class="outline"
     style="margin-right: 8px;"
     title="Download project as GeoJSON"
-    on:click={() => downloadProject(notNull($currentProjectID))}
+    onclick={() => downloadProject(notNull($currentProjectID))}
   >
     <div style="display: flex; align-items: center; gap: 8px; color: black;">
       <FileDown />
@@ -128,7 +128,7 @@
     class="outline"
     style="margin-right: 8px;"
     title="Make a copy of this project"
-    on:click={() => copyProject()}
+    onclick={() => copyProject()}
   >
     <div style="display: flex; align-items: center; gap: 8px; color: black;">
       <Copy />
@@ -188,7 +188,7 @@
 {/if}
 
 {#if $devMode}
-  <button class="secondary" on:click={debugRouteSnapper}>
+  <button class="secondary" onclick={debugRouteSnapper}>
     Debug route-snapper
   </button>
 {/if}

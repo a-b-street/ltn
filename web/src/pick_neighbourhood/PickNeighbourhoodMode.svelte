@@ -168,8 +168,8 @@
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
         <li
-          on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
-          on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
+          onmouseenter={() => (hoveredNeighbourhoodFromList = name)}
+          onmouseleave={() => (hoveredNeighbourhoodFromList = null)}
           class="actionable-cell"
           class:highlighted={hoveredMapFeature?.properties.name == name ||
             hoveredNeighbourhoodFromList == name}
@@ -179,14 +179,14 @@
             <button
               class="outline icon-btn"
               title="Rename neighbourhood"
-              on:click={() => renameNeighbourhood(name)}
+              onclick={() => renameNeighbourhood(name)}
             >
               <Pencil color="black" />
             </button>
             <button
               class="icon-btn destructive"
               title="Delete neighbourhood"
-              on:click={() => deleteNeighbourhood(name)}
+              onclick={() => deleteNeighbourhood(name)}
             >
               <Trash2 color="white" />
             </button>
@@ -253,8 +253,8 @@
         manageHoverState
         bind:hovered={hoveredMapFeature}
         hoverCursor="pointer"
-        on:click={(e) =>
-          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
+        onclick={(e) =>
+          pickNeighbourhood(notNull(e.features[0].properties).name)}
       >
         <Popup openOn="hover" let:props>
           <h2>{props.name}</h2>

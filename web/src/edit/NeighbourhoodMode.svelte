@@ -191,7 +191,7 @@
     }
   }
 
-  function onMapClick(e: CustomEvent<MapMouseEvent>) {
+  function onMapClick(e: MapMouseEvent) {
     if (action.kind != "turn_restriction") {
       return;
     }
@@ -199,7 +199,7 @@
     // If we click a blank area, reset some state. Not sure why, but clicking
     // layers doesn't always prevent a click on the map itself.
     if (
-      $map!.queryRenderedFeatures(e.detail.point, {
+      $map!.queryRenderedFeatures(e.point, {
         layers: ["interior-roads", "turn-restriction-targets"],
       }).length > 0
     ) {
@@ -209,23 +209,23 @@
     action = startTurnRestrictionAction();
   }
 
-  function createTurnRestriction(e: CustomEvent<LayerClickInfo>) {
+  function createTurnRestriction(e: LayerClickInfo) {
     if (action.kind == "turn_restriction" && action.from_road_id != null) {
-      let to = e.detail.features[0].properties!.road;
+      let to = e.features[0].properties!.road;
       $backend!.addTurnRestriction(action.from_road_id, to);
       $mutationCounter++;
     }
     action = startTurnRestrictionAction();
   }
 
-  function deleteModalFilter(e: CustomEvent<LayerClickInfo>) {
-    let f = e.detail.features[0];
+  function deleteModalFilter(e: LayerClickInfo) {
+    let f = e.features[0];
     $backend!.deleteModalFilter(f.properties!.road);
     $mutationCounter++;
   }
 
-  function deleteTurnRestriction(e: CustomEvent<LayerClickInfo>) {
-    let f = e.detail.features[0];
+  function deleteTurnRestriction(e: LayerClickInfo) {
+    let f = e.features[0];
     $backend!.deleteTurnRestriction(
       f.properties!.intersection,
       f.properties!.from_road,
@@ -350,7 +350,7 @@
   };
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <SplitComponent>
   <div slot="top" style="display: flex; justify-content: space-between;">
@@ -424,7 +424,7 @@
           style="height: 50px; display: flex; justify-content: left; gap: 6px;"
         >
           <button
-            on:click={() => (action = { kind: "filter", freehand: false })}
+            onclick={() => (action = { kind: "filter", freehand: false })}
             class="icon-btn"
             class:active={action.kind == "filter"}
             data-tippy-content="Add a modal filter (hotkey 1)"
@@ -436,7 +436,7 @@
             />
           </button>
           <button
-            on:click={() => (action = { kind: "oneway" })}
+            onclick={() => (action = { kind: "oneway" })}
             class="icon-btn"
             class:active={action.kind == "oneway"}
             data-tippy-content="Toggle one-way (hotkey 2)"
@@ -459,7 +459,7 @@
             </div>
           </button>
           <button
-            on:click={() => (action = startTurnRestrictionAction())}
+            onclick={() => (action = startTurnRestrictionAction())}
             class="icon-btn"
             class:active={action.kind == "turn_restriction"}
             data-tippy-content="Restrict turns (hotkey 3)"
@@ -467,7 +467,7 @@
             <img src={noRightUrl} alt="Restrict turns" />
           </button>
           <button
-            on:click={() =>
+            onclick={() =>
               (action = { kind: "main-roads", tool: "toggle", waypoints: [] })}
             class="icon-btn"
             class:active={action.kind == "main-roads"}
@@ -482,7 +482,7 @@
           <button
             class="outline icon-btn"
             disabled={undoLength == 0}
-            on:click={undo}
+            onclick={undo}
             data-tippy-content={undoLength == 0
               ? "Undo Ctrl+Z"
               : `Undo (${undoLength}) Ctrl+Z`}
@@ -492,7 +492,7 @@
           <button
             class="outline icon-btn"
             disabled={redoLength == 0}
-            on:click={redo}
+            onclick={redo}
             data-tippy-content={redoLength == 0
               ? "Redo Ctrl+Y"
               : `Redo (${redoLength}) Ctrl+Y`}
@@ -516,12 +516,12 @@
           <div
             style="display: flex; gap: 8px; align-items: leading; flex-direction: column; width: fit-content;"
           >
-            <button class="outline" on:click={() => (settingFilterType = true)}>
+            <button class="outline" onclick={() => (settingFilterType = true)}>
               Change modal filter type
             </button>
 
             <button
-              on:click={action.freehand
+              onclick={action.freehand
                 ? () => (action = { kind: "filter", freehand: false })
                 : () => (action = { kind: "filter", freehand: true })}
               class:active={action.freehand}
@@ -566,7 +566,7 @@
             style="display: flex; flex-direction: column; gap: 8px; justify-content: left;"
           >
             <button
-              on:click={() => {
+              onclick={() => {
                 action = { kind: "main-roads", tool: "toggle", waypoints: [] };
               }}
               class:active={action.tool == "toggle"}
@@ -580,7 +580,7 @@
             </button>
 
             <button
-              on:click={() => {
+              onclick={() => {
                 action = {
                   kind: "main-roads",
                   tool: "snap-route-main",
@@ -598,7 +598,7 @@
             </button>
 
             <button
-              on:click={() => {
+              onclick={() => {
                 action = {
                   kind: "main-roads",
                   tool: "snap-route-erase",
@@ -615,7 +615,7 @@
               </div>
             </button>
 
-            <button class:outline={true} on:click={eraseAllMainRoads}>
+            <button class:outline={true} onclick={eraseAllMainRoads}>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <Trash2 />
                 <span>Erase all main roads</span>
@@ -683,7 +683,7 @@
   </div>
 
   <div slot="map">
-    <MapEvents on:click={onMapClick} />
+    <MapEvents onclick={onMapClick} />
 
     <ShowBeforeEdits />
 
@@ -782,7 +782,7 @@
             "line-opacity": hoverStateFilter(0.5, 1.0),
             "line-width": roadLineWidth(1),
           }}
-          on:click={createTurnRestriction}
+          onclick={createTurnRestriction}
         >
           <Popup openOn="hover" let:props>
             <div>

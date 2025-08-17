@@ -86,7 +86,7 @@
         view lets you understand the limits of this assumption.
       </p>
 
-      <button on:click={() => (state = { state: "neutral" })}>
+      <button onclick={() => (state = { state: "neutral" })}>
         Pick a different road
       </button>
 

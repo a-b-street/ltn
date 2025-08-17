@@ -17,9 +17,9 @@
   let movements = emptyGeojson();
   let idx = 0;
 
-  function pickIntersection(e: CustomEvent<LayerClickInfo>) {
-    currentOsm = e.detail.features[0].properties!.osm;
-    movements = $backend!.getMovements(e.detail.features[0].id as number);
+  function pickIntersection(e: LayerClickInfo) {
+    currentOsm = e.features[0].properties!.osm;
+    movements = $backend!.getMovements(e.features[0].id as number);
     idx = 0;
   }
 </script>
@@ -45,7 +45,7 @@
     <p>Purple intersections have some kind of turn restriction.</p>
 
     {#if movements.features.length > 0}
-      <button class="secondary" on:click={() => (movements = emptyGeojson())}>
+      <button class="secondary" onclick={() => (movements = emptyGeojson())}>
         Pick another intersection
       </button>
 
@@ -71,7 +71,7 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        on:click={pickIntersection}
+        onclick={pickIntersection}
       />
     </GeoJSON>
 

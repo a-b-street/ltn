@@ -38,8 +38,8 @@
     ladNames = ladNames;
   });
 
-  function onClick(e: CustomEvent<LayerClickInfo>) {
-    let props = e.detail.features[0].properties!;
+  function onClick(e: LayerClickInfo) {
+    let props = e.features[0].properties!;
     newFile(`${props.kind}_${props.name}`);
   }
 
@@ -89,7 +89,7 @@
 </script>
 
 <p>Choose a boundary below or on the map to begin:</p>
-<select bind:value={ladChoice} on:change={chooseLAD} style="width: 90%">
+<select bind:value={ladChoice} onchange={chooseLAD} style="width: 90%">
   <option value=""></option>
   {#each ladNames as value}
     <option {value}>{value}</option>
@@ -106,7 +106,7 @@
     beforeId="Road labels"
     manageHoverState
     hoverCursor="pointer"
-    on:click={onClick}
+    onclick={onClick}
   >
     <Popup openOn="hover" let:props>
       <p>Click to start a new project in {props.name}</p>

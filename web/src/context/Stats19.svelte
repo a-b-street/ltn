@@ -47,10 +47,10 @@
     return list.join(", ");
   }
 
-  function onClick(e: CustomEvent<LayerClickInfo>) {
+  function onClick(e: LayerClickInfo) {
     window.open(
       `https://www.cyclestreets.net/collisions/reports/${
-        e.detail.features[0].properties!.accident_index
+        e.features[0].properties!.accident_index
       }`,
       "_blank",
     );
@@ -209,7 +209,7 @@
       visibility: show ? "visible" : "none",
     }}
     hoverCursor="pointer"
-    on:click={onClick}
+    onclick={onClick}
   >
     <Popup let:props>
       <p>

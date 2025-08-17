@@ -74,5 +74,5 @@
 
 <label style="margin-top: 16px;">
   <strong>Load a project from a file</strong>
-  <input bind:this={fileInput} on:change={loadFile} type="file" />
+  <input bind:this={fileInput} onchange={loadFile} type="file" />
 </label>

@@ -8,7 +8,7 @@
 
 <button
   class="context-control"
-  on:click={() => {
+  onclick={() => {
     show = !show;
     onChange();
   }}

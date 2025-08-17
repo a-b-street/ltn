@@ -94,9 +94,9 @@
     loading = "";
   });
 
-  function clickedBoundary(e: CustomEvent<LayerClickInfo>) {
+  function clickedBoundary(e: LayerClickInfo) {
     // Trust generateId to make IDs in order
-    let featureId = e.detail.features[0].id as number;
+    let featureId = e.features[0].id as number;
     let feature: GeneratedBoundaryFeature =
       generatedBoundaries.features[featureId];
 
@@ -233,7 +233,7 @@
   }
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <Loading {loading} />
 
@@ -275,7 +275,7 @@
         style="display: flex; align-items: center; gap: 16px;"
       >
         <button
-          on:click={() => (addMode = "choose-area")}
+          onclick={() => (addMode = "choose-area")}
           class:active={addMode == "choose-area"}
         >
           <Pointer />
@@ -283,7 +283,7 @@
         </button>
         or
         <button
-          on:click={() => (addMode = "draw-area")}
+          onclick={() => (addMode = "draw-area")}
           class:active={addMode == "draw-area"}
         >
           <Pencil />
@@ -345,14 +345,14 @@
         style="display: flex; gap: 16px; justify-content: space-between; margin-bottom: 16px;"
       >
         <button
-          on:click={() => createNeighbourhood(notNull(neighbourhoodBoundary))}
+          onclick={() => createNeighbourhood(notNull(neighbourhoodBoundary))}
           disabled={!neighbourhoodBoundary}
         >
           Create neighborhood
         </button>
         <button
           class="destructive"
-          on:click={clearNeighbourhoodBoundary}
+          onclick={clearNeighbourhoodBoundary}
           style="display: flex; gap: 8px; align-items: center;"
           disabled={!(
             neighbourhoodBoundary ||
@@ -385,7 +385,7 @@
     </div>
     <hr />
 
-    <button class="secondary" on:click={download}
+    <button class="secondary" onclick={download}
       >Export metrics to GeoJSON</button
     >
   </div>
@@ -425,7 +425,7 @@
           }}
           manageHoverState
           hoverCursor="pointer"
-          on:click={clickedBoundary}
+          onclick={clickedBoundary}
         >
           {#if selectedPrioritization != "simd"}
             <Popup openOn="hover" let:props>

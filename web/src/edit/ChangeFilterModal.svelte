@@ -19,7 +19,7 @@
             class="outline"
             style="width: 100%"
             disabled={$currentFilterType == filter.filterType}
-            on:click={() => ($currentFilterType = filter.filterType)}
+            onclick={() => ($currentFilterType = filter.filterType)}
           >
             <img src={filter.iconURL} width="80" alt={filter.label} />
             <br />
@@ -38,6 +38,6 @@
     </tr>
   </table>
   <center>
-    <button on:click={() => (show = false)}>Confirm</button>
+    <button onclick={() => (show = false)}>Confirm</button>
   </center>
 </Modal>

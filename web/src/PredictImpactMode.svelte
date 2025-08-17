@@ -145,7 +145,7 @@
           type="radio"
           value="fast"
           bind:group={fastSampleRadio}
-          on:change={updateFastSample}
+          onchange={updateFastSample}
         />
         Calculate quickly
       </label>
@@ -154,7 +154,7 @@
           type="radio"
           value="accurate"
           bind:group={fastSampleRadio}
-          on:change={updateFastSample}
+          onchange={updateFastSample}
         />
         Calculate more accurately
       </label>
@@ -251,7 +251,7 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        on:click={(e) => pickRoad(e.detail.features[0])}
+        onclick={(e) => pickRoad(e.features[0])}
       >
         <Popup openOn="hover" let:props>
           <p>

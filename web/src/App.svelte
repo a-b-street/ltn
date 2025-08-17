@@ -154,14 +154,14 @@
       class="pico"
       style="display: flex; align-items: center; gap: 8px;"
     >
-      <button class="outline" on:click={() => (showAbout = true)}>
+      <button class="outline" onclick={() => (showAbout = true)}>
         <img src={logo} style="height: 32px;" alt="A/B Street logo" />
       </button>
       <span bind:this={topDiv} style="width: 100%"></span>
       <button
         class="icon-btn"
         title="User guide"
-        on:click={() => window.open("user_guide.html", "_blank")}
+        onclick={() => window.open("user_guide.html", "_blank")}
       >
         <CircleHelp color="black" />
       </button>
@@ -177,9 +177,8 @@
           bind:map
           bounds={initialBounds}
           maxZoom={19}
-          on:error={(e) => {
-            // @ts-expect-error ErrorEvent isn't exported
-            console.log(e.detail.error);
+          onerror={(e) => {
+            console.log(e.error);
           }}
           images={[
             {
@@ -244,7 +243,7 @@
               <ControlGroup>
                 <ControlButton
                   title="Zoom to fit study area"
-                  on:click={() => zoomToFit(true)}
+                  onclick={() => zoomToFit(true)}
                 >
                   <div class="ltn-map-btn zoom-to-fit-btn">
                     <House />

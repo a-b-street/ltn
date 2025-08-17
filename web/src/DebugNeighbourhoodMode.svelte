@@ -38,8 +38,8 @@
     movementIdx: number;
   };
 
-  function pickIntersection(e: CustomEvent<LayerClickInfo>) {
-    let feature = e.detail.features[0] as IntersectionFeature;
+  function pickIntersection(e: LayerClickInfo) {
+    let feature = e.features[0] as IntersectionFeature;
     let movements = $backend!.getMovements(feature.properties.intersection_id);
     let movementIdx = 0;
     intersection = { feature, movements, movementIdx };
@@ -74,7 +74,7 @@
     >
       <h4>Intersections</h4>
       {#if intersection}
-        <button class="close-btn" on:click={() => (intersection = null)}>
+        <button class="close-btn" onclick={() => (intersection = null)}>
           Ⓧ
         </button>
       {/if}
@@ -151,7 +151,7 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        on:click={pickIntersection}
+        onclick={pickIntersection}
       >
         <Popup openOn="hover" let:props>
           <PropertiesTable properties={props} />

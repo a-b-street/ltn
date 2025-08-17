@@ -14,12 +14,8 @@
 
   export let modalFilterGj: FeatureCollection | null = null;
   export let turnRestrictionGj: FeatureCollection | null = null;
-  export let onClickModalFilter: (
-    e: CustomEvent<LayerClickInfo>,
-  ) => void = () => {};
-  export let onClickTurnRestriction: (
-    e: CustomEvent<LayerClickInfo>,
-  ) => void = () => {};
+  export let onClickModalFilter: (e: LayerClickInfo) => void = () => {};
+  export let onClickTurnRestriction: (e: LayerClickInfo) => void = () => {};
 
   export let interactive: boolean;
   export let show = true;
@@ -53,7 +49,7 @@
     paint={{
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
-    on:click={onClickModalFilter}
+    onclick={onClickModalFilter}
   >
     <slot name="modal-filter" />
   </SymbolLayer>
