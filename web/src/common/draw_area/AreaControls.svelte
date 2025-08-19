@@ -10,6 +10,7 @@
     MapEvents,
     Marker,
     Popup,
+    type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../";
@@ -109,7 +110,7 @@
     waypoints = waypoints;
   }
 
-  function onMouseMove(e: MapMouseEvent) {
+  function onMouseMove(e: MapMoveEvent) {
     cursor = {
       point: e.lngLat.toArray(),
       snapped: snapMode == "snap",
