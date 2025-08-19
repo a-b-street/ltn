@@ -316,8 +316,7 @@
     $mutationCounter++;
   }
 
-  function paintedModalFiltersLine(e: CustomEvent<Feature<LineString> | null>) {
-    let f = e.detail;
+  function paintedModalFiltersLine(f: Feature<LineString> | null) {
     if (f) {
       $backend!.addManyModalFilters(f, $currentFilterType);
       $mutationCounter++;
@@ -766,7 +765,7 @@
     </ModalFilterLayer>
 
     {#if action.kind == "filter" && action.freehand}
-      <FreehandLine map={$map!} on:done={paintedModalFiltersLine} />
+      <FreehandLine map={$map!} onDone={paintedModalFiltersLine} />
     {:else if action.kind == "main-roads" && action.tool != "toggle"}
       <SnapRouteSelector
         map={$map!}

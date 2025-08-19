@@ -2,17 +2,14 @@
   import turfDistance from "@turf/distance";
   import type { Feature, LineString } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { layerId } from "../common";
 
   export let map: Map;
-  let line: Feature<LineString> | null = null;
+  export let onDone: (f: Feature<LineString> | null) => void;
 
-  const dispatch = createEventDispatcher<{
-    done: Feature<LineString> | null;
-    progress: Feature<LineString>;
-  }>();
+  let line: Feature<LineString> | null = null;
 
   map.on("dragstart", onDragStart);
   map.on("mousemove", onMouseMove);
@@ -52,17 +49,14 @@
 
       line.geometry.coordinates.push(next);
       line = line;
-      if (line.geometry.coordinates.length % 10 == 0) {
-        dispatch("progress", line);
-      }
     }
   }
 
   function onMouseUp() {
     if (!line || line.geometry.coordinates.length == 0) {
-      dispatch("done", null);
+      onDone(null);
     } else {
-      dispatch("done", line);
+      onDone(line);
     }
     line = null;
     map.dragPan.enable();
