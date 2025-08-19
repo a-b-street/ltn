@@ -8,7 +8,7 @@
   // will get the raw GJ data by svelte context if needed. If input isn't
   // specified, the backend will be called.
   export let input: RenderNeighbourhoodOutput | null = null;
-  export let children: Snippet | undefined = undefined;
+  export let children: Snippet;
 
   // TODO Might be more clear for edit/NeighbourhoodMode to just setContext itself
   $: data = input || $backend!.renderNeighbourhood();
@@ -16,5 +16,5 @@
 </script>
 
 <GeoJSON {data} generateId>
-  {@render children?.()}
+  {@render children()}
 </GeoJSON>

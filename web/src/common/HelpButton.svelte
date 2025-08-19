@@ -7,7 +7,7 @@
 
   let show = false;
   export let color = "black";
-  export let children: Snippet | undefined = undefined;
+  export let children: Snippet;
 </script>
 
 <button
@@ -20,7 +20,7 @@
 
 <Modal bind:show>
   <h2>Help</h2>
-  {@render children?.()}
+  {@render children()}
 </Modal>
 
 <style>

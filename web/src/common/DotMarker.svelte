@@ -5,16 +5,16 @@
 
   export let lngLat: LngLatLike;
   export let draggable = false;
-  export let children: Snippet | undefined = undefined;
+  export let children: Snippet;
 </script>
 
 {#if draggable}
   <Marker bind:lngLat draggable>
-    <span class="dot">{@render children?.()}</span>
+    <span class="dot">{@render children()}</span>
   </Marker>
 {:else}
   <Marker {lngLat}>
-    <span class="dot">{@render children?.()}</span>
+    <span class="dot">{@render children()}</span>
   </Marker>
 {/if}
 
