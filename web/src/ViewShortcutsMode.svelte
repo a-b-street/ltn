@@ -36,6 +36,10 @@
   let state: State = { state: "neutral" };
 
   function choseRoad(roadGj: Feature, _: LngLat) {
+    if (state.state != "neutral") {
+      return;
+    }
+
     let gj = $backend!.getShortcutsCrossingRoad(roadGj.properties!.id);
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");
@@ -107,8 +111,11 @@
       <CellLayer />
       <OneWayLayer />
 
-      {#if state.state == "neutral"}
-        <NeighbourhoodRoadLayer onClickLine={choseRoad}>
+      <NeighbourhoodRoadLayer
+        onClickLine={choseRoad}
+        interactive={state.state == "neutral"}
+      >
+        {#if state.state == "neutral"}
           {#snippet linePopup()}
             <Popup openOn="hover">
               {#snippet children({ data })}
@@ -126,10 +133,8 @@
               {/snippet}
             </Popup>
           {/snippet}
-        </NeighbourhoodRoadLayer>
-      {:else if state.state == "chose-road"}
-        <NeighbourhoodRoadLayer interactive={false} />
-      {/if}
+        {/if}
+      </NeighbourhoodRoadLayer>
     </RenderNeighbourhood>
 
     {#if state.state == "chose-road"}
