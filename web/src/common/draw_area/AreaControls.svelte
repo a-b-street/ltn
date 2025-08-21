@@ -112,6 +112,7 @@
 
   function onMouseMove(e: MapMoveEvent) {
     cursor = {
+      // @ts-expect-error TODO fix upstream types
       point: e.lngLat.toArray(),
       snapped: snapMode == "snap",
     };
