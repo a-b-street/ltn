@@ -18,10 +18,14 @@
   <CircleHelp {color} />
 </button>
 
-<Modal bind:show>
-  <h2>Help</h2>
-  {@render children()}
-</Modal>
+<div class="pico">
+  <Modal bind:show>
+    <article style="max-height: 80vh; max-width: 80vw; overflow: auto">
+      <h2>Help</h2>
+      {@render children()}
+    </article>
+  </Modal>
+</div>
 
 <style>
   button.help {

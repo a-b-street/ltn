@@ -16,13 +16,15 @@
   {/snippet}
 
   {#snippet help()}
-    These are all <a
-      href="https://wiki.openstreetmap.org/wiki/Tag:railway%3Dstation"
-      target="_blank"
-    >
-      railway stations
-    </a>
-    according to OpenStreetMap.
+    <p>
+      These are all <a
+        href="https://wiki.openstreetmap.org/wiki/Tag:railway%3Dstation"
+        target="_blank"
+      >
+        railway stations
+      </a>
+      according to OpenStreetMap.
+    </p>
   {/snippet}
 </ContextLayerButton>
 

@@ -133,9 +133,11 @@
 
 <ContextLayerButton bind:show label="Estimated cycling demand">
   {#snippet help()}
-    <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
-      Data from NPT
-    </a>
+    <p>
+      <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
+        Data from NPT
+      </a>
+    </p>
   {/snippet}
 
   {#snippet legend()}

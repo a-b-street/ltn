@@ -122,15 +122,17 @@
 </svelte:head>
 
 <div class="pico">
-  <Modal bind:show={showAbout}>
-    {#if appFocus == "cnt"}
-      <h1>The Connected Neighbourhoods Tool</h1>
-    {:else}
-      <h1>The Low-Traffic Neighbourhood (LTN) tool, v2</h1>
-    {/if}
+  <Modal bind:show={showAbout}
+    ><article style="max-height: 80vh; max-width: 80vw; overflow: auto">
+      {#if appFocus == "cnt"}
+        <h1>The Connected Neighbourhoods Tool</h1>
+      {:else}
+        <h1>The Low-Traffic Neighbourhood (LTN) tool, v2</h1>
+      {/if}
 
-    <About />
-  </Modal>
+      <About />
+    </article></Modal
+  >
 </div>
 
 <div class="app-focus-{$appFocusStore}">

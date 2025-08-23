@@ -44,12 +44,14 @@
   {/snippet}
 
   {#snippet help()}
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
+    <p>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </p>
   {/snippet}
 </ContextLayerButton>
 
@@ -63,12 +65,14 @@
   {/snippet}
 
   {#snippet help()}
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
+    <p>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </p>
   {/snippet}
 </ContextLayerButton>
 
@@ -85,12 +89,14 @@
   {/snippet}
 
   {#snippet help()}
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
+    <p>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </p>
   {/snippet}
 </ContextLayerButton>
 
