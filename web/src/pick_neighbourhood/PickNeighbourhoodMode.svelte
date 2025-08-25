@@ -15,7 +15,6 @@
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { run } from "svelte/legacy";
   import { layerId, Link, ModeLink, pageTitle, Style } from "../common";
   import { pickNeighbourhoodName } from "../common/pick_names";
   import { ModalFilterLayer } from "../layers";
@@ -49,7 +48,7 @@
 
   // If a user loads an empty project or deletes all neighbourhoods, don't show
   // them an empty pick screen
-  run(() => {
+  $effect(() => {
     if (neighbourhoods.features.length == 0) {
       $mode = { mode: "add-neighbourhood" };
     }

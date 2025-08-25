@@ -13,7 +13,6 @@
     type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
-  import { run } from "svelte/legacy";
   import { layerId } from "../";
   import { routeTool, type Waypoint } from "./stores";
 
@@ -60,17 +59,14 @@
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = $state([]);
+  let extraNodes: ExtraNode[] = $derived.by(() =>
+    getExtraNodes($routeTool, waypoints, draggingExtraNode),
+  );
 
   let cursor: Waypoint | null = $state(null);
   let hoveringOnMarker = $state(false);
   let draggingMarker = $state(false);
   let draggingExtraNode = $state(false);
-
-  function updateCursor(waypoints: Waypoint[]) {
-    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
-    map.getCanvas().style.cursor = cursor;
-  }
 
   function undo() {
     let state = undoStates.pop();
@@ -143,17 +139,17 @@
     return emptyGeojson();
   }
 
-  function updateExtraNodes(
+  function getExtraNodes(
     routeTool: RouteTool | null,
     waypoints: Waypoint[],
     draggingExtraNode: boolean,
-  ) {
+  ): ExtraNode[] {
     if (draggingExtraNode) {
-      return;
+      // TODO Does this work?
+      return extraNodes;
     }
     if (!routeTool || waypoints.length < 3) {
-      extraNodes = [];
-      return;
+      return [];
     }
 
     let nodes: ExtraNode[] = [];
@@ -172,7 +168,7 @@
       insertIdx++;
     }
 
-    extraNodes = nodes;
+    return nodes;
   }
 
   function addNode(node: ExtraNode) {
@@ -201,7 +197,7 @@
     captureUndoState();
     draggingMarker = true;
   }
-  run(() => {
+  $effect(() => {
     try {
       if ($routeTool) {
         drawnShapeOut = calculateArea($routeTool, waypoints);
@@ -211,9 +207,6 @@
       drawnShapeOut = undefined;
     }
   });
-  run(() => {
-    updateExtraNodes($routeTool, waypoints, draggingExtraNode);
-  });
   let previewGj = $derived(
     getPreview(
       $routeTool,
@@ -222,8 +215,9 @@
       hoveringOnMarker || draggingMarker,
     ),
   );
-  run(() => {
-    updateCursor(waypoints);
+  $effect(() => {
+    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
+    map.getCanvas().style.cursor = cursor;
   });
 </script>
 

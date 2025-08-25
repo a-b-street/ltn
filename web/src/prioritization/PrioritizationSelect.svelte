@@ -1,6 +1,5 @@
 <script lang="ts">
   import { SequentialLegend } from "svelte-utils";
-  import { run } from "svelte/legacy";
   import {
     areaColorScale,
     areaLimits,
@@ -51,7 +50,7 @@
   } else {
     selectedPrioritization = "none";
   }
-  run(() => {
+  $effect(() => {
     const url = new URL(window.location.href);
     if (selectedPrioritization == "none") {
       url.searchParams.delete("prioritisationMetric");

@@ -3,17 +3,12 @@
   import type { FeatureCollection } from "geojson";
   import { onDestroy } from "svelte";
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
-  import { run } from "svelte/legacy";
   import { layerId } from "./common";
   import type { AllShortcuts } from "./wasm";
 
-  interface Props {
-    paths: AllShortcuts;
-  }
+  let { paths }: { paths: AllShortcuts } = $props();
 
-  let { paths }: Props = $props();
-
-  let totalDirectness = $state(sumWeights());
+  let totalDirectness = $derived.by(sumWeights);
 
   let numDots = 50;
   let redrawMs = 100;
@@ -24,8 +19,8 @@
     distance: number;
   }
 
-  let dots = $state(makeDots());
-  let gj = $state(redraw());
+  let dots = $derived.by(makeDots);
+  let gj = $derived.by(redraw);
 
   let intervalId = setInterval(animate, redrawMs);
   onDestroy(() => clearInterval(intervalId));
@@ -81,14 +76,7 @@
         dots[idx] = startDot();
       }
     }
-    gj = redraw();
   }
-  run(() => {
-    if (paths) {
-      totalDirectness = sumWeights();
-      dots = makeDots();
-    }
-  });
 </script>
 
 <GeoJSON data={gj}>

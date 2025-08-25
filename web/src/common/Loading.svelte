@@ -1,16 +1,13 @@
 <script lang="ts">
-  import { run } from "svelte/legacy";
-
   interface Props {
     loading: string;
     progress?: number | null;
   }
-
   let { loading, progress = null }: Props = $props();
 
   let startTime: number | undefined = $state();
   let taskName: string | undefined = $state();
-  run(() => {
+  $effect(() => {
     if (loading && !startTime) {
       // Start timing when loading begins
       startTime = Date.now();

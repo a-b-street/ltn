@@ -22,7 +22,6 @@
   import { SequentialLegend } from "svelte-utils";
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
-  import { run } from "svelte/legacy";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
   import paintbrushCursorURL from "../../assets/cursors/paintbrush.svg?url";
   import noLeftUrl from "../../assets/filters/no_left_turn.png?url";
@@ -320,14 +319,14 @@
     u_left_to_right: noUTurnLtrUrl,
     u_right_to_left: noUTurnRtlUrl,
   };
-  run(() => {
+  $effect(() => {
     if (action.kind == "oneway" || action.kind == "main-roads") {
       $map!.doubleClickZoom.disable();
     } else {
       $map!.doubleClickZoom.enable();
     }
   });
-  run(() => {
+  $effect(() => {
     if (action.kind == "filter" && action.freehand) {
       $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
     } else if (
@@ -339,10 +338,10 @@
       $map!.getCanvas().style.cursor = "";
     }
   });
-  run(() => {
+  $effect(() => {
     rerender($mutationCounter);
   });
-  run(() => {
+  $effect(() => {
     recalculateShortcuts($mutationCounter, $animateShortcuts);
   });
   let numDisconnectedCells = $derived(

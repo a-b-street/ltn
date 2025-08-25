@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { run } from "svelte/legacy";
   import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import favicon from "../assets/favicon.ico?url";
@@ -101,28 +100,23 @@
     initialBounds = [-8.943, 54.631, -0.901, 59.489];
   }
 
-  let style: string | null = $state(null);
-  async function updateStyle(basemap: string) {
-    // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
-    // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
-    if (basemap == "streets-v2") {
-      style = streetsMapStyleUrl;
-    } else {
-      style = `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
-    }
-  }
+  // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
+  // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
+  let style: string | null = $derived(
+    $maptilerBasemap == "streets-v2"
+      ? streetsMapStyleUrl
+      : `https://api.maptiler.com/maps/${$maptilerBasemap}/style.json?key=${maptilerApiKey}`,
+  );
 
   let showAbout = $state(false);
-  run(() => {
+
+  $effect(() => {
     if (map) {
       map.keyboard.disableRotation();
       map.dragRotate.disable();
       map.touchZoomRotate.disableRotation();
       mapStore.set(map);
     }
-  });
-  run(() => {
-    updateStyle($maptilerBasemap);
   });
 </script>
 

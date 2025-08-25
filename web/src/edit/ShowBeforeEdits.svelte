@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { Popup } from "svelte-maplibre";
-  import { run } from "svelte/legacy";
   import {
     CellLayer,
     ModalFilterLayer,
@@ -18,7 +17,7 @@
   let modalFilterGj: FeatureCollection | null = $state(null);
   let turnRestrictionGj: FeatureCollection | null = $state(null);
 
-  run(() => {
+  $effect(() => {
     if ($showBeforeEdits && neighbourhoodGj == null) {
       neighbourhoodGj = $backend!.renderNeighbourhoodBeforeEdits();
       modalFilterGj = $backend!.renderModalFiltersBeforeEdits();

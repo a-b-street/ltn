@@ -4,7 +4,6 @@
   import { CircleHelp } from "lucide-svelte";
   import type { Snippet } from "svelte";
   import { Modal } from "svelte-utils";
-  import { stopPropagation } from "svelte/legacy";
 
   let show = $state(false);
   interface Props {
@@ -13,13 +12,14 @@
   }
 
   let { color = "black", children }: Props = $props();
+
+  function onclick(e: Event) {
+    e.stopPropagation();
+    show = true;
+  }
 </script>
 
-<button
-  class="icon-btn help"
-  title="Help"
-  onclick={stopPropagation(() => (show = true))}
->
+<button class="icon-btn help" title="Help" {onclick}>
   <CircleHelp {color} />
 </button>
 

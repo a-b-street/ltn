@@ -12,7 +12,6 @@
     type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
-  import { run } from "svelte/legacy";
   import { layerId } from "../common";
   import { routeTool, type Waypoint } from "../common/draw_area/stores";
 
@@ -38,17 +37,14 @@
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = $state([]);
+  let extraNodes: ExtraNode[] = $derived.by(() =>
+    getExtraNodes($routeTool, waypoints, draggingExtraNode),
+  );
 
   let cursor: Waypoint | null = $state(null);
   let hoveringOnMarker = $state(false);
   let draggingMarker = $state(false);
   let draggingExtraNode = $state(false);
-
-  function updateCursor(waypoints: Waypoint[]) {
-    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
-    map.getCanvas().style.cursor = cursor;
-  }
 
   function onMapClick(e: MapMouseEvent) {
     waypoints.push({
@@ -106,17 +102,16 @@
     return emptyGeojson();
   }
 
-  function updateExtraNodes(
+  function getExtraNodes(
     routeTool: RouteTool | null,
     waypoints: Waypoint[],
     draggingExtraNode: boolean,
-  ) {
+  ): ExtraNode[] {
     if (draggingExtraNode) {
-      return;
+      return extraNodes;
     }
     if (!routeTool) {
-      extraNodes = [];
-      return;
+      return [];
     }
 
     let nodes: ExtraNode[] = [];
@@ -132,7 +127,7 @@
       insertIdx++;
     }
 
-    extraNodes = nodes;
+    return nodes;
   }
 
   function addNode(node: ExtraNode) {
@@ -182,9 +177,6 @@
       cancel();
     }
   }
-  run(() => {
-    updateExtraNodes($routeTool, waypoints, draggingExtraNode);
-  });
   let previewGj = $derived(
     getPreview(
       $routeTool,
@@ -193,8 +185,9 @@
       hoveringOnMarker || draggingMarker,
     ),
   );
-  run(() => {
-    updateCursor(waypoints);
+  $effect(() => {
+    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
+    map.getCanvas().style.cursor = cursor;
   });
 </script>
 
