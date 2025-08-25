@@ -13,19 +13,23 @@
   import { mode, projectStorage } from "../stores";
   import { loadProject } from "./loader";
 
-  export let boundariesUrl: string;
+  interface Props {
+    boundariesUrl: string;
+  }
+
+  let { boundariesUrl }: Props = $props();
 
   // This component works for both CNT and England, because the boundaries for
   // both fit this format. We could consider generalizing in the future.
   let gj: FeatureCollection<
     Polygon | MultiPolygon,
     { kind: "LAD"; name: string }
-  > = {
+  > = $state({
     type: "FeatureCollection" as const,
     features: [],
-  };
-  let ladNames: string[] = [];
-  let ladChoice = "";
+  });
+  let ladNames: string[] = $state([]);
+  let ladChoice = $state("");
 
   onMount(async () => {
     let resp = await fetch(boundariesUrl);

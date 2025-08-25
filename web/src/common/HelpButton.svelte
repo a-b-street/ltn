@@ -1,19 +1,25 @@
 <script lang="ts">
+  import { stopPropagation } from 'svelte/legacy';
+
   // This launches a modal when clicked. The user should put the modal contents
   // as the child snippet beneath this component.
   import { CircleHelp } from "lucide-svelte";
   import type { Snippet } from "svelte";
   import { Modal } from "svelte-utils";
 
-  let show = false;
-  export let color = "black";
-  export let children: Snippet;
+  let show = $state(false);
+  interface Props {
+    color?: string;
+    children: Snippet;
+  }
+
+  let { color = "black", children }: Props = $props();
 </script>
 
 <button
   class="icon-btn help"
   title="Help"
-  on:click|stopPropagation={() => (show = true)}
+  onclick={stopPropagation(() => (show = true))}
 >
   <CircleHelp {color} />
 </button>

@@ -1,10 +1,16 @@
 <script lang="ts">
-  export let loading: string;
-  export let progress: number | null = null;
+  import { run } from 'svelte/legacy';
 
-  let startTime: number | undefined = undefined;
-  let taskName: string | undefined = undefined;
-  $: {
+  interface Props {
+    loading: string;
+    progress?: number | null;
+  }
+
+  let { loading, progress = null }: Props = $props();
+
+  let startTime: number | undefined = $state(undefined);
+  let taskName: string | undefined = $state(undefined);
+  run(() => {
     if (loading && !startTime) {
       // Start timing when loading begins
       startTime = Date.now();
@@ -15,7 +21,7 @@
       console.log(`Loading "${taskName}" took ${duration}ms`);
       startTime = undefined;
     }
-  }
+  });
 </script>
 
 {#if loading}

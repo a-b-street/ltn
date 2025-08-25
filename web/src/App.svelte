@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import favicon from "../assets/favicon.ico?url";
@@ -65,10 +67,14 @@
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
   import "tippy.js/dist/tippy.css";
 
-  export let appFocus: AppFocus;
+  interface Props {
+    appFocus: AppFocus;
+  }
+
+  let { appFocus }: Props = $props();
   appFocusStore.set(appFocus);
 
-  let wasmReady = false;
+  let wasmReady = $state(false);
   onMount(async () => {
     await backendPkg.default();
     await routeSnapperPkg.default();
@@ -84,26 +90,19 @@
     } catch (err) {}
   });
 
-  let map: Map | undefined = undefined;
-  $: if (map) {
-    map.keyboard.disableRotation();
-    map.dragRotate.disable();
-    map.touchZoomRotate.disableRotation();
-    mapStore.set(map);
-  }
-  let loaded = false;
+  let map: Map | undefined = $state(undefined);
+  let loaded = $state(false);
 
   function zoomToFit(animate: boolean) {
     $mapStore!.fitBounds($backend!.getBounds(), { animate });
   }
 
-  let initialBounds: LngLatBoundsLike | undefined = undefined;
+  let initialBounds: LngLatBoundsLike | undefined = $state(undefined);
   if (appFocus == "cnt") {
     initialBounds = [-8.943, 54.631, -0.901, 59.489];
   }
 
-  let style: string | null = null;
-  $: updateStyle($maptilerBasemap);
+  let style: string | null = $state(null);
   async function updateStyle(basemap: string) {
     // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
     // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
@@ -114,7 +113,18 @@
     }
   }
 
-  let showAbout = false;
+  let showAbout = $state(false);
+  run(() => {
+    if (map) {
+      map.keyboard.disableRotation();
+      map.dragRotate.disable();
+      map.touchZoomRotate.disableRotation();
+      mapStore.set(map);
+    }
+  });
+  run(() => {
+    updateStyle($maptilerBasemap);
+  });
 </script>
 
 <svelte:head>

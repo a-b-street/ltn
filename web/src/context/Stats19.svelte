@@ -12,13 +12,13 @@
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
-  let show = false;
-  let filters = {
+  let show = $state(false);
+  let filters = $state({
     pedestrians: true,
     cyclists: true,
     minYear: 2017,
     maxYear: 2023,
-  };
+  });
 
   function makeFilter(_: any): ExpressionSpecification {
     let includeTypes: ExpressionSpecification = ["any"];

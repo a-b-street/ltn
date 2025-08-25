@@ -29,14 +29,18 @@
     routePtB,
   } from "./stores";
 
-  export let prevMode:
+  interface Props {
+    prevMode: 
     | "pick-neighbourhood"
     | "neighbourhood"
     | "impact-one-destination";
+  }
 
-  $: gj = $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty);
-  $: routeBefore = gj.features.find((f) => f.properties.kind == "before");
-  $: routeAfter = gj.features.find((f) => f.properties.kind == "after");
+  let { prevMode }: Props = $props();
+
+  let gj = $derived($backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty));
+  let routeBefore = $derived(gj.features.find((f) => f.properties.kind == "before"));
+  let routeAfter = $derived(gj.features.find((f) => f.properties.kind == "after"));
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.

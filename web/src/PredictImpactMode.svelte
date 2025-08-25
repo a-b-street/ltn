@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
@@ -22,19 +24,22 @@
   } from "./stores";
   import type { Impact } from "./wasm";
 
-  export let prevMode: "pick-neighbourhood" | "neighbourhood";
+  interface Props {
+    prevMode: "pick-neighbourhood" | "neighbourhood";
+  }
+
+  let { prevMode }: Props = $props();
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
   let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
 
-  let loading = "";
-  let impactGj: Impact = {
+  let loading = $state("");
+  let impactGj: Impact = $state({
     type: "FeatureCollection" as const,
     features: [],
     max_count: 1,
-  };
-  $: recalculate($fastSample);
+  });
   let neighbourhoods = $backend!.toSavefile();
 
   let minRoadWidth = 3;
@@ -51,10 +56,13 @@
     loading = "";
   }
 
-  let fastSampleRadio = $fastSample ? "fast" : "accurate";
+  let fastSampleRadio = $state($fastSample ? "fast" : "accurate");
   function updateFastSample() {
     $fastSample = fastSampleRadio == "fast";
   }
+  run(() => {
+    recalculate($fastSample);
+  });
 </script>
 
 <Loading {loading} />

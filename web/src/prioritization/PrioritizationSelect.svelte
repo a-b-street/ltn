@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { SequentialLegend } from "svelte-utils";
   import {
     areaColorScale,
@@ -17,7 +19,11 @@
   import { appFocus, metricBuckets } from "../stores";
   import type { Prioritization } from "./index";
 
-  export let selectedPrioritization: Prioritization;
+  interface Props {
+    selectedPrioritization: Prioritization;
+  }
+
+  let { selectedPrioritization = $bindable() }: Props = $props();
 
   function setSelectedPrioritizationFromURL() {
     let currentURLParam = new URL(window.location.href).searchParams.get(
@@ -46,7 +52,7 @@
   } else {
     selectedPrioritization = "none";
   }
-  $: {
+  run(() => {
     const url = new URL(window.location.href);
     if (selectedPrioritization == "none") {
       url.searchParams.delete("prioritisationMetric");
@@ -54,7 +60,7 @@
       url.searchParams.set("prioritisationMetric", selectedPrioritization);
     }
     history.replaceState({}, "", url);
-  }
+  });
 </script>
 
 <div style="display: flex; gap: 16px; align-items: center; width: fit-content;">

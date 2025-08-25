@@ -19,7 +19,7 @@
   import { backend, mode } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
 
-  let gj = emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>;
+  let gj = $state(emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>);
   try {
     gj = $backend!.getDemandModel();
   } catch (err) {
@@ -27,14 +27,10 @@
     $mode = { mode: "pick-neighbourhood" };
   }
 
-  let showTo = false;
+  let showTo = $state(false);
 
-  let hovered: (Feature & MapGeoJSONFeature) | undefined = undefined;
-  $: hoveredId = hovered ? (hovered.id as number) : null;
-  // MapLibre doesn't preserve the arrays in properties, so use the original version
-  $: current = hoveredId != null ? gj.features[hoveredId] : null;
+  let hovered: (Feature & MapGeoJSONFeature) | undefined = $state(undefined);
 
-  $: [limits, fillColor] = getLimitsAndColor(hoveredId, showTo);
 
   function getLimitsAndColor(
     hoveredId: number | null,
@@ -74,6 +70,10 @@
       Math.round((max / (n - 1)) * i),
     );
   }
+  let hoveredId = $derived(hovered ? (hovered.id as number) : null);
+  // MapLibre doesn't preserve the arrays in properties, so use the original version
+  let current = $derived(hoveredId != null ? gj.features[hoveredId] : null);
+  let [limits, fillColor] = $derived(getLimitsAndColor(hoveredId, showTo));
 </script>
 
 <SplitComponent>

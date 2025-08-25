@@ -35,13 +35,9 @@
   } from "./stores";
   import type { CompareRoute } from "./wasm";
 
-  $: perRoadGj = $backend!.impactToOneDestination($oneDestination);
 
-  let hovered: (Feature & MapGeoJSONFeature) | undefined = undefined;
+  let hovered: (Feature & MapGeoJSONFeature) | undefined = $state(undefined);
 
-  $: routeGj = previewRoutes(hovered);
-  $: routeBefore = routeGj.features.find((f) => f.properties.kind == "before");
-  $: routeAfter = routeGj.features.find((f) => f.properties.kind == "after");
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.
@@ -73,6 +69,10 @@
     // Move the first marker, for convenience
     $oneDestination = e.lngLat;
   }
+  let perRoadGj = $derived($backend!.impactToOneDestination($oneDestination));
+  let routeGj = $derived(previewRoutes(hovered));
+  let routeBefore = $derived(routeGj.features.find((f) => f.properties.kind == "before"));
+  let routeAfter = $derived(routeGj.features.find((f) => f.properties.kind == "after"));
 </script>
 
 <MapEvents oncontextmenu={onRightClick} />

@@ -31,7 +31,7 @@
   import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
   import { backend, mode } from "./stores";
 
-  let intersection: DebugIntersection | null = null;
+  let intersection: DebugIntersection | null = $state(null);
   type DebugIntersection = {
     feature: IntersectionFeature;
     movements: FeatureCollection;

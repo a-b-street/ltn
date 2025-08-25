@@ -4,7 +4,7 @@
   import { database, mode, type AppFocus } from "../stores";
   import { loadProject } from "./loader";
 
-  let fileInput: HTMLInputElement;
+  let fileInput: HTMLInputElement = $state();
 
   async function loadFile(e: Event) {
     let filename = fileInput.files![0].name;

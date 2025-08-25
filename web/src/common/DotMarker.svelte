@@ -3,9 +3,13 @@
   import type { Snippet } from "svelte";
   import { Marker } from "svelte-maplibre";
 
-  export let lngLat: LngLatLike;
-  export let draggable = false;
-  export let children: Snippet;
+  interface Props {
+    lngLat: LngLatLike;
+    draggable?: boolean;
+    children: Snippet;
+  }
+
+  let { lngLat = $bindable(), draggable = false, children }: Props = $props();
 </script>
 
 {#if draggable}

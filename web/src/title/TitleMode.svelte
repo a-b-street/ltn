@@ -27,7 +27,11 @@
   import { loadingMessage, loadingProgress, loadProject } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
-  export let wasmReady: boolean;
+  interface Props {
+    wasmReady: boolean;
+  }
+
+  let { wasmReady }: Props = $props();
 
   // When other modes reset here, they can't clear state without a race condition
   {
@@ -64,7 +68,7 @@
     }
   }
 
-  let studyAreas = $projectStorage.studyAreaProjects();
+  let studyAreas = $state($projectStorage.studyAreaProjects());
 
   function loadProjectFromUrlParam(projectIDParam: string) {
     let projectID = projectIDParam as ProjectID;

@@ -6,10 +6,14 @@
   import { GeoJSON, LineLayer } from "svelte-maplibre";
   import { layerId } from "../common";
 
-  export let map: Map;
-  export let onDone: (f: Feature<LineString> | null) => void;
+  interface Props {
+    map: Map;
+    onDone: (f: Feature<LineString> | null) => void;
+  }
 
-  let line: Feature<LineString> | null = null;
+  let { map, onDone }: Props = $props();
+
+  let line: Feature<LineString> | null = $state(null);
 
   map.on("dragstart", onDragStart);
   map.on("mousemove", onMouseMove);

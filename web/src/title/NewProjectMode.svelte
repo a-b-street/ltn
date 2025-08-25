@@ -22,10 +22,10 @@
     loadProject,
   } from "./loader";
 
-  let newProjectName = "";
-  let example: string | null = null;
-  let exampleAreas: [string, [string, string][]][] = [];
-  let loading = "";
+  let newProjectName = $state("");
+  let example: string | null = $state(null);
+  let exampleAreas: [string, [string, string][]][] = $state([]);
+  let loading = $state("");
 
   onMount(async () => {
     let resp = await safeFetch(assetUrl("severance_pbfs/areas.json"));

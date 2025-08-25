@@ -10,9 +10,9 @@
   // related to the Cycling By Design guidance
   // (https://www.transport.gov.scot/media/50323/cycling-by-design-update-2019-final-document-15-september-2021-1.pdf).
 
-  let showTraffic = false;
-  let showLos = false;
-  let showExistingInfra = false;
+  let showTraffic = $state(false);
+  let showLos = $state(false);
+  let showExistingInfra = $state(false);
 
   let traffic = {
     colorScale: ["#27918d", "#ffaa33", "#440154"],

@@ -3,10 +3,14 @@
   import { ModalFilterType } from "../common/ModalFilterType";
   import { currentFilterType } from "../stores";
 
-  export let show: boolean;
-  $: currentFilter = ModalFilterType.allTypes.find(
+  interface Props {
+    show: boolean;
+  }
+
+  let { show = $bindable() }: Props = $props();
+  let currentFilter = $derived(ModalFilterType.allTypes.find(
     (x) => x.filterType == $currentFilterType,
-  )!;
+  )!);
 </script>
 
 <Modal bind:show

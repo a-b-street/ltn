@@ -4,7 +4,7 @@
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
-  let show = false;
+  let show = $state(false);
 </script>
 
 <ContextLayerButton bind:show label="Railway stations">

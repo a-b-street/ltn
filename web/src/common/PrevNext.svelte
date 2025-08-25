@@ -3,8 +3,12 @@
   import { initTooltips } from ".";
   import { map } from "../stores";
 
-  export let list: any[];
-  export let idx = 0;
+  interface Props {
+    list: any[];
+    idx?: number;
+  }
+
+  let { list, idx = $bindable(0) }: Props = $props();
 
   onMount(() => {
     $map?.keyboard.disable();

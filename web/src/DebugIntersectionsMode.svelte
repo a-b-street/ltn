@@ -12,9 +12,9 @@
   import { layerId, ModeLink, pageTitle, PrevNext } from "./common";
   import { backend, mode } from "./stores";
 
-  let currentOsm: string | null = null;
-  let movements = emptyGeojson();
-  let idx = 0;
+  let currentOsm: string | null = $state(null);
+  let movements = $state(emptyGeojson());
+  let idx = $state(0);
 
   function pickIntersection(e: LayerClickInfo) {
     currentOsm = e.features[0].properties!.osm;

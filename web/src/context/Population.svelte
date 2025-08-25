@@ -19,9 +19,9 @@
   } from "../common/colors";
   import { assetUrl, metricBuckets } from "../stores";
 
-  let showSIMD = false;
-  let showPopulationDensity = false;
-  let showCarOwnership = false;
+  let showSIMD = $state(false);
+  let showPopulationDensity = $state(false);
+  let showCarOwnership = $state(false);
 </script>
 
 <ContextLayerButton

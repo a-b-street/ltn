@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { FeatureCollection } from "geojson";
   import { Popup } from "svelte-maplibre";
   import {
@@ -13,15 +15,17 @@
 
   let prefix = "before-edits-";
 
-  let neighbourhoodGj: RenderNeighbourhoodOutput | null = null;
-  let modalFilterGj: FeatureCollection | null = null;
-  let turnRestrictionGj: FeatureCollection | null = null;
+  let neighbourhoodGj: RenderNeighbourhoodOutput | null = $state(null);
+  let modalFilterGj: FeatureCollection | null = $state(null);
+  let turnRestrictionGj: FeatureCollection | null = $state(null);
 
-  $: if ($showBeforeEdits && neighbourhoodGj == null) {
-    neighbourhoodGj = $backend!.renderNeighbourhoodBeforeEdits();
-    modalFilterGj = $backend!.renderModalFiltersBeforeEdits();
-    turnRestrictionGj = $backend!.renderTurnRestrictionsBeforeEdits();
-  }
+  run(() => {
+    if ($showBeforeEdits && neighbourhoodGj == null) {
+      neighbourhoodGj = $backend!.renderNeighbourhoodBeforeEdits();
+      modalFilterGj = $backend!.renderModalFiltersBeforeEdits();
+      turnRestrictionGj = $backend!.renderTurnRestrictionsBeforeEdits();
+    }
+  });
 </script>
 
 {#if neighbourhoodGj}

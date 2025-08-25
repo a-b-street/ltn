@@ -16,7 +16,7 @@
   import RailwayStations from "./RailwayStations.svelte";
   import Stats19 from "./Stats19.svelte";
 
-  let expand = false;
+  let expand = $state(false);
 </script>
 
 <Control defaultStyling>

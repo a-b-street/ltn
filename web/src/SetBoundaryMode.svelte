@@ -8,10 +8,14 @@
   import { type Waypoint } from "./common/draw_area/stores";
   import { backend, map, mode, saveCurrentProject } from "./stores";
 
-  export let name: string;
-  export let existing: Feature<Polygon, AreaProps>;
-  let waypoints: Waypoint[] = [];
-  let drawnShape: Feature<Polygon>;
+  interface Props {
+    name: string;
+    existing: Feature<Polygon, AreaProps>;
+  }
+
+  let { name, existing }: Props = $props();
+  let waypoints: Waypoint[] = $state([]);
+  let drawnShape: Feature<Polygon> = $state();
 
   let unformattedWaypoints = existing.properties.waypoints;
   if (!unformattedWaypoints) {

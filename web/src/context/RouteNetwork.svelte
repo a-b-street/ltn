@@ -8,13 +8,12 @@
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
-  let show = false;
-  let purpose = "all";
-  let scenario = "bicycle_go_dutch";
-  let networkType = "fastest";
-  let colorBy = "flow";
+  let show = $state(false);
+  let purpose = $state("all");
+  let scenario = $state("bicycle_go_dutch");
+  let networkType = $state("fastest");
+  let colorBy = $state("flow");
 
-  $: key = `${purpose}_${networkType}_${scenario}`;
 
   let purposes = [
     ["all", "All"],
@@ -39,28 +38,6 @@
     ["gradient", "Gradient"],
   ];
 
-  $: lineColor = {
-    none: "#304ce7",
-    flow: lineColorForDemand(["get", key]),
-    quietness: [
-      "step",
-      ["get", "quietness"],
-      "#882255",
-      25,
-      "#CC6677",
-      50,
-      "#44AA99",
-      75,
-      "#117733",
-      101,
-      "#000000",
-    ],
-    gradient: makeRamp(
-      ["abs", ["get", "gradient"]],
-      gradient.limits,
-      gradient.colorScale,
-    ),
-  }[colorBy] as ExpressionSpecification;
 
   let gradient = {
     colorScale: [
@@ -129,6 +106,29 @@
       "#FF00C5",
     ] as ExpressionSpecification;
   }
+  let key = $derived(`${purpose}_${networkType}_${scenario}`);
+  let lineColor = $derived({
+    none: "#304ce7",
+    flow: lineColorForDemand(["get", key]),
+    quietness: [
+      "step",
+      ["get", "quietness"],
+      "#882255",
+      25,
+      "#CC6677",
+      50,
+      "#44AA99",
+      75,
+      "#117733",
+      101,
+      "#000000",
+    ],
+    gradient: makeRamp(
+      ["abs", ["get", "gradient"]],
+      gradient.limits,
+      gradient.colorScale,
+    ),
+  }[colorBy] as ExpressionSpecification);
 </script>
 
 <ContextLayerButton bind:show label="Estimated cycling demand">

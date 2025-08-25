@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { FeatureCollection, Polygon } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
   import type {
@@ -38,24 +40,26 @@
   import ManageProject from "./ManageProject.svelte";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson();
-  $: neighbourhoods = {
+  let gj = $derived($mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson());
+  let neighbourhoods = $derived({
     type: "FeatureCollection" as const,
     features: gj.features.filter((f) => f.properties!.kind == "boundary"),
-  } as FeatureCollection<Polygon, { name: string }>;
+  } as FeatureCollection<Polygon, { name: string }>);
 
   // If a user loads an empty project or deletes all neighbourhoods, don't show
   // them an empty pick screen
-  $: if (neighbourhoods.features.length == 0) {
-    $mode = { mode: "add-neighbourhood" };
-  }
+  run(() => {
+    if (neighbourhoods.features.length == 0) {
+      $mode = { mode: "add-neighbourhood" };
+    }
+  });
 
   let selectedPrioritization: Prioritization =
-    $appFocus == "cnt" ? "combined" : "none";
-  let hoveredNeighbourhoodFromList: string | null = null;
+    $state($appFocus == "cnt" ? "combined" : "none");
+  let hoveredNeighbourhoodFromList: string | null = $state(null);
   let hoveredMapFeature:
     | (NeighbourhoodBoundaryFeature & MapGeoJSONFeature)
-    | undefined = undefined;
+    | undefined = $state(undefined);
   $currentNeighbourhoodName = undefined;
 
   function pickNeighbourhood(name: string) {

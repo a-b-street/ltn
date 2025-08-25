@@ -2,11 +2,21 @@
   import type { Snippet } from "svelte";
   import { HelpButton } from "../common";
 
-  export let label: string;
-  export let show = false;
-  export let onChange: () => void = () => {};
-  export let help: Snippet | undefined = undefined;
-  export let legend: Snippet | undefined = undefined;
+  interface Props {
+    label: string;
+    show?: boolean;
+    onChange?: () => void;
+    help?: Snippet | undefined;
+    legend?: Snippet | undefined;
+  }
+
+  let {
+    label,
+    show = $bindable(false),
+    onChange = () => {},
+    help = undefined,
+    legend = undefined
+  }: Props = $props();
 </script>
 
 <button

@@ -17,7 +17,11 @@
   import type { GeneratedBoundaryFeature } from "../wasm";
   import MetricProgress from "./MetricProgress.svelte";
 
-  export let neighbourhoodBoundary: GeneratedBoundaryFeature;
+  interface Props {
+    neighbourhoodBoundary: GeneratedBoundaryFeature;
+  }
+
+  let { neighbourhoodBoundary }: Props = $props();
 </script>
 
 <table>

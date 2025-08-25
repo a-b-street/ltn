@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import along from "@turf/along";
   import type { FeatureCollection } from "geojson";
   import { onDestroy } from "svelte";
@@ -6,9 +8,13 @@
   import { layerId } from "./common";
   import type { AllShortcuts } from "./wasm";
 
-  export let paths: AllShortcuts;
+  interface Props {
+    paths: AllShortcuts;
+  }
 
-  let totalDirectness = sumWeights();
+  let { paths }: Props = $props();
+
+  let totalDirectness = $state(sumWeights());
 
   let numDots = 50;
   let redrawMs = 100;
@@ -19,13 +25,9 @@
     distance: number;
   }
 
-  let dots = makeDots();
-  let gj = redraw();
+  let dots = $state(makeDots());
+  let gj = $state(redraw());
 
-  $: if (paths) {
-    totalDirectness = sumWeights();
-    dots = makeDots();
-  }
 
   let intervalId = setInterval(animate, redrawMs);
   onDestroy(() => clearInterval(intervalId));
@@ -83,6 +85,12 @@
     }
     gj = redraw();
   }
+  run(() => {
+    if (paths) {
+      totalDirectness = sumWeights();
+      dots = makeDots();
+    }
+  });
 </script>
 
 <GeoJSON data={gj}>

@@ -5,7 +5,7 @@
   import { ContextLayerButton, layerId } from "../common";
   import { backend } from "../stores";
 
-  let show = false;
+  let show = $state(false);
 
   // https://colorbrewer2.org/#type=qualitative&scheme=Accent&n=6
   let labelColors = {

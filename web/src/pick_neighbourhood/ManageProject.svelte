@@ -13,12 +13,14 @@
     projectStorage,
   } from "../stores";
 
-  export let projectGj: FeatureCollection;
+  interface Props {
+    projectGj: FeatureCollection;
+  }
 
-  $: edits = countEdits(projectGj);
+  let { projectGj }: Props = $props();
 
-  let showPickProject = false;
-  $: otherProjects = listOtherProjects($currentProjectID!);
+
+  let showPickProject = $state(false);
 
   let osmTimestamp = $backend!.getOsmTimestamp();
 
@@ -103,6 +105,8 @@
     }
     return { modalFilters, deletedModalFilters, travelFlows };
   }
+  let edits = $derived(countEdits(projectGj));
+  let otherProjects = $derived(listOtherProjects($currentProjectID!));
 </script>
 
 <h2>Project: {$currentProject!.project_name}</h2>
@@ -148,7 +152,7 @@
     style="display: inline-block; margin-top: 8px"
     bind:open={showPickProject}
   >
-    <!-- svelte-ignore a11y-no-redundant-roles -->
+    <!-- svelte-ignore a11y_no_redundant_roles -->
     <summary role="button" class="contrast outline">
       <FolderOpen />
       <span style="margin-left: 2px;">Open another project</span>

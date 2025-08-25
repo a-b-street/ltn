@@ -9,11 +9,19 @@
   import EditIntersectionPopup from "../edit/EditIntersectionPopup.svelte";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
-  export let neighbourhood: RenderNeighbourhoodOutput =
-    getContext("neighbourhoodGj");
-  export let onClickIntersection = (intersection: Intersection) => {};
-  export let interactive: boolean = false;
-  export let show = true;
+  interface Props {
+    neighbourhood?: RenderNeighbourhoodOutput;
+    onClickIntersection?: any;
+    interactive?: boolean;
+    show?: boolean;
+  }
+
+  let {
+    neighbourhood = getContext("neighbourhoodGj"),
+    onClickIntersection = (intersection: Intersection) => {},
+    interactive = false,
+    show = true
+  }: Props = $props();
 
   /// NOTE: this takes the intersection's index in the neighborhood FeatureCollection, *not* the intersectionId!
   function getIntersectionByFeatureIndex(

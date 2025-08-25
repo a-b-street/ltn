@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { Feature, FeatureCollection, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { RouteTool } from "route-snapper-ts";
@@ -16,9 +18,13 @@
   import { layerId } from "../";
   import { routeTool, type Waypoint } from "./stores";
 
-  export let map: Map;
-  export let waypoints: Waypoint[];
-  export let drawnShapeOut: Feature<Polygon> | undefined = undefined;
+  interface Props {
+    map: Map;
+    waypoints: Waypoint[];
+    drawnShapeOut?: Feature<Polygon> | undefined;
+  }
+
+  let { map, waypoints = $bindable(), drawnShapeOut = $bindable(undefined) }: Props = $props();
 
   function calculateArea(
     routeTool: RouteTool,
@@ -38,46 +44,28 @@
     return out;
   }
 
-  $: {
-    try {
-      if ($routeTool) {
-        drawnShapeOut = calculateArea($routeTool, waypoints);
-      }
-    } catch (err) {
-      console.log("error drawing shape", err);
-      drawnShapeOut = undefined;
-    }
-  }
 
   onDestroy(() => {
     $routeTool?.stop();
     map.getCanvas().style.cursor = "inherit";
   });
 
-  let snapMode: "snap" | "free" = "snap";
-  let undoStates: Waypoint[][] = [];
+  let snapMode: "snap" | "free" = $state("snap");
+  let undoStates: Waypoint[][] = $state([]);
 
   interface ExtraNode {
     point: [number, number];
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = [];
+  let extraNodes: ExtraNode[] = $state([]);
 
-  $: updateExtraNodes($routeTool, waypoints, draggingExtraNode);
 
-  let cursor: Waypoint | null = null;
-  let hoveringOnMarker = false;
-  let draggingMarker = false;
-  let draggingExtraNode = false;
-  $: previewGj = getPreview(
-    $routeTool,
-    waypoints,
-    cursor,
-    hoveringOnMarker || draggingMarker,
-  );
+  let cursor: Waypoint | null = $state(null);
+  let hoveringOnMarker = $state(false);
+  let draggingMarker = $state(false);
+  let draggingExtraNode = $state(false);
 
-  $: updateCursor(waypoints);
   function updateCursor(waypoints: Waypoint[]) {
     let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
     map.getCanvas().style.cursor = cursor;
@@ -212,6 +200,28 @@
     captureUndoState();
     draggingMarker = true;
   }
+  run(() => {
+    try {
+      if ($routeTool) {
+        drawnShapeOut = calculateArea($routeTool, waypoints);
+      }
+    } catch (err) {
+      console.log("error drawing shape", err);
+      drawnShapeOut = undefined;
+    }
+  });
+  run(() => {
+    updateExtraNodes($routeTool, waypoints, draggingExtraNode);
+  });
+  let previewGj = $derived(getPreview(
+    $routeTool,
+    waypoints,
+    cursor,
+    hoveringOnMarker || draggingMarker,
+  ));
+  run(() => {
+    updateCursor(waypoints);
+  });
 </script>
 
 <p>Click the map to add three points. Then adjust the points or add more.</p>

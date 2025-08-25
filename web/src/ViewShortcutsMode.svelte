@@ -33,7 +33,7 @@
         gj: AllShortcuts;
         shortcutIndex: number;
       };
-  let action: Action = { state: "neutral" };
+  let action: Action = $state({ state: "neutral" });
 
   function choseRoad(roadGj: Feature, _: LngLat) {
     if (action.state != "neutral") {

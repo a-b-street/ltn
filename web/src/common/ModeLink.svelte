@@ -5,8 +5,12 @@
   import Link from "./Link.svelte";
   import { pageTitle } from "./navbar";
 
-  export let mode: Mode;
-  export let children: Snippet | undefined = undefined;
+  interface Props {
+    mode: Mode;
+    children?: Snippet | undefined;
+  }
+
+  let { mode, children = undefined }: Props = $props();
 </script>
 
 <Link on:click={() => ($storedMode = mode)}>

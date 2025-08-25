@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { Feature, FeatureCollection, LineString } from "geojson";
   import {
     Eraser,
@@ -108,43 +110,20 @@
       >,
     };
   }
-  let action: Action = { kind: "filter", freehand: false };
+  let action: Action = $state({ kind: "filter", freehand: false });
 
-  $: if (action.kind == "oneway" || action.kind == "main-roads") {
-    $map!.doubleClickZoom.disable();
-  } else {
-    $map!.doubleClickZoom.enable();
-  }
 
-  $: {
-    if (action.kind == "filter" && action.freehand) {
-      $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
-    } else if (
-      action.kind == "main-roads" &&
-      action.tool == "snap-route-erase"
-    ) {
-      $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
-    } else {
-      $map!.getCanvas().style.cursor = "";
-    }
-  }
 
-  let settingFilterType = false;
-  let undoLength = 0;
-  let redoLength = 0;
+  let settingFilterType = $state(false);
+  let undoLength = $state(0);
+  let redoLength = $state(0);
   let boundary: NeighbourhoodBoundaryFeature | null;
 
-  let gj: RenderNeighbourhoodOutput;
-  $: rerender($mutationCounter);
+  let gj: RenderNeighbourhoodOutput = $state();
 
-  let allShortcuts = emptyGeojson() as AllShortcuts;
+  let allShortcuts = $state(emptyGeojson() as AllShortcuts);
   let lastShortcutCalculation = 0;
-  $: recalculateShortcuts($mutationCounter, $animateShortcuts);
 
-  $: numDisconnectedCells = gj.features.filter(
-    (f) =>
-      f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
-  ).length;
 
   onMount(() => {
     initTooltips();
@@ -348,6 +327,35 @@
     u_left_to_right: noUTurnLtrUrl,
     u_right_to_left: noUTurnRtlUrl,
   };
+  run(() => {
+    if (action.kind == "oneway" || action.kind == "main-roads") {
+      $map!.doubleClickZoom.disable();
+    } else {
+      $map!.doubleClickZoom.enable();
+    }
+  });
+  run(() => {
+    if (action.kind == "filter" && action.freehand) {
+      $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
+    } else if (
+      action.kind == "main-roads" &&
+      action.tool == "snap-route-erase"
+    ) {
+      $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
+    } else {
+      $map!.getCanvas().style.cursor = "";
+    }
+  });
+  run(() => {
+    rerender($mutationCounter);
+  });
+  run(() => {
+    recalculateShortcuts($mutationCounter, $animateShortcuts);
+  });
+  let numDisconnectedCells = $derived(gj.features.filter(
+    (f) =>
+      f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
+  ).length);
 </script>
 
 <svelte:window onkeydown={onKeyDown} />

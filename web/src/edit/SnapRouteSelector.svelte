@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { Feature, FeatureCollection, LineString } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { RouteTool } from "route-snapper-ts";
@@ -15,10 +17,19 @@
   import { layerId } from "../common";
   import { routeTool, type Waypoint } from "../common/draw_area/stores";
 
-  export let map: Map;
-  export let waypoints: Waypoint[];
-  export let finish: (roads: number[]) => void;
-  export let cancel: () => void;
+  interface Props {
+    map: Map;
+    waypoints: Waypoint[];
+    finish: (roads: number[]) => void;
+    cancel: () => void;
+  }
+
+  let {
+    map,
+    waypoints = $bindable(),
+    finish,
+    cancel
+  }: Props = $props();
 
   onDestroy(() => {
     waypoints = [];
@@ -33,21 +44,13 @@
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = [];
-  $: updateExtraNodes($routeTool, waypoints, draggingExtraNode);
+  let extraNodes: ExtraNode[] = $state([]);
 
-  let cursor: Waypoint | null = null;
-  let hoveringOnMarker = false;
-  let draggingMarker = false;
-  let draggingExtraNode = false;
-  $: previewGj = getPreview(
-    $routeTool,
-    waypoints,
-    cursor,
-    hoveringOnMarker || draggingMarker,
-  );
+  let cursor: Waypoint | null = $state(null);
+  let hoveringOnMarker = $state(false);
+  let draggingMarker = $state(false);
+  let draggingExtraNode = $state(false);
 
-  $: updateCursor(waypoints);
   function updateCursor(waypoints: Waypoint[]) {
     let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
     map.getCanvas().style.cursor = cursor;
@@ -185,6 +188,18 @@
       cancel();
     }
   }
+  run(() => {
+    updateExtraNodes($routeTool, waypoints, draggingExtraNode);
+  });
+  let previewGj = $derived(getPreview(
+    $routeTool,
+    waypoints,
+    cursor,
+    hoveringOnMarker || draggingMarker,
+  ));
+  run(() => {
+    updateCursor(waypoints);
+  });
 </script>
 
 <svelte:window onkeydown={onKeyDown} />

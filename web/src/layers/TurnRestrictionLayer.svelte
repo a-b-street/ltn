@@ -16,15 +16,25 @@
     showExistingFiltersAndTRs,
   } from "../stores";
 
-  export let children: Snippet | undefined = undefined;
-  export let turnRestrictionGj: FeatureCollection | null = null;
-  export let show = true;
-  export let prefix = "";
-  export let onClickTurnRestriction: (e: LayerClickInfo) => void = () => {};
+  interface Props {
+    children?: Snippet | undefined;
+    turnRestrictionGj?: FeatureCollection | null;
+    show?: boolean;
+    prefix?: string;
+    onClickTurnRestriction?: (e: LayerClickInfo) => void;
+  }
 
-  let hoveredIcon: (Feature & MapGeoJSONFeature) | undefined = undefined;
-  $: showArrow =
-    hoveredIcon == undefined
+  let {
+    children = undefined,
+    turnRestrictionGj = null,
+    show = true,
+    prefix = "",
+    onClickTurnRestriction = () => {}
+  }: Props = $props();
+
+  let hoveredIcon: (Feature & MapGeoJSONFeature) | undefined = $state(undefined);
+  let showArrow =
+    $derived(hoveredIcon == undefined
       ? emptyGeojson()
       : {
           type: "FeatureCollection" as const,
@@ -44,13 +54,13 @@
               properties: {},
             },
           ],
-        };
+        });
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
-  $: gj =
-    $mutationCounter > 0 && turnRestrictionGj == null
+  let gj =
+    $derived($mutationCounter > 0 && turnRestrictionGj == null
       ? $backend!.renderTurnRestrictions()
-      : emptyGeojson();
+      : emptyGeojson());
 </script>
 
 <GeoJSON data={turnRestrictionGj || gj} generateId>

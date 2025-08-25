@@ -22,12 +22,23 @@
 
   let gj: RenderNeighbourhoodOutput = getContext("neighbourhoodGj");
 
-  // When disabled, can't click lines or filters, no linePopup, no hoverCursor
-  export let interactive = true;
-  export let linePopup: Snippet | undefined = undefined;
-  export let onClickLine = (f: Feature, pt: LngLat) => {};
-  export let show = true;
-  export let prefix = "";
+  
+  interface Props {
+    // When disabled, can't click lines or filters, no linePopup, no hoverCursor
+    interactive?: boolean;
+    linePopup?: Snippet | undefined;
+    onClickLine?: any;
+    show?: boolean;
+    prefix?: string;
+  }
+
+  let {
+    interactive = true,
+    linePopup = undefined,
+    onClickLine = (f: Feature, pt: LngLat) => {},
+    show = true,
+    prefix = ""
+  }: Props = $props();
 
   function roadLineColor(
     style: "shortcuts" | "cells" | "edits" | "speeds",

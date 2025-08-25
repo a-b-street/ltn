@@ -2,7 +2,11 @@
   import { Link } from "./common";
   import { mode as storedMode, type Mode } from "./stores";
 
-  export let mode: Mode;
+  interface Props {
+    mode: Mode;
+  }
+
+  let { mode }: Props = $props();
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key == "Escape") {
