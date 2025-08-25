@@ -13,7 +13,7 @@
   import { assetUrl } from "../stores";
 
   let show = false;
-  let state = {
+  let filters = {
     pedestrians: true,
     cyclists: true,
     minYear: 2017,
@@ -22,27 +22,27 @@
 
   function makeFilter(_: any): ExpressionSpecification {
     let includeTypes: ExpressionSpecification = ["any"];
-    if (state.pedestrians) {
+    if (filters.pedestrians) {
       includeTypes.push(["get", "pedestrian"]);
     }
-    if (state.cyclists) {
+    if (filters.cyclists) {
       includeTypes.push(["get", "cyclist"]);
     }
 
     return [
       "all",
-      [">=", ["get", "year"], state.minYear],
-      ["<=", ["get", "year"], state.maxYear],
+      [">=", ["get", "year"], filters.minYear],
+      ["<=", ["get", "year"], filters.maxYear],
       includeTypes,
     ];
   }
 
-  function casualtyTypes(props: { [name: string]: any }): string {
+  function casualtyTypes(data: { [name: string]: any }): string {
     let list = [];
-    if (props.pedestrian) {
+    if (data.pedestrian) {
       list.push("pedestrian");
     }
-    if (props.cyclist) {
+    if (data.cyclist) {
       list.push("cyclist");
     }
     return list.join(", ");
@@ -151,22 +151,32 @@
   {#snippet legend()}
     <fieldset style="display: flex; gap: 3em;">
       <label>
-        <input type="checkbox" bind:checked={state.pedestrians} />
+        <input type="checkbox" bind:checked={filters.pedestrians} />
         Pedestrians
       </label>
       <label>
-        <input type="checkbox" bind:checked={state.cyclists} />
+        <input type="checkbox" bind:checked={filters.cyclists} />
         Cyclists
       </label>
     </fieldset>
     <fieldset class="year-filter">
       <label>
         From
-        <input type="number" min={2017} max={2023} bind:value={state.minYear} />
+        <input
+          type="number"
+          min={2017}
+          max={2023}
+          bind:value={filters.minYear}
+        />
       </label>
       <label>
         To
-        <input type="number" min={2017} max={2023} bind:value={state.maxYear} />
+        <input
+          type="number"
+          min={2017}
+          max={2023}
+          bind:value={filters.maxYear}
+        />
       </label>
     </fieldset>
     <QualitativeLegend
@@ -182,7 +192,7 @@
     {...layerId("context-stats19-heatmap")}
     sourceLayer="stats19"
     maxzoom={13}
-    filter={makeFilter(state)}
+    filter={makeFilter(filters)}
     layout={{
       visibility: show ? "visible" : "none",
     }}
@@ -206,7 +216,7 @@
       "circle-stroke-color": "black",
       "circle-stroke-width": 0.1,
     }}
-    filter={makeFilter(state)}
+    filter={makeFilter(filters)}
     layout={{
       visibility: show ? "visible" : "none",
     }}

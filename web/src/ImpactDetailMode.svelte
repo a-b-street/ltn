@@ -23,8 +23,8 @@
   export let prevPrevMode: "pick-neighbourhood" | "neighbourhood";
 
   // TODO Weird to modify the input like this?
-  let props = road.properties!;
-  props.kind = "focus";
+  let data = road.properties!;
+  data.kind = "focus";
 
   let routes: ImpactOnRoad[] = [];
   let idx = 0;
@@ -32,7 +32,7 @@
   let loading = "Finding changes to this road";
   onMount(async () => {
     await refreshLoadingScreen();
-    routes = $backend!.getImpactsOnRoad(props.id, $fastSample);
+    routes = $backend!.getImpactsOnRoad(data.id, $fastSample);
     loading = "";
     if (routes.length == 0) {
       window.alert(
@@ -96,12 +96,12 @@
     <BackButton mode={{ mode: "predict-impact", prevMode: prevPrevMode }} />
 
     <p>
-      {props.before.toLocaleString()} routes cross here
+      {data.before.toLocaleString()} routes cross here
       <span style:color="red">before your changes</span>
-      , and {props.after.toLocaleString()}
+      , and {data.after.toLocaleString()}
       <span style:color="blue">after your changes</span>
       . That's
-      {Math.round((100 * props.after) / props.before)}% of the original traffic.
+      {Math.round((100 * data.after) / data.before)}% of the original traffic.
     </p>
 
     {#if routes.length > 0}
