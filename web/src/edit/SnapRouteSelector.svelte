@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { Feature, FeatureCollection, LineString } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { RouteTool } from "route-snapper-ts";
@@ -14,6 +12,7 @@
     type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
+  import { run } from "svelte/legacy";
   import { layerId } from "../common";
   import { routeTool, type Waypoint } from "../common/draw_area/stores";
 
@@ -24,12 +23,7 @@
     cancel: () => void;
   }
 
-  let {
-    map,
-    waypoints = $bindable(),
-    finish,
-    cancel
-  }: Props = $props();
+  let { map, waypoints = $bindable(), finish, cancel }: Props = $props();
 
   onDestroy(() => {
     waypoints = [];
@@ -191,12 +185,14 @@
   run(() => {
     updateExtraNodes($routeTool, waypoints, draggingExtraNode);
   });
-  let previewGj = $derived(getPreview(
-    $routeTool,
-    waypoints,
-    cursor,
-    hoveringOnMarker || draggingMarker,
-  ));
+  let previewGj = $derived(
+    getPreview(
+      $routeTool,
+      waypoints,
+      cursor,
+      hoveringOnMarker || draggingMarker,
+    ),
+  );
   run(() => {
     updateCursor(waypoints);
   });

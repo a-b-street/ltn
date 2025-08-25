@@ -7,7 +7,6 @@
   import { interactiveMapLayersEnabled } from "./stores";
 
   // TODO Need to intercept the escape key always
-  
 
   interface Props {
     // TODO Make sure all layers respect DisableInteractiveLayers (they currently do not)

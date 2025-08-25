@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import along from "@turf/along";
   import type { FeatureCollection } from "geojson";
   import { onDestroy } from "svelte";
   import { CircleLayer, GeoJSON } from "svelte-maplibre";
+  import { run } from "svelte/legacy";
   import { layerId } from "./common";
   import type { AllShortcuts } from "./wasm";
 
@@ -27,7 +26,6 @@
 
   let dots = $state(makeDots());
   let gj = $state(redraw());
-
 
   let intervalId = setInterval(animate, redrawMs);
   onDestroy(() => clearInterval(intervalId));

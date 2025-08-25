@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { FeatureCollection, Polygon } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
   import type {
@@ -17,6 +15,7 @@
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import { run } from "svelte/legacy";
   import { layerId, Link, ModeLink, pageTitle, Style } from "../common";
   import { pickNeighbourhoodName } from "../common/pick_names";
   import { ModalFilterLayer } from "../layers";
@@ -40,7 +39,9 @@
   import ManageProject from "./ManageProject.svelte";
 
   // Note we do this to trigger a refresh when loading stuff
-  let gj = $derived($mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson());
+  let gj = $derived(
+    $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson(),
+  );
   let neighbourhoods = $derived({
     type: "FeatureCollection" as const,
     features: gj.features.filter((f) => f.properties!.kind == "boundary"),
@@ -54,12 +55,13 @@
     }
   });
 
-  let selectedPrioritization: Prioritization =
-    $state($appFocus == "cnt" ? "combined" : "none");
+  let selectedPrioritization: Prioritization = $state(
+    $appFocus == "cnt" ? "combined" : "none",
+  );
   let hoveredNeighbourhoodFromList: string | null = $state(null);
   let hoveredMapFeature:
     | (NeighbourhoodBoundaryFeature & MapGeoJSONFeature)
-    | undefined = $state(undefined);
+    | undefined = $state();
   $currentNeighbourhoodName = undefined;
 
   function pickNeighbourhood(name: string) {
@@ -187,7 +189,7 @@
           class:highlighted={hoveredMapFeature?.properties.name == name ||
             hoveredNeighbourhoodFromList == name}
         >
-          <h3><Link on:click={() => pickNeighbourhood(name)}>{name}</Link></h3>
+          <h3><Link onclick={() => pickNeighbourhood(name)}>{name}</Link></h3>
           <span class="actions">
             <button
               class="outline icon-btn"

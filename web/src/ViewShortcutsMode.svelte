@@ -138,7 +138,7 @@
     </RenderNeighbourhood>
 
     {#if action.state == "chose-road"}
-      <GeoJSON data={action.gj.features[state.shortcutIndex]}>
+      <GeoJSON data={action.gj.features[action.shortcutIndex]}>
         <LineLayer
           {...layerId("shortcuts")}
           paint={{

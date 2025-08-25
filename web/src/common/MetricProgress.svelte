@@ -9,7 +9,6 @@
 
   let { colorScale, limits, value }: Props = $props();
 
-
   function calculateBucket(limits: number[], value: number): number {
     // Note the value might exceed the highest limit; it winds up in the last bucket if so
     let idx = 0;

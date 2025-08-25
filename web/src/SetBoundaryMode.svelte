@@ -15,7 +15,7 @@
 
   let { name, existing }: Props = $props();
   let waypoints: Waypoint[] = $state([]);
-  let drawnShape: Feature<Polygon> = $state();
+  let drawnShape: Feature<Polygon> | undefined = $state();
 
   let unformattedWaypoints = existing.properties.waypoints;
   if (!unformattedWaypoints) {

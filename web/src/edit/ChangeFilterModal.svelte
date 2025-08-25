@@ -8,9 +8,9 @@
   }
 
   let { show = $bindable() }: Props = $props();
-  let currentFilter = $derived(ModalFilterType.allTypes.find(
-    (x) => x.filterType == $currentFilterType,
-  )!);
+  let currentFilter = $derived(
+    ModalFilterType.allTypes.find((x) => x.filterType == $currentFilterType)!,
+  );
 </script>
 
 <Modal bind:show

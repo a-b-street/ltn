@@ -163,7 +163,7 @@
               {#each projects as { projectID, projectName }}
                 <li class="actionable-cell">
                   <h3 class="project-name">
-                    <Link on:click={() => openProject(projectID)}>
+                    <Link onclick={() => openProject(projectID)}>
                       {projectName}
                     </Link>
                   </h3>

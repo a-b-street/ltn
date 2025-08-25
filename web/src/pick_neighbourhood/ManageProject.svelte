@@ -19,7 +19,6 @@
 
   let { projectGj }: Props = $props();
 
-
   let showPickProject = $state(false);
 
   let osmTimestamp = $backend!.getOsmTimestamp();
@@ -160,7 +159,7 @@
     <ul>
       {#each otherProjects as item}
         <li>
-          <Link on:click={() => openProject(item.projectID)}
+          <Link onclick={() => openProject(item.projectID)}
             >{item.projectName}</Link
           >
         </li>

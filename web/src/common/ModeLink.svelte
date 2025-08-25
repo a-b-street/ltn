@@ -13,7 +13,7 @@
   let { mode, children = undefined }: Props = $props();
 </script>
 
-<Link on:click={() => ($storedMode = mode)}>
+<Link onclick={() => ($storedMode = mode)}>
   {#if children}
     {@render children()}
   {:else}

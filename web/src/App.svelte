@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
+  import { run } from "svelte/legacy";
   import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import favicon from "../assets/favicon.ico?url";
@@ -90,14 +89,14 @@
     } catch (err) {}
   });
 
-  let map: Map | undefined = $state(undefined);
+  let map: Map | undefined = $state();
   let loaded = $state(false);
 
   function zoomToFit(animate: boolean) {
     $mapStore!.fitBounds($backend!.getBounds(), { animate });
   }
 
-  let initialBounds: LngLatBoundsLike | undefined = $state(undefined);
+  let initialBounds: LngLatBoundsLike | undefined = $state();
   if (appFocus == "cnt") {
     initialBounds = [-8.943, 54.631, -0.901, 59.489];
   }

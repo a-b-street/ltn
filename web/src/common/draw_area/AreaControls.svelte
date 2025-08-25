@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { Feature, FeatureCollection, Polygon } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { RouteTool } from "route-snapper-ts";
@@ -15,6 +13,7 @@
     type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
+  import { run } from "svelte/legacy";
   import { layerId } from "../";
   import { routeTool, type Waypoint } from "./stores";
 
@@ -24,7 +23,11 @@
     drawnShapeOut?: Feature<Polygon> | undefined;
   }
 
-  let { map, waypoints = $bindable(), drawnShapeOut = $bindable(undefined) }: Props = $props();
+  let {
+    map,
+    waypoints = $bindable(),
+    drawnShapeOut = $bindable(undefined),
+  }: Props = $props();
 
   function calculateArea(
     routeTool: RouteTool,
@@ -44,7 +47,6 @@
     return out;
   }
 
-
   onDestroy(() => {
     $routeTool?.stop();
     map.getCanvas().style.cursor = "inherit";
@@ -59,7 +61,6 @@
     snapped: boolean;
   }
   let extraNodes: ExtraNode[] = $state([]);
-
 
   let cursor: Waypoint | null = $state(null);
   let hoveringOnMarker = $state(false);
@@ -213,12 +214,14 @@
   run(() => {
     updateExtraNodes($routeTool, waypoints, draggingExtraNode);
   });
-  let previewGj = $derived(getPreview(
-    $routeTool,
-    waypoints,
-    cursor,
-    hoveringOnMarker || draggingMarker,
-  ));
+  let previewGj = $derived(
+    getPreview(
+      $routeTool,
+      waypoints,
+      cursor,
+      hoveringOnMarker || draggingMarker,
+    ),
+  );
   run(() => {
     updateCursor(waypoints);
   });

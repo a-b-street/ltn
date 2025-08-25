@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { SequentialLegend } from "svelte-utils";
+  import { run } from "svelte/legacy";
   import {
     areaColorScale,
     areaLimits,

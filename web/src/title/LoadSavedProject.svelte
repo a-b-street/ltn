@@ -4,12 +4,12 @@
   import { database, mode, type AppFocus } from "../stores";
   import { loadProject } from "./loader";
 
-  let fileInput: HTMLInputElement = $state();
+  let fileInput: HTMLInputElement | undefined = $state();
 
   async function loadFile(e: Event) {
-    let filename = fileInput.files![0].name;
+    let filename = fileInput!.files![0].name;
 
-    let contents = await fileInput.files![0].text();
+    let contents = await fileInput!.files![0].text();
     let gj = JSON.parse(contents);
 
     let appFocus: AppFocus;

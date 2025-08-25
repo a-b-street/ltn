@@ -10,17 +10,17 @@
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
   interface Props {
-    neighbourhood?: RenderNeighbourhoodOutput;
-    onClickIntersection?: any;
-    interactive?: boolean;
-    show?: boolean;
+    neighbourhood: RenderNeighbourhoodOutput;
+    onClickIntersection: (intersection: Intersection) => void;
+    interactive: boolean;
+    show: boolean;
   }
 
   let {
     neighbourhood = getContext("neighbourhoodGj"),
     onClickIntersection = (intersection: Intersection) => {},
     interactive = false,
-    show = true
+    show = true,
   }: Props = $props();
 
   /// NOTE: this takes the intersection's index in the neighborhood FeatureCollection, *not* the intersectionId!

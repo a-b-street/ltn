@@ -1,14 +1,13 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { setContext, type Snippet } from "svelte";
   import { GeoJSON } from "svelte-maplibre";
+  import { run } from "svelte/legacy";
   import { backend } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
   // This component should act as the parent for most other layers, who
   // will get the raw GJ data by svelte context if needed. If input isn't
-  
+
   interface Props {
     // specified, the backend will be called.
     input?: RenderNeighbourhoodOutput | null;

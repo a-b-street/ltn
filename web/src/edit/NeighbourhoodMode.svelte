@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { Feature, FeatureCollection, LineString } from "geojson";
   import {
     Eraser,
@@ -24,6 +22,7 @@
   import { SequentialLegend } from "svelte-utils";
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import { run } from "svelte/legacy";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
   import paintbrushCursorURL from "../../assets/cursors/paintbrush.svg?url";
   import noLeftUrl from "../../assets/filters/no_left_turn.png?url";
@@ -112,18 +111,17 @@
   }
   let action: Action = $state({ kind: "filter", freehand: false });
 
-
-
   let settingFilterType = $state(false);
-  let undoLength = $state(0);
-  let redoLength = $state(0);
-  let boundary: NeighbourhoodBoundaryFeature | null;
 
-  let gj: RenderNeighbourhoodOutput = $state();
+  // TODO Will this run twice the first time?
+  let gj: RenderNeighbourhoodOutput = $state($backend!.renderNeighbourhood());
+  // @ts-expect-error TS can't figure out that we're narrowing the case here
+  let boundary: NeighbourhoodBoundaryFeature = $derived(
+    gj.features.find((f) => f.properties.kind == "boundary")!,
+  );
 
   let allShortcuts = $state(emptyGeojson() as AllShortcuts);
   let lastShortcutCalculation = 0;
-
 
   onMount(() => {
     initTooltips();
@@ -134,11 +132,6 @@
 
   function rerender(_x: number) {
     gj = $backend!.renderNeighbourhood();
-    // @ts-expect-error TS can't figure out that we're narrowing the case here
-    boundary = gj.features.find((f) => f.properties.kind == "boundary")!;
-
-    undoLength = gj.undo_length;
-    redoLength = gj.redo_length;
 
     saveCurrentProject();
   }
@@ -352,10 +345,13 @@
   run(() => {
     recalculateShortcuts($mutationCounter, $animateShortcuts);
   });
-  let numDisconnectedCells = $derived(gj.features.filter(
-    (f) =>
-      f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
-  ).length);
+  let numDisconnectedCells = $derived(
+    gj.features.filter(
+      (f) =>
+        f.properties.kind == "cell" &&
+        f.properties.cell_color == "disconnected",
+    ).length,
+  );
 </script>
 
 <svelte:window onkeydown={onKeyDown} />
@@ -396,8 +392,8 @@
             <ModeLink
               mode={{
                 mode: "set-boundary",
-                name: boundary!.properties.name,
-                existing: boundary!,
+                name: boundary.properties.name,
+                existing: boundary,
               }}
             />
           </li>
@@ -491,21 +487,21 @@
         >
           <button
             class="outline icon-btn"
-            disabled={undoLength == 0}
+            disabled={gj.undo_length == 0}
             onclick={undo}
-            data-tippy-content={undoLength == 0
+            data-tippy-content={gj.undo_length == 0
               ? "Undo Ctrl+Z"
-              : `Undo (${undoLength}) Ctrl+Z`}
+              : `Undo (${gj.undo_length}) Ctrl+Z`}
           >
             <Undo />
           </button>
           <button
             class="outline icon-btn"
-            disabled={redoLength == 0}
+            disabled={gj.redo_length == 0}
             onclick={redo}
-            data-tippy-content={redoLength == 0
+            data-tippy-content={gj.redo_length == 0
               ? "Redo Ctrl+Y"
-              : `Redo (${redoLength}) Ctrl+Y`}
+              : `Redo (${gj.redo_length}) Ctrl+Y`}
           >
             <Redo />
           </button>
@@ -689,7 +685,7 @@
       />
     {/if}
     <h2>Neighbourhood stats</h2>
-    <NeighbourhoodBoundarySummary neighbourhoodBoundary={boundary!} />
+    <NeighbourhoodBoundarySummary neighbourhoodBoundary={boundary} />
   {/snippet}
 
   {#snippet main()}

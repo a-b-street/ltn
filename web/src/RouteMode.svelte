@@ -30,17 +30,20 @@
   } from "./stores";
 
   interface Props {
-    prevMode: 
-    | "pick-neighbourhood"
-    | "neighbourhood"
-    | "impact-one-destination";
+    prevMode: "pick-neighbourhood" | "neighbourhood" | "impact-one-destination";
   }
 
   let { prevMode }: Props = $props();
 
-  let gj = $derived($backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty));
-  let routeBefore = $derived(gj.features.find((f) => f.properties.kind == "before"));
-  let routeAfter = $derived(gj.features.find((f) => f.properties.kind == "after"));
+  let gj = $derived(
+    $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty),
+  );
+  let routeBefore = $derived(
+    gj.features.find((f) => f.properties.kind == "before"),
+  );
+  let routeAfter = $derived(
+    gj.features.find((f) => f.properties.kind == "after"),
+  );
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.

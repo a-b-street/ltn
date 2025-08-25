@@ -22,12 +22,11 @@
 
   let gj: RenderNeighbourhoodOutput = getContext("neighbourhoodGj");
 
-  
   interface Props {
     // When disabled, can't click lines or filters, no linePopup, no hoverCursor
     interactive?: boolean;
     linePopup?: Snippet | undefined;
-    onClickLine?: any;
+    onClickLine?: (f: Feature, pt: LngLat) => void;
     show?: boolean;
     prefix?: string;
   }
@@ -37,7 +36,7 @@
     linePopup = undefined,
     onClickLine = (f: Feature, pt: LngLat) => {},
     show = true,
-    prefix = ""
+    prefix = "",
   }: Props = $props();
 
   function roadLineColor(

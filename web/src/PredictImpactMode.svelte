@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { Feature } from "geojson";
   import { FillLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
+  import { run } from "svelte/legacy";
   import BackButton from "./BackButton.svelte";
   import {
     HelpButton,

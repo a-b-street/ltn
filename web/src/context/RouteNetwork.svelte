@@ -14,7 +14,6 @@
   let networkType = $state("fastest");
   let colorBy = $state("flow");
 
-
   let purposes = [
     ["all", "All"],
     ["commute", "Commute"],
@@ -37,7 +36,6 @@
     ["quietness", "Cycle friendliness"],
     ["gradient", "Gradient"],
   ];
-
 
   let gradient = {
     colorScale: [
@@ -107,28 +105,30 @@
     ] as ExpressionSpecification;
   }
   let key = $derived(`${purpose}_${networkType}_${scenario}`);
-  let lineColor = $derived({
-    none: "#304ce7",
-    flow: lineColorForDemand(["get", key]),
-    quietness: [
-      "step",
-      ["get", "quietness"],
-      "#882255",
-      25,
-      "#CC6677",
-      50,
-      "#44AA99",
-      75,
-      "#117733",
-      101,
-      "#000000",
-    ],
-    gradient: makeRamp(
-      ["abs", ["get", "gradient"]],
-      gradient.limits,
-      gradient.colorScale,
-    ),
-  }[colorBy] as ExpressionSpecification);
+  let lineColor = $derived(
+    {
+      none: "#304ce7",
+      flow: lineColorForDemand(["get", key]),
+      quietness: [
+        "step",
+        ["get", "quietness"],
+        "#882255",
+        25,
+        "#CC6677",
+        50,
+        "#44AA99",
+        75,
+        "#117733",
+        101,
+        "#000000",
+      ],
+      gradient: makeRamp(
+        ["abs", ["get", "gradient"]],
+        gradient.limits,
+        gradient.colorScale,
+      ),
+    }[colorBy] as ExpressionSpecification,
+  );
 </script>
 
 <ContextLayerButton bind:show label="Estimated cycling demand">

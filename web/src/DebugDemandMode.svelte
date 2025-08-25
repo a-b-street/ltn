@@ -19,7 +19,9 @@
   import { backend, mode } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
 
-  let gj = $state(emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>);
+  let gj = $state(
+    emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>,
+  );
   try {
     gj = $backend!.getDemandModel();
   } catch (err) {
@@ -29,8 +31,7 @@
 
   let showTo = $state(false);
 
-  let hovered: (Feature & MapGeoJSONFeature) | undefined = $state(undefined);
-
+  let hovered: (Feature & MapGeoJSONFeature) | undefined = $state();
 
   function getLimitsAndColor(
     hoveredId: number | null,

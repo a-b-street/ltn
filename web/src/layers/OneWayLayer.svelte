@@ -9,7 +9,6 @@
 
   let { show = true, prefix = "" }: Props = $props();
 
-  
   // ignores it when interactive is false
 </script>
 

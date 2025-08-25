@@ -15,7 +15,7 @@
     show = $bindable(false),
     onChange = () => {},
     help = undefined,
-    legend = undefined
+    legend = undefined,
   }: Props = $props();
 </script>
 

@@ -29,12 +29,12 @@
     turnRestrictionGj = null,
     show = true,
     prefix = "",
-    onClickTurnRestriction = () => {}
+    onClickTurnRestriction = () => {},
   }: Props = $props();
 
-  let hoveredIcon: (Feature & MapGeoJSONFeature) | undefined = $state(undefined);
-  let showArrow =
-    $derived(hoveredIcon == undefined
+  let hoveredIcon: (Feature & MapGeoJSONFeature) | undefined = $state();
+  let showArrow = $derived(
+    hoveredIcon == undefined
       ? emptyGeojson()
       : {
           type: "FeatureCollection" as const,
@@ -54,13 +54,15 @@
               properties: {},
             },
           ],
-        });
+        },
+  );
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
-  let gj =
-    $derived($mutationCounter > 0 && turnRestrictionGj == null
+  let gj = $derived(
+    $mutationCounter > 0 && turnRestrictionGj == null
       ? $backend!.renderTurnRestrictions()
-      : emptyGeojson());
+      : emptyGeojson(),
+  );
 </script>
 
 <GeoJSON data={turnRestrictionGj || gj} generateId>

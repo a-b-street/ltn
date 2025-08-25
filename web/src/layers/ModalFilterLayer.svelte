@@ -13,7 +13,6 @@
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
-
   interface Props {
     modalFilterGj?: FeatureCollection | null;
     turnRestrictionGj?: FeatureCollection | null;
@@ -35,15 +34,16 @@
     turnRestrictionPopup = undefined,
     interactive,
     show = true,
-    prefix = ""
+    prefix = "",
   }: Props = $props();
 
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
-  let gj =
-    $derived($mutationCounter > 0 && modalFilterGj == null
+  let gj = $derived(
+    $mutationCounter > 0 && modalFilterGj == null
       ? $backend!.renderModalFilters()
-      : emptyGeojson());
+      : emptyGeojson(),
+  );
 </script>
 
 <GeoJSON data={modalFilterGj || gj} generateId>
