@@ -17,7 +17,11 @@
   import { appFocus, metricBuckets } from "../stores";
   import type { Prioritization } from "./index";
 
-  export let selectedPrioritization: Prioritization;
+  interface Props {
+    selectedPrioritization: Prioritization;
+  }
+
+  let { selectedPrioritization = $bindable() }: Props = $props();
 
   function setSelectedPrioritizationFromURL() {
     let currentURLParam = new URL(window.location.href).searchParams.get(
@@ -46,7 +50,7 @@
   } else {
     selectedPrioritization = "none";
   }
-  $: {
+  $effect(() => {
     const url = new URL(window.location.href);
     if (selectedPrioritization == "none") {
       url.searchParams.delete("prioritisationMetric");
@@ -54,7 +58,7 @@
       url.searchParams.set("prioritisationMetric", selectedPrioritization);
     }
     history.replaceState({}, "", url);
-  }
+  });
 </script>
 
 <div style="display: flex; gap: 16px; align-items: center; width: fit-content;">
@@ -79,9 +83,9 @@
     labels={{ limits: areaLimits }}
   />
   <div class="sub-labels">
-    <span />
+    <span></span>
     <span>km²</span>
-    <span />
+    <span></span>
   </div>
 {:else if selectedPrioritization == "population_density"}
   <SequentialLegend

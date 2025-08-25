@@ -3,18 +3,16 @@
     DataDrivenPropertyValueSpecification,
     ExpressionSpecification,
   } from "maplibre-gl";
-  import { LineLayer, VectorTileSource } from "svelte-maplibre";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { LineLayer, Popup, VectorTileSource } from "svelte-maplibre";
+  import { makeRamp } from "svelte-utils/map";
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
-  let show = false;
-  let purpose = "all";
-  let scenario = "bicycle_go_dutch";
-  let networkType = "fastest";
-  let colorBy = "flow";
-
-  $: key = `${purpose}_${networkType}_${scenario}`;
+  let show = $state(false);
+  let purpose = $state("all");
+  let scenario = $state("bicycle_go_dutch");
+  let networkType = $state("fastest");
+  let colorBy = $state("flow");
 
   let purposes = [
     ["all", "All"],
@@ -38,29 +36,6 @@
     ["quietness", "Cycle friendliness"],
     ["gradient", "Gradient"],
   ];
-
-  $: lineColor = {
-    none: "#304ce7",
-    flow: lineColorForDemand(["get", key]),
-    quietness: [
-      "step",
-      ["get", "quietness"],
-      "#882255",
-      25,
-      "#CC6677",
-      50,
-      "#44AA99",
-      75,
-      "#117733",
-      101,
-      "#000000",
-    ],
-    gradient: makeRamp(
-      ["abs", ["get", "gradient"]],
-      gradient.limits,
-      gradient.colorScale,
-    ),
-  }[colorBy] as ExpressionSpecification;
 
   let gradient = {
     colorScale: [
@@ -129,16 +104,43 @@
       "#FF00C5",
     ] as ExpressionSpecification;
   }
+  let key = $derived(`${purpose}_${networkType}_${scenario}`);
+  let lineColor = $derived(
+    {
+      none: "#304ce7",
+      flow: lineColorForDemand(["get", key]),
+      quietness: [
+        "step",
+        ["get", "quietness"],
+        "#882255",
+        25,
+        "#CC6677",
+        50,
+        "#44AA99",
+        75,
+        "#117733",
+        101,
+        "#000000",
+      ],
+      gradient: makeRamp(
+        ["abs", ["get", "gradient"]],
+        gradient.limits,
+        gradient.colorScale,
+      ),
+    }[colorBy] as ExpressionSpecification,
+  );
 </script>
 
 <ContextLayerButton bind:show label="Estimated cycling demand">
-  <p slot="help">
-    <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
-      Data from NPT
-    </a>
-  </p>
+  {#snippet help()}
+    <p>
+      <a href="https://nptscot.github.io/manual/#routenetwork" target="_blank">
+        Data from NPT
+      </a>
+    </p>
+  {/snippet}
 
-  <div slot="legend">
+  {#snippet legend()}
     <label>
       Trip purpose:
       <select bind:value={purpose}>
@@ -174,7 +176,7 @@
         {/each}
       </select>
     </label>
-  </div>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource
@@ -192,60 +194,76 @@
     }}
     hoverCursor="pointer"
   >
-    <Popup openOn="click" let:props>
-      <div style="max-width: 30vw; max-height: 60vh; overflow: auto;">
-        <p>Cyclists: {props[key].toLocaleString()}</p>
-        <p>Gradient: {props.gradient}%</p>
-        <p>Cycle-friendliness: {props.quietness}%</p>
+    <Popup openOn="click">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <div style="max-width: 30vw; max-height: 60vh; overflow: auto;">
+          <p>Cyclists: {props[key].toLocaleString()}</p>
+          <p>Gradient: {props.gradient}%</p>
+          <p>Cycle-friendliness: {props.quietness}%</p>
 
-        <details>
-          <summary>All network details</summary>
+          <details>
+            <summary>All network details</summary>
 
-          <p>Fast/Direct network</p>
-          <table>
-            <tr>
-              <td />
-              <th>Baseline</th>
-              <th>Go Dutch</th>
-              <th>E-bikes</th>
-            </tr>
-            {#each purposes as [value, label]}
-              <tr>
-                <th>{label}</th>
-                <td>{props[`${value}_fastest_bicycle`].toLocaleString()}</td>
-                <td>
-                  {props[`${value}_fastest_bicycle_go_dutch`].toLocaleString()}
-                </td>
-                <td>
-                  {props[`${value}_fastest_bicycle_ebike`].toLocaleString()}
-                </td>
-              </tr>
-            {/each}
-          </table>
+            <p>Fast/Direct network</p>
+            <table>
+              <tbody>
+                <tr>
+                  <td></td>
+                  <th>Baseline</th>
+                  <th>Go Dutch</th>
+                  <th>E-bikes</th>
+                </tr>
+                {#each purposes as [value, label]}
+                  <tr>
+                    <th>{label}</th>
+                    <td>{props[`${value}_fastest_bicycle`].toLocaleString()}</td
+                    >
+                    <td>
+                      {props[
+                        `${value}_fastest_bicycle_go_dutch`
+                      ].toLocaleString()}
+                    </td>
+                    <td>
+                      {props[`${value}_fastest_bicycle_ebike`].toLocaleString()}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
 
-          <p>Quiet/Indirect network</p>
-          <table>
-            <tr>
-              <td />
-              <th>Baseline</th>
-              <th>Go Dutch</th>
-              <th>E-bikes</th>
-            </tr>
-            {#each purposes as [value, label]}
-              <tr>
-                <th>{label}</th>
-                <td>{props[`${value}_quietest_bicycle`].toLocaleString()}</td>
-                <td>
-                  {props[`${value}_quietest_bicycle_go_dutch`].toLocaleString()}
-                </td>
-                <td>
-                  {props[`${value}_quietest_bicycle_ebike`].toLocaleString()}
-                </td>
-              </tr>
-            {/each}
-          </table>
-        </details>
-      </div>
+            <p>Quiet/Indirect network</p>
+            <table>
+              <tbody>
+                <tr>
+                  <td></td>
+                  <th>Baseline</th>
+                  <th>Go Dutch</th>
+                  <th>E-bikes</th>
+                </tr>
+                {#each purposes as [value, label]}
+                  <tr>
+                    <th>{label}</th>
+                    <td
+                      >{props[`${value}_quietest_bicycle`].toLocaleString()}</td
+                    >
+                    <td>
+                      {props[
+                        `${value}_quietest_bicycle_go_dutch`
+                      ].toLocaleString()}
+                    </td>
+                    <td>
+                      {props[
+                        `${value}_quietest_bicycle_ebike`
+                      ].toLocaleString()}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </details>
+        </div>
+      {/snippet}
     </Popup>
   </LineLayer>
 </VectorTileSource>

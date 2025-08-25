@@ -16,8 +16,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    // disable hot module reloading during test runs
-    svelte({ hot: !process.env.VITEST }),
+    svelte(),
     wasm(),
   ],
   server: {

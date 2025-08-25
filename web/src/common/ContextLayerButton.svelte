@@ -1,14 +1,27 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { HelpButton } from "../common";
 
-  export let label: string;
-  export let show = false;
-  export let onChange: () => void = () => {};
+  interface Props {
+    label: string;
+    show?: boolean;
+    onChange?: () => void;
+    help?: Snippet | undefined;
+    legend?: Snippet | undefined;
+  }
+
+  let {
+    label,
+    show = $bindable(false),
+    onChange = () => {},
+    help = undefined,
+    legend = undefined,
+  }: Props = $props();
 </script>
 
 <button
   class="context-control"
-  on:click={() => {
+  onclick={() => {
     show = !show;
     onChange();
   }}
@@ -17,23 +30,23 @@
     style="aspect-ratio: 1.0"
     type="checkbox"
     bind:checked={show}
-    on:change={onChange}
+    onchange={onChange}
   />
   {label}
-  {#if $$slots.help}
+  {#if help}
     <span style="margin-left: auto"
       ><HelpButton>
         <div class="context-layer-help-content">
-          <slot name="help" />
+          {@render help()}
         </div>
       </HelpButton></span
     >
   {/if}
 </button>
 
-{#if show && $$slots.legend}
+{#if show && legend}
   <div class="legend">
-    <slot name="legend" />
+    {@render legend()}
   </div>
 {/if}
 

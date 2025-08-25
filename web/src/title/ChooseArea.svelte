@@ -6,26 +6,30 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
+    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { Popup } from "svelte-utils/map";
   import { prettyPrintStudyAreaName, Style } from "../common";
   import { mode, projectStorage } from "../stores";
   import { loadProject } from "./loader";
 
-  export let boundariesUrl: string;
+  interface Props {
+    boundariesUrl: string;
+  }
+
+  let { boundariesUrl }: Props = $props();
 
   // This component works for both CNT and England, because the boundaries for
   // both fit this format. We could consider generalizing in the future.
   let gj: FeatureCollection<
     Polygon | MultiPolygon,
     { kind: "LAD"; name: string }
-  > = {
+  > = $state({
     type: "FeatureCollection" as const,
     features: [],
-  };
-  let ladNames: string[] = [];
-  let ladChoice = "";
+  });
+  let ladNames: string[] = $state([]);
+  let ladChoice = $state("");
 
   onMount(async () => {
     let resp = await fetch(boundariesUrl);
@@ -38,8 +42,8 @@
     ladNames = ladNames;
   });
 
-  function onClick(e: CustomEvent<LayerClickInfo>) {
-    let props = e.detail.features[0].properties!;
+  function onClick(e: LayerClickInfo) {
+    let props = e.features[0].properties!;
     newFile(`${props.kind}_${props.name}`);
   }
 
@@ -89,7 +93,7 @@
 </script>
 
 <p>Choose a boundary below or on the map to begin:</p>
-<select bind:value={ladChoice} on:change={chooseLAD} style="width: 90%">
+<select bind:value={ladChoice} onchange={chooseLAD} style="width: 90%">
   <option value=""></option>
   {#each ladNames as value}
     <option {value}>{value}</option>
@@ -106,10 +110,12 @@
     beforeId="Road labels"
     manageHoverState
     hoverCursor="pointer"
-    on:click={onClick}
+    onclick={onClick}
   >
-    <Popup openOn="hover" let:props>
-      <p>Click to start a new project in {props.name}</p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        <p>Click to start a new project in {data!.properties!.name}</p>
+      {/snippet}
     </Popup>
   </FillLayer>
 

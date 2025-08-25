@@ -22,26 +22,24 @@
     loadProject,
   } from "./loader";
 
-  let newProjectName = "";
-  let example: string | null = null;
-  let exampleAreas: [string, [string, string][]][] = [];
-  let loading = "";
+  let newProjectName = $state("");
+  let example: string | null = $state(null);
+  let exampleAreas: [string, [string, string][]][] = $state([]);
+  let loading = $state("");
 
   onMount(async () => {
     let resp = await safeFetch(assetUrl("severance_pbfs/areas.json"));
     exampleAreas = await resp.json();
   });
 
-  async function gotXml(
-    e: CustomEvent<{ xml: string; boundary: Feature<Polygon> }>,
-  ) {
+  async function gotXml(xml: string, boundary: Feature<Polygon>) {
     loading = "Loading OSM";
     try {
       let studyAreaName = undefined;
       $backend = new Backend(
         undefined,
-        new TextEncoder().encode(e.detail.xml),
-        e.detail.boundary,
+        new TextEncoder().encode(xml),
+        boundary,
         $appFocus,
         studyAreaName,
         newProjectName,
@@ -83,7 +81,7 @@
 <Loading loading={$loadingMessage} progress={$loadingProgress} />
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -92,9 +90,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <div>
       <label>
         Project name:
@@ -105,7 +103,7 @@
     {#if newProjectName}
       <label>
         Load a built-in area:
-        <select bind:value={example} on:change={() => loadExample()}>
+        <select bind:value={example} onchange={() => loadExample()}>
           <option value=""></option>
           {#each exampleAreas as [country, areas]}
             <optgroup label={country}>
@@ -122,15 +120,15 @@
       <div>
         <OverpassSelector
           map={$map}
-          on:gotXml={gotXml}
-          on:loading={(e) => (loading = e.detail)}
-          on:error={(e) => window.alert(e.detail)}
+          {gotXml}
+          onloading={(msg) => (loading = msg)}
+          onerror={(msg) => window.alert(msg)}
         />
       </div>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet main()}
     <PolygonToolLayer />
-  </div>
+  {/snippet}
 </SplitComponent>

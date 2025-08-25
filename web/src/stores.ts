@@ -75,7 +75,7 @@ export type Mode =
 
 export type AppFocus = "global" | "cnt" | "england";
 
-export let map: Writable<Map | null> = writable(null);
+export let map: Writable<Map | undefined> = writable(undefined);
 
 export let appFocus: Writable<AppFocus> = writable("global");
 // The id of the project currently being worked on

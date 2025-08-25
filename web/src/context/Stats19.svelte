@@ -3,54 +3,55 @@
   import {
     CircleLayer,
     HeatmapLayer,
+    Popup,
     VectorTileSource,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { QualitativeLegend } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { makeRamp } from "svelte-utils/map";
   import { ContextLayerButton, layerId } from "../common";
   import { assetUrl } from "../stores";
 
-  let show = false;
-  let state = {
+  let show = $state(false);
+  let filters = $state({
     pedestrians: true,
     cyclists: true,
     minYear: 2017,
     maxYear: 2023,
-  };
+  });
 
   function makeFilter(_: any): ExpressionSpecification {
     let includeTypes: ExpressionSpecification = ["any"];
-    if (state.pedestrians) {
+    if (filters.pedestrians) {
       includeTypes.push(["get", "pedestrian"]);
     }
-    if (state.cyclists) {
+    if (filters.cyclists) {
       includeTypes.push(["get", "cyclist"]);
     }
 
     return [
       "all",
-      [">=", ["get", "year"], state.minYear],
-      ["<=", ["get", "year"], state.maxYear],
+      [">=", ["get", "year"], filters.minYear],
+      ["<=", ["get", "year"], filters.maxYear],
       includeTypes,
     ];
   }
 
-  function casualtyTypes(props: { [name: string]: any }): string {
+  function casualtyTypes(data: { [name: string]: any }): string {
     let list = [];
-    if (props.pedestrian) {
+    if (data.pedestrian) {
       list.push("pedestrian");
     }
-    if (props.cyclist) {
+    if (data.cyclist) {
       list.push("cyclist");
     }
     return list.join(", ");
   }
 
-  function onClick(e: CustomEvent<LayerClickInfo>) {
+  function onClick(e: LayerClickInfo) {
     window.open(
       `https://www.cyclestreets.net/collisions/reports/${
-        e.detail.features[0].properties!.accident_index
+        e.features[0].properties!.accident_index
       }`,
       "_blank",
     );
@@ -98,7 +99,7 @@
 </script>
 
 <ContextLayerButton bind:show label="Collisions">
-  <div slot="help">
+  {#snippet help()}
     <p>
       This layer shows collisions recorded in the <a
         href="https://www.data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data"
@@ -145,26 +146,37 @@
       </a>
       . Contains OS data &copy; Crown copyright and database right 2025.
     </p>
-  </div>
-  <div slot="legend">
+  {/snippet}
+
+  {#snippet legend()}
     <fieldset style="display: flex; gap: 3em;">
       <label>
-        <input type="checkbox" bind:checked={state.pedestrians} />
+        <input type="checkbox" bind:checked={filters.pedestrians} />
         Pedestrians
       </label>
       <label>
-        <input type="checkbox" bind:checked={state.cyclists} />
+        <input type="checkbox" bind:checked={filters.cyclists} />
         Cyclists
       </label>
     </fieldset>
     <fieldset class="year-filter">
       <label>
         From
-        <input type="number" min={2017} max={2023} bind:value={state.minYear} />
+        <input
+          type="number"
+          min={2017}
+          max={2023}
+          bind:value={filters.minYear}
+        />
       </label>
       <label>
         To
-        <input type="number" min={2017} max={2023} bind:value={state.maxYear} />
+        <input
+          type="number"
+          min={2017}
+          max={2023}
+          bind:value={filters.maxYear}
+        />
       </label>
     </fieldset>
     <QualitativeLegend
@@ -172,7 +184,7 @@
       swatchClass="circle"
       itemsPerRow={3}
     />
-  </div>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt/layers/stats19.pmtiles")}`}>
@@ -180,7 +192,7 @@
     {...layerId("context-stats19-heatmap")}
     sourceLayer="stats19"
     maxzoom={13}
-    filter={makeFilter(state)}
+    filter={makeFilter(filters)}
     layout={{
       visibility: show ? "visible" : "none",
     }}
@@ -204,38 +216,41 @@
       "circle-stroke-color": "black",
       "circle-stroke-width": 0.1,
     }}
-    filter={makeFilter(state)}
+    filter={makeFilter(filters)}
     layout={{
       visibility: show ? "visible" : "none",
     }}
     hoverCursor="pointer"
-    on:click={onClick}
+    onclick={onClick}
   >
-    <Popup let:props>
-      <p>
-        Year: <b>{props.year}</b>
-      </p>
-      <p>
-        Severity: <b>{severity[props.severity]}</b>
-      </p>
-      <p>
-        Casualties: <b>{casualtyTypes(props)}</b>
-      </p>
-      {#if props.pedestrian_location}
+    <Popup openOn="click">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
         <p>
-          Pedestrian location: <b>
-            {pedestrianLocation[props.pedestrian_location]}
-          </b>
+          Year: <b>{props.year}</b>
         </p>
-      {/if}
-      {#if props.pedestrian_movement}
         <p>
-          Pedestrian movement: <b>
-            {pedestrianMovement[props.pedestrian_movement]}
-          </b>
+          Severity: <b>{severity[props.severity]}</b>
         </p>
-      {/if}
-      <p>Click to open full report in CycleStreets</p>
+        <p>
+          Casualties: <b>{casualtyTypes(props)}</b>
+        </p>
+        {#if props.pedestrian_location}
+          <p>
+            Pedestrian location: <b>
+              {pedestrianLocation[props.pedestrian_location]}
+            </b>
+          </p>
+        {/if}
+        {#if props.pedestrian_movement}
+          <p>
+            Pedestrian movement: <b>
+              {pedestrianMovement[props.pedestrian_movement]}
+            </b>
+          </p>
+        {/if}
+        <p>Click to open full report in CycleStreets</p>
+      {/snippet}
     </Popup>
   </CircleLayer>
 </VectorTileSource>

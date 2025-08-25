@@ -3,8 +3,12 @@
   import { initTooltips } from ".";
   import { map } from "../stores";
 
-  export let list: any[];
-  export let idx = 0;
+  interface Props {
+    list: any[];
+    idx?: number;
+  }
+
+  let { list, idx = $bindable(0) }: Props = $props();
 
   onMount(() => {
     $map?.keyboard.disable();
@@ -38,18 +42,18 @@
   }
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <div
   style="display: flex; justify-content: space-between; align-items: center;"
 >
-  <button disabled={idx == 0} on:click={prev} data-tippy-content="Left">
+  <button disabled={idx == 0} onclick={prev} data-tippy-content="Left">
     Previous
   </button>
   {idx + 1} / {list.length}
   <button
     disabled={idx == list.length - 1}
-    on:click={next}
+    onclick={next}
     data-tippy-content="Right"
   >
     Next

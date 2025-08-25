@@ -1,16 +1,19 @@
 <script lang="ts">
   import type { FeatureCollection, Polygon } from "geojson";
   import { CirclePlus, Pencil, Trash2 } from "lucide-svelte";
-  import { type DataDrivenPropertyValueSpecification } from "maplibre-gl";
+  import type {
+    DataDrivenPropertyValueSpecification,
+    MapGeoJSONFeature,
+  } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
     hoverStateFilter,
     JoinedData,
     LineLayer,
+    Popup,
   } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import { layerId, Link, ModeLink, pageTitle, Style } from "../common";
   import { pickNeighbourhoodName } from "../common/pick_names";
@@ -35,22 +38,29 @@
   import ManageProject from "./ManageProject.svelte";
 
   // Note we do this to trigger a refresh when loading stuff
-  $: gj = $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson();
-  $: neighbourhoods = {
+  let gj = $derived(
+    $mutationCounter > 0 ? $backend!.toSavefile() : emptyGeojson(),
+  );
+  let neighbourhoods = $derived({
     type: "FeatureCollection" as const,
     features: gj.features.filter((f) => f.properties!.kind == "boundary"),
-  } as FeatureCollection<Polygon, { name: string }>;
+  } as FeatureCollection<Polygon, { name: string }>);
 
   // If a user loads an empty project or deletes all neighbourhoods, don't show
   // them an empty pick screen
-  $: if (neighbourhoods.features.length == 0) {
-    $mode = { mode: "add-neighbourhood" };
-  }
+  $effect(() => {
+    if (neighbourhoods.features.length == 0) {
+      $mode = { mode: "add-neighbourhood" };
+    }
+  });
 
-  let selectedPrioritization: Prioritization =
-    $appFocus == "cnt" ? "combined" : "none";
-  let hoveredNeighbourhoodFromList: string | null = null;
-  let hoveredMapFeature: NeighbourhoodBoundaryFeature | null = null;
+  let selectedPrioritization: Prioritization = $state(
+    $appFocus == "cnt" ? "combined" : "none",
+  );
+  let hoveredNeighbourhoodFromList: string | null = $state(null);
+  let hoveredMapFeature:
+    | (NeighbourhoodBoundaryFeature & MapGeoJSONFeature)
+    | undefined = $state();
   $currentNeighbourhoodName = undefined;
 
   function pickNeighbourhood(name: string) {
@@ -131,62 +141,66 @@
 </script>
 
 <SplitComponent>
-  <div slot="top" style="display: flex; justify-content: space-between;">
-    <nav aria-label="breadcrumb">
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "title" }} />
-        </li>
-        <li>
-          {#key $currentProjectID}
-            {pageTitle($mode.mode)}
-          {/key}
-        </li>
-      </ul>
-    </nav>
-    <nav>
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "route", prevMode: "pick-neighbourhood" }} />
-        </li>
-        <li>
-          <ModeLink
-            mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
-          />
-        </li>
-        {#if $devMode}
+  {#snippet top()}
+    <div style="display: flex; justify-content: space-between;">
+      <nav aria-label="breadcrumb">
+        <ul>
           <li>
-            <ModeLink mode={{ mode: "debug-intersections" }} />
+            <ModeLink mode={{ mode: "title" }} />
           </li>
-        {/if}
-      </ul>
-    </nav>
-  </div>
+          <li>
+            {#key $currentProjectID}
+              {pageTitle($mode.mode)}
+            {/key}
+          </li>
+        </ul>
+      </nav>
+      <nav>
+        <ul>
+          <li>
+            <ModeLink
+              mode={{ mode: "route", prevMode: "pick-neighbourhood" }}
+            />
+          </li>
+          <li>
+            <ModeLink
+              mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
+            />
+          </li>
+          {#if $devMode}
+            <li>
+              <ModeLink mode={{ mode: "debug-intersections" }} />
+            </li>
+          {/if}
+        </ul>
+      </nav>
+    </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <h2>Neighbourhoods</h2>
     <ul class="navigable-list">
       {#each neighbourhoods.features as { properties: { name } }}
         <li
-          on:mouseenter={() => (hoveredNeighbourhoodFromList = name)}
-          on:mouseleave={() => (hoveredNeighbourhoodFromList = null)}
+          onmouseenter={() => (hoveredNeighbourhoodFromList = name)}
+          onmouseleave={() => (hoveredNeighbourhoodFromList = null)}
           class="actionable-cell"
           class:highlighted={hoveredMapFeature?.properties.name == name ||
             hoveredNeighbourhoodFromList == name}
         >
-          <h3><Link on:click={() => pickNeighbourhood(name)}>{name}</Link></h3>
+          <h3><Link onclick={() => pickNeighbourhood(name)}>{name}</Link></h3>
           <span class="actions">
             <button
               class="outline icon-btn"
               title="Rename neighbourhood"
-              on:click={() => renameNeighbourhood(name)}
+              onclick={() => renameNeighbourhood(name)}
             >
               <Pencil color="black" />
             </button>
             <button
               class="icon-btn destructive"
               title="Delete neighbourhood"
-              on:click={() => deleteNeighbourhood(name)}
+              onclick={() => deleteNeighbourhood(name)}
             >
               <Trash2 color="white" />
             </button>
@@ -212,9 +226,9 @@
     {/if}
 
     <ManageProject projectGj={gj} />
-  </div>
+  {/snippet}
 
-  <div slot="map">
+  {#snippet main()}
     <GeoJSON data={neighbourhoods} promoteId="name">
       <JoinedData
         data={hoveredNeighbourhoodFromList
@@ -253,29 +267,31 @@
         manageHoverState
         bind:hovered={hoveredMapFeature}
         hoverCursor="pointer"
-        on:click={(e) =>
-          pickNeighbourhood(notNull(e.detail.features[0].properties).name)}
+        onclick={(e) => pickNeighbourhood(e.features[0].properties!.name)}
       >
-        <Popup openOn="hover" let:props>
-          <h2>{props.name}</h2>
+        <Popup openOn="hover">
+          {#snippet children({ data })}
+            {@const props = data!.properties!}
+            <h2>{props.name}</h2>
 
-          {#if selectedPrioritization == "population_density"}
-            <b>Population density:</b>
-            {Math.round(props.population / props.area_km2).toLocaleString()} people
-            / km²
-          {:else if selectedPrioritization == "stats19"}
-            <b>Pedestrian and cyclist collisions:</b>
-            {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
-          {:else if selectedPrioritization == "pois"}
-            <b>Points of interest:</b>
-            {(props.number_pois / props.area_km2).toFixed(1)} / km²
-          {/if}
+            {#if selectedPrioritization == "population_density"}
+              <b>Population density:</b>
+              {Math.round(props.population / props.area_km2).toLocaleString()} people
+              / km²
+            {:else if selectedPrioritization == "stats19"}
+              <b>Pedestrian and cyclist collisions:</b>
+              {(props.number_stats19_collisions / props.area_km2).toFixed(1)} / km²
+            {:else if selectedPrioritization == "pois"}
+              <b>Points of interest:</b>
+              {(props.number_pois / props.area_km2).toFixed(1)} / km²
+            {/if}
+          {/snippet}
         </Popup>
       </FillLayer>
     </GeoJSON>
 
     <ModalFilterLayer interactive={false} />
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>

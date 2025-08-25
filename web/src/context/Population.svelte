@@ -3,10 +3,11 @@
     FillLayer,
     hoverStateFilter,
     LineLayer,
+    Popup,
     VectorTileSource,
   } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
-  import { makeRamp, Popup } from "svelte-utils/map";
+  import { makeRamp } from "svelte-utils/map";
   import { ContextLayerButton, layerId, prettyPrintPercent } from "../common";
   import {
     bucketize,
@@ -18,9 +19,9 @@
   } from "../common/colors";
   import { assetUrl, metricBuckets } from "../stores";
 
-  let showSIMD = false;
-  let showPopulationDensity = false;
-  let showCarOwnership = false;
+  let showSIMD = $state(false);
+  let showPopulationDensity = $state(false);
+  let showCarOwnership = $state(false);
 </script>
 
 <ContextLayerButton
@@ -33,7 +34,7 @@
     }
   }}
 >
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={simdColorScale.toReversed()}
       labels={{ buckets: bucketize(simdLimits).toReversed() }}
@@ -42,18 +43,20 @@
       <span>Less deprived</span>
       <span>More deprived</span>
     </div>
-  </div>
+  {/snippet}
 
-  <p slot="help">
-    This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
-      href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
-      target="_blank"
-    >
-      2020 data
-    </a>
-    . SIMD combines different domains: income; employment; health; education, skills
-    and training; geographic access to services; crime; and housing.
-  </p>
+  {#snippet help()}
+    <p>
+      This shows the Scottish Index of Multiple Deprivation (SIMD) from <a
+        href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
+        target="_blank"
+      >
+        2020 data
+      </a>
+      . SIMD combines different domains: income; employment; health; education, skills
+      and training; geographic access to services; crime; and housing.
+    </p>
+  {/snippet}
 </ContextLayerButton>
 
 <ContextLayerButton
@@ -66,7 +69,7 @@
     }
   }}
 >
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={populationDensityColorScale}
       labels={{ limits: $metricBuckets.population_density }}
@@ -76,17 +79,19 @@
       <span>people / km²</span>
       <span>More dense</span>
     </div>
-  </div>
+  {/snippet}
 
-  <p slot="help">
-    This shows population data from <a
-      href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
-      target="_blank"
-    >
-      2020 data
-    </a>
-    .
-  </p>
+  {#snippet help()}
+    <p>
+      This shows population data from <a
+        href="https://www.data.gov.uk/dataset/1102bf85-ed49-440a-b211-da87e8d752eb/scottish-index-of-multiple-deprivation-simd-2020"
+        target="_blank"
+      >
+        2020 data
+      </a>
+      .
+    </p>
+  {/snippet}
 </ContextLayerButton>
 
 <ContextLayerButton
@@ -99,7 +104,7 @@
     }
   }}
 >
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={carOwnershipColorScale.toReversed()}
       labels={{
@@ -111,11 +116,11 @@
         Households with at least one car or van
       </span>
     </div>
-  </div>
+  {/snippet}
 
-  <p slot="help">
-    Show households from the Scottish census with at least one car.
-  </p>
+  {#snippet help()}
+    <p>Show households from the Scottish census with at least one car.</p>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource
@@ -137,13 +142,16 @@
       visibility: showSIMD ? "visible" : "none",
     }}
   >
-    <Popup openOn="hover" let:props>
-      <p>
-        Data zone {props.id}
-        has {props.population.toLocaleString()}
-        people, and a SIMD rank of {props.imd_rank}, making it less deprived
-        than {props.imd_percentile}% of data zones.
-      </p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <p>
+          Data zone {props.id}
+          has {props.population.toLocaleString()}
+          people, and a SIMD rank of {props.imd_rank}, making it less deprived
+          than {props.imd_percentile}% of data zones.
+        </p>
+      {/snippet}
     </Popup>
   </FillLayer>
 
@@ -171,15 +179,18 @@
       visibility: showCarOwnership ? "visible" : "none",
     }}
   >
-    <Popup openOn="hover" let:props>
-      <p>
-        In data zone {props.id}
-        {prettyPrintPercent(
-          props.households_with_cars_or_vans,
-          props.total_households,
-        )} of approximately {props.total_households.toLocaleString()}
-        households have at least one car or van.
-      </p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <p>
+          In data zone {props.id}
+          {prettyPrintPercent(
+            props.households_with_cars_or_vans,
+            props.total_households,
+          )} of approximately {props.total_households.toLocaleString()}
+          households have at least one car or van.
+        </p>
+      {/snippet}
     </Popup>
   </FillLayer>
 
@@ -199,14 +210,17 @@
       visibility: showPopulationDensity ? "visible" : "none",
     }}
   >
-    <Popup openOn="hover" let:props>
-      <p>
-        Data zone {props.id}
-        has {props.population.toLocaleString()}
-        people, with a density of {Math.round(
-          props.population / (props.area / 1e6),
-        ).toLocaleString()} people per square kilometer
-      </p>
+    <Popup openOn="hover">
+      {#snippet children({ data })}
+        {@const props = data!.properties!}
+        <p>
+          Data zone {props.id}
+          has {props.population.toLocaleString()}
+          people, with a density of {Math.round(
+            props.population / (props.area / 1e6),
+          ).toLocaleString()} people per square kilometer
+        </p>
+      {/snippet}
     </Popup>
   </FillLayer>
 
