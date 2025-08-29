@@ -23,6 +23,7 @@
     ControlGroup,
     FillLayer,
     GeoJSON,
+    MapEvents,
     MapLibre,
     NavigationControl,
     ScaleControl,
@@ -40,6 +41,7 @@
   import AddNeighbourhoodMode from "./AddNeighbourhoodMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import { ModalFilterType } from "./common/ModalFilterType";
+  import { fixAllLayerOrderings } from "./common/zorder";
   import DebugDemandMode from "./DebugDemandMode.svelte";
   import DebugIntersectionsMode from "./DebugIntersectionsMode.svelte";
   import DebugNeighbourhoodMode from "./DebugNeighbourhoodMode.svelte";
@@ -93,6 +95,16 @@
 
   function zoomToFit(animate: boolean) {
     $mapStore!.fitBounds($backend!.getBounds(), { animate });
+  }
+
+  let lastLayerFix = $state(Date.now());
+  function fixLayerOrdering() {
+    if (map) {
+      if (Date.now() - lastLayerFix > 500) {
+        fixAllLayerOrderings();
+        lastLayerFix = Date.now();
+      }
+    }
   }
 
   let initialBounds: LngLatBoundsLike | undefined = $state();
@@ -232,6 +244,7 @@
             ]}
           >
             <NavigationControl showCompass={false} />
+            <MapEvents onstyledata={fixLayerOrdering} />
 
             {#if $backend}
               <Control position="top-left">
