@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Layers } from "lucide-svelte";
   import { Control } from "svelte-maplibre";
-  import { ContextLayerButton } from "../common";
+  import { ContextLayerButton, LanguagePicker } from "../common";
   import {
     appFocus,
     backend,
@@ -78,6 +78,8 @@
           <option value="hybrid">MapTiler Satellite</option>
           <option value="uk-openzoomstack-light">OS Open Zoomstack</option>
         </select>
+
+        <LanguagePicker />
 
         <ContextLayerButton label="Debugging tools" bind:show={$devMode} />
       </div>

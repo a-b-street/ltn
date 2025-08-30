@@ -1,12 +1,16 @@
 msgid ""
 msgstr ""
-"Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-30T11:22:11.897Z\n"
+"PO-Revision-Date: 2025-08-30T15:40:37.916Z\n"
+"Last-Translator: \n"
 "Language: fr\n"
-"MIME-Version: 1.0\n"
+"Language-Team: \n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2025-08-30T11:22:11.897Z\n"
-"POT-Creation-Date: 2025-08-30T11:22:11.897Z\n"
+"Plural-Forms: nplurals=2; plural=n == 1 ? 0 : 1;\n"
+"MIME-Version: 1.0\n"
 
 #: src/About.svelte
 msgid ""
@@ -75,14 +79,14 @@ msgstr ""
 msgid "Some road signs images © Crown copyright."
 msgstr ""
 
-#: src/AnimatePaths.svelte
 #: src/AddNeighbourhoodMode.svelte
+#: src/AnimatePaths.svelte
 msgid "FeatureCollection"
 msgstr ""
 
 #: src/BackButton.svelte
-#: src/common/StreetView.svelte
 #: src/edit/SnapRouteSelector.svelte
+#: src/common/StreetView.svelte
 msgid "Escape"
 msgstr ""
 
@@ -90,8 +94,8 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-#: src/App.svelte
 #: src/title/TitleMode.svelte
+#: src/App.svelte
 msgid "The Connected Neighbourhoods Tool"
 msgstr ""
 
@@ -197,14 +201,14 @@ msgid "No possible route after changes ( <0>This is usually a known software bug
 msgstr ""
 
 #: src/ImpactDetailMode.svelte
-#: src/RouteMode.svelte
 #: src/ViewShortcutsMode.svelte
+#: src/RouteMode.svelte
 msgid "A"
 msgstr ""
 
 #: src/ImpactDetailMode.svelte
-#: src/RouteMode.svelte
 #: src/ViewShortcutsMode.svelte
+#: src/RouteMode.svelte
 msgid "B"
 msgstr ""
 
@@ -760,7 +764,7 @@ msgstr ""
 
 #: src/title/TitleMode.svelte
 msgid "Read the user guide"
-msgstr ""
+msgstr "Lire le guide d'utilisation"
 
 #: src/title/TitleMode.svelte
 msgid "Your projects"
@@ -818,13 +822,13 @@ msgstr ""
 msgid "<0>+</0> <1/> Add diagonal filter"
 msgstr ""
 
-#: src/edit/SnapRouteSelector.svelte
 #: src/common/draw_area/AreaControls.svelte
+#: src/edit/SnapRouteSelector.svelte
 msgid "<0>Click and drag</0> to move"
 msgstr ""
 
-#: src/edit/SnapRouteSelector.svelte
 #: src/common/draw_area/AreaControls.svelte
+#: src/edit/SnapRouteSelector.svelte
 msgid "<0>Right click</0> to delete"
 msgstr ""
 
@@ -1223,14 +1227,13 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The Connected Neighbourhood Tool helps you design a Low-Traffic\n"
-"Neighbourhood (LTN). This guide is written specifically for the Scottish\n"
-"version of the tool, but most of it applies elsewhere too. In this guide,\n"
-"we assume you are already familiar with the concept and purpose of LTNs.\n"
-"If you have any trouble using the tool, please email the maintainer at <0>dabreegster@gmail.com</0> or <1>create a Github issue</1>."
-msgstr ""
+#~ msgid ""
+#~ "The Connected Neighbourhood Tool helps you design a Low-Traffic\n"
+#~ "Neighbourhood (LTN). This guide is written specifically for the Scottish\n"
+#~ "version of the tool, but most of it applies elsewhere too. In this guide,\n"
+#~ "we assume you are already familiar with the concept and purpose of LTNs.\n"
+#~ "If you have any trouble using the tool, please email the maintainer at <0>dabreegster@gmail.com</0> or <1>create a Github issue</1>."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "The overall process of using the CNT looks like this:"
@@ -1244,11 +1247,10 @@ msgstr ""
 msgid "Add one or more neighbourhood boundaries"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Design your LTN with modal filters, one-way streets, turn restrictions,\n"
-"and sometimes by reclassifying main roads"
-msgstr ""
+#~ msgid ""
+#~ "Design your LTN with modal filters, one-way streets, turn restrictions,\n"
+#~ "and sometimes by reclassifying main roads"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Explore the effects of your proposal"
@@ -1262,30 +1264,27 @@ msgstr ""
 msgid "Adding a neighbourhood"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Start using the tool by going to <0>https://cnt.scot/</0> and picking your study area on the map or from the list. The study areas are\n"
-"defined by Local Authority Districts."
-msgstr ""
+#~ msgid ""
+#~ "Start using the tool by going to <0>https://cnt.scot/</0> and picking your study area on the map or from the list. The study areas are\n"
+#~ "defined by Local Authority Districts."
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"To design an LTN, you first need to specify its boundary. Unless you’re\n"
-"working on a large circulation plan, the neighbourhood boundary will\n"
-"probably be a much smaller area than the entire study area shown. You can\n"
-"create multiple LTNs in one project, but you only need one to start."
-msgstr ""
+#~ msgid ""
+#~ "To design an LTN, you first need to specify its boundary. Unless you’re\n"
+#~ "working on a large circulation plan, the neighbourhood boundary will\n"
+#~ "probably be a much smaller area than the entire study area shown. You can\n"
+#~ "create multiple LTNs in one project, but you only need one to start."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Quick boundaries from severances"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"In some cases, the boundary you want will already be shown on the map as a\n"
-"coloured area. These areas are found automatically by dividing settlements\n"
-"on the map by severances – main roads, railways, and bodies of water."
-msgstr ""
+#~ msgid ""
+#~ "In some cases, the boundary you want will already be shown on the map as a\n"
+#~ "coloured area. These areas are found automatically by dividing settlements\n"
+#~ "on the map by severances – main roads, railways, and bodies of water."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1309,13 +1308,12 @@ msgid ""
 "point you drag becomes a red waypoint:"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The red points snap the boundary to roads. Sometimes near a park or body\n"
-"of water without any roads, you may wish to draw the boundary in even more\n"
-"detail by turning off snapping. Click any red point to turn it blue, which\n"
-"you can drag anywhere you like:"
-msgstr ""
+#~ msgid ""
+#~ "The red points snap the boundary to roads. Sometimes near a park or body\n"
+#~ "of water without any roads, you may wish to draw the boundary in even more\n"
+#~ "detail by turning off snapping. Click any red point to turn it blue, which\n"
+#~ "you can drag anywhere you like:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1323,15 +1321,14 @@ msgid ""
 "have a valid shape:"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The 1st and 2nd point form long line-like “spurs” away from the area.\n"
-"Between red snapped points, the tool is trying to find the shortest\n"
-"distance path along roads. Sometimes that path on both sides of a point\n"
-"will use exactly the same roads, resulting in this spur. When you see this\n"
-"happen, you can keep dragging points around, introducing more points, and\n"
-"so on to fix the shape to match whatever you intend."
-msgstr ""
+#~ msgid ""
+#~ "The 1st and 2nd point form long line-like “spurs” away from the area.\n"
+#~ "Between red snapped points, the tool is trying to find the shortest\n"
+#~ "distance path along roads. Sometimes that path on both sides of a point\n"
+#~ "will use exactly the same roads, resulting in this spur. When you see this\n"
+#~ "happen, you can keep dragging points around, introducing more points, and\n"
+#~ "so on to fix the shape to match whatever you intend."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Prioritisation metrics"
@@ -1347,15 +1344,13 @@ msgid ""
 "exposes some of these metrics for the areas:"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid "Population density – generally LTNs have greater benefit in denser areas"
-msgstr ""
+#~ msgid "Population density – generally LTNs have greater benefit in denser areas"
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Collisions – using <0>stats19 data</0> about prior collisions involving pedestrians and cyclists, it may be important\n"
-"to target areas with existing problems"
-msgstr ""
+#~ msgid ""
+#~ "Collisions – using <0>stats19 data</0> about prior collisions involving pedestrians and cyclists, it may be important\n"
+#~ "to target areas with existing problems"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1363,11 +1358,10 @@ msgid ""
 "priorities, areas with higher deprivation may be important"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Points of interest – areas with a mix of residential and commercial land\n"
-"use can be important to improve walking and cycling"
-msgstr ""
+#~ msgid ""
+#~ "Points of interest – areas with a mix of residential and commercial land\n"
+#~ "use can be important to improve walking and cycling"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1403,16 +1397,15 @@ msgstr ""
 msgid "Understanding the map: cells"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"This example neighbourhood is bounded on all sides by a grey main road,\n"
-"where we assume the road is designed to handle a higher volume of traffic.\n"
-"The smaller coloured areas inside the neighbourhood are <0>cells</0>, showing internal connectivity for a driver. If a driver enters the\n"
-"neighbourhood by the blue arrow, they are only able to reach the area\n"
-"shown in blue; they can’t drive to the yellow or pink cells without\n"
-"exiting back onto the main road, then re-entering the neighbourhood\n"
-"somewhere else."
-msgstr ""
+#~ msgid ""
+#~ "This example neighbourhood is bounded on all sides by a grey main road,\n"
+#~ "where we assume the road is designed to handle a higher volume of traffic.\n"
+#~ "The smaller coloured areas inside the neighbourhood are <0>cells</0>, showing internal connectivity for a driver. If a driver enters the\n"
+#~ "neighbourhood by the blue arrow, they are only able to reach the area\n"
+#~ "shown in blue; they can’t drive to the yellow or pink cells without\n"
+#~ "exiting back onto the main road, then re-entering the neighbourhood\n"
+#~ "somewhere else."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1421,36 +1414,33 @@ msgid ""
 "there. They can’t access the larger blue cell."
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Aside from these smaller cells, this neighbourhood mainly consists of the\n"
-"large blue cell. There are many points where a driver can enter and exit\n"
-"this cell. Because the blue cell stretches so far, a driver can enter from\n"
-"the south and drive all the way through to the north."
-msgstr ""
+#~ msgid ""
+#~ "Aside from these smaller cells, this neighbourhood mainly consists of the\n"
+#~ "large blue cell. There are many points where a driver can enter and exit\n"
+#~ "this cell. Because the blue cell stretches so far, a driver can enter from\n"
+#~ "the south and drive all the way through to the north."
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"If understanding the cells as areas is confusing or inconvenient, you can\n"
-"modify the map style and colour the roads by their cell instead:"
-msgstr ""
+#~ msgid ""
+#~ "If understanding the cells as areas is confusing or inconvenient, you can\n"
+#~ "modify the map style and colour the roads by their cell instead:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Understanding the map: shortcuts"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"To design an effective LTN, you must limit the traffic cutting through the\n"
-"neighbourhood. <0>Shortcuts</0> show the possible routes through\n"
-"a neighbourhood a driver might take when avoiding main roads. They do not include\n"
-"journeys starting or ending somewhere in the neighbourhood, just routes that\n"
-"pass through without stopping. These are shown in shades of red; the white\n"
-"streets are dead-ends and cul-de-sacs; a driver has no reason to go there unless\n"
-"their trip starts or ends there. The darkest reds show the streets most likely\n"
-"to see lots of traffic cutting through. The darkest red is along the long north/south\n"
-"street:"
-msgstr ""
+#~ msgid ""
+#~ "To design an effective LTN, you must limit the traffic cutting through the\n"
+#~ "neighbourhood. <0>Shortcuts</0> show the possible routes through\n"
+#~ "a neighbourhood a driver might take when avoiding main roads. They do not include\n"
+#~ "journeys starting or ending somewhere in the neighbourhood, just routes that\n"
+#~ "pass through without stopping. These are shown in shades of red; the white\n"
+#~ "streets are dead-ends and cul-de-sacs; a driver has no reason to go there unless\n"
+#~ "their trip starts or ends there. The darkest reds show the streets most likely\n"
+#~ "to see lots of traffic cutting through. The darkest red is along the long north/south\n"
+#~ "street:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1458,15 +1448,14 @@ msgid ""
 "inspect this street, we see one example shortcut from north to south:"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The tool identifies 51 different shortcuts passing through this one\n"
-"street, showing the most advantageous shortcuts first – the ones that save\n"
-"the driver the most time by cutting through the middle of the\n"
-"neighbourhood. Most of the shortcuts are simple variations, changing the\n"
-"exact entrance or exit. There are also some shortcuts involving the\n"
-"western boundary:"
-msgstr ""
+#~ msgid ""
+#~ "The tool identifies 51 different shortcuts passing through this one\n"
+#~ "street, showing the most advantageous shortcuts first – the ones that save\n"
+#~ "the driver the most time by cutting through the middle of the\n"
+#~ "neighbourhood. Most of the shortcuts are simple variations, changing the\n"
+#~ "exact entrance or exit. There are also some shortcuts involving the\n"
+#~ "western boundary:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "The tool counts these shortcuts in a simple way:"
@@ -1476,12 +1465,11 @@ msgstr ""
 msgid "Find all entrances and exits onto streets from the main roads"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"For every combination, calculate the fastest driving route, using the\n"
-"speed limit and length of each road. Main roads are penalised as having\n"
-"half their speed limit, to simulate delays in heavy traffic conditions."
-msgstr ""
+#~ msgid ""
+#~ "For every combination, calculate the fastest driving route, using the\n"
+#~ "speed limit and length of each road. Main roads are penalised as having\n"
+#~ "half their speed limit, to simulate delays in heavy traffic conditions."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Any route that crosses a main road is discarded"
@@ -1491,34 +1479,32 @@ msgstr ""
 msgid "Count the number of routes crossing each street segment"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The tool assumes a driver is equally likely to enter and exit the\n"
-"neighbourhood through any point, but of course this doesn’t reflect the\n"
-"real traffic patterns in the larger area. Maybe the northern boundary of\n"
-"this neighbourhood isn’t attractive for drivers, because there’s no reason\n"
-"to drive that way. (In this case, since the neighbourhood is just north of\n"
-"Aberdeen city centre and the north/south shortcut is parallel to an A\n"
-"road, it <0>is</0> likely a shortcut that happens in practice.)\n"
-"The tool’s assumptions are necessary to make due to a lack of detailed\n"
-"traffic pattern data, and because they can be calculated even as you start\n"
-"to edit the neighbourhood. The shortcuts simply show what is <1>possible</1> for drivers to do, not what is likely. You may need\n"
-"to apply your own local knowledge, judgment, or traffic counters to verify\n"
-"a shortcut is actually a problem in practice."
-msgstr ""
+#~ msgid ""
+#~ "The tool assumes a driver is equally likely to enter and exit the\n"
+#~ "neighbourhood through any point, but of course this doesn’t reflect the\n"
+#~ "real traffic patterns in the larger area. Maybe the northern boundary of\n"
+#~ "this neighbourhood isn’t attractive for drivers, because there’s no reason\n"
+#~ "to drive that way. (In this case, since the neighbourhood is just north of\n"
+#~ "Aberdeen city centre and the north/south shortcut is parallel to an A\n"
+#~ "road, it <0>is</0> likely a shortcut that happens in practice.)\n"
+#~ "The tool’s assumptions are necessary to make due to a lack of detailed\n"
+#~ "traffic pattern data, and because they can be calculated even as you start\n"
+#~ "to edit the neighbourhood. The shortcuts simply show what is <1>possible</1> for drivers to do, not what is likely. You may need\n"
+#~ "to apply your own local knowledge, judgment, or traffic counters to verify\n"
+#~ "a shortcut is actually a problem in practice."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Editing: modal filters"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Now that you understand shortcuts, let’s move on to the interventions you\n"
-"can propose to fix these problems. The main tool is the <0>modal filter</0>, or point closure. It stops drivers from passing through a street, while\n"
-"still allowing pedestrians and cyclists (and sometimes buses, emergency\n"
-"vehicles, etc) through. Let’s try adding a modal filter along the\n"
-"north/south shortcut:"
-msgstr ""
+#~ msgid ""
+#~ "Now that you understand shortcuts, let’s move on to the interventions you\n"
+#~ "can propose to fix these problems. The main tool is the <0>modal filter</0>, or point closure. It stops drivers from passing through a street, while\n"
+#~ "still allowing pedestrians and cyclists (and sometimes buses, emergency\n"
+#~ "vehicles, etc) through. Let’s try adding a modal filter along the\n"
+#~ "north/south shortcut:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1527,11 +1513,10 @@ msgid ""
 "add a second filter there, you’ll see a big change:"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The blue cell has been split into a new yellow cell, making it clear that\n"
-"now the north/south shortcut is totally impossible."
-msgstr ""
+#~ msgid ""
+#~ "The blue cell has been split into a new yellow cell, making it clear that\n"
+#~ "now the north/south shortcut is totally impossible."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1539,45 +1524,42 @@ msgid ""
 "There are four types you can choose from:"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"In the scope of the tool, these all mean the same thing – a driver cannot\n"
-"pass through. You can use the different types to communicate more specific\n"
-"proposals. School streets are timed closures, but the tool will model the\n"
-"effects of the filter during school hours. When you place a filter on a\n"
-"street that currently has a bus route along it, you will automatically get\n"
-"a bus gate, which uses camera enforcement and doesn’t physically prevent\n"
-"vehicles from crossing. The specifics of the physical intervention are\n"
-"outside the scope of this tool – depending on width constraints, allowing\n"
-"adequate room for bin lorries to turn, and so on, the physical\n"
-"implementation of a filter could be a pocket park, removable bollards,\n"
-"concrete, etc. The LTN tool’s purpose is to focus on the strategic\n"
-"planning."
-msgstr ""
+#~ msgid ""
+#~ "In the scope of the tool, these all mean the same thing – a driver cannot\n"
+#~ "pass through. You can use the different types to communicate more specific\n"
+#~ "proposals. School streets are timed closures, but the tool will model the\n"
+#~ "effects of the filter during school hours. When you place a filter on a\n"
+#~ "street that currently has a bus route along it, you will automatically get\n"
+#~ "a bus gate, which uses camera enforcement and doesn’t physically prevent\n"
+#~ "vehicles from crossing. The specifics of the physical intervention are\n"
+#~ "outside the scope of this tool – depending on width constraints, allowing\n"
+#~ "adequate room for bin lorries to turn, and so on, the physical\n"
+#~ "implementation of a filter could be a pocket park, removable bollards,\n"
+#~ "concrete, etc. The LTN tool’s purpose is to focus on the strategic\n"
+#~ "planning."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Editing: diagonal modal filters"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Modal filters usually apply at one point along a street, but when you have\n"
-"a four-way intersection, you can click it to toggle through two possible\n"
-"diagonal filters. These allow traffic through the intersection only for\n"
-"some combinations of streets."
-msgstr ""
+#~ msgid ""
+#~ "Modal filters usually apply at one point along a street, but when you have\n"
+#~ "a four-way intersection, you can click it to toggle through two possible\n"
+#~ "diagonal filters. These allow traffic through the intersection only for\n"
+#~ "some combinations of streets."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Editing: one-way streets"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"You can also change the direction of traffic flow along a street. This is\n"
-"helpful to retain through-traffic in one direction, but funnel it back out\n"
-"to a main road. Or sometimes a shortcut is only problematic in one\n"
-"direction."
-msgstr ""
+#~ msgid ""
+#~ "You can also change the direction of traffic flow along a street. This is\n"
+#~ "helpful to retain through-traffic in one direction, but funnel it back out\n"
+#~ "to a main road. Or sometimes a shortcut is only problematic in one\n"
+#~ "direction."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1621,17 +1603,16 @@ msgid ""
 "side."
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"You may want to reclassify these main roads, and treat them like\n"
-"residential streets that should not carry through-traffic. This could make\n"
-"sense in the context of a larger circulation plan, a redesign to the\n"
-"strategic road network in the wider area, or when the main road is a high\n"
-"street with heavy foot and cycling traffic. No matter the reason, you can\n"
-"mark new main roads or erase main roads using one of the tools. In complex\n"
-"areas, it may be simplest to first <0>Erase all main roads</0> and then <1>Mark as main along a route</1>. After removing those two interior main\n"
-"roads, the neighbourhood looks like one big cell:"
-msgstr ""
+#~ msgid ""
+#~ "You may want to reclassify these main roads, and treat them like\n"
+#~ "residential streets that should not carry through-traffic. This could make\n"
+#~ "sense in the context of a larger circulation plan, a redesign to the\n"
+#~ "strategic road network in the wider area, or when the main road is a high\n"
+#~ "street with heavy foot and cycling traffic. No matter the reason, you can\n"
+#~ "mark new main roads or erase main roads using one of the tools. In complex\n"
+#~ "areas, it may be simplest to first <0>Erase all main roads</0> and then <1>Mark as main along a route</1>. After removing those two interior main\n"
+#~ "roads, the neighbourhood looks like one big cell:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1643,83 +1624,77 @@ msgstr ""
 msgid "Exploring effects"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"As you design an LTN, you are already understanding the effects on traffic\n"
-"through the area, by paying attention to cells and shortcuts. You can also\n"
-"study the effects on the entire study area."
-msgstr ""
+#~ msgid ""
+#~ "As you design an LTN, you are already understanding the effects on traffic\n"
+#~ "through the area, by paying attention to cells and shortcuts. You can also\n"
+#~ "study the effects on the entire study area."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Effect on one journey"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"A common concern during public consultations is that a driving route that\n"
-"previously cut through a neighbourhood will become much longer or\n"
-"impossible after an LTN is created. You can use the route tool to evaluate\n"
-"journeys between a start and end point. The red line shows the fastest\n"
-"route before any changes you’ve made, and the blue line shows the new\n"
-"route accounting for your new modal filters, one-ways, and turn\n"
-"restrictions. When you see just a blue line, it means both routes are the\n"
-"same – your changes had no effect on this journey."
-msgstr ""
+#~ msgid ""
+#~ "A common concern during public consultations is that a driving route that\n"
+#~ "previously cut through a neighbourhood will become much longer or\n"
+#~ "impossible after an LTN is created. You can use the route tool to evaluate\n"
+#~ "journeys between a start and end point. The red line shows the fastest\n"
+#~ "route before any changes you’ve made, and the blue line shows the new\n"
+#~ "route accounting for your new modal filters, one-ways, and turn\n"
+#~ "restrictions. When you see just a blue line, it means both routes are the\n"
+#~ "same – your changes had no effect on this journey."
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"The choice of route and the estimated journey time is based on simple\n"
-"assumptions that drivers travel at the full speed limit, with no delays at\n"
-"junctions or due to traffic. This is of course unrealistic, but there is\n"
-"no openly available traffic data everywhere. Usually the fastest route\n"
-"stays on main roads, which have higher speed limits, but during heavy\n"
-"traffic, drivers are more likely to divert through a neighbourhood street.\n"
-"You can model this situation using the slider to slow-down main road\n"
-"traffic."
-msgstr ""
+#~ msgid ""
+#~ "The choice of route and the estimated journey time is based on simple\n"
+#~ "assumptions that drivers travel at the full speed limit, with no delays at\n"
+#~ "junctions or due to traffic. This is of course unrealistic, but there is\n"
+#~ "no openly available traffic data everywhere. Usually the fastest route\n"
+#~ "stays on main roads, which have higher speed limits, but during heavy\n"
+#~ "traffic, drivers are more likely to divert through a neighbourhood street.\n"
+#~ "You can model this situation using the slider to slow-down main road\n"
+#~ "traffic."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Effect on routes to one destination"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Another concern during public consultations is the effect on residents\n"
-"within an LTN who drive. Previously they may have taken a shortcut through\n"
-"the neighbourhood to visit the city centre, but a new filter might make\n"
-"their journey slightly more inconvenient. You can use a tool to explore\n"
-"the change in journey times starting from everywhere in the neighbourhood\n"
-"going to one destination, designated by the orange X. Starting a journey\n"
-"from most streets isn’t affected by new filters, but a few streets are\n"
-"coloured red."
-msgstr ""
+#~ msgid ""
+#~ "Another concern during public consultations is the effect on residents\n"
+#~ "within an LTN who drive. Previously they may have taken a shortcut through\n"
+#~ "the neighbourhood to visit the city centre, but a new filter might make\n"
+#~ "their journey slightly more inconvenient. You can use a tool to explore\n"
+#~ "the change in journey times starting from everywhere in the neighbourhood\n"
+#~ "going to one destination, designated by the orange X. Starting a journey\n"
+#~ "from most streets isn’t affected by new filters, but a few streets are\n"
+#~ "coloured red."
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Hovering on one of the streets shows the journey before and after the\n"
-"changes. You can click any of these to open in the route tool and explore\n"
-"further."
-msgstr ""
+#~ msgid ""
+#~ "Hovering on one of the streets shows the journey before and after the\n"
+#~ "changes. You can click any of these to open in the route tool and explore\n"
+#~ "further."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Impact prediction"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"Suppose a large volume of traffic previously took a shortcut through a\n"
-"neighbourhood. After designing an LTN to address this problem, will those\n"
-"drivers stick to main roads, or is there a different detour through an\n"
-"adjacent neighbourhood they might try? To understand these possible\n"
-"spillover effects, we need to understand the overall patterns of traffic\n"
-"in the wider study area. Origin/destination datasets describe where\n"
-"journeys begin and end. The LTN tool’s impact prediction mode calculates\n"
-"the route each trip would take before and after your edits, and then\n"
-"identifies red streets in the entire study area that may experience higher\n"
-"traffic and green streets that should experience lower traffic. In the\n"
-"example below, there are two LTNs, shown as grey areas, each with new\n"
-"modal filters."
-msgstr ""
+#~ msgid ""
+#~ "Suppose a large volume of traffic previously took a shortcut through a\n"
+#~ "neighbourhood. After designing an LTN to address this problem, will those\n"
+#~ "drivers stick to main roads, or is there a different detour through an\n"
+#~ "adjacent neighbourhood they might try? To understand these possible\n"
+#~ "spillover effects, we need to understand the overall patterns of traffic\n"
+#~ "in the wider study area. Origin/destination datasets describe where\n"
+#~ "journeys begin and end. The LTN tool’s impact prediction mode calculates\n"
+#~ "the route each trip would take before and after your edits, and then\n"
+#~ "identifies red streets in the entire study area that may experience higher\n"
+#~ "traffic and green streets that should experience lower traffic. In the\n"
+#~ "example below, there are two LTNs, shown as grey areas, each with new\n"
+#~ "modal filters."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -1736,53 +1711,48 @@ msgid ""
 "traffic. There are no known better open datasets to replace this."
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"By default, this tool uses the “Calculate quickly” option, which samples\n"
-"only one journey between census zones, and weights the result based on\n"
-"the number of trips between the zones. “Calculate more accurately” takes\n"
-"longer, but simulates many journeys between zones."
-msgstr ""
+#~ msgid ""
+#~ "By default, this tool uses the “Calculate quickly” option, which samples\n"
+#~ "only one journey between census zones, and weights the result based on\n"
+#~ "the number of trips between the zones. “Calculate more accurately” takes\n"
+#~ "longer, but simulates many journeys between zones."
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"In studies of real LTNs, counters show “traffic dissipation” over a long\n"
-"period of time, in which people previously choosing to drive change\n"
-"their travel behavior entirely – resulting in different destinations,\n"
-"walking or cycling or taking public transit instead, driving at\n"
-"different times of day, and so on. This analysis does not model any of\n"
-"that."
-msgstr ""
+#~ msgid ""
+#~ "In studies of real LTNs, counters show “traffic dissipation” over a long\n"
+#~ "period of time, in which people previously choosing to drive change\n"
+#~ "their travel behavior entirely – resulting in different destinations,\n"
+#~ "walking or cycling or taking public transit instead, driving at\n"
+#~ "different times of day, and so on. This analysis does not model any of\n"
+#~ "that."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Sharing your work"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"All of your projects are stored in your web browser’s local storage. If\n"
-"you change devices or browsers or clear your browser’s storage, then you\n"
-"will not see your old projects. At any time, you can export a project to a\n"
-"file from the main screen:"
-msgstr ""
+#~ msgid ""
+#~ "All of your projects are stored in your web browser’s local storage. If\n"
+#~ "you change devices or browsers or clear your browser’s storage, then you\n"
+#~ "will not see your old projects. At any time, you can export a project to a\n"
+#~ "file from the main screen:"
+#~ msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"This will download a GeoJSON file. You can email this, copy to Sharepoint,\n"
-"or otherwise transfer to somebody else. At the bottom of the very first\n"
-"Choose Project screen, you can then load this project from its file:"
-msgstr ""
+#~ msgid ""
+#~ "This will download a GeoJSON file. You can email this, copy to Sharepoint,\n"
+#~ "or otherwise transfer to somebody else. At the bottom of the very first\n"
+#~ "Choose Project screen, you can then load this project from its file:"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Multiple proposals"
 msgstr ""
 
-#: src/user_guide/Page.svelte
-msgid ""
-"You may want to try a few different proposals for an LTN. Each alternate\n"
-"proposal will be in its own project. From the main screen, you can quickly\n"
-"copy a project and switch between projects."
-msgstr ""
+#~ msgid ""
+#~ "You may want to try a few different proposals for an LTN. Each alternate\n"
+#~ "proposal will be in its own project. From the main screen, you can quickly\n"
+#~ "copy a project and switch between projects."
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Appendix"
@@ -1824,13 +1794,13 @@ msgstr ""
 msgid "Table of Contents"
 msgstr ""
 
-#: src/edit/ShowBeforeEdits.svelte
 #: src/edit/NeighbourhoodMode.svelte
+#: src/edit/ShowBeforeEdits.svelte
 msgid "{0} shortcuts through {1} ({2} mph)"
 msgstr ""
 
-#: src/edit/ShowBeforeEdits.svelte
 #: src/edit/NeighbourhoodMode.svelte
+#: src/edit/ShowBeforeEdits.svelte
 msgid "Main road: {0} ({1} mph)"
 msgstr ""
 
@@ -2090,4 +2060,324 @@ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Create a turn restriction from {0} to {1}"
+msgstr ""
+
+#~ msgid "Language <0><0>English</0> <1>Français</1> <2>Magyar</2></0>"
+#~ msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "<0/> Language <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The Connected Neighbourhood Tool helps you design a Low-Traffic\n"
+"Neighbourhood (LTN). This guide is written specifically for the Scottish\n"
+"version of the tool, but most of it applies elsewhere too. In this\n"
+"guide, we assume you are already familiar with the concept and purpose\n"
+"of LTNs. If you have any trouble using the tool, please email the\n"
+"maintainer at <0>dabreegster@gmail.com</0> or <1>create a Github issue</1>."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Design your LTN with modal filters, one-way streets, turn\n"
+"restrictions, and sometimes by reclassifying main roads"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Start using the tool by going to <0>https://cnt.scot/</0> and picking your study area on the map or from the list. The study areas\n"
+"are defined by Local Authority Districts."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"To design an LTN, you first need to specify its boundary. Unless you’re\n"
+"working on a large circulation plan, the neighbourhood boundary will\n"
+"probably be a much smaller area than the entire study area shown. You\n"
+"can create multiple LTNs in one project, but you only need one to start."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"In some cases, the boundary you want will already be shown on the map as\n"
+"a coloured area. These areas are found automatically by dividing\n"
+"settlements on the map by severances – main roads, railways, and bodies\n"
+"of water."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The red points snap the boundary to roads. Sometimes near a park or body\n"
+"of water without any roads, you may wish to draw the boundary in even\n"
+"more detail by turning off snapping. Click any red point to turn it\n"
+"blue, which you can drag anywhere you like:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The 1st and 2nd point form long line-like “spurs” away from the area.\n"
+"Between red snapped points, the tool is trying to find the shortest\n"
+"distance path along roads. Sometimes that path on both sides of a point\n"
+"will use exactly the same roads, resulting in this spur. When you see\n"
+"this happen, you can keep dragging points around, introducing more\n"
+"points, and so on to fix the shape to match whatever you intend."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Population density – generally LTNs have greater benefit in denser\n"
+"areas"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Collisions – using <0>stats19 data</0> about prior collisions involving pedestrians and cyclists, it may be\n"
+"important to target areas with existing problems"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Points of interest – areas with a mix of residential and commercial\n"
+"land use can be important to improve walking and cycling"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"This example neighbourhood is bounded on all sides by a grey main road,\n"
+"where we assume the road is designed to handle a higher volume of\n"
+"traffic. The smaller coloured areas inside the neighbourhood are <0>cells</0>, showing internal connectivity for a driver. If a driver enters the\n"
+"neighbourhood by the blue arrow, they are only able to reach the area\n"
+"shown in blue; they can’t drive to the yellow or pink cells without\n"
+"exiting back onto the main road, then re-entering the neighbourhood\n"
+"somewhere else."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Aside from these smaller cells, this neighbourhood mainly consists of\n"
+"the large blue cell. There are many points where a driver can enter and\n"
+"exit this cell. Because the blue cell stretches so far, a driver can\n"
+"enter from the south and drive all the way through to the north."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"If understanding the cells as areas is confusing or inconvenient, you\n"
+"can modify the map style and colour the roads by their cell instead:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"To design an effective LTN, you must limit the traffic cutting through\n"
+"the neighbourhood. <0>Shortcuts</0> show the possible routes through\n"
+"a neighbourhood a driver might take when avoiding main roads. They do not\n"
+"include journeys starting or ending somewhere in the neighbourhood, just\n"
+"routes that pass through without stopping. These are shown in shades of red;\n"
+"the white streets are dead-ends and cul-de-sacs; a driver has no reason to\n"
+"go there unless their trip starts or ends there. The darkest reds show the\n"
+"streets most likely to see lots of traffic cutting through. The darkest red\n"
+"is along the long north/south street:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The tool identifies 51 different shortcuts passing through this one\n"
+"street, showing the most advantageous shortcuts first – the ones that\n"
+"save the driver the most time by cutting through the middle of the\n"
+"neighbourhood. Most of the shortcuts are simple variations, changing the\n"
+"exact entrance or exit. There are also some shortcuts involving the\n"
+"western boundary:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"For every combination, calculate the fastest driving route, using the\n"
+"speed limit and length of each road. Main roads are penalised as\n"
+"having half their speed limit, to simulate delays in heavy traffic\n"
+"conditions."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The tool assumes a driver is equally likely to enter and exit the\n"
+"neighbourhood through any point, but of course this doesn’t reflect the\n"
+"real traffic patterns in the larger area. Maybe the northern boundary of\n"
+"this neighbourhood isn’t attractive for drivers, because there’s no\n"
+"reason to drive that way. (In this case, since the neighbourhood is just\n"
+"north of Aberdeen city centre and the north/south shortcut is parallel\n"
+"to an A road, it <0>is</0> likely a shortcut that happens in\n"
+"practice.) The tool’s assumptions are necessary to make due to a lack of\n"
+"detailed traffic pattern data, and because they can be calculated even\n"
+"as you start to edit the neighbourhood. The shortcuts simply show what\n"
+"is <1>possible</1> for drivers to do, not what is likely. You may\n"
+"need to apply your own local knowledge, judgment, or traffic counters to\n"
+"verify a shortcut is actually a problem in practice."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Now that you understand shortcuts, let’s move on to the interventions\n"
+"you can propose to fix these problems. The main tool is the <0>modal filter</0>, or point closure. It stops drivers from passing through a street,\n"
+"while still allowing pedestrians and cyclists (and sometimes buses,\n"
+"emergency vehicles, etc) through. Let’s try adding a modal filter along\n"
+"the north/south shortcut:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The blue cell has been split into a new yellow cell, making it clear\n"
+"that now the north/south shortcut is totally impossible."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"In the scope of the tool, these all mean the same thing – a driver\n"
+"cannot pass through. You can use the different types to communicate more\n"
+"specific proposals. School streets are timed closures, but the tool will\n"
+"model the effects of the filter during school hours. When you place a\n"
+"filter on a street that currently has a bus route along it, you will\n"
+"automatically get a bus gate, which uses camera enforcement and doesn’t\n"
+"physically prevent vehicles from crossing. The specifics of the physical\n"
+"intervention are outside the scope of this tool – depending on width\n"
+"constraints, allowing adequate room for bin lorries to turn, and so on,\n"
+"the physical implementation of a filter could be a pocket park,\n"
+"removable bollards, concrete, etc. The LTN tool’s purpose is to focus on\n"
+"the strategic planning."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Modal filters usually apply at one point along a street, but when you\n"
+"have a four-way intersection, you can click it to toggle through two\n"
+"possible diagonal filters. These allow traffic through the intersection\n"
+"only for some combinations of streets."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"You can also change the direction of traffic flow along a street. This\n"
+"is helpful to retain through-traffic in one direction, but funnel it\n"
+"back out to a main road. Or sometimes a shortcut is only problematic in\n"
+"one direction."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"You may want to reclassify these main roads, and treat them like\n"
+"residential streets that should not carry through-traffic. This could\n"
+"make sense in the context of a larger circulation plan, a redesign to\n"
+"the strategic road network in the wider area, or when the main road is a\n"
+"high street with heavy foot and cycling traffic. No matter the reason,\n"
+"you can mark new main roads or erase main roads using one of the tools.\n"
+"In complex areas, it may be simplest to first <0>Erase all main roads</0> and then <1>Mark as main along a route</1>. After removing those two interior\n"
+"main roads, the neighbourhood looks like one big cell:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"As you design an LTN, you are already understanding the effects on\n"
+"traffic through the area, by paying attention to cells and shortcuts.\n"
+"You can also study the effects on the entire study area."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"A common concern during public consultations is that a driving route\n"
+"that previously cut through a neighbourhood will become much longer or\n"
+"impossible after an LTN is created. You can use the route tool to\n"
+"evaluate journeys between a start and end point. The red line shows the\n"
+"fastest route before any changes you’ve made, and the blue line shows\n"
+"the new route accounting for your new modal filters, one-ways, and turn\n"
+"restrictions. When you see just a blue line, it means both routes are\n"
+"the same – your changes had no effect on this journey."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"The choice of route and the estimated journey time is based on simple\n"
+"assumptions that drivers travel at the full speed limit, with no delays\n"
+"at junctions or due to traffic. This is of course unrealistic, but there\n"
+"is no openly available traffic data everywhere. Usually the fastest\n"
+"route stays on main roads, which have higher speed limits, but during\n"
+"heavy traffic, drivers are more likely to divert through a neighbourhood\n"
+"street. You can model this situation using the slider to slow-down main\n"
+"road traffic."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Another concern during public consultations is the effect on residents\n"
+"within an LTN who drive. Previously they may have taken a shortcut\n"
+"through the neighbourhood to visit the city centre, but a new filter\n"
+"might make their journey slightly more inconvenient. You can use a tool\n"
+"to explore the change in journey times starting from everywhere in the\n"
+"neighbourhood going to one destination, designated by the orange X.\n"
+"Starting a journey from most streets isn’t affected by new filters, but\n"
+"a few streets are coloured red."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Hovering on one of the streets shows the journey before and after the\n"
+"changes. You can click any of these to open in the route tool and\n"
+"explore further."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"Suppose a large volume of traffic previously took a shortcut through a\n"
+"neighbourhood. After designing an LTN to address this problem, will\n"
+"those drivers stick to main roads, or is there a different detour\n"
+"through an adjacent neighbourhood they might try? To understand these\n"
+"possible spillover effects, we need to understand the overall patterns\n"
+"of traffic in the wider study area. Origin/destination datasets describe\n"
+"where journeys begin and end. The LTN tool’s impact prediction mode\n"
+"calculates the route each trip would take before and after your edits,\n"
+"and then identifies red streets in the entire study area that may\n"
+"experience higher traffic and green streets that should experience lower\n"
+"traffic. In the example below, there are two LTNs, shown as grey areas,\n"
+"each with new modal filters."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"By default, this tool uses the “Calculate quickly” option, which\n"
+"samples only one journey between census zones, and weights the result\n"
+"based on the number of trips between the zones. “Calculate more\n"
+"accurately” takes longer, but simulates many journeys between zones."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"In studies of real LTNs, counters show “traffic dissipation” over a\n"
+"long period of time, in which people previously choosing to drive\n"
+"change their travel behavior entirely – resulting in different\n"
+"destinations, walking or cycling or taking public transit instead,\n"
+"driving at different times of day, and so on. This analysis does not\n"
+"model any of that."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"All of your projects are stored in your web browser’s local storage. If\n"
+"you change devices or browsers or clear your browser’s storage, then you\n"
+"will not see your old projects. At any time, you can export a project to\n"
+"a file from the main screen:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"This will download a GeoJSON file. You can email this, copy to\n"
+"Sharepoint, or otherwise transfer to somebody else. At the bottom of the\n"
+"very first Choose Project screen, you can then load this project from\n"
+"its file:"
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"You may want to try a few different proposals for an LTN. Each alternate\n"
+"proposal will be in its own project. From the main screen, you can\n"
+"quickly copy a project and switch between projects."
 msgstr ""

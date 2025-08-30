@@ -147,6 +147,16 @@ export function saveCurrentProject() {
 
 export let useLocalVite: Writable<boolean> = writable(false);
 
+export let locale = writable(languageFromURL());
+
+export function languageFromURL(): string {
+  let param = new URL(window.location.href).searchParams.get("lang");
+  if (param && ["en", "fr", "hu"].includes(param)) {
+    return param;
+  }
+  return "en";
+}
+
 export function assetUrl(path: string): string {
   if (get(useLocalVite)) {
     return `/${path}`;
