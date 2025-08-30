@@ -19,7 +19,7 @@
     distance: number;
   }
 
-  let dots = $derived.by(makeDots);
+  let dots = $state(makeDots());
   let gj = $derived.by(redraw);
 
   let intervalId = setInterval(animate, redrawMs);
