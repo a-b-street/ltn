@@ -16,10 +16,11 @@
     hoverStateFilter,
     LineLayer,
     MapEvents,
+    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull, SequentialLegend } from "svelte-utils";
-  import { emptyGeojson, Popup } from "svelte-utils/map";
+  import { SequentialLegend } from "svelte-utils";
+  import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import eraserCursorURL from "../../assets/cursors/eraser.svg?url";
   import paintbrushCursorURL from "../../assets/cursors/paintbrush.svg?url";
@@ -107,43 +108,19 @@
       >,
     };
   }
-  let action: Action = { kind: "filter", freehand: false };
+  let action: Action = $state({ kind: "filter", freehand: false });
 
-  $: if (action.kind == "oneway" || action.kind == "main-roads") {
-    $map!.doubleClickZoom.disable();
-  } else {
-    $map!.doubleClickZoom.enable();
-  }
+  let settingFilterType = $state(false);
 
-  $: {
-    if (action.kind == "filter" && action.freehand) {
-      $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
-    } else if (
-      action.kind == "main-roads" &&
-      action.tool == "snap-route-erase"
-    ) {
-      $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
-    } else {
-      $map!.getCanvas().style.cursor = "";
-    }
-  }
+  // TODO Will this run twice the first time?
+  let gj: RenderNeighbourhoodOutput = $state($backend!.renderNeighbourhood());
+  // @ts-expect-error TS can't figure out that we're narrowing the case here
+  let boundary: NeighbourhoodBoundaryFeature = $derived(
+    gj.features.find((f) => f.properties.kind == "boundary")!,
+  );
 
-  let settingFilterType = false;
-  let undoLength = 0;
-  let redoLength = 0;
-  let boundary: NeighbourhoodBoundaryFeature | null;
-
-  let gj: RenderNeighbourhoodOutput;
-  $: rerender($mutationCounter);
-
-  let allShortcuts = emptyGeojson() as AllShortcuts;
-  let lastShortcutCalculation = 0;
-  $: recalculateShortcuts($mutationCounter, $animateShortcuts);
-
-  $: numDisconnectedCells = gj.features.filter(
-    (f) =>
-      f.properties.kind == "cell" && f.properties.cell_color == "disconnected",
-  ).length;
+  let allShortcuts = $state(emptyGeojson() as AllShortcuts);
+  let lastShortcutCalculation = $state(0);
 
   onMount(() => {
     initTooltips();
@@ -154,11 +131,6 @@
 
   function rerender(_x: number) {
     gj = $backend!.renderNeighbourhood();
-    // @ts-expect-error TS can't figure out that we're narrowing the case here
-    boundary = gj.features.find((f) => f.properties.kind == "boundary")!;
-
-    undoLength = gj.undo_length;
-    redoLength = gj.redo_length;
 
     saveCurrentProject();
   }
@@ -191,7 +163,7 @@
     }
   }
 
-  function onMapClick(e: CustomEvent<MapMouseEvent>) {
+  function onMapClick(e: MapMouseEvent) {
     if (action.kind != "turn_restriction") {
       return;
     }
@@ -199,7 +171,7 @@
     // If we click a blank area, reset some state. Not sure why, but clicking
     // layers doesn't always prevent a click on the map itself.
     if (
-      $map!.queryRenderedFeatures(e.detail.point, {
+      $map!.queryRenderedFeatures(e.point, {
         layers: ["interior-roads", "turn-restriction-targets"],
       }).length > 0
     ) {
@@ -209,23 +181,23 @@
     action = startTurnRestrictionAction();
   }
 
-  function createTurnRestriction(e: CustomEvent<LayerClickInfo>) {
+  function createTurnRestriction(e: LayerClickInfo) {
     if (action.kind == "turn_restriction" && action.from_road_id != null) {
-      let to = e.detail.features[0].properties!.road;
+      let to = e.features[0].properties!.road;
       $backend!.addTurnRestriction(action.from_road_id, to);
       $mutationCounter++;
     }
     action = startTurnRestrictionAction();
   }
 
-  function deleteModalFilter(e: CustomEvent<LayerClickInfo>) {
-    let f = e.detail.features[0];
+  function deleteModalFilter(e: LayerClickInfo) {
+    let f = e.features[0];
     $backend!.deleteModalFilter(f.properties!.road);
     $mutationCounter++;
   }
 
-  function deleteTurnRestriction(e: CustomEvent<LayerClickInfo>) {
-    let f = e.detail.features[0];
+  function deleteTurnRestriction(e: LayerClickInfo) {
+    let f = e.features[0];
     $backend!.deleteTurnRestriction(
       f.properties!.intersection,
       f.properties!.from_road,
@@ -315,8 +287,7 @@
     $mutationCounter++;
   }
 
-  function paintedModalFiltersLine(e: CustomEvent<Feature<LineString> | null>) {
-    let f = e.detail;
+  function paintedModalFiltersLine(f: Feature<LineString> | null) {
     if (f) {
       $backend!.addManyModalFilters(f, $currentFilterType);
       $mutationCounter++;
@@ -348,59 +319,94 @@
     u_left_to_right: noUTurnLtrUrl,
     u_right_to_left: noUTurnRtlUrl,
   };
+  $effect(() => {
+    if (action.kind == "oneway" || action.kind == "main-roads") {
+      $map!.doubleClickZoom.disable();
+    } else {
+      $map!.doubleClickZoom.enable();
+    }
+  });
+  $effect(() => {
+    if (action.kind == "filter" && action.freehand) {
+      $map!.getCanvas().style.cursor = `url(${paintbrushCursorURL}) 8 22, cell`;
+    } else if (
+      action.kind == "main-roads" &&
+      action.tool == "snap-route-erase"
+    ) {
+      $map!.getCanvas().style.cursor = `url(${eraserCursorURL}) 8 22, cell`;
+    } else {
+      $map!.getCanvas().style.cursor = "";
+    }
+  });
+  $effect(() => {
+    rerender($mutationCounter);
+  });
+  $effect(() => {
+    recalculateShortcuts($mutationCounter, $animateShortcuts);
+  });
+  let numDisconnectedCells = $derived(
+    gj.features.filter(
+      (f) =>
+        f.properties.kind == "cell" &&
+        f.properties.cell_color == "disconnected",
+    ).length,
+  );
 </script>
 
-<svelte:window on:keydown={onKeyDown} />
+<svelte:window onkeydown={onKeyDown} />
 
 <SplitComponent>
-  <div slot="top" style="display: flex; justify-content: space-between;">
-    <nav aria-label="breadcrumb">
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "title" }} />
-        </li>
-        <li>
-          <ModeLink mode={{ mode: "pick-neighbourhood" }} />
-        </li>
-        <li>
-          {pageTitle($mode.mode)}
-        </li>
-      </ul>
-    </nav>
-    <nav>
-      <ul>
-        <li>
-          <ModeLink mode={{ mode: "view-shortcuts" }} />
-        </li>
-        <li>
-          <ModeLink mode={{ mode: "route", prevMode: "neighbourhood" }} />
-        </li>
-        <li>
-          <ModeLink
-            mode={{ mode: "predict-impact", prevMode: "neighbourhood" }}
-          />
-        </li>
-        <li>
-          <ModeLink mode={{ mode: "impact-one-destination" }} />
-        </li>
-        <li>
-          <ModeLink
-            mode={{
-              mode: "set-boundary",
-              name: notNull(boundary).properties.name,
-              existing: notNull(boundary),
-            }}
-          />
-        </li>
-        {#if $devMode}
+  {#snippet top()}
+    <div style="display: flex; justify-content: space-between;">
+      <nav aria-label="breadcrumb">
+        <ul>
           <li>
-            <ModeLink mode={{ mode: "debug-neighbourhood" }}>Debug</ModeLink>
+            <ModeLink mode={{ mode: "title" }} />
           </li>
-        {/if}
-      </ul>
-    </nav>
-  </div>
-  <div slot="sidebar">
+          <li>
+            <ModeLink mode={{ mode: "pick-neighbourhood" }} />
+          </li>
+          <li>
+            {pageTitle($mode.mode)}
+          </li>
+        </ul>
+      </nav>
+      <nav>
+        <ul>
+          <li>
+            <ModeLink mode={{ mode: "view-shortcuts" }} />
+          </li>
+          <li>
+            <ModeLink mode={{ mode: "route", prevMode: "neighbourhood" }} />
+          </li>
+          <li>
+            <ModeLink
+              mode={{ mode: "predict-impact", prevMode: "neighbourhood" }}
+            />
+          </li>
+          <li>
+            <ModeLink mode={{ mode: "impact-one-destination" }} />
+          </li>
+          <li>
+            <ModeLink
+              mode={{
+                mode: "set-boundary",
+                name: boundary.properties.name,
+                existing: boundary,
+              }}
+            />
+          </li>
+          {#if $devMode}
+            <li>
+              <ModeLink mode={{ mode: "debug-neighbourhood" }}>Debug</ModeLink>
+            </li>
+          {/if}
+        </ul>
+      </nav>
+    </div>
+  {/snippet}
+
+  {#snippet left()}
     <div
       style="display: flex; justify-content: space-between; align-items: center"
     >
@@ -424,19 +430,18 @@
           style="height: 50px; display: flex; justify-content: left; gap: 6px;"
         >
           <button
-            on:click={() => (action = { kind: "filter", freehand: false })}
+            onclick={() => (action = { kind: "filter", freehand: false })}
             class="icon-btn"
             class:active={action.kind == "filter"}
             data-tippy-content="Add a modal filter (hotkey 1)"
           >
             <img
-              src={notNull(ModalFilterType.getFilter($currentFilterType))
-                .iconURL}
+              src={ModalFilterType.getFilter($currentFilterType)!.iconURL}
               alt="Add a modal filter"
             />
           </button>
           <button
-            on:click={() => (action = { kind: "oneway" })}
+            onclick={() => (action = { kind: "oneway" })}
             class="icon-btn"
             class:active={action.kind == "oneway"}
             data-tippy-content="Toggle one-way (hotkey 2)"
@@ -459,7 +464,7 @@
             </div>
           </button>
           <button
-            on:click={() => (action = startTurnRestrictionAction())}
+            onclick={() => (action = startTurnRestrictionAction())}
             class="icon-btn"
             class:active={action.kind == "turn_restriction"}
             data-tippy-content="Restrict turns (hotkey 3)"
@@ -467,7 +472,7 @@
             <img src={noRightUrl} alt="Restrict turns" />
           </button>
           <button
-            on:click={() =>
+            onclick={() =>
               (action = { kind: "main-roads", tool: "toggle", waypoints: [] })}
             class="icon-btn"
             class:active={action.kind == "main-roads"}
@@ -481,21 +486,21 @@
         >
           <button
             class="outline icon-btn"
-            disabled={undoLength == 0}
-            on:click={undo}
-            data-tippy-content={undoLength == 0
+            disabled={gj.undo_length == 0}
+            onclick={undo}
+            data-tippy-content={gj.undo_length == 0
               ? "Undo Ctrl+Z"
-              : `Undo (${undoLength}) Ctrl+Z`}
+              : `Undo (${gj.undo_length}) Ctrl+Z`}
           >
             <Undo />
           </button>
           <button
             class="outline icon-btn"
-            disabled={redoLength == 0}
-            on:click={redo}
-            data-tippy-content={redoLength == 0
+            disabled={gj.redo_length == 0}
+            onclick={redo}
+            data-tippy-content={gj.redo_length == 0
               ? "Redo Ctrl+Y"
-              : `Redo (${redoLength}) Ctrl+Y`}
+              : `Redo (${gj.redo_length}) Ctrl+Y`}
           >
             <Redo />
           </button>
@@ -516,12 +521,12 @@
           <div
             style="display: flex; gap: 8px; align-items: leading; flex-direction: column; width: fit-content;"
           >
-            <button class="outline" on:click={() => (settingFilterType = true)}>
+            <button class="outline" onclick={() => (settingFilterType = true)}>
               Change modal filter type
             </button>
 
             <button
-              on:click={action.freehand
+              onclick={action.freehand
                 ? () => (action = { kind: "filter", freehand: false })
                 : () => (action = { kind: "filter", freehand: true })}
               class:active={action.freehand}
@@ -566,7 +571,7 @@
             style="display: flex; flex-direction: column; gap: 8px; justify-content: left;"
           >
             <button
-              on:click={() => {
+              onclick={() => {
                 action = { kind: "main-roads", tool: "toggle", waypoints: [] };
               }}
               class:active={action.tool == "toggle"}
@@ -580,7 +585,7 @@
             </button>
 
             <button
-              on:click={() => {
+              onclick={() => {
                 action = {
                   kind: "main-roads",
                   tool: "snap-route-main",
@@ -598,7 +603,7 @@
             </button>
 
             <button
-              on:click={() => {
+              onclick={() => {
                 action = {
                   kind: "main-roads",
                   tool: "snap-route-erase",
@@ -615,7 +620,7 @@
               </div>
             </button>
 
-            <button class:outline={true} on:click={eraseAllMainRoads}>
+            <button class:outline={true} onclick={eraseAllMainRoads}>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <Trash2 />
                 <span>Erase all main roads</span>
@@ -679,11 +684,11 @@
       />
     {/if}
     <h2>Neighbourhood stats</h2>
-    <NeighbourhoodBoundarySummary neighbourhoodBoundary={notNull(boundary)} />
-  </div>
+    <NeighbourhoodBoundarySummary neighbourhoodBoundary={boundary} />
+  {/snippet}
 
-  <div slot="map">
-    <MapEvents on:click={onMapClick} />
+  {#snippet main()}
+    <MapEvents onclick={onMapClick} />
 
     <ShowBeforeEdits />
 
@@ -700,39 +705,41 @@
           (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
       >
-        <div slot="line-popup">
-          <Popup openOn="hover" let:props>
-            {#if props.kind == "interior_road"}
-              <p>
-                {props.shortcuts} shortcuts through {props.name ??
-                  "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
-              </p>
-            {:else if props.kind == "main_road"}
-              <p>
-                Main road: {props.name ?? "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
-              </p>
-            {/if}
-            {#if action.kind == "filter"}
-              <div>
-                <img
-                  src={notNull(ModalFilterType.getFilter($currentFilterType))
-                    .iconURL}
-                  width="20"
-                  alt="Add modal filter"
-                />
-                Click to add modal filter
-              </div>
-            {:else if action.kind == "oneway"}
-              <p>Click to change direction</p>
-            {:else if action.kind == "main-roads" && action.tool == "toggle"}
-              <p>Click to designate a main road or not</p>
-            {:else if action.kind == "turn_restriction"}
-              <p>Click to create a turn restriction from here</p>
-            {/if}
+        {#snippet linePopup()}
+          <Popup openOn="hover">
+            {#snippet children({ data })}
+              {@const props = data!.properties!}
+              {#if props.kind == "interior_road"}
+                <p>
+                  {props.shortcuts} shortcuts through {props.name ??
+                    "unnamed road"}
+                  ({Math.round(props.speed_mph)} mph)
+                </p>
+              {:else if props.kind == "main_road"}
+                <p>
+                  Main road: {props.name ?? "unnamed road"}
+                  ({Math.round(props.speed_mph)} mph)
+                </p>
+              {/if}
+              {#if action.kind == "filter"}
+                <div>
+                  <img
+                    src={ModalFilterType.getFilter($currentFilterType)!.iconURL}
+                    width="20"
+                    alt="Add modal filter"
+                  />
+                  Click to add modal filter
+                </div>
+              {:else if action.kind == "oneway"}
+                <p>Click to change direction</p>
+              {:else if action.kind == "main-roads" && action.tool == "toggle"}
+                <p>Click to designate a main road or not</p>
+              {:else if action.kind == "turn_restriction"}
+                <p>Click to create a turn restriction from here</p>
+              {/if}
+            {/snippet}
           </Popup>
-        </div>
+        {/snippet}
       </NeighbourhoodRoadLayer>
       <EditableIntersectionLayer
         show={!$showBeforeEdits}
@@ -742,7 +749,7 @@
       />
     </RenderNeighbourhood>
 
-    {#if $animateShortcuts}
+    {#if $animateShortcuts && $mutationCounter == lastShortcutCalculation}
       <AnimatePaths paths={allShortcuts} />
     {/if}
 
@@ -752,19 +759,19 @@
       onClickTurnRestriction={deleteTurnRestriction}
       interactive={action.kind == "filter"}
     >
-      <div slot="modal-filter">
+      {#snippet modalFilterPopup()}
         <Popup openOn="hover">Click to delete filter</Popup>
-      </div>
-      <div slot="turn-restriction">
+      {/snippet}
+      {#snippet turnRestrictionPopup()}
         <Popup openOn="hover">Click to delete turn restriction</Popup>
-      </div>
+      {/snippet}
     </ModalFilterLayer>
 
     {#if action.kind == "filter" && action.freehand}
-      <FreehandLine map={notNull($map)} on:done={paintedModalFiltersLine} />
+      <FreehandLine map={$map!} onDone={paintedModalFiltersLine} />
     {:else if action.kind == "main-roads" && action.tool != "toggle"}
       <SnapRouteSelector
-        map={notNull($map)}
+        map={$map!}
         finish={finishSnapping}
         cancel={() =>
           (action = { kind: "main-roads", tool: "toggle", waypoints: [] })}
@@ -782,24 +789,29 @@
             "line-opacity": hoverStateFilter(0.5, 1.0),
             "line-width": roadLineWidth(1),
           }}
-          on:click={createTurnRestriction}
+          onclick={createTurnRestriction}
         >
-          <Popup openOn="hover" let:props>
-            <div>
-              <img
-                src={turnRestrictionUrls[props.kind]}
-                width="20"
-                alt="Add turn restriction"
-              />
+          <Popup openOn="hover">
+            {#snippet children({ data })}
+              {@const props = data!.properties!}
+              <div>
+                <img
+                  src={turnRestrictionUrls[props.kind]}
+                  width="20"
+                  alt="Add turn restriction"
+                />
 
-              Create a turn restriction from {action.from_road_name} to {props.name ||
-                "unnamed road"}
-            </div>
+                Create a turn restriction from {action.kind ==
+                "turn_restriction"
+                  ? action.from_road_name
+                  : "???"} to {props.name || "unnamed road"}
+              </div>
+            {/snippet}
           </Popup>
         </LineLayer>
       </GeoJSON>
     {/if}
-  </div>
+  {/snippet}
 </SplitComponent>
 
 <style>

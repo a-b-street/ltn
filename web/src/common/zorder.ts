@@ -170,3 +170,29 @@ const layerZorder = [
   "edit-polygon-lines",
   "edit-polygon-vertices",
 ];
+
+export function fixAllLayerOrderings() {
+  let map = get(mapStore);
+  if (!map) {
+    return;
+  }
+
+  // TODO Mark more directly above?
+  let skip = [
+    "Background",
+    "Ferry line",
+    "Building",
+    "Road labels",
+    "road_label",
+  ];
+  for (let i = layerZorder.length - 1; i >= 0; i--) {
+    let layer = layerZorder[i];
+    if (skip.includes(layer) || !map.getLayer(layer)) {
+      continue;
+    }
+    let beforeId = getBeforeId(layer);
+    if (beforeId) {
+      map.moveLayer(layer, beforeId);
+    }
+  }
+}

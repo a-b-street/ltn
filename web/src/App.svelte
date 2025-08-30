@@ -15,6 +15,7 @@
   import "@picocss/pico/css/pico.conditional.jade.min.css";
   import { CircleHelp, House } from "lucide-svelte";
   import type { LngLatBoundsLike, Map } from "maplibre-gl";
+  import * as routeSnapperPkg from "route-snapper";
   import { onMount } from "svelte";
   import {
     Control,
@@ -22,24 +23,25 @@
     ControlGroup,
     FillLayer,
     GeoJSON,
+    MapEvents,
     MapLibre,
     NavigationControl,
     ScaleControl,
   } from "svelte-maplibre";
-  import { Modal, notNull } from "svelte-utils";
+  import { Modal } from "svelte-utils";
   import { Geocoder } from "svelte-utils/map";
   import {
     Layout,
-    mapContents,
-    sidebarContents,
-    topContents,
+    leftTarget,
+    mainTarget,
+    topTarget,
   } from "svelte-utils/top_bar_layout";
   import * as backendPkg from "../../backend/pkg";
-  import * as routeSnapperPkg from "route-snapper";
   import streetsMapStyleUrl from "../assets/map-styles/streets-v2-style.json?url";
   import AddNeighbourhoodMode from "./AddNeighbourhoodMode.svelte";
   import { DisableInteractiveLayers, layerId, StreetView } from "./common";
   import { ModalFilterType } from "./common/ModalFilterType";
+  import { fixAllLayerOrderings } from "./common/zorder";
   import DebugDemandMode from "./DebugDemandMode.svelte";
   import DebugIntersectionsMode from "./DebugIntersectionsMode.svelte";
   import DebugNeighbourhoodMode from "./DebugNeighbourhoodMode.svelte";
@@ -65,10 +67,14 @@
   import ViewShortcutsMode from "./ViewShortcutsMode.svelte";
   import "tippy.js/dist/tippy.css";
 
-  export let appFocus: AppFocus;
+  interface Props {
+    appFocus: AppFocus;
+  }
+
+  let { appFocus }: Props = $props();
   appFocusStore.set(appFocus);
 
-  let wasmReady = false;
+  let wasmReady = $state(false);
   onMount(async () => {
     await backendPkg.default();
     await routeSnapperPkg.default();
@@ -84,52 +90,50 @@
     } catch (err) {}
   });
 
-  let map: Map | null = null;
-  $: if (map) {
-    map.keyboard.disableRotation();
-    map.dragRotate.disable();
-    map.touchZoomRotate.disableRotation();
-    mapStore.set(map);
-  }
+  let map: Map | undefined = $state();
+  let loaded = $state(false);
 
   function zoomToFit(animate: boolean) {
     $mapStore!.fitBounds($backend!.getBounds(), { animate });
   }
 
-  let topDiv: HTMLSpanElement;
-  let sidebarDiv: HTMLDivElement;
-  let mapDiv: HTMLDivElement;
-  $: if (topDiv && $topContents) {
-    topDiv.innerHTML = "";
-    topDiv.appendChild($topContents);
-  }
-  $: if (sidebarDiv && $sidebarContents) {
-    sidebarDiv.innerHTML = "";
-    sidebarDiv.appendChild($sidebarContents);
-  }
-  $: if (mapDiv && $mapContents) {
-    mapDiv.innerHTML = "";
-    mapDiv.appendChild($mapContents);
+  // Some layers can't be added in the correct z-order initially. Every time
+  // all layers have been added to maplibre, fix up the ordering. This
+  // generally only happens when changing modes, not constantly within a
+  // mode. The timeout prevents repeatedly doing the same work.
+  let lastLayerFix = $state(Date.now());
+  function fixLayerOrdering() {
+    if (map) {
+      if (Date.now() - lastLayerFix > 500) {
+        fixAllLayerOrderings();
+        lastLayerFix = Date.now();
+      }
+    }
   }
 
-  let initialBounds: LngLatBoundsLike | undefined = undefined;
+  let initialBounds: LngLatBoundsLike | undefined = $state();
   if (appFocus == "cnt") {
     initialBounds = [-8.943, 54.631, -0.901, 59.489];
   }
 
-  let style: string | null = null;
-  $: updateStyle($maptilerBasemap);
-  async function updateStyle(basemap: string) {
-    // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
-    // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
-    if (basemap == "streets-v2") {
-      style = streetsMapStyleUrl;
-    } else {
-      style = `https://api.maptiler.com/maps/${basemap}/style.json?key=${maptilerApiKey}`;
-    }
-  }
+  // streets-v2 uses a fill-extrusion layer for 3D buildings that's very distracting, so we have a custom version
+  // NOTE: our maptiler apiKey is baked into the downloaded style, so if we rotate keys, we'll need to regenerate this file.
+  let style = $derived(
+    $maptilerBasemap == "streets-v2"
+      ? streetsMapStyleUrl
+      : `https://api.maptiler.com/maps/${$maptilerBasemap}/style.json?key=${maptilerApiKey}`,
+  );
 
-  let showAbout = false;
+  let showAbout = $state(false);
+
+  $effect(() => {
+    if (map) {
+      map.keyboard.disableRotation();
+      map.dragRotate.disable();
+      map.touchZoomRotate.disableRotation();
+      mapStore.set(map);
+    }
+  });
 </script>
 
 <svelte:head>
@@ -137,49 +141,54 @@
 </svelte:head>
 
 <div class="pico">
-  <Modal bind:show={showAbout}>
-    {#if appFocus == "cnt"}
-      <h1>The Connected Neighbourhoods Tool</h1>
-    {:else}
-      <h1>The Low-Traffic Neighbourhood (LTN) tool, v2</h1>
-    {/if}
+  <Modal bind:show={showAbout}
+    ><article style="max-height: 80vh; max-width: 80vw; overflow: auto">
+      {#if appFocus == "cnt"}
+        <h1>The Connected Neighbourhoods Tool</h1>
+      {:else}
+        <h1>The Low-Traffic Neighbourhood (LTN) tool, v2</h1>
+      {/if}
 
-    <About />
-  </Modal>
+      <About />
+    </article></Modal
+  >
 </div>
+
 <div class="app-focus-{$appFocusStore}">
   <Layout>
-    <div
-      slot="top"
-      class="pico"
-      style="display: flex; align-items: center; gap: 8px;"
-    >
-      <button class="outline" on:click={() => (showAbout = true)}>
-        <img src={logo} style="height: 32px;" alt="A/B Street logo" />
-      </button>
-      <span bind:this={topDiv} style="width: 100%" />
-      <button
-        class="icon-btn"
-        title="User guide"
-        on:click={() => window.open("user_guide.html", "_blank")}
-      >
-        <CircleHelp color="black" />
-      </button>
-    </div>
-    <div class="pico" slot="left">
-      <div bind:this={sidebarDiv} />
-    </div>
-    <div slot="main" style="position: relative; width: 100%; height: 100%;">
-      {#if style}
+    {#snippet top()}
+      <div class="pico" style="display: flex; align-items: center; gap: 8px;">
+        <button class="outline" onclick={() => (showAbout = true)}>
+          <img src={logo} style="height: 32px;" alt="A/B Street logo" />
+        </button>
+        <div bind:this={topTarget.value} style="width: 100%"></div>
+        <button
+          class="icon-btn"
+          title="User guide"
+          onclick={() => window.open("user_guide.html", "_blank")}
+        >
+          <CircleHelp color="black" />
+        </button>
+      </div>
+    {/snippet}
+
+    {#snippet left()}
+      <div class="pico">
+        <div bind:this={leftTarget.value}></div>
+      </div>
+    {/snippet}
+
+    {#snippet main()}
+      <div style="position: relative; width: 100%; height: 100%;">
         <MapLibre
           {style}
           hash
           bind:map
+          bind:loaded
           bounds={initialBounds}
           maxZoom={19}
-          on:error={(e) => {
-            // @ts-expect-error ErrorEvent isn't exported
-            console.log(e.detail.error);
+          onerror={(e) => {
+            console.log(e.error);
           }}
           images={[
             {
@@ -238,13 +247,14 @@
           ]}
         >
           <NavigationControl showCompass={false} />
+          <MapEvents onstyledata={fixLayerOrdering} />
 
           {#if $backend}
             <Control position="top-left">
               <ControlGroup>
                 <ControlButton
                   title="Zoom to fit study area"
-                  on:click={() => zoomToFit(true)}
+                  onclick={() => zoomToFit(true)}
                 >
                   <div class="ltn-map-btn zoom-to-fit-btn">
                     <House />
@@ -255,18 +265,18 @@
             <Control position="top-left">
               <ControlGroup>
                 <StreetView
-                  map={notNull($mapStore)}
+                  map={$mapStore!}
                   maptilerBasemap={$maptilerBasemap}
                 />
               </ControlGroup>
             </Control>
           {/if}
 
-          <Geocoder {map} apiKey={maptilerApiKey} country={undefined} />
+          <Geocoder {map} {loaded} />
 
           <ScaleControl />
 
-          <div bind:this={mapDiv} />
+          <div bind:this={mainTarget.value}></div>
 
           {#if $mode.mode == "title"}
             <TitleMode {wasmReady} />
@@ -313,8 +323,8 @@
           {/if}
           <DisableInteractiveLayers />
         </MapLibre>
-      {/if}
-    </div>
+      </div>
+    {/snippet}
   </Layout>
 </div>
 
@@ -555,5 +565,12 @@
     height: 20px;
     width: auto;
     margin-top: 2px;
+  }
+
+  /* Put geocoder to the right of the zoom buttons */
+  :global(.maplibregl-ctrl-geocoder) {
+    position: absolute;
+    top: 10px;
+    left: 50px;
   }
 </style>

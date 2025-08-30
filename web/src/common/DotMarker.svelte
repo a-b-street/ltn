@@ -1,18 +1,24 @@
 <script lang="ts">
   import type { LngLatLike } from "maplibre-gl";
+  import type { Snippet } from "svelte";
   import { Marker } from "svelte-maplibre";
 
-  export let lngLat: LngLatLike;
-  export let draggable = false;
+  interface Props {
+    lngLat: LngLatLike;
+    draggable?: boolean;
+    children: Snippet;
+  }
+
+  let { lngLat = $bindable(), draggable = false, children }: Props = $props();
 </script>
 
 {#if draggable}
   <Marker bind:lngLat draggable>
-    <span class="dot"><slot /></span>
+    <span class="dot">{@render children()}</span>
   </Marker>
 {:else}
   <Marker {lngLat}>
-    <span class="dot"><slot /></span>
+    <span class="dot">{@render children()}</span>
   </Marker>
 {/if}
 

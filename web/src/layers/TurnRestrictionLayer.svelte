@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, Geometry } from "geojson";
+  import type { MapGeoJSONFeature } from "maplibre-gl";
+  import type { Snippet } from "svelte";
   import {
     GeoJSON,
     LineLayer,
@@ -14,16 +16,25 @@
     showExistingFiltersAndTRs,
   } from "../stores";
 
-  export let turnRestrictionGj: FeatureCollection | null = null;
-  export let show = true;
-  export let prefix = "";
-  export let onClickTurnRestriction: (
-    e: CustomEvent<LayerClickInfo>,
-  ) => void = () => {};
+  interface Props {
+    children?: Snippet | undefined;
+    turnRestrictionGj?: FeatureCollection | null;
+    show?: boolean;
+    prefix?: string;
+    onClickTurnRestriction?: (e: LayerClickInfo) => void;
+  }
 
-  let hoveredIcon: Feature | null = null;
-  $: showArrow =
-    hoveredIcon == null
+  let {
+    children = undefined,
+    turnRestrictionGj = null,
+    show = true,
+    prefix = "",
+    onClickTurnRestriction = () => {},
+  }: Props = $props();
+
+  let hoveredIcon: (Feature & MapGeoJSONFeature) | undefined = $state();
+  let showArrow = $derived(
+    hoveredIcon == undefined
       ? emptyGeojson()
       : {
           type: "FeatureCollection" as const,
@@ -43,13 +54,15 @@
               properties: {},
             },
           ],
-        };
+        },
+  );
 
   // TODO Runes would make this so nicer. The > 0 part is a hack...
-  $: gj =
+  let gj = $derived(
     $mutationCounter > 0 && turnRestrictionGj == null
       ? $backend!.renderTurnRestrictions()
-      : emptyGeojson();
+      : emptyGeojson(),
+  );
 </script>
 
 <GeoJSON data={turnRestrictionGj || gj} generateId>
@@ -68,9 +81,9 @@
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
     bind:hovered={hoveredIcon}
-    on:click={onClickTurnRestriction}
+    onclick={onClickTurnRestriction}
   >
-    <slot />
+    {@render children?.()}
   </SymbolLayer>
 </GeoJSON>
 

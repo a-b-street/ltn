@@ -2,8 +2,12 @@
   import { SymbolLayer } from "svelte-maplibre";
   import { layerId } from "../common";
 
-  export let show = true;
-  export let prefix = "";
+  interface Props {
+    show?: boolean;
+    prefix?: string;
+  }
+
+  let { show = true, prefix = "" }: Props = $props();
 
   // TODO Figure out if hoverCursor is necessary here, or if svelte-maplibre
   // ignores it when interactive is false

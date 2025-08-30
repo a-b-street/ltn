@@ -6,26 +6,25 @@
     LineLayer,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { notNull } from "svelte-utils";
   import { emptyGeojson } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { layerId, ModeLink, pageTitle, PrevNext } from "./common";
   import { backend, mode } from "./stores";
 
-  let currentOsm: string | null = null;
-  let movements = emptyGeojson();
-  let idx = 0;
+  let currentOsm: string | null = $state(null);
+  let movements = $state(emptyGeojson());
+  let idx = $state(0);
 
-  function pickIntersection(e: CustomEvent<LayerClickInfo>) {
-    currentOsm = e.detail.features[0].properties!.osm;
-    movements = $backend!.getMovements(e.detail.features[0].id as number);
+  function pickIntersection(e: LayerClickInfo) {
+    currentOsm = e.features[0].properties!.osm;
+    movements = $backend!.getMovements(e.features[0].id as number);
     idx = 0;
   }
 </script>
 
 <SplitComponent>
-  <div slot="top">
+  {#snippet top()}
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -37,15 +36,15 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  </div>
+  {/snippet}
 
-  <div slot="sidebar">
+  {#snippet left()}
     <BackButton mode={{ mode: "pick-neighbourhood" }} />
 
     <p>Purple intersections have some kind of turn restriction.</p>
 
     {#if movements.features.length > 0}
-      <button class="secondary" on:click={() => (movements = emptyGeojson())}>
+      <button class="secondary" onclick={() => (movements = emptyGeojson())}>
         Pick another intersection
       </button>
 
@@ -54,10 +53,10 @@
     {#if currentOsm}
       <a href={currentOsm} target="_blank">Open OSM</a>
     {/if}
-  </div>
+  {/snippet}
 
-  <div slot="map">
-    <GeoJSON data={notNull($backend).getAllIntersections()} generateId>
+  {#snippet main()}
+    <GeoJSON data={$backend!.getAllIntersections()} generateId>
       <CircleLayer
         {...layerId("debug-intersections")}
         paint={{
@@ -71,7 +70,7 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        on:click={pickIntersection}
+        onclick={pickIntersection}
       />
     </GeoJSON>
 
@@ -92,5 +91,5 @@
         }}
       />
     </GeoJSON>
-  </div>
+  {/snippet}
 </SplitComponent>

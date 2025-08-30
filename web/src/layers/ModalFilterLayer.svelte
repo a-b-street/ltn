@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
+  import type { Snippet } from "svelte";
   import { GeoJSON, SymbolLayer, type LayerClickInfo } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
@@ -12,25 +13,37 @@
   // restrictions, since all callers want both
   import TurnRestrictionLayer from "./TurnRestrictionLayer.svelte";
 
-  export let modalFilterGj: FeatureCollection | null = null;
-  export let turnRestrictionGj: FeatureCollection | null = null;
-  export let onClickModalFilter: (
-    e: CustomEvent<LayerClickInfo>,
-  ) => void = () => {};
-  export let onClickTurnRestriction: (
-    e: CustomEvent<LayerClickInfo>,
-  ) => void = () => {};
+  interface Props {
+    modalFilterGj?: FeatureCollection | null;
+    turnRestrictionGj?: FeatureCollection | null;
+    onClickModalFilter?: (e: LayerClickInfo) => void;
+    onClickTurnRestriction?: (e: LayerClickInfo) => void;
+    modalFilterPopup?: Snippet | undefined;
+    turnRestrictionPopup?: Snippet | undefined;
+    interactive: boolean;
+    show?: boolean;
+    prefix?: string;
+  }
 
-  export let interactive: boolean;
-  export let show = true;
-  export let prefix = "";
+  let {
+    modalFilterGj = null,
+    turnRestrictionGj = null,
+    onClickModalFilter = () => {},
+    onClickTurnRestriction = () => {},
+    modalFilterPopup = undefined,
+    turnRestrictionPopup = undefined,
+    interactive,
+    show = true,
+    prefix = "",
+  }: Props = $props();
 
   let minzoom = 13;
   // TODO Runes would make this so nicer. The > 0 part is a hack...
-  $: gj =
+  let gj = $derived(
     $mutationCounter > 0 && modalFilterGj == null
       ? $backend!.renderModalFilters()
-      : emptyGeojson();
+      : emptyGeojson(),
+  );
 </script>
 
 <GeoJSON data={modalFilterGj || gj} generateId>
@@ -53,9 +66,9 @@
     paint={{
       "icon-opacity": ["case", ["get", "edited"], 1.0, 0.5],
     }}
-    on:click={onClickModalFilter}
+    onclick={onClickModalFilter}
   >
-    <slot name="modal-filter" />
+    {@render modalFilterPopup?.()}
   </SymbolLayer>
   <SymbolLayer
     {...layerId(prefix + "intersection-filters")}
@@ -78,5 +91,5 @@
   {turnRestrictionGj}
   {onClickTurnRestriction}
 >
-  <slot name="turn-restriction" />
+  {@render turnRestrictionPopup?.()}
 </TurnRestrictionLayer>

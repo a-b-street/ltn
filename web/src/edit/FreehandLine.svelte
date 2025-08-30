@@ -2,17 +2,23 @@
   import turfDistance from "@turf/distance";
   import type { Feature, LineString } from "geojson";
   import type { Map, MapMouseEvent } from "maplibre-gl";
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
 
-  export let map: Map;
-  let line: Feature<LineString> | null = null;
+  // TODO This component seems to have broken during the upgrade to svelte 5.
+  // The line doesn't show up when drawing quickly or after adding too
+  // many points?
 
-  const dispatch = createEventDispatcher<{
-    done: Feature<LineString> | null;
-    progress: Feature<LineString>;
-  }>();
+  interface Props {
+    map: Map;
+    onDone: (f: Feature<LineString> | null) => void;
+  }
+
+  let { map, onDone }: Props = $props();
+
+  let line: Feature<LineString> | null = $state(null);
 
   map.on("dragstart", onDragStart);
   map.on("mousemove", onMouseMove);
@@ -51,32 +57,26 @@
       }
 
       line.geometry.coordinates.push(next);
-      line = line;
-      if (line.geometry.coordinates.length % 10 == 0) {
-        dispatch("progress", line);
-      }
     }
   }
 
   function onMouseUp() {
     if (!line || line.geometry.coordinates.length == 0) {
-      dispatch("done", null);
+      onDone(null);
     } else {
-      dispatch("done", line);
+      onDone(line);
     }
     line = null;
     map.dragPan.enable();
   }
 </script>
 
-{#if line}
-  <GeoJSON data={line}>
-    <LineLayer
-      {...layerId("freehand-line")}
-      paint={{
-        "line-width": 5,
-        "line-color": "red",
-      }}
-    />
-  </GeoJSON>
-{/if}
+<GeoJSON data={line || emptyGeojson()}>
+  <LineLayer
+    {...layerId("freehand-line")}
+    paint={{
+      "line-width": 5,
+      "line-color": "red",
+    }}
+  />
+</GeoJSON>

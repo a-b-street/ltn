@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
   import { Copy, FileDown, FolderOpen } from "lucide-svelte";
-  import { downloadGeneratedFile, notNull } from "svelte-utils";
+  import { downloadGeneratedFile } from "svelte-utils";
   import { downloadProject, HelpButton, Link } from "../common";
   import { type ProjectID } from "../common/ProjectStorage";
   import {
@@ -13,12 +13,13 @@
     projectStorage,
   } from "../stores";
 
-  export let projectGj: FeatureCollection;
+  interface Props {
+    projectGj: FeatureCollection;
+  }
 
-  $: edits = countEdits(projectGj);
+  let { projectGj }: Props = $props();
 
-  let showPickProject = false;
-  $: otherProjects = listOtherProjects(notNull($currentProjectID));
+  let showPickProject = $state(false);
 
   let osmTimestamp = $backend!.getOsmTimestamp();
 
@@ -103,15 +104,17 @@
     }
     return { modalFilters, deletedModalFilters, travelFlows };
   }
+  let edits = $derived(countEdits(projectGj));
+  let otherProjects = $derived(listOtherProjects($currentProjectID!));
 </script>
 
-<h2>Project: {notNull($currentProject).project_name}</h2>
+<h2>Project: {$currentProject!.project_name}</h2>
 <div style="display: flex; gap: 8px">
   <button
     class="outline"
     style="margin-right: 8px;"
     title="Download project as GeoJSON"
-    on:click={() => downloadProject(notNull($currentProjectID))}
+    onclick={() => downloadProject($currentProjectID!)}
   >
     <div style="display: flex; align-items: center; gap: 8px; color: black;">
       <FileDown />
@@ -128,7 +131,7 @@
     class="outline"
     style="margin-right: 8px;"
     title="Make a copy of this project"
-    on:click={() => copyProject()}
+    onclick={() => copyProject()}
   >
     <div style="display: flex; align-items: center; gap: 8px; color: black;">
       <Copy />
@@ -142,13 +145,13 @@
   </button>
 </div>
 
-{#if notNull($currentProject).study_area_name && otherProjects.length > 0}
+{#if $currentProject!.study_area_name && otherProjects.length > 0}
   <details
     class="dropdown"
     style="display: inline-block; margin-top: 8px"
     bind:open={showPickProject}
   >
-    <!-- svelte-ignore a11y-no-redundant-roles -->
+    <!-- svelte-ignore a11y_no_redundant_roles -->
     <summary role="button" class="contrast outline">
       <FolderOpen />
       <span style="margin-left: 2px;">Open another project</span>
@@ -156,7 +159,7 @@
     <ul>
       {#each otherProjects as item}
         <li>
-          <Link on:click={() => openProject(item.projectID)}
+          <Link onclick={() => openProject(item.projectID)}
             >{item.projectName}</Link
           >
         </li>
@@ -188,7 +191,7 @@
 {/if}
 
 {#if $devMode}
-  <button class="secondary" on:click={debugRouteSnapper}>
+  <button class="secondary" onclick={debugRouteSnapper}>
     Debug route-snapper
   </button>
 {/if}

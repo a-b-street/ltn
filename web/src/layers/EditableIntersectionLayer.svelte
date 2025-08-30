@@ -9,11 +9,19 @@
   import EditIntersectionPopup from "../edit/EditIntersectionPopup.svelte";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
-  export let neighbourhood: RenderNeighbourhoodOutput =
-    getContext("neighbourhoodGj");
-  export let onClickIntersection = (intersection: Intersection) => {};
-  export let interactive: boolean = false;
-  export let show = true;
+  interface Props {
+    neighbourhood: RenderNeighbourhoodOutput;
+    onClickIntersection: (intersection: Intersection) => void;
+    interactive: boolean;
+    show: boolean;
+  }
+
+  let {
+    neighbourhood = getContext("neighbourhoodGj"),
+    onClickIntersection = (intersection: Intersection) => {},
+    interactive = false,
+    show = true,
+  }: Props = $props();
 
   /// NOTE: this takes the intersection's index in the neighborhood FeatureCollection, *not* the intersectionId!
   function getIntersectionByFeatureIndex(
@@ -64,12 +72,14 @@
   {interactive}
   manageHoverState
   hoverCursor="pointer"
-  on:click={(event) =>
-    onClickIntersection(getIntersectionFromFeatures(event.detail.features))}
+  onclick={(event) =>
+    onClickIntersection(getIntersectionFromFeatures(event.features))}
 >
-  <Popup openOn="hover" let:features>
-    <EditIntersectionPopup
-      intersection={getIntersectionFromFeatures(features)}
-    />
+  <Popup openOn="hover">
+    {#snippet children({ features })}
+      <EditIntersectionPopup
+        intersection={getIntersectionFromFeatures(features)}
+      />
+    {/snippet}
   </Popup>
 </CircleLayer>
