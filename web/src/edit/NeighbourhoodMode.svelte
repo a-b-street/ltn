@@ -120,7 +120,7 @@
   );
 
   let allShortcuts = $state(emptyGeojson() as AllShortcuts);
-  let lastShortcutCalculation = 0;
+  let lastShortcutCalculation = $state(0);
 
   onMount(() => {
     initTooltips();
@@ -749,7 +749,7 @@
       />
     </RenderNeighbourhood>
 
-    {#if $animateShortcuts}
+    {#if $animateShortcuts && $mutationCounter == lastShortcutCalculation}
       <AnimatePaths paths={allShortcuts} />
     {/if}
 
