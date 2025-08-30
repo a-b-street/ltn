@@ -4,11 +4,12 @@
 
   interface Props {
     show?: boolean;
-    prefix?: string; // TODO Figure out if hoverCursor is necessary here, or if svelte-maplibre
+    prefix?: string;
   }
 
   let { show = true, prefix = "" }: Props = $props();
 
+  // TODO Figure out if hoverCursor is necessary here, or if svelte-maplibre
   // ignores it when interactive is false
 </script>
 
