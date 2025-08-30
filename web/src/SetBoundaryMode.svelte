@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Feature, Polygon } from "geojson";
   import type { AreaProps } from "route-snapper-ts";
+  import { notNull } from "svelte-utils";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import { ModeLink, pageTitle } from "./common";
@@ -8,14 +9,10 @@
   import { type Waypoint } from "./common/draw_area/stores";
   import { backend, map, mode, saveCurrentProject } from "./stores";
 
-  interface Props {
-    name: string;
-    existing: Feature<Polygon, AreaProps>;
-  }
-
-  let { name, existing }: Props = $props();
-  let waypoints: Waypoint[] = $state([]);
-  let drawnShape: Feature<Polygon> | undefined = $state();
+  export let name: string;
+  export let existing: Feature<Polygon, AreaProps>;
+  let waypoints: Waypoint[] = [];
+  let drawnShape: Feature<Polygon>;
 
   let unformattedWaypoints = existing.properties.waypoints;
   if (!unformattedWaypoints) {
@@ -63,7 +60,7 @@
 </script>
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -78,18 +75,21 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
-
-  {#snippet left()}
+  </div>
+  <div slot="sidebar">
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     <h1>Adjust boundary</h1>
 
-    <AreaControls map={$map!} bind:waypoints bind:drawnShapeOut={drawnShape} />
+    <AreaControls
+      map={notNull($map)}
+      bind:waypoints
+      bind:drawnShapeOut={drawnShape}
+    />
 
     <div style="display: flex; gap: 16px;">
-      <button onclick={finish} disabled={waypoints.length < 3}>Finish</button>
-      <button class="secondary" onclick={cancel}>Cancel</button>
+      <button on:click={finish} disabled={waypoints.length < 3}>Finish</button>
+      <button class="secondary" on:click={cancel}>Cancel</button>
     </div>
-  {/snippet}
+  </div>
 </SplitComponent>

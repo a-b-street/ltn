@@ -11,24 +11,22 @@
 <span style="display: flex; flex-direction: row; height: 80%; gap: 4px">
   <button
     class="outline icon-btn"
-    onclick={() => (window.location.href = ".")}
+    on:click={() => (window.location.href = ".")}
     data-tippy-content="Global version"
     disabled={$appFocus == "global"}><Globe color="black" /></button
   >
 
   <button
     class="outline icon-btn"
-    onclick={() => (window.location.href = "cnt.html")}
+    on:click={() => (window.location.href = "cnt.html")}
     data-tippy-content="Scotland"
-    aria-label="Scotland"
     disabled={$appFocus == "cnt"}><span class="fi fi-gb-sct"></span></button
   >
 
   <button
     class="outline icon-btn"
-    onclick={() => (window.location.href = "england.html")}
+    on:click={() => (window.location.href = "england.html")}
     data-tippy-content="England"
-    aria-label="England"
     disabled={$appFocus == "england"}><span class="fi fi-gb-eng"></span></button
   >
 

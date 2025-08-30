@@ -1,36 +1,25 @@
 <script lang="ts">
   // This launches a modal when clicked. The user should put the modal contents
-  // as the child snippet beneath this component.
+  // as a slot beneath this component.
   import { CircleHelp } from "lucide-svelte";
-  import type { Snippet } from "svelte";
   import { Modal } from "svelte-utils";
 
-  let show = $state(false);
-  interface Props {
-    color?: string;
-    children: Snippet;
-  }
-
-  let { color = "black", children }: Props = $props();
-
-  function onclick(e: Event) {
-    e.stopPropagation();
-    show = true;
-  }
+  let show = false;
+  export let color = "black";
 </script>
 
-<button class="icon-btn help" title="Help" {onclick}>
+<button
+  class="icon-btn help"
+  title="Help"
+  on:click|stopPropagation={() => (show = true)}
+>
   <CircleHelp {color} />
 </button>
 
-<div class="pico">
-  <Modal bind:show>
-    <article style="max-height: 80vh; max-width: 80vw; overflow: auto">
-      <h2>Help</h2>
-      {@render children()}
-    </article>
-  </Modal>
-</div>
+<Modal bind:show>
+  <h2>Help</h2>
+  <slot />
+</Modal>
 
 <style>
   button.help {

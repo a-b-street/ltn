@@ -3,21 +3,19 @@
   import { ContextLayerButton, layerId, roadLineWidth } from "../common";
   import { assetUrl } from "../stores";
 
-  let show = $state(false);
+  let show = false;
 </script>
 
 <ContextLayerButton bind:show label="Bus routes">
-  {#snippet help()}
-    <p>
-      These are all <a
-        href="https://wiki.openstreetmap.org/wiki/Tag:route%3Dbus"
-        target="_blank"
-      >
-        bus routes
-      </a>
-      according to OpenStreetMap.
-    </p>
-  {/snippet}
+  <p slot="help">
+    These are all <a
+      href="https://wiki.openstreetmap.org/wiki/Tag:route%3Dbus"
+      target="_blank"
+    >
+      bus routes
+    </a>
+    according to OpenStreetMap.
+  </p>
 </ContextLayerButton>
 
 <VectorTileSource

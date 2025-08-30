@@ -1,13 +1,11 @@
 <script lang="ts">
   import { ArrowUp } from "lucide-svelte";
 
-  interface Props {
-    colorScale: string[];
-    limits: number[];
-    value: number;
-  }
+  export let colorScale: string[];
+  export let limits: number[];
+  export let value: number;
 
-  let { colorScale, limits, value }: Props = $props();
+  $: bucketIdx = calculateBucket(limits, value);
 
   function calculateBucket(limits: number[], value: number): number {
     // Note the value might exceed the highest limit; it winds up in the last bucket if so
@@ -20,7 +18,6 @@
     }
     return idx;
   }
-  let bucketIdx = $derived(calculateBucket(limits, value));
 </script>
 
 <div class="colors">

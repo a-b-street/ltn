@@ -1,9 +1,6 @@
 <script lang="ts">
   import type { Feature, FeatureCollection, MultiPolygon } from "geojson";
-  import type {
-    DataDrivenPropertyValueSpecification,
-    MapGeoJSONFeature,
-  } from "maplibre-gl";
+  import type { DataDrivenPropertyValueSpecification } from "maplibre-gl";
   import {
     FillLayer,
     GeoJSON,
@@ -19,9 +16,7 @@
   import { backend, mode } from "./stores";
   import type { ZoneDemandProps } from "./wasm";
 
-  let gj = $state(
-    emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>,
-  );
+  let gj = emptyGeojson() as FeatureCollection<MultiPolygon, ZoneDemandProps>;
   try {
     gj = $backend!.getDemandModel();
   } catch (err) {
@@ -29,9 +24,14 @@
     $mode = { mode: "pick-neighbourhood" };
   }
 
-  let showTo = $state(false);
+  let showTo = false;
 
-  let hovered: (Feature & MapGeoJSONFeature) | undefined = $state();
+  let hovered: Feature | null = null;
+  $: hoveredId = hovered == null ? null : (hovered.id as number);
+  // MapLibre doesn't preserve the arrays in properties, so use the original version
+  $: current = hoveredId != null ? gj.features[hoveredId] : null;
+
+  $: [limits, fillColor] = getLimitsAndColor(hoveredId, showTo);
 
   function getLimitsAndColor(
     hoveredId: number | null,
@@ -71,14 +71,10 @@
       Math.round((max / (n - 1)) * i),
     );
   }
-  let hoveredId = $derived(hovered ? (hovered.id as number) : null);
-  // MapLibre doesn't preserve the arrays in properties, so use the original version
-  let current = $derived(hoveredId != null ? gj.features[hoveredId] : null);
-  let [limits, fillColor] = $derived(getLimitsAndColor(hoveredId, showTo));
 </script>
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -95,9 +91,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
+  </div>
 
-  {#snippet left()}
+  <div slot="sidebar">
     <BackButton
       mode={{ mode: "predict-impact", prevMode: "pick-neighbourhood" }}
     />
@@ -135,9 +131,9 @@
     {:else}
       <p>Hover on a zone</p>
     {/if}
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     <GeoJSON data={gj} generateId>
       <FillLayer
         {...layerId("debug-demand-fill")}
@@ -157,5 +153,5 @@
         }}
       />
     </GeoJSON>
-  {/snippet}
+  </div>
 </SplitComponent>

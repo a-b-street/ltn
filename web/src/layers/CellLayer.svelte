@@ -5,12 +5,8 @@
   import { layerId } from "../common";
   import { drawBorderEntries, roadStyle } from "../stores";
 
-  interface Props {
-    show?: boolean;
-    prefix?: string;
-  }
-
-  let { show = true, prefix = "" }: Props = $props();
+  export let show = true;
+  export let prefix = "";
 
   function borderEntryIconSize(
     scale: number,

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
-  import { Popup } from "svelte-maplibre";
+  import { Popup } from "svelte-utils/map";
   import {
     CellLayer,
     ModalFilterLayer,
@@ -13,17 +13,15 @@
 
   let prefix = "before-edits-";
 
-  let neighbourhoodGj: RenderNeighbourhoodOutput | null = $state(null);
-  let modalFilterGj: FeatureCollection | null = $state(null);
-  let turnRestrictionGj: FeatureCollection | null = $state(null);
+  let neighbourhoodGj: RenderNeighbourhoodOutput | null = null;
+  let modalFilterGj: FeatureCollection | null = null;
+  let turnRestrictionGj: FeatureCollection | null = null;
 
-  $effect(() => {
-    if ($showBeforeEdits && neighbourhoodGj == null) {
-      neighbourhoodGj = $backend!.renderNeighbourhoodBeforeEdits();
-      modalFilterGj = $backend!.renderModalFiltersBeforeEdits();
-      turnRestrictionGj = $backend!.renderTurnRestrictionsBeforeEdits();
-    }
-  });
+  $: if ($showBeforeEdits && neighbourhoodGj == null) {
+    neighbourhoodGj = $backend!.renderNeighbourhoodBeforeEdits();
+    modalFilterGj = $backend!.renderModalFiltersBeforeEdits();
+    turnRestrictionGj = $backend!.renderTurnRestrictionsBeforeEdits();
+  }
 </script>
 
 {#if neighbourhoodGj}
@@ -32,25 +30,21 @@
     <OneWayLayer show={$showBeforeEdits} {prefix} />
 
     <NeighbourhoodRoadLayer show={$showBeforeEdits} {prefix} interactive={true}>
-      {#snippet linePopup()}
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            {@const props = data!.properties!}
-            {#if props.kind == "interior_road"}
-              <p>
-                {props.shortcuts} shortcuts through {props.name ??
-                  "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
-              </p>
-            {:else if props.kind == "main_road"}
-              <p>
-                Main road: {props.name ?? "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
-              </p>
-            {/if}
-          {/snippet}
+      <div slot="line-popup">
+        <Popup openOn="hover" let:props>
+          {#if props.kind == "interior_road"}
+            <p>
+              {props.shortcuts} shortcuts through {props.name ?? "unnamed road"}
+              ({Math.round(props.speed_mph)} mph)
+            </p>
+          {:else if props.kind == "main_road"}
+            <p>
+              Main road: {props.name ?? "unnamed road"}
+              ({Math.round(props.speed_mph)} mph)
+            </p>
+          {/if}
         </Popup>
-      {/snippet}
+      </div>
     </NeighbourhoodRoadLayer>
   </RenderNeighbourhood>
 {/if}

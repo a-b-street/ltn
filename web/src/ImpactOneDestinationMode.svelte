@@ -1,19 +1,13 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import {
-    LngLat,
-    type MapGeoJSONFeature,
-    type MapMouseEvent,
-  } from "maplibre-gl";
+  import { LngLat, type MapMouseEvent } from "maplibre-gl";
   import { onMount } from "svelte";
+  import { FillLayer, GeoJSON, LineLayer, MapEvents } from "svelte-maplibre";
   import {
-    FillLayer,
-    GeoJSON,
-    LineLayer,
-    MapEvents,
+    constructMatchExpression,
+    emptyGeojson,
     Popup,
-  } from "svelte-maplibre";
-  import { constructMatchExpression, emptyGeojson } from "svelte-utils/map";
+  } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -35,7 +29,13 @@
   } from "./stores";
   import type { CompareRoute } from "./wasm";
 
-  let hovered: (Feature & MapGeoJSONFeature) | undefined = $state();
+  $: perRoadGj = $backend!.impactToOneDestination($oneDestination);
+
+  let hovered: Feature | null = null;
+
+  $: routeGj = previewRoutes(hovered);
+  $: routeBefore = routeGj.features.find((f) => f.properties.kind == "before");
+  $: routeAfter = routeGj.features.find((f) => f.properties.kind == "after");
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.
@@ -46,7 +46,7 @@
     }, 10);
   });
 
-  function previewRoutes(hovered: Feature | undefined): CompareRoute {
+  function previewRoutes(hovered: Feature | null): CompareRoute {
     if (!hovered) {
       return emptyGeojson() as CompareRoute;
     }
@@ -63,24 +63,16 @@
     $mode = { mode: "route", prevMode: "impact-one-destination" };
   }
 
-  function onRightClick(e: MapMouseEvent) {
+  function onRightClick(e: CustomEvent<MapMouseEvent>) {
     // Move the first marker, for convenience
-    $oneDestination = e.lngLat;
+    $oneDestination = e.detail.lngLat;
   }
-  let perRoadGj = $derived($backend!.impactToOneDestination($oneDestination));
-  let routeGj = $derived(previewRoutes(hovered));
-  let routeBefore = $derived(
-    routeGj.features.find((f) => f.properties.kind == "before"),
-  );
-  let routeAfter = $derived(
-    routeGj.features.find((f) => f.properties.kind == "after"),
-  );
 </script>
 
-<MapEvents oncontextmenu={onRightClick} />
+<MapEvents on:contextmenu={onRightClick} />
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -95,9 +87,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
+  </div>
 
-  {#snippet left()}
+  <div slot="sidebar">
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     <p>
@@ -138,9 +130,9 @@
     {:else}
       <p>Hover on a road to compare</p>
     {/if}
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     <RenderNeighbourhood>
       <FillLayer
         {...layerId("cells")}
@@ -168,16 +160,11 @@
           "line-width": 5,
         }}
         manageHoverState
-        onclick={(e) => compareRoute(e.features[0])}
+        on:click={(e) => compareRoute(e.detail.features[0])}
         bind:hovered
       >
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            {@const props = data!.properties!}
-            <p>
-              Time ratio: {(props.time_after / props.time_before).toFixed(1)}
-            </p>
-          {/snippet}
+        <Popup openOn="hover" let:props>
+          <p>Time ratio: {(props.time_after / props.time_before).toFixed(1)}</p>
         </Popup>
       </LineLayer>
     </GeoJSON>
@@ -203,5 +190,5 @@
     <ModalFilterLayer interactive={false} />
 
     <DotMarker bind:lngLat={$oneDestination} draggable>X</DotMarker>
-  {/snippet}
+  </div>
 </SplitComponent>

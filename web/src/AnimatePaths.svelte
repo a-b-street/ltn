@@ -6,9 +6,9 @@
   import { layerId } from "./common";
   import type { AllShortcuts } from "./wasm";
 
-  let { paths }: { paths: AllShortcuts } = $props();
+  export let paths: AllShortcuts;
 
-  let totalDirectness = $derived.by(sumWeights);
+  let totalDirectness = sumWeights();
 
   let numDots = 50;
   let redrawMs = 100;
@@ -19,8 +19,13 @@
     distance: number;
   }
 
-  let dots = $state(makeDots());
-  let gj = $derived.by(redraw);
+  let dots = makeDots();
+  let gj = redraw();
+
+  $: if (paths) {
+    totalDirectness = sumWeights();
+    dots = makeDots();
+  }
 
   let intervalId = setInterval(animate, redrawMs);
   onDestroy(() => clearInterval(intervalId));
@@ -76,6 +81,7 @@
         dots[idx] = startDot();
       }
     }
+    gj = redraw();
   }
 </script>
 

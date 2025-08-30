@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { Feature } from "geojson";
   import type { LngLat } from "maplibre-gl";
-  import { GeoJSON, LineLayer, Popup } from "svelte-maplibre";
+  import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { notNull } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -23,7 +25,7 @@
   import { backend, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
 
-  type Action =
+  type State =
     | {
         state: "neutral";
       }
@@ -33,20 +35,16 @@
         gj: AllShortcuts;
         shortcutIndex: number;
       };
-  let action: Action = $state({ state: "neutral" });
+  let state: State = { state: "neutral" };
 
   function choseRoad(roadGj: Feature, _: LngLat) {
-    if (action.state != "neutral") {
-      return;
-    }
-
     let gj = $backend!.getShortcutsCrossingRoad(roadGj.properties!.id);
     if (gj.features.length == 0) {
       window.alert("No shortcuts here");
       return;
     }
 
-    action = {
+    state = {
       state: "chose-road",
       roadGj,
       gj,
@@ -56,7 +54,7 @@
 </script>
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -71,14 +69,14 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
+  </div>
 
-  {#snippet left()}
+  <div slot="sidebar">
     <BackButton mode={{ mode: "neighbourhood" }} />
 
-    {#if action.state == "neutral"}
+    {#if state.state == "neutral"}
       <p>Click a road to see shortcuts</p>
-    {:else if action.state == "chose-road"}
+    {:else if state.state == "chose-road"}
       <p>
         This shows all possible shortcuts crossing the blue road you've chosen.
         A shortcut is defined as a route starting and ending on main (busy)
@@ -88,57 +86,53 @@
         view lets you understand the limits of this assumption.
       </p>
 
-      <button onclick={() => (action = { state: "neutral" })}>
+      <button on:click={() => (state = { state: "neutral" })}>
         Pick a different road
       </button>
 
-      <PrevNext list={action.gj.features} bind:idx={action.shortcutIndex} />
+      <PrevNext list={state.gj.features} bind:idx={state.shortcutIndex} />
 
       <p>
         This shortcut is <b>
-          {action.gj.features[
-            action.shortcutIndex
-          ].properties!.directness.toFixed(1)}x
+          {notNull(
+            state.gj.features[state.shortcutIndex].properties,
+          ).directness.toFixed(1)}x
         </b>
         the length of the shortest route using all roads, not just this neighbourhood
       </p>
     {/if}
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
 
-      <NeighbourhoodRoadLayer
-        onClickLine={choseRoad}
-        interactive={action.state == "neutral"}
-      >
-        {#snippet linePopup()}
-          {#if action.state == "neutral"}
-            <Popup openOn="hover">
-              {#snippet children({ data })}
-                {@const props = data!.properties!}
-                {#if props.kind == "interior_road"}
-                  <p>
-                    {props.shortcuts} shortcuts through {props.name ??
-                      "unnamed road"}
-                  </p>
-                {:else if props.kind == "main_road"}
-                  <p>
-                    Main road: {props.name ?? "unnamed road"}
-                  </p>
-                {/if}
-              {/snippet}
+      {#if state.state == "neutral"}
+        <NeighbourhoodRoadLayer onClickLine={choseRoad}>
+          <div slot="line-popup">
+            <Popup openOn="hover" let:props>
+              {#if props.kind == "interior_road"}
+                <p>
+                  {props.shortcuts} shortcuts through {props.name ??
+                    "unnamed road"}
+                </p>
+              {:else if props.kind == "main_road"}
+                <p>
+                  Main road: {props.name ?? "unnamed road"}
+                </p>
+              {/if}
             </Popup>
-          {/if}
-        {/snippet}
-      </NeighbourhoodRoadLayer>
+          </div>
+        </NeighbourhoodRoadLayer>
+      {:else if state.state == "chose-road"}
+        <NeighbourhoodRoadLayer interactive={false} />
+      {/if}
     </RenderNeighbourhood>
 
-    {#if action.state == "chose-road"}
-      <GeoJSON data={action.gj.features[action.shortcutIndex]}>
+    {#if state.state == "chose-road"}
+      <GeoJSON data={state.gj.features[state.shortcutIndex]}>
         <LineLayer
           {...layerId("shortcuts")}
           paint={{
@@ -148,7 +142,7 @@
         />
       </GeoJSON>
 
-      <GeoJSON data={action.roadGj}>
+      <GeoJSON data={state.roadGj}>
         <LineLayer
           {...layerId("shortcuts-focus")}
           paint={{
@@ -160,16 +154,16 @@
 
       <DotMarker
         lngLat={gjPosition(
-          action.gj.features[action.shortcutIndex].geometry.coordinates[0],
+          state.gj.features[state.shortcutIndex].geometry.coordinates[0],
         )}
       >
         A
       </DotMarker>
       <DotMarker
         lngLat={gjPosition(
-          action.gj.features[action.shortcutIndex].geometry.coordinates[
-            action.gj.features[action.shortcutIndex].geometry.coordinates
-              .length - 1
+          state.gj.features[state.shortcutIndex].geometry.coordinates[
+            state.gj.features[state.shortcutIndex].geometry.coordinates.length -
+              1
           ],
         )}
       >
@@ -178,5 +172,5 @@
     {/if}
 
     <ModalFilterLayer interactive={false} />
-  {/snippet}
+  </div>
 </SplitComponent>

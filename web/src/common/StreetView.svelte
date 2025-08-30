@@ -7,17 +7,13 @@
   import { interactiveMapLayersEnabled } from "./stores";
 
   // TODO Need to intercept the escape key always
+  // TODO Make sure all layers respect DisableInteractiveLayers (they currently do not)
 
-  interface Props {
-    // TODO Make sure all layers respect DisableInteractiveLayers (they currently do not)
-    map: Map;
-    maptilerBasemap: string;
-  }
+  export let map: Map;
+  export let maptilerBasemap: string;
+  let expanded = false;
 
-  let { map, maptilerBasemap }: Props = $props();
-  let expanded = $state(false);
-
-  let source: "google" | "bing" = $state("google");
+  let source: "google" | "bing" = "google";
   let defaultLineColorPerLayer: [string, any][] = [];
 
   function start() {
@@ -71,11 +67,11 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeyDown} />
+<svelte:window on:keydown={onKeyDown} />
 
 <ControlButton>
   <button
-    onclick={() => {
+    on:click={() => {
       expanded = !expanded;
       expanded ? start() : stop();
     }}

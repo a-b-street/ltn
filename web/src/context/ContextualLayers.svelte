@@ -16,7 +16,7 @@
   import RailwayStations from "./RailwayStations.svelte";
   import Stats19 from "./Stats19.svelte";
 
-  let expand = $state(false);
+  let expand = false;
 </script>
 
 <Control defaultStyling>
@@ -28,7 +28,7 @@
     <button
       class="show-layers-button icon-btn {expand ? 'expanded' : ''}"
       aria-label="Layers"
-      onclick={() => (expand = !expand)}
+      on:click={() => (expand = !expand)}
     >
       <div
         style="display: flex; gap: 12px; color: #333; align-items: center; justify-content: center;"

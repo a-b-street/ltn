@@ -27,11 +27,7 @@
   import { loadingMessage, loadingProgress, loadProject } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
-  interface Props {
-    wasmReady: boolean;
-  }
-
-  let { wasmReady }: Props = $props();
+  export let wasmReady: boolean;
 
   // When other modes reset here, they can't clear state without a race condition
   {
@@ -68,7 +64,7 @@
     }
   }
 
-  let studyAreas = $state($projectStorage.studyAreaProjects());
+  let studyAreas = $projectStorage.studyAreaProjects();
 
   function loadProjectFromUrlParam(projectIDParam: string) {
     let projectID = projectIDParam as ProjectID;
@@ -129,15 +125,14 @@
 <Loading loading={$loadingMessage} progress={$loadingProgress} />
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
-
-  {#snippet left()}
+  </div>
+  <div slot="sidebar">
     {#if $map && wasmReady}
       {#if $appFocus == "cnt"}
         <h1>The Connected Neighbourhoods Tool</h1>
@@ -163,7 +158,7 @@
               {#each projects as { projectID, projectName }}
                 <li class="actionable-cell">
                   <h3 class="project-name">
-                    <Link onclick={() => openProject(projectID)}>
+                    <Link on:click={() => openProject(projectID)}>
                       {projectName}
                     </Link>
                   </h3>
@@ -171,28 +166,28 @@
                     <button
                       class="outline icon-btn"
                       title="Download project as GeoJSON"
-                      onclick={() => downloadProject(projectID)}
+                      on:click={() => downloadProject(projectID)}
                     >
                       <FileDown color="black" />
                     </button>
                     <button
                       class="outline icon-btn"
                       title="Rename project"
-                      onclick={() => renameProject(projectID, projectName)}
+                      on:click={() => renameProject(projectID, projectName)}
                     >
                       <Pencil color="black" />
                     </button>
                     <button
                       class="outline icon-btn"
                       title="Copy project"
-                      onclick={() => copyProject(projectID, projectName)}
+                      on:click={() => copyProject(projectID, projectName)}
                     >
                       <Copy color="black" />
                     </button>
                     <button
                       class="icon-btn destructive"
                       title="Delete project"
-                      onclick={() => deleteProject(projectID, projectName)}
+                      on:click={() => deleteProject(projectID, projectName)}
                     >
                       <Trash2 color="white" />
                     </button>
@@ -206,7 +201,7 @@
 
       <h2>Start a new project</h2>
       {#if $appFocus == "global"}
-        <button onclick={() => ($mode = { mode: "new-project" })}>
+        <button on:click={() => ($mode = { mode: "new-project" })}>
           New project
         </button>
       {:else if $appFocus == "cnt"}
@@ -218,7 +213,7 @@
     {:else}
       <p>Waiting for MapLibre and WASM to load...</p>
     {/if}
-  {/snippet}
+  </div>
 </SplitComponent>
 
 <style>

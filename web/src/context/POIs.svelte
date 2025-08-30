@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { CircleLayer, GeoJSON, Popup } from "svelte-maplibre";
+  import { CircleLayer, GeoJSON } from "svelte-maplibre";
   import { QualitativeLegend } from "svelte-utils";
-  import { constructMatchExpression } from "svelte-utils/map";
+  import { constructMatchExpression, Popup } from "svelte-utils/map";
   import { ContextLayerButton, layerId } from "../common";
   import { backend } from "../stores";
 
-  let show = $state(false);
+  let show = false;
 
   // https://colorbrewer2.org/#type=qualitative&scheme=Accent&n=6
   let labelColors = {
@@ -19,40 +19,38 @@
 </script>
 
 <ContextLayerButton label="POIs" bind:show>
-  {#snippet legend()}
+  <div slot="legend">
     <QualitativeLegend {labelColors} swatchClass="circle" />
-  {/snippet}
+  </div>
 
-  {#snippet help()}
-    <p>
-      See Scottish data sources for
-      <a
-        href="https://www.data.gov.uk/dataset/9a6f9d86-9698-4a5d-a2c8-89f3b212c52c/scottish-school-roll-and-locations"
-        target="_blank"
-      >
-        schools
-      </a>
-      ,
-      <a
-        href="https://data.spatialhub.scot/dataset/gp_practices-is"
-        target="_blank"
-      >
-        GP practices
-      </a>
-      , and
-      <a
-        href="https://data.spatialhub.scot/dataset/nhs_hospitals-is"
-        target="_blank"
-      >
-        hospitals
-      </a>
-      . Other data is from
-      <a href="https://www.openstreetmap.org/about" target="_blank">
-        OpenStreetMap
-      </a>
-      .
-    </p>
-  {/snippet}
+  <p slot="help">
+    See Scottish data sources for
+    <a
+      href="https://www.data.gov.uk/dataset/9a6f9d86-9698-4a5d-a2c8-89f3b212c52c/scottish-school-roll-and-locations"
+      target="_blank"
+    >
+      schools
+    </a>
+    ,
+    <a
+      href="https://data.spatialhub.scot/dataset/gp_practices-is"
+      target="_blank"
+    >
+      GP practices
+    </a>
+    , and
+    <a
+      href="https://data.spatialhub.scot/dataset/nhs_hospitals-is"
+      target="_blank"
+    >
+      hospitals
+    </a>
+    . Other data is from
+    <a href="https://www.openstreetmap.org/about" target="_blank">
+      OpenStreetMap
+    </a>
+    .
+  </p>
 </ContextLayerButton>
 
 {#if $backend}
@@ -74,11 +72,8 @@
         visibility: show ? "visible" : "none",
       }}
     >
-      <Popup openOn="hover">
-        {#snippet children({ data })}
-          {@const props = data!.properties!}
-          {props.name || `unnamed ${props.kind}`}
-        {/snippet}
+      <Popup openOn="hover" let:props>
+        {props.name || `unnamed ${props.kind}`}
       </Popup>
     </CircleLayer>
   </GeoJSON>

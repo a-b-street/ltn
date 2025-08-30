@@ -19,24 +19,20 @@
   import { backend, fastSample, mode } from "./stores";
   import type { ImpactOnRoad } from "./wasm";
 
-  interface Props {
-    road: Feature;
-    prevPrevMode: "pick-neighbourhood" | "neighbourhood";
-  }
-
-  let { road, prevPrevMode }: Props = $props();
+  export let road: Feature;
+  export let prevPrevMode: "pick-neighbourhood" | "neighbourhood";
 
   // TODO Weird to modify the input like this?
-  let data = $state(road.properties!);
-  data.kind = "focus";
+  let props = road.properties!;
+  props.kind = "focus";
 
-  let routes: ImpactOnRoad[] = $state([]);
-  let idx = $state(0);
+  let routes: ImpactOnRoad[] = [];
+  let idx = 0;
 
-  let loading = $state("Finding changes to this road");
+  let loading = "Finding changes to this road";
   onMount(async () => {
     await refreshLoadingScreen();
-    routes = $backend!.getImpactsOnRoad(data.id, $fastSample);
+    routes = $backend!.getImpactsOnRoad(props.id, $fastSample);
     loading = "";
     if (routes.length == 0) {
       window.alert(
@@ -74,7 +70,7 @@
 <Loading {loading} />
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -94,18 +90,18 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
+  </div>
 
-  {#snippet left()}
+  <div slot="sidebar">
     <BackButton mode={{ mode: "predict-impact", prevMode: prevPrevMode }} />
 
     <p>
-      {data.before.toLocaleString()} routes cross here
+      {props.before.toLocaleString()} routes cross here
       <span style:color="red">before your changes</span>
-      , and {data.after.toLocaleString()}
+      , and {props.after.toLocaleString()}
       <span style:color="blue">after your changes</span>
       . That's
-      {Math.round((100 * data.after) / data.before)}% of the original traffic.
+      {Math.round((100 * props.after) / props.before)}% of the original traffic.
     </p>
 
     {#if routes.length > 0}
@@ -136,9 +132,9 @@
         </p>
       {/if}
     {/if}
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     {#if routes.length > 0}
       <GeoJSON data={gj(idx)}>
         <LineLayer
@@ -176,5 +172,5 @@
     {/if}
 
     <ModalFilterLayer interactive={false} />
-  {/snippet}
+  </div>
 </SplitComponent>

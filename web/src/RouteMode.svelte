@@ -29,21 +29,14 @@
     routePtB,
   } from "./stores";
 
-  interface Props {
-    prevMode: "pick-neighbourhood" | "neighbourhood" | "impact-one-destination";
-  }
+  export let prevMode:
+    | "pick-neighbourhood"
+    | "neighbourhood"
+    | "impact-one-destination";
 
-  let { prevMode }: Props = $props();
-
-  let gj = $derived(
-    $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty),
-  );
-  let routeBefore = $derived(
-    gj.features.find((f) => f.properties.kind == "before"),
-  );
-  let routeAfter = $derived(
-    gj.features.find((f) => f.properties.kind == "after"),
-  );
+  $: gj = $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty);
+  $: routeBefore = gj.features.find((f) => f.properties.kind == "before");
+  $: routeAfter = gj.features.find((f) => f.properties.kind == "after");
 
   onMount(() => {
     // There seems to be a race with the Marker component, so we wait just a bit before updating.
@@ -55,7 +48,7 @@
 </script>
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -72,9 +65,8 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
-
-  {#snippet left()}
+  </div>
+  <div slot="sidebar">
     <BackButton mode={{ mode: prevMode }} />
 
     <p>Drag markers for a route</p>
@@ -123,9 +115,9 @@
       Increase to see how drivers may detour in heavy traffic. 1 means
       free-flow.
     </i>
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     {#if prevMode == "neighbourhood"}
       <RenderNeighbourhood>
         <HighlightBoundaryLayer />
@@ -156,5 +148,5 @@
 
     <DotMarker bind:lngLat={$routePtA} draggable>A</DotMarker>
     <DotMarker bind:lngLat={$routePtB} draggable>B</DotMarker>
-  {/snippet}
+  </div>
 </SplitComponent>

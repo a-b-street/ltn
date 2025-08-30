@@ -9,20 +9,15 @@
     MapEvents,
     Marker,
     Popup,
-    type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
   import { routeTool, type Waypoint } from "../common/draw_area/stores";
 
-  interface Props {
-    map: Map;
-    waypoints: Waypoint[];
-    finish: (roads: number[]) => void;
-    cancel: () => void;
-  }
-
-  let { map, waypoints = $bindable(), finish, cancel }: Props = $props();
+  export let map: Map;
+  export let waypoints: Waypoint[];
+  export let finish: (roads: number[]) => void;
+  export let cancel: () => void;
 
   onDestroy(() => {
     waypoints = [];
@@ -37,29 +32,37 @@
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = $state([]);
-  // This can't be derived, because we bind a Marker lngLat to it
-  $effect(() => {
-    extraNodes = getExtraNodes($routeTool, waypoints, draggingExtraNode);
-  });
+  let extraNodes: ExtraNode[] = [];
+  $: updateExtraNodes($routeTool, waypoints, draggingExtraNode);
 
-  let cursor: Waypoint | null = $state(null);
-  let hoveringOnMarker = $state(false);
-  let draggingMarker = $state(false);
-  let draggingExtraNode = $state(false);
+  let cursor: Waypoint | null = null;
+  let hoveringOnMarker = false;
+  let draggingMarker = false;
+  let draggingExtraNode = false;
+  $: previewGj = getPreview(
+    $routeTool,
+    waypoints,
+    cursor,
+    hoveringOnMarker || draggingMarker,
+  );
 
-  function onMapClick(e: MapMouseEvent) {
+  $: updateCursor(waypoints);
+  function updateCursor(waypoints: Waypoint[]) {
+    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
+    map.getCanvas().style.cursor = cursor;
+  }
+
+  function onMapClick(e: CustomEvent<MapMouseEvent>) {
     waypoints.push({
-      point: e.lngLat.toArray(),
+      point: e.detail.lngLat.toArray(),
       snapped: snapMode,
     });
     waypoints = waypoints;
   }
 
-  function onMouseMove(e: MapMoveEvent) {
+  function onMouseMove(e: CustomEvent<MapMouseEvent>) {
     cursor = {
-      // @ts-expect-error TODO fix upstream types
-      point: e.lngLat.toArray(),
+      point: e.detail.lngLat.toArray(),
       snapped: snapMode,
     };
   }
@@ -104,16 +107,17 @@
     return emptyGeojson();
   }
 
-  function getExtraNodes(
+  function updateExtraNodes(
     routeTool: RouteTool | null,
     waypoints: Waypoint[],
     draggingExtraNode: boolean,
-  ): ExtraNode[] {
+  ) {
     if (draggingExtraNode) {
-      return extraNodes;
+      return;
     }
     if (!routeTool) {
-      return [];
+      extraNodes = [];
+      return;
     }
 
     let nodes: ExtraNode[] = [];
@@ -129,7 +133,7 @@
       insertIdx++;
     }
 
-    return nodes;
+    extraNodes = nodes;
   }
 
   function addNode(node: ExtraNode) {
@@ -179,31 +183,19 @@
       cancel();
     }
   }
-  let previewGj = $derived(
-    getPreview(
-      $routeTool,
-      waypoints,
-      cursor,
-      hoveringOnMarker || draggingMarker,
-    ),
-  );
-  $effect(() => {
-    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
-    map.getCanvas().style.cursor = cursor;
-  });
 </script>
 
-<svelte:window onkeydown={onKeyDown} />
+<svelte:window on:keydown={onKeyDown} />
 
-<MapEvents onclick={onMapClick} onmousemove={onMouseMove} />
+<MapEvents on:click={onMapClick} on:mousemove={onMouseMove} />
 
 {#each extraNodes as node}
   <Marker
     draggable
     bind:lngLat={node.point}
-    ondragstart={() => addNode(node)}
-    ondrag={() => updateDrag(node)}
-    ondragend={finalizeDrag}
+    on:dragstart={() => addNode(node)}
+    on:drag={() => updateDrag(node)}
+    on:dragend={finalizeDrag}
     zIndex={0}
   >
     <span
@@ -211,7 +203,7 @@
       class:snapped-node={node.snapped}
       class:free-node={!node.snapped}
       class:hide={draggingExtraNode}
-    ></span>
+    />
   </Marker>
 {/each}
 
@@ -219,12 +211,12 @@
   <Marker
     draggable
     bind:lngLat={waypt.point}
-    onclick={() => clickWaypoint(idx)}
-    oncontextmenu={() => removeWaypoint(idx)}
-    onmouseenter={() => (hoveringOnMarker = true)}
-    onmouseleave={() => (hoveringOnMarker = false)}
-    ondragstart={startDraggingWaypoint}
-    ondragend={() => (draggingMarker = false)}
+    on:click={() => clickWaypoint(idx)}
+    on:contextmenu={() => removeWaypoint(idx)}
+    on:mouseenter={() => (hoveringOnMarker = true)}
+    on:mouseleave={() => (hoveringOnMarker = false)}
+    on:dragstart={startDraggingWaypoint}
+    on:dragend={() => (draggingMarker = false)}
     zIndex={1}
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>

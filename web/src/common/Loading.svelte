@@ -1,13 +1,10 @@
 <script lang="ts">
-  interface Props {
-    loading: string;
-    progress?: number | null;
-  }
-  let { loading, progress = null }: Props = $props();
+  export let loading: string;
+  export let progress: number | null = null;
 
-  let startTime: number | undefined = $state();
-  let taskName: string | undefined = $state();
-  $effect(() => {
+  let startTime: number | undefined = undefined;
+  let taskName: string | undefined = undefined;
+  $: {
     if (loading && !startTime) {
       // Start timing when loading begins
       startTime = Date.now();
@@ -18,7 +15,7 @@
       console.log(`Loading "${taskName}" took ${duration}ms`);
       startTime = undefined;
     }
-  });
+  }
 </script>
 
 {#if loading}
@@ -29,9 +26,9 @@
       {#if progress != null}
         <div>
           {#if progress == 100}
-            <progress style:width="100%"></progress>
+            <progress style:width="100%" />
           {:else}
-            <progress value={progress} max="100" style:width="100%"></progress>
+            <progress value={progress} max="100" style:width="100%" />
           {/if}
         </div>
       {/if}

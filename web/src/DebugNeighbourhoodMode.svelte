@@ -6,10 +6,10 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
-    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
-  import { PropertiesTable } from "svelte-utils";
+  import { notNull, PropertiesTable } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -31,15 +31,15 @@
   import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
   import { backend, mode } from "./stores";
 
-  let intersection: DebugIntersection | null = $state(null);
+  let intersection: DebugIntersection | null = null;
   type DebugIntersection = {
     feature: IntersectionFeature;
     movements: FeatureCollection;
     movementIdx: number;
   };
 
-  function pickIntersection(e: LayerClickInfo) {
-    let feature = e.features[0] as IntersectionFeature;
+  function pickIntersection(e: CustomEvent<LayerClickInfo>) {
+    let feature = e.detail.features[0] as IntersectionFeature;
     let movements = $backend!.getMovements(feature.properties.intersection_id);
     let movementIdx = 0;
     intersection = { feature, movements, movementIdx };
@@ -47,7 +47,7 @@
 </script>
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -62,9 +62,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
+  </div>
 
-  {#snippet left()}
+  <div slot="sidebar">
     <BackButton mode={{ mode: "neighbourhood" }} />
 
     <h4>Roads</h4>
@@ -74,7 +74,7 @@
     >
       <h4>Intersections</h4>
       {#if intersection}
-        <button class="close-btn" onclick={() => (intersection = null)}>
+        <button class="close-btn" on:click={() => (intersection = null)}>
           Ⓧ
         </button>
       {/if}
@@ -89,9 +89,9 @@
     {:else}
       <p>Click an intersection to inspect its movements.</p>
     {/if}
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     <RenderNeighbourhood>
       <HighlightBoundaryLayer />
       <CellLayer />
@@ -105,46 +105,31 @@
           "circle-color": "green",
         }}
       >
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            <PropertiesTable properties={data!.properties!} />
-          {/snippet}
+        <Popup openOn="hover" let:props>
+          <PropertiesTable properties={props} />
         </Popup>
       </CircleLayer>
 
       <NeighbourhoodRoadLayer
         interactive
-        onClickLine={(f, _) => window.open(f.properties!.way, "_blank")}
+        onClickLine={(f, _) => window.open(notNull(f.properties).way, "_blank")}
       >
-        {#snippet linePopup()}
-          <Popup openOn="hover">
-            {#snippet children({ data })}
-              <PropertiesTable properties={data!.properties!} />
-            {/snippet}
+        <div slot="line-popup">
+          <Popup openOn="hover" let:props>
+            <PropertiesTable properties={props} />
           </Popup>
-        {/snippet}
+        </div>
       </NeighbourhoodRoadLayer>
     </RenderNeighbourhood>
 
     <ModalFilterLayer interactive={true}>
-      {#snippet modalFilterPopup()}
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            <PropertiesTable properties={data!.properties!} />
-          {/snippet}
-        </Popup>
-      {/snippet}
-
-      {#snippet turnRestrictionPopup()}
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            <PropertiesTable properties={data!.properties!} />
-          {/snippet}
-        </Popup>
-      {/snippet}
+      <!-- Note: This popup is currently broken (it was before this commit too). -->
+      <Popup openOn="hover" let:props>
+        <PropertiesTable properties={props} />
+      </Popup>
     </ModalFilterLayer>
 
-    <GeoJSON data={$backend!.getAllIntersections()} generateId>
+    <GeoJSON data={notNull($backend).getAllIntersections()} generateId>
       <CircleLayer
         {...layerId("debug-intersections")}
         paint={{
@@ -166,12 +151,10 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        onclick={pickIntersection}
+        on:click={pickIntersection}
       >
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            <PropertiesTable properties={data!.properties!} />
-          {/snippet}
+        <Popup openOn="hover" let:props>
+          <PropertiesTable properties={props} />
         </Popup>
       </CircleLayer>
     </GeoJSON>
@@ -195,7 +178,7 @@
         />
       </GeoJSON>
     {/if}
-  {/snippet}
+  </div>
 </SplitComponent>
 
 <style>

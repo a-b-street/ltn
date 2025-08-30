@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Feature } from "geojson";
-  import { FillLayer, GeoJSON, LineLayer, Popup } from "svelte-maplibre";
+  import { FillLayer, GeoJSON, LineLayer } from "svelte-maplibre";
   import { SequentialLegend } from "svelte-utils";
+  import { Popup } from "svelte-utils/map";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import BackButton from "./BackButton.svelte";
   import {
@@ -22,22 +23,19 @@
   } from "./stores";
   import type { Impact } from "./wasm";
 
-  interface Props {
-    prevMode: "pick-neighbourhood" | "neighbourhood";
-  }
-
-  let { prevMode }: Props = $props();
+  export let prevMode: "pick-neighbourhood" | "neighbourhood";
 
   // Based partly on https://colorbrewer2.org/#type=diverging&scheme=RdYlGn&n=5
   // The middle color white doesn't matter; the source data will filter out unchanged roads
   let divergingScale = ["#1a9641", "#a6d96a", "white", "#fdae61", "#d7191c"];
 
-  let loading = $state("");
-  let impactGj: Impact = $state({
+  let loading = "";
+  let impactGj: Impact = {
     type: "FeatureCollection" as const,
     features: [],
     max_count: 1,
-  });
+  };
+  $: recalculate($fastSample);
   let neighbourhoods = $backend!.toSavefile();
 
   let minRoadWidth = 3;
@@ -53,11 +51,8 @@
     impactGj = $backend!.predictImpact(fastSample);
     loading = "";
   }
-  $effect(() => {
-    recalculate($fastSample);
-  });
 
-  let fastSampleRadio = $state($fastSample ? "fast" : "accurate");
+  let fastSampleRadio = $fastSample ? "fast" : "accurate";
   function updateFastSample() {
     $fastSample = fastSampleRadio == "fast";
   }
@@ -66,7 +61,7 @@
 <Loading {loading} />
 
 <SplitComponent>
-  {#snippet top()}
+  <div slot="top">
     <nav aria-label="breadcrumb">
       <ul>
         <li>
@@ -83,9 +78,9 @@
         <li>{pageTitle($mode.mode)}</li>
       </ul>
     </nav>
-  {/snippet}
+  </div>
 
-  {#snippet left()}
+  <div slot="sidebar">
     <BackButton mode={{ mode: prevMode }} />
 
     <p>
@@ -150,7 +145,7 @@
           type="radio"
           value="fast"
           bind:group={fastSampleRadio}
-          onchange={updateFastSample}
+          on:change={updateFastSample}
         />
         Calculate quickly
       </label>
@@ -159,7 +154,7 @@
           type="radio"
           value="accurate"
           bind:group={fastSampleRadio}
-          onchange={updateFastSample}
+          on:change={updateFastSample}
         />
         Calculate more accurately
       </label>
@@ -180,9 +175,9 @@
       colorScale={divergingScale}
       labels={{ limits: ["0%", "50%", "same", "150%", "200%"] }}
     />
-  {/snippet}
+  </div>
 
-  {#snippet main()}
+  <div slot="map">
     <GeoJSON data={neighbourhoods}>
       <FillLayer
         {...layerId("neighbourhood-boundaries", false)}
@@ -256,21 +251,18 @@
         }}
         manageHoverState
         hoverCursor="pointer"
-        onclick={(e) => pickRoad(e.features[0])}
+        on:click={(e) => pickRoad(e.detail.features[0])}
       >
-        <Popup openOn="hover">
-          {#snippet children({ data })}
-            {@const props = data!.properties!}
-            <p>
-              {props.before.toLocaleString()} before, {props.after.toLocaleString()}
-              after
-            </p>
-            <p>{Math.round((100 * props.after) / props.before)}%</p>
-          {/snippet}
+        <Popup openOn="hover" let:props>
+          <p>
+            {props.before.toLocaleString()} before, {props.after.toLocaleString()}
+            after
+          </p>
+          <p>{Math.round((100 * props.after) / props.before)}%</p>
         </Popup>
       </LineLayer>
     </GeoJSON>
 
     <ModalFilterLayer interactive={false} />
-  {/snippet}
+  </div>
 </SplitComponent>

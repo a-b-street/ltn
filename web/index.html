@@ -8,10 +8,9 @@
   <body>
     <div id="app"></div>
     <script type="module">
-      import { mount } from "svelte";
       import App from "./src/App.svelte";
 
-      mount(App, {
+      new App({
         target: document.getElementById("app"),
         props: {
           appFocus: "global",

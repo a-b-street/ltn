@@ -2,11 +2,7 @@
   import icon from "../../assets/filters/diagonal_filter_icon.png";
   import { Intersection } from "../common/Intersection";
 
-  interface Props {
-    intersection: Intersection;
-  }
-
-  let { intersection }: Props = $props();
+  export let intersection: Intersection;
 </script>
 
 <div style="display: flex; align-items: center;">

@@ -2,11 +2,7 @@
   import { Link } from "./common";
   import { mode as storedMode, type Mode } from "./stores";
 
-  interface Props {
-    mode: Mode;
-  }
-
-  let { mode }: Props = $props();
+  export let mode: Mode;
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key == "Escape") {
@@ -16,6 +12,6 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeyDown} />
+<svelte:window on:keydown={onKeyDown} />
 
-<Link onclick={() => ($storedMode = mode)}>Back</Link>
+<Link on:click={() => ($storedMode = mode)}>Back</Link>
