@@ -50,7 +50,6 @@
     ModalFilterLayer,
     NeighbourhoodRoadLayer,
     OneWayLayer,
-    RenderNeighbourhood,
   } from "../layers";
   import EditableIntersectionLayer from "../layers/EditableIntersectionLayer.svelte";
   import {
@@ -67,11 +66,7 @@
     showBeforeEdits,
     thickRoadsForShortcuts,
   } from "../stores";
-  import type {
-    AllShortcuts,
-    NeighbourhoodBoundaryFeature,
-    RenderNeighbourhoodOutput,
-  } from "../wasm";
+  import type { AllShortcuts, NeighbourhoodBoundaryFeature } from "../wasm";
   import ChangeFilterModal from "./ChangeFilterModal.svelte";
   import FreehandLine from "./FreehandLine.svelte";
   import ShowBeforeEdits from "./ShowBeforeEdits.svelte";
@@ -113,7 +108,7 @@
   let settingFilterType = $state(false);
 
   // TODO Will this run twice the first time?
-  let gj: RenderNeighbourhoodOutput = $state($backend!.renderNeighbourhood());
+  let gj = $state($backend!.renderNeighbourhood());
   // @ts-expect-error TS can't figure out that we're narrowing the case here
   let boundary: NeighbourhoodBoundaryFeature = $derived(
     gj.features.find((f) => f.properties.kind == "boundary")!,
@@ -692,7 +687,7 @@
 
     <ShowBeforeEdits />
 
-    <RenderNeighbourhood input={gj}>
+    <GeoJSON data={gj} generateId>
       <HighlightBoundaryLayer />
       <CellLayer show={!$showBeforeEdits} />
       <OneWayLayer show={!$showBeforeEdits} />
@@ -704,6 +699,7 @@
           (action.kind == "main-roads" && action.tool == "toggle") ||
           (action.kind == "turn_restriction" && action.from_road_id == null)}
         {onClickLine}
+        maxShortcuts={gj.maxShortcuts}
       >
         {#snippet linePopup()}
           <Popup openOn="hover">
@@ -747,7 +743,7 @@
         neighbourhood={gj}
         {onClickIntersection}
       />
-    </RenderNeighbourhood>
+    </GeoJSON>
 
     {#if $animateShortcuts && $mutationCounter == lastShortcutCalculation}
       <AnimatePaths paths={allShortcuts} />

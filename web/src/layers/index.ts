@@ -5,7 +5,6 @@ export { default as HighlightBoundaryLayer } from "./HighlightBoundaryLayer.svel
 export { default as NeighbourhoodRoadLayer } from "./NeighbourhoodRoadLayer.svelte";
 export { default as ModalFilterLayer } from "./ModalFilterLayer.svelte";
 export { default as OneWayLayer } from "./OneWayLayer.svelte";
-export { default as RenderNeighbourhood } from "./RenderNeighbourhood.svelte";
 
 export function colorByCellColor(): DataDrivenPropertyValueSpecification<string> {
   return [

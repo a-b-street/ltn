@@ -18,7 +18,6 @@
     ModalFilterLayer,
     NeighbourhoodRoadLayer,
     OneWayLayer,
-    RenderNeighbourhood,
   } from "./layers";
   import {
     backend,
@@ -34,6 +33,8 @@
   }
 
   let { prevMode }: Props = $props();
+
+  let neighbourhoodGj = $backend!.renderNeighbourhood();
 
   let gj = $derived(
     $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty),
@@ -127,12 +128,15 @@
 
   {#snippet main()}
     {#if prevMode == "neighbourhood"}
-      <RenderNeighbourhood>
+      <GeoJSON data={neighbourhoodGj} generateId>
         <HighlightBoundaryLayer />
         <CellLayer />
         <OneWayLayer />
-        <NeighbourhoodRoadLayer interactive={false} />
-      </RenderNeighbourhood>
+        <NeighbourhoodRoadLayer
+          interactive={false}
+          maxShortcuts={neighbourhoodGj.maxShortcuts}
+        />
+      </GeoJSON>
     {/if}
 
     <ModalFilterLayer interactive={false} />

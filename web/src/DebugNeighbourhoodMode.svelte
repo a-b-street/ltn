@@ -26,10 +26,11 @@
     HighlightBoundaryLayer,
     NeighbourhoodRoadLayer,
     OneWayLayer,
-    RenderNeighbourhood,
   } from "./layers";
   import ModalFilterLayer from "./layers/ModalFilterLayer.svelte";
   import { backend, mode } from "./stores";
+
+  let neighbourhoodGj = $backend!.renderNeighbourhood();
 
   let intersection: DebugIntersection | null = $state(null);
   type DebugIntersection = {
@@ -92,7 +93,7 @@
   {/snippet}
 
   {#snippet main()}
-    <RenderNeighbourhood>
+    <GeoJSON data={neighbourhoodGj} generateId>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
@@ -115,6 +116,7 @@
       <NeighbourhoodRoadLayer
         interactive
         onClickLine={(f, _) => window.open(f.properties!.way, "_blank")}
+        maxShortcuts={neighbourhoodGj.maxShortcuts}
       >
         {#snippet linePopup()}
           <Popup openOn="hover">
@@ -124,7 +126,7 @@
           </Popup>
         {/snippet}
       </NeighbourhoodRoadLayer>
-    </RenderNeighbourhood>
+    </GeoJSON>
 
     <ModalFilterLayer interactive={true}>
       {#snippet modalFilterPopup()}

@@ -1,12 +1,11 @@
 <script lang="ts">
   import type { FeatureCollection } from "geojson";
-  import { Popup } from "svelte-maplibre";
+  import { GeoJSON, Popup } from "svelte-maplibre";
   import {
     CellLayer,
     ModalFilterLayer,
     NeighbourhoodRoadLayer,
     OneWayLayer,
-    RenderNeighbourhood,
   } from "../layers";
   import { backend, showBeforeEdits } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
@@ -27,11 +26,16 @@
 </script>
 
 {#if neighbourhoodGj}
-  <RenderNeighbourhood input={neighbourhoodGj}>
+  <GeoJSON data={neighbourhoodGj} generateId>
     <CellLayer show={$showBeforeEdits} {prefix} />
     <OneWayLayer show={$showBeforeEdits} {prefix} />
 
-    <NeighbourhoodRoadLayer show={$showBeforeEdits} {prefix} interactive={true}>
+    <NeighbourhoodRoadLayer
+      show={$showBeforeEdits}
+      {prefix}
+      interactive={true}
+      maxShortcuts={neighbourhoodGj.maxShortcuts}
+    >
       {#snippet linePopup()}
         <Popup openOn="hover">
           {#snippet children({ data })}
@@ -52,7 +56,7 @@
         </Popup>
       {/snippet}
     </NeighbourhoodRoadLayer>
-  </RenderNeighbourhood>
+  </GeoJSON>
 {/if}
 
 {#if modalFilterGj && turnRestrictionGj}

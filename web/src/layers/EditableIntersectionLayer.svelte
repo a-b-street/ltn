@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getContext } from "svelte";
   import { CircleLayer, hoverStateFilter, Popup } from "svelte-maplibre";
   import { layerId, mapMetersToPixels, Style } from "../common";
   import {
@@ -17,7 +16,7 @@
   }
 
   let {
-    neighbourhood = getContext("neighbourhoodGj"),
+    neighbourhood,
     onClickIntersection = (intersection: Intersection) => {},
     interactive = false,
     show = true,

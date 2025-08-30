@@ -18,10 +18,11 @@
     ModalFilterLayer,
     NeighbourhoodRoadLayer,
     OneWayLayer,
-    RenderNeighbourhood,
   } from "./layers";
   import { backend, mode } from "./stores";
   import type { AllShortcuts } from "./wasm";
+
+  let neighbourhoodGj = $backend!.renderNeighbourhood();
 
   type Action =
     | {
@@ -106,7 +107,7 @@
   {/snippet}
 
   {#snippet main()}
-    <RenderNeighbourhood>
+    <GeoJSON data={neighbourhoodGj} generateId>
       <HighlightBoundaryLayer />
       <CellLayer />
       <OneWayLayer />
@@ -114,6 +115,7 @@
       <NeighbourhoodRoadLayer
         onClickLine={choseRoad}
         interactive={action.state == "neutral"}
+        maxShortcuts={neighbourhoodGj.maxShortcuts}
       >
         {#snippet linePopup()}
           {#if action.state == "neutral"}
@@ -135,7 +137,7 @@
           {/if}
         {/snippet}
       </NeighbourhoodRoadLayer>
-    </RenderNeighbourhood>
+    </GeoJSON>
 
     {#if action.state == "chose-road"}
       <GeoJSON data={action.gj.features[action.shortcutIndex]}>

@@ -24,7 +24,7 @@
     prettyPrintDistance,
     prettyPrintTime,
   } from "./common";
-  import { ModalFilterLayer, RenderNeighbourhood } from "./layers";
+  import { ModalFilterLayer } from "./layers";
   import {
     backend,
     ensurePointInVisibleBounds,
@@ -34,6 +34,8 @@
     routePtB,
   } from "./stores";
   import type { CompareRoute } from "./wasm";
+
+  let neighbourhoodGj = $backend!.renderNeighbourhood();
 
   let hovered: (Feature & MapGeoJSONFeature) | undefined = $state();
 
@@ -141,7 +143,7 @@
   {/snippet}
 
   {#snippet main()}
-    <RenderNeighbourhood>
+    <GeoJSON data={neighbourhoodGj} generateId>
       <FillLayer
         {...layerId("cells")}
         filter={["==", ["get", "kind"], "cell"]}
@@ -150,7 +152,7 @@
           "fill-opacity": 0.6,
         }}
       />
-    </RenderNeighbourhood>
+    </GeoJSON>
 
     <GeoJSON data={perRoadGj} generateId>
       <LineLayer

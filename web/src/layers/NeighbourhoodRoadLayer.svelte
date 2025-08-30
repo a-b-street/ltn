@@ -6,7 +6,7 @@
     ExpressionSpecification,
     LngLat,
   } from "maplibre-gl";
-  import { getContext, type Snippet } from "svelte";
+  import { type Snippet } from "svelte";
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { makeRamp } from "svelte-utils/map";
   import { colorByCellColor } from ".";
@@ -18,11 +18,9 @@
     Style,
   } from "../common/colors";
   import { roadStyle, thickRoadsForShortcuts } from "../stores";
-  import type { RenderNeighbourhoodOutput } from "../wasm";
-
-  let gj: RenderNeighbourhoodOutput = getContext("neighbourhoodGj");
 
   interface Props {
+    maxShortcuts: number;
     // When disabled, can't click lines or filters, no linePopup, no hoverCursor
     interactive?: boolean;
     linePopup?: Snippet | undefined;
@@ -32,6 +30,7 @@
   }
 
   let {
+    maxShortcuts,
     interactive = true,
     linePopup = undefined,
     onClickLine = (f: Feature, pt: LngLat) => {},
@@ -108,7 +107,7 @@
   {...layerId(prefix + "interior-roads-outlines")}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
-    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 1),
+    "line-width": lineWidth($thickRoadsForShortcuts, maxShortcuts, 1),
     "line-color": "black",
   }}
   layout={{
@@ -121,8 +120,8 @@
   {...layerId(prefix + "interior-roads")}
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
-    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 0),
-    "line-color": roadLineColor($roadStyle, gj.maxShortcuts),
+    "line-width": lineWidth($thickRoadsForShortcuts, maxShortcuts, 0),
+    "line-color": roadLineColor($roadStyle, maxShortcuts),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{
@@ -143,7 +142,7 @@
   {...layerId(prefix + "main-roads-outlines")}
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
-    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 6),
+    "line-width": lineWidth($thickRoadsForShortcuts, maxShortcuts, 6),
     "line-color": "black",
   }}
   layout={{
@@ -156,7 +155,7 @@
   {...layerId(prefix + "main-roads")}
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
-    "line-width": lineWidth($thickRoadsForShortcuts, gj.maxShortcuts, 4),
+    "line-width": lineWidth($thickRoadsForShortcuts, maxShortcuts, 4),
     "line-color": hoverStateFilter(
       "gray",
       Style.mapFeature.hover.backgroundColor,
