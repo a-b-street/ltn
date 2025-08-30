@@ -6,7 +6,7 @@
     ExpressionSpecification,
     LngLat,
   } from "maplibre-gl";
-  import { getContext } from "svelte";
+  import { getContext, type Snippet } from "svelte";
   import { hoverStateFilter, LineLayer } from "svelte-maplibre";
   import { makeRamp } from "svelte-utils/map";
   import { colorByCellColor } from ".";
@@ -22,11 +22,22 @@
 
   let gj: RenderNeighbourhoodOutput = getContext("neighbourhoodGj");
 
-  // When disabled, can't click lines or filters, no slots, no hoverCursor
-  export let interactive = true;
-  export let onClickLine = (f: Feature, pt: LngLat) => {};
-  export let show = true;
-  export let prefix = "";
+  interface Props {
+    // When disabled, can't click lines or filters, no linePopup, no hoverCursor
+    interactive?: boolean;
+    linePopup?: Snippet | undefined;
+    onClickLine?: (f: Feature, pt: LngLat) => void;
+    show?: boolean;
+    prefix?: string;
+  }
+
+  let {
+    interactive = true,
+    linePopup = undefined,
+    onClickLine = (f: Feature, pt: LngLat) => {},
+    show = true,
+    prefix = "",
+  }: Props = $props();
 
   function roadLineColor(
     style: "shortcuts" | "cells" | "edits" | "speeds",
@@ -119,13 +130,12 @@
     visibility: show ? "visible" : "none",
   }}
   minzoom={13}
-  on:click={(e) =>
-    interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
+  onclick={(e) => interactive && onClickLine(e.features[0], e.event.lngLat)}
   manageHoverState={interactive}
   hoverCursor={interactive ? "pointer" : undefined}
 >
   {#if interactive}
-    <slot name="line-popup" />
+    {@render linePopup?.()}
   {/if}
 </LineLayer>
 
@@ -158,12 +168,11 @@
     visibility: show ? "visible" : "none",
   }}
   minzoom={13}
-  on:click={(e) =>
-    interactive && onClickLine(e.detail.features[0], e.detail.event.lngLat)}
+  onclick={(e) => interactive && onClickLine(e.features[0], e.event.lngLat)}
   manageHoverState={interactive}
   hoverCursor={interactive ? "pointer" : undefined}
 >
   {#if interactive}
-    <slot name="line-popup" />
+    {@render linePopup?.()}
   {/if}
 </LineLayer>

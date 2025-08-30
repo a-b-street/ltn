@@ -10,9 +10,9 @@
   // related to the Cycling By Design guidance
   // (https://www.transport.gov.scot/media/50323/cycling-by-design-update-2019-final-document-15-september-2021-1.pdf).
 
-  let showTraffic = false;
-  let showLos = false;
-  let showExistingInfra = false;
+  let showTraffic = $state(false);
+  let showLos = $state(false);
+  let showExistingInfra = $state(false);
 
   let traffic = {
     colorScale: ["#27918d", "#ffaa33", "#440154"],
@@ -39,37 +39,41 @@
   bind:show={showExistingInfra}
   label="Existing cycling infrastructure"
 >
-  <div slot="legend">
+  {#snippet legend()}
     <QualitativeLegend labelColors={infraTypeColors} />
-  </div>
+  {/snippet}
 
-  <p slot="help">
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
-  </p>
+  {#snippet help()}
+    <p>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </p>
+  {/snippet}
 </ContextLayerButton>
 
 <ContextLayerButton bind:show={showLos} label="Cycling safety Level of Service">
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={Object.values(levelOfServiceColors)}
       labels={{ buckets: Object.keys(levelOfServiceColors) }}
       fullWidthBucketLegend
     />
-  </div>
+  {/snippet}
 
-  <p slot="help">
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
-  </p>
+  {#snippet help()}
+    <p>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </p>
+  {/snippet}
 </ContextLayerButton>
 
 <RouteNetwork />
@@ -77,21 +81,23 @@
 <div class="layer-group">Other</div>
 
 <ContextLayerButton bind:show={showTraffic} label="Estimated traffic">
-  <div slot="legend">
+  {#snippet legend()}
     <SequentialLegend
       colorScale={traffic.colorScale}
       labels={{ limits: traffic.limits }}
     />
-  </div>
+  {/snippet}
 
-  <p slot="help">
-    <a
-      href="https://nptscot.github.io/manual/#infrastructureandtraffic"
-      target="_blank"
-    >
-      Data from NPT
-    </a>
-  </p>
+  {#snippet help()}
+    <p>
+      <a
+        href="https://nptscot.github.io/manual/#infrastructureandtraffic"
+        target="_blank"
+      >
+        Data from NPT
+      </a>
+    </p>
+  {/snippet}
 </ContextLayerButton>
 
 <VectorTileSource url={`pmtiles://${assetUrl("cnt/layers/cbd.pmtiles")}`}>

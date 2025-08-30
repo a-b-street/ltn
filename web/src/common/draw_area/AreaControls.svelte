@@ -10,14 +10,23 @@
     MapEvents,
     Marker,
     Popup,
+    type MapMoveEvent,
   } from "svelte-maplibre";
   import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../";
   import { routeTool, type Waypoint } from "./stores";
 
-  export let map: Map;
-  export let waypoints: Waypoint[];
-  export let drawnShapeOut: Feature<Polygon> | undefined = undefined;
+  interface Props {
+    map: Map;
+    waypoints: Waypoint[];
+    drawnShapeOut?: Feature<Polygon> | undefined;
+  }
+
+  let {
+    map,
+    waypoints = $bindable(),
+    drawnShapeOut = $bindable(undefined),
+  }: Props = $props();
 
   function calculateArea(
     routeTool: RouteTool,
@@ -37,50 +46,29 @@
     return out;
   }
 
-  $: {
-    try {
-      if ($routeTool) {
-        drawnShapeOut = calculateArea($routeTool, waypoints);
-      }
-    } catch (err) {
-      console.log("error drawing shape", err);
-      drawnShapeOut = undefined;
-    }
-  }
-
   onDestroy(() => {
     $routeTool?.stop();
     map.getCanvas().style.cursor = "inherit";
   });
 
-  let snapMode: "snap" | "free" = "snap";
-  let undoStates: Waypoint[][] = [];
+  let snapMode: "snap" | "free" = $state("snap");
+  let undoStates: Waypoint[][] = $state([]);
 
   interface ExtraNode {
     point: [number, number];
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = [];
+  let extraNodes: ExtraNode[] = $state([]);
+  // This can't be derived, because we bind a Marker lngLat to it
+  $effect(() => {
+    extraNodes = getExtraNodes($routeTool, waypoints, draggingExtraNode);
+  });
 
-  $: updateExtraNodes($routeTool, waypoints, draggingExtraNode);
-
-  let cursor: Waypoint | null = null;
-  let hoveringOnMarker = false;
-  let draggingMarker = false;
-  let draggingExtraNode = false;
-  $: previewGj = getPreview(
-    $routeTool,
-    waypoints,
-    cursor,
-    hoveringOnMarker || draggingMarker,
-  );
-
-  $: updateCursor(waypoints);
-  function updateCursor(waypoints: Waypoint[]) {
-    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
-    map.getCanvas().style.cursor = cursor;
-  }
+  let cursor: Waypoint | null = $state(null);
+  let hoveringOnMarker = $state(false);
+  let draggingMarker = $state(false);
+  let draggingExtraNode = $state(false);
 
   function undo() {
     let state = undoStates.pop();
@@ -97,21 +85,22 @@
     undoStates = [...undoStates, JSON.parse(JSON.stringify(waypoints))];
   }
 
-  function onMapClick(e: CustomEvent<MapMouseEvent>) {
+  function onMapClick(e: MapMouseEvent) {
     if (waypoints.length >= 3) {
       return;
     }
     captureUndoState();
     waypoints.push({
-      point: e.detail.lngLat.toArray(),
+      point: e.lngLat.toArray(),
       snapped: snapMode == "snap",
     });
     waypoints = waypoints;
   }
 
-  function onMouseMove(e: CustomEvent<MapMouseEvent>) {
+  function onMouseMove(e: MapMoveEvent) {
     cursor = {
-      point: e.detail.lngLat.toArray(),
+      // @ts-expect-error TODO fix upstream types
+      point: e.lngLat.toArray(),
       snapped: snapMode == "snap",
     };
   }
@@ -152,17 +141,17 @@
     return emptyGeojson();
   }
 
-  function updateExtraNodes(
+  function getExtraNodes(
     routeTool: RouteTool | null,
     waypoints: Waypoint[],
     draggingExtraNode: boolean,
-  ) {
+  ): ExtraNode[] {
     if (draggingExtraNode) {
-      return;
+      // TODO Does this work?
+      return extraNodes;
     }
     if (!routeTool || waypoints.length < 3) {
-      extraNodes = [];
-      return;
+      return [];
     }
 
     let nodes: ExtraNode[] = [];
@@ -181,7 +170,7 @@
       insertIdx++;
     }
 
-    extraNodes = nodes;
+    return nodes;
   }
 
   function addNode(node: ExtraNode) {
@@ -210,6 +199,28 @@
     captureUndoState();
     draggingMarker = true;
   }
+  $effect(() => {
+    try {
+      if ($routeTool) {
+        drawnShapeOut = calculateArea($routeTool, waypoints);
+      }
+    } catch (err) {
+      console.log("error drawing shape", err);
+      drawnShapeOut = undefined;
+    }
+  });
+  let previewGj = $derived(
+    getPreview(
+      $routeTool,
+      waypoints,
+      cursor,
+      hoveringOnMarker || draggingMarker,
+    ),
+  );
+  $effect(() => {
+    let cursor = waypoints.length == 0 ? "crosshair" : "inherit";
+    map.getCanvas().style.cursor = cursor;
+  });
 </script>
 
 <p>Click the map to add three points. Then adjust the points or add more.</p>
@@ -227,7 +238,7 @@
     />
     Snap boundary to roads
   </label>
-  <button class="secondary" disabled={undoStates.length == 0} on:click={undo}>
+  <button class="secondary" disabled={undoStates.length == 0} onclick={undo}>
     {#if undoStates.length == 0}
       Undo
     {:else}
@@ -236,16 +247,16 @@
   </button>
 </div>
 
-<MapEvents on:click={onMapClick} on:mousemove={onMouseMove} />
+<MapEvents onclick={onMapClick} onmousemove={onMouseMove} />
 
 {#each extraNodes as node}
   <Marker
     draggable
     bind:lngLat={node.point}
-    on:dragstart={() => addNode(node)}
-    on:drag={() => updateDrag(node)}
-    on:dragend={finalizeDrag}
-    on:click={() => {
+    ondragstart={() => addNode(node)}
+    ondrag={() => updateDrag(node)}
+    ondragend={finalizeDrag}
+    onclick={() => {
       addNode(node);
       draggingExtraNode = false;
     }}
@@ -256,7 +267,7 @@
       class:snapped-node={node.snapped}
       class:free-node={!node.snapped}
       class:hide={draggingExtraNode}
-    />
+    ></span>
   </Marker>
 {/each}
 
@@ -264,30 +275,32 @@
   <Marker
     draggable
     bind:lngLat={waypt.point}
-    on:click={() => toggleSnapped(idx)}
-    on:contextmenu={() => removeWaypoint(idx)}
-    on:mouseenter={() => (hoveringOnMarker = true)}
-    on:mouseleave={() => (hoveringOnMarker = false)}
-    on:dragstart={startDraggingWaypoint}
-    on:dragend={() => (draggingMarker = false)}
+    onclick={() => toggleSnapped(idx)}
+    oncontextmenu={() => removeWaypoint(idx)}
+    onmouseenter={() => (hoveringOnMarker = true)}
+    onmouseleave={() => (hoveringOnMarker = false)}
+    ondragstart={startDraggingWaypoint}
+    ondragend={() => (draggingMarker = false)}
     zIndex={1}
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
     <Popup openOn="hover" popupClass="edit-waypoint-popup">
-      <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
-        <li>
-          <b>Click and drag</b>
-          to move
-        </li>
-        <li>
-          <b>Click</b>
-          to toggle snapping
-        </li>
-        <li>
-          <b>Right click</b>
-          to delete
-        </li>
-      </ul>
+      {#snippet children({ data })}
+        <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
+          <li>
+            <b>Click and drag</b>
+            to move
+          </li>
+          <li>
+            <b>Click</b>
+            to toggle snapping
+          </li>
+          <li>
+            <b>Right click</b>
+            to delete
+          </li>
+        </ul>
+      {/snippet}
     </Popup>
   </Marker>
 {/each}
