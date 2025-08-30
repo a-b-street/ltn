@@ -41,6 +41,17 @@ Dustin on assets.od2net.org and assets.cnt.scot.
 If you're developing locally, you can cache assets locally by running
 `bin/download-local-dev-data.sh`.
 
+### Translations
+
+If you're translating the app, you'll be editing `.po` files in
+`web/src/locales/`. You have to refresh the entire page to see changes. If
+you're using a tool to edit the `.po` file that's handy, please share it so we
+can list it here! And don't forget to add yourself to the credits in
+`web/src/About.svelte`.
+
+When the app changes and new strings to translate appear, `npx wuchale init`
+should pick them up.
+
 ### Tests
 
 (Don't spend too much time looking after these particular tests; they've been
