@@ -1,5 +1,6 @@
 import { resolve } from "path";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { wuchale } from "@wuchale/vite-plugin";
 import { defineConfig } from "vite";
 import wasm from "vite-plugin-wasm";
 
@@ -15,10 +16,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    svelte(),
-    wasm(),
-  ],
+  plugins: [wuchale(), svelte(), wasm()],
   server: {
     fs: {
       allow: ["./", "../backend/pkg"],
