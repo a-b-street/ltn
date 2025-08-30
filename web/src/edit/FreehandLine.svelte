@@ -4,7 +4,12 @@
   import type { Map, MapMouseEvent } from "maplibre-gl";
   import { onDestroy } from "svelte";
   import { GeoJSON, LineLayer } from "svelte-maplibre";
+  import { emptyGeojson } from "svelte-utils/map";
   import { layerId } from "../common";
+
+  // TODO This component seems to have broken during the upgrade to svelte 5.
+  // The line doesn't show up when drawing quickly or after adding too
+  // many points?
 
   interface Props {
     map: Map;
@@ -52,7 +57,6 @@
       }
 
       line.geometry.coordinates.push(next);
-      line = line;
     }
   }
 
@@ -67,14 +71,12 @@
   }
 </script>
 
-{#if line}
-  <GeoJSON data={line}>
-    <LineLayer
-      {...layerId("freehand-line")}
-      paint={{
-        "line-width": 5,
-        "line-color": "red",
-      }}
-    />
-  </GeoJSON>
-{/if}
+<GeoJSON data={line || emptyGeojson()}>
+  <LineLayer
+    {...layerId("freehand-line")}
+    paint={{
+      "line-width": 5,
+      "line-color": "red",
+    }}
+  />
+</GeoJSON>
