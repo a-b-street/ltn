@@ -6,6 +6,7 @@
   import englandBoundariesUrl from "../../assets/england_boundaries.geojson?url";
   import {
     downloadProject,
+    LanguagePicker,
     Link,
     Loading,
     pageTitle,
@@ -18,6 +19,7 @@
     backend,
     currentProjectID,
     firstTimeLoadProjectFromURL,
+    languageFromURL,
     map,
     mode,
     projectStorage,
@@ -150,7 +152,10 @@
         </div>
       {/if}
 
-      <a href="user_guide.html" target="_blank">Read the user guide</a>
+      <a href={`user_guide.html?lang=${languageFromURL()}`} target="_blank"
+        >Read the user guide</a
+      >
+      <LanguagePicker />
 
       {#if studyAreas.length > 0}
         <h2>Your projects</h2>
