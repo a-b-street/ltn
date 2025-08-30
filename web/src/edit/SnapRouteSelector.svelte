@@ -37,9 +37,11 @@
     insertIdx: number;
     snapped: boolean;
   }
-  let extraNodes: ExtraNode[] = $derived.by(() =>
-    getExtraNodes($routeTool, waypoints, draggingExtraNode),
-  );
+  let extraNodes: ExtraNode[] = $state([]);
+  // This can't be derived, because we bind a Marker lngLat to it
+  $effect(() => {
+    extraNodes = getExtraNodes($routeTool, waypoints, draggingExtraNode);
+  });
 
   let cursor: Waypoint | null = $state(null);
   let hoveringOnMarker = $state(false);
