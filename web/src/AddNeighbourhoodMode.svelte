@@ -218,9 +218,6 @@
     selectedBoundaries.clear();
     selectedBoundaries = selectedBoundaries;
     waypoints = [];
-    // TODO Necessary?
-    drawnBoundary = null;
-    neighbourhoodBoundary = null;
   }
 
   function onKeyDown(e: KeyboardEvent) {
