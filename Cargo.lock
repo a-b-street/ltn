@@ -486,8 +486,9 @@ dependencies = [
 
 [[package]]
 name = "geo"
-version = "0.30.0"
-source = "git+https://github.com/georust/geo#36b0f893c742b4e0188bbad4486c5429c09e0c1c"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fc1a1678e54befc9b4bcab6cd43b8e7f834ae8ea121118b0fd8c42747675b4a"
 dependencies = [
  "earcutr",
  "float_next_after",
@@ -603,24 +604,24 @@ dependencies = [
 
 [[package]]
 name = "i_float"
-version = "1.7.0"
+version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85df3a416829bb955fdc2416c7b73680c8dcea8d731f2c7aa23e1042fe1b8343"
+checksum = "010025c2c532c8d82e42d0b8bb5184afa449fa6f06c709ea9adcb16c49ae405b"
 dependencies = [
- "serde",
+ "libm",
 ]
 
 [[package]]
 name = "i_key_sort"
-version = "0.2.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "347c253b4748a1a28baf94c9ce133b6b166f08573157e05afe718812bc599fcd"
+checksum = "9190f86706ca38ac8add223b2aed8b1330002b5cdbbce28fb58b10914d38fc27"
 
 [[package]]
 name = "i_overlay"
-version = "2.0.3"
+version = "4.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b147cb6b642e3e84f7c6a4aec505a1dc9a5834b75c6f106be1d6884db45c1fcd"
+checksum = "e9c291f5c15a84f0e9126ff050719c5ca50227b27947b52526ee8370287dfc9e"
 dependencies = [
  "i_float",
  "i_key_sort",
@@ -631,19 +632,18 @@ dependencies = [
 
 [[package]]
 name = "i_shape"
-version = "1.7.0"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a38f5a42678726718ff924f6d4a0e79b129776aeed298f71de4ceedbd091bce"
+checksum = "1ea154b742f7d43dae2897fcd5ead86bc7b5eefcedd305a7ebf9f69d44d61082"
 dependencies = [
  "i_float",
- "serde",
 ]
 
 [[package]]
 name = "i_tree"
-version = "0.8.3"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "155181bc97d770181cf9477da51218a19ee92a8e5be642e796661aee2b601139"
+checksum = "35e6d558e6d4c7b82bc51d9c771e7a927862a161a7d87bf2b0541450e0e20915"
 
 [[package]]
 name = "indexmap"
@@ -1020,7 +1020,7 @@ checksum = "cbf4a6aa5f6d6888f39e980649f3ad6b666acdce1d78e95b8a2cb076e687ae30"
 [[package]]
 name = "route-snapper-graph"
 version = "0.1.0"
-source = "git+https://github.com/dabreegster/route_snapper#2f4086f9e11f12664f8007566650dae99775b759"
+source = "git+https://github.com/dabreegster/route_snapper#9f26d7c72c3dc5955bf1abefdb921fe302aff79a"
 dependencies = [
  "geo",
  "serde",
@@ -1254,7 +1254,7 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#31227027a1746b65e0421e7ae2abc98029996974"
+source = "git+https://github.com/a-b-street/utils#1c52f4e0dad1eeaa69b08850b5de404b72b8542b"
 dependencies = [
  "anyhow",
  "fast_paths",
