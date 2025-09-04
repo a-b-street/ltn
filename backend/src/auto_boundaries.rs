@@ -2,12 +2,11 @@ use crate::boundary_stats::BoundaryStats;
 use crate::geo_helpers::buffer_polygon;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
-use geo::{Area, BoundingRect, Coord, LineString, MultiPolygon, Polygon, Relate};
+use geo::{Area, BoundingRect, LineString, MultiPolygon, Polygon, Relate};
 use geojson::{Feature, FeatureCollection};
-use i_overlay::core::fill_rule::FillRule;
-use i_overlay::float::slice::FloatSlice;
 use rstar::RTree;
 use serde::{Deserialize, Serialize};
+use utils::split_polygon;
 
 impl MapModel {
     pub fn generated_boundaries(&self) -> FeatureCollection {
@@ -90,7 +89,7 @@ impl MapModel {
                 return vec![];
             };
             let relevant_splitters = severance_rtree.locate_in_envelope_intersecting(&envelope);
-            split_polygon(boundary_polygon, relevant_splitters)
+            split_polygon(&boundary_polygon, relevant_splitters)
         }) {
             let area_km_2 = polygon.unsigned_area() / 1000. / 1000.;
 
@@ -185,40 +184,4 @@ impl GeneratedBoundary {
         map.mercator.to_wgs84_in_place(&mut projected.geometry);
         geojson::ser::to_feature(projected).expect("should have no unserializable fields")
     }
-}
-
-// TODO Revisit some of this; conversions are now in geo
-fn split_polygon<'a>(
-    polygon: Polygon,
-    severances: impl Iterator<Item = &'a LineString>,
-) -> Vec<Polygon> {
-    let mut shape = to_i_overlay_contour(polygon.exterior());
-
-    // geo Polygon's are explicitly closed LineStrings, but i_overlay Polygon's are not.
-    shape.pop();
-
-    let splitters: Vec<_> = severances.map(to_i_overlay_contour).collect();
-    let shapes = shape.slice_by(&splitters, FillRule::NonZero);
-
-    shapes
-        .into_iter()
-        .map(|rings| {
-            let exterior = rings.into_iter().next().expect("shapes must be non-empty");
-            let exterior_line_string = to_geo_linestring(exterior);
-            // We ignore any interiors
-            Polygon::new(exterior_line_string, vec![])
-        })
-        .collect()
-}
-
-fn to_geo_linestring(pts: Vec<[f64; 2]>) -> LineString {
-    LineString(
-        pts.into_iter()
-            .map(|pt| Coord { x: pt[0], y: pt[1] })
-            .collect(),
-    )
-}
-
-fn to_i_overlay_contour(line_string: &LineString) -> Vec<[f64; 2]> {
-    line_string.coords().map(|c| [c.x, c.y]).collect()
 }
