@@ -1253,7 +1253,7 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 [[package]]
 name = "utils"
 version = "0.1.0"
-source = "git+https://github.com/a-b-street/utils#ce2e8b4faa70ca7a38622a5b4c3c84f2f54361fa"
+source = "git+https://github.com/a-b-street/utils#2d4a7cb8035df9a558c81e8614a344f1ec1b66e8"
 dependencies = [
  "anyhow",
  "fast_paths",
@@ -1263,6 +1263,7 @@ dependencies = [
  "i_overlay",
  "log",
  "osm-reader",
+ "rstar",
  "serde",
 ]
 

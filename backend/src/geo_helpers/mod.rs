@@ -4,9 +4,8 @@ pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
 use anyhow::Result;
 use geo::line_measures::InterpolatableLine;
 use geo::{
-    BooleanOps, BoundingRect, Buffer, Contains, Coord, Distance, Euclidean, Intersects, Length,
-    Line, LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Rect,
-    Validation,
+    BooleanOps, Buffer, Contains, Coord, Distance, Euclidean, Intersects, Length, Line,
+    LineIntersection, LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Validation,
 };
 use rstar::AABB;
 use utils::LineSplit;
@@ -129,15 +128,6 @@ pub fn buffer_polygon(area: &impl Buffer<Scalar = f64>, distance: f64) -> anyhow
         }
     };
     Ok(polygon)
-}
-
-// TODO What in the generics is going on here...
-pub fn aabb<G: BoundingRect<f64, Output = Option<Rect<f64>>>>(geom: &G) -> AABB<Point> {
-    let bbox: Rect = geom.bounding_rect().unwrap().into();
-    AABB::from_corners(
-        Point::new(bbox.min().x, bbox.min().y),
-        Point::new(bbox.max().x, bbox.max().y),
-    )
 }
 
 pub fn angle_of_line(line: Line) -> f64 {
