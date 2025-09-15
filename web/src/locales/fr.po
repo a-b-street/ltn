@@ -96,7 +96,7 @@ msgstr ""
 
 #: src/BackButton.svelte
 msgid "Back"
-msgstr ""
+msgstr "Retour"
 
 #: src/title/TitleMode.svelte
 #: src/App.svelte
@@ -225,7 +225,7 @@ msgstr ""
 #: src/ImpactOneDestinationMode.svelte
 #: src/RouteMode.svelte
 msgid "Route before changes"
-msgstr ""
+msgstr "Itinéraire avant changements"
 
 #: src/ImpactOneDestinationMode.svelte
 #: src/ImpactOneDestinationMode.svelte
@@ -237,12 +237,12 @@ msgstr ""
 #: src/ImpactOneDestinationMode.svelte
 #: src/ImpactOneDestinationMode.svelte
 msgid "Hover on a road to compare"
-msgstr ""
+msgstr "Survolez une route pour comparer"
 
 #: src/ImpactOneDestinationMode.svelte
 #: src/RouteMode.svelte
 msgid "Route after changes"
-msgstr ""
+msgstr "Itinéraire après changements"
 
 #: src/ImpactOneDestinationMode.svelte
 msgid "Time ratio: {0}"
@@ -325,11 +325,11 @@ msgstr ""
 
 #: src/RouteMode.svelte
 msgid "Drag markers for a route"
-msgstr ""
+msgstr "Déplacez les marqueurs pour créer un itinéraire"
 
 #: src/RouteMode.svelte
 msgid "Slow-down factor for main roads: {0} <0/>"
-msgstr ""
+msgstr "Facteur de ralentissement pour les routes principales : {0} <0/>"
 
 #: src/RouteMode.svelte
 msgid ""
@@ -339,15 +339,15 @@ msgstr ""
 
 #: src/SetBoundaryMode.svelte
 msgid "Adjust boundary"
-msgstr ""
+msgstr "Ajuster les limites"
 
 #: src/SetBoundaryMode.svelte
 msgid "Finish"
-msgstr ""
+msgstr "Valider"
 
 #: src/SetBoundaryMode.svelte
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: src/ViewShortcutsMode.svelte
 msgid "No shortcuts here"
@@ -355,7 +355,7 @@ msgstr ""
 
 #: src/ViewShortcutsMode.svelte
 msgid "Click a road to see shortcuts"
-msgstr ""
+msgstr "Cliquez sur une route pour voir les raccourcis"
 
 #: src/ViewShortcutsMode.svelte
 msgid ""
@@ -369,19 +369,19 @@ msgstr ""
 
 #: src/ViewShortcutsMode.svelte
 msgid "Pick a different road"
-msgstr ""
+msgstr "Sélectionner une autre route"
 
 #: src/ViewShortcutsMode.svelte
 msgid "This shortcut is <0>{0}x</0> the length of the shortest route using all roads, not just this neighbourhood"
-msgstr ""
+msgstr "Ce raccourci est <0>{0}x</0> plus long que l’itinéraire le plus court. Toutes routes confondues, pas seulement ce quartier."
 
 #: src/ViewShortcutsMode.svelte
 msgid "{0} shortcuts through {1}"
-msgstr ""
+msgstr "{0} raccourci(s) par {1}"
 
 #: src/ViewShortcutsMode.svelte
 msgid "Main road: {0}"
-msgstr ""
+msgstr "Route principale : {0}"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "What do you want to name the neighbourhood?"
@@ -576,7 +576,7 @@ msgstr ""
 
 #: src/common/PrevNext.svelte
 msgid "Previous"
-msgstr ""
+msgstr "Précédent"
 
 #: src/common/PrevNext.svelte
 msgid "Right"
@@ -584,7 +584,7 @@ msgstr ""
 
 #: src/common/PrevNext.svelte
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: src/common/StreetView.svelte
 msgid "Street view"
@@ -601,45 +601,45 @@ msgstr ""
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Project: {0}"
-msgstr ""
+msgstr "Projet : {0}"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 #: src/title/TitleMode.svelte
 msgid "Download project as GeoJSON"
-msgstr ""
+msgstr "Télécharger le projet en GeoJSON"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Export"
-msgstr ""
+msgstr "Exporter"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Make a copy of this project"
-msgstr ""
+msgstr "Faire une copie de ce projet"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 #: src/title/TitleMode.svelte
 msgid "Copy project"
-msgstr ""
+msgstr "Copier le projet"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Open another project"
-msgstr ""
+msgstr "Ouvrir un autre projet"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} new modal filter(s) added"
-msgstr ""
+msgstr "{0} nouveau(x) filtre(s) modaux ajouté(s)"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} existing modal filter(s) removed"
-msgstr ""
+msgstr "{0} filtre(s) modaux existant(s) supprimé(s)"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} road segment direction(s) changed"
-msgstr ""
+msgstr "{0} sens de circulation modifié(s)"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Map data is from {0}"
-msgstr ""
+msgstr "Les données de la carte sont du {0}"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "If this area has changed since then, please contact <0>dabreegster@gmail.com</0> to use newer OpenStreetMap data."
@@ -651,27 +651,27 @@ msgstr ""
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Really delete neighbourhood {0}? You can't undo this."
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer le quartier {0} ? Annulation impossible."
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Rename neighbourhood {0} to what?"
-msgstr ""
+msgstr "Renommer le quartier {0} en ?"
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Neighbourhoods"
-msgstr ""
+msgstr "Quartiers"
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Rename neighbourhood"
-msgstr ""
+msgstr "Renommer le quartier"
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Delete neighbourhood"
-msgstr ""
+msgstr "Supprimer le quartier"
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "<0/> Add a new neighbourhood"
-msgstr ""
+msgstr "<0/> Ajouter un nouveau quartier"
 
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid ""
@@ -758,15 +758,15 @@ msgstr "ou..."
 
 #: src/title/TitleMode.svelte
 msgid "Really delete project {0}? You can't undo this."
-msgstr "Êtes-vous sur de vouloir supprimer le projet {0} ? Cela ne peut pas être annulé."
+msgstr "Êtes-vous sûr de vouloir supprimer le projet {0} ? Annulation impossible."
 
 #: src/title/TitleMode.svelte
 msgid "Rename project {0} to what?"
-msgstr "Renommer projet {0} vers ?"
+msgstr "Renommer projet {0} en ?"
 
 #: src/title/TitleMode.svelte
 msgid "The LTN Tool"
-msgstr "L'outil LTN"
+msgstr "Outil LTN"
 
 #: src/title/TitleMode.svelte
 msgid "Read the user guide"
@@ -1824,19 +1824,19 @@ msgstr ""
 
 #: src/common/draw_area/AreaControls.svelte
 msgid "Click the map to add three points. Then adjust the points or add more."
-msgstr ""
+msgstr "Cliquez sur la carte pour ajouter trois points. Puis ajustez les points ou ajoutez-en plus."
 
 #: src/common/draw_area/AreaControls.svelte
 msgid "<0/> Snap boundary to roads"
-msgstr ""
+msgstr "<0/> Aimanter les limites aux routes"
 
 #: src/common/draw_area/AreaControls.svelte
 msgid "Undo"
-msgstr ""
+msgstr "Annuler"
 
 #: src/common/draw_area/AreaControls.svelte
 msgid "Undo ({0})"
-msgstr ""
+msgstr "Annuler ({0})"
 
 #: src/common/draw_area/AreaControls.svelte
 msgid "<0>Click</0> to toggle snapping"
@@ -1857,7 +1857,6 @@ msgstr "Outils de modifications"
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Show before edits"
 msgstr "<0/> Masquer les modifications"
-# TODO: here I slightly changed the meaning (hide modifications)
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add a modal filter (hotkey 1)"
@@ -1879,17 +1878,16 @@ msgstr "Inverser les sens"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Restrict turns (hotkey 3)"
-msgstr "Restreindre les girations (raccourci clavier 3)"
-# TODO: I also noted that modal filters and one way are singular but turns and directions are plural, expected?
+msgstr "Interdiction de tourner (raccourci clavier 3)"
 
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Restrict turns"
-msgstr "Restreindre les girations"
+msgstr "Interdiction de tourner"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify main roads (hotkey 4)"
-msgstr "Re-classifier les routes principales (raccourci clavier 4)"
+msgstr "Redéfinir les routes principales (raccourci clavier 4)"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Change main/minor roads"
@@ -1922,8 +1920,8 @@ msgid ""
 "segment. Place them strategically to deter shortcuts through your\n"
 "neighbourhood."
 msgstr ""
-"Les filtres modaux limitent le type de traffic qui peut circuler par une segment de route."
-"Placez les stratégiquement pour dissuader d'utiliser le quartier comme un raccourci."
+"Les filtres modaux limitent le type de véhicules qui peuvent circuler sur un segment de route. "
+"Leur utilisation permet d’empêcher que le quartier serve de raccourci. Placez les stratégiquement."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Change modal filter type"
@@ -1956,31 +1954,31 @@ msgid ""
 "source road to the destination road."
 msgstr ""
 "Pour limiter certaines girations, commencez par cliquer sur la route source, puis sur la route destination. "
-"Le trafic le pourra plus tourner de la rue source vers la rue destination."
+"Le trafic ne pourra plus tourner de la rue source vers la rue destination."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify main roads"
-msgstr "Re-classifier les routes principales"
+msgstr "Redéfinir les routes principales"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
 "<0>Main roads</0>, drawn in grey, were classified automatically\n"
 "using data from <1>OpenStreetMap</1>, but you can reclassify a road segment by clicking on it."
 msgstr ""
-"<0>Les routes principales</0>, dessinées en gris, ont étés classifiées automatiquement\n"
-"à partir de données issues d'<1>OpenStreetMap</1>, vous pouvez toutefois re-classifier un segment de route en cliquant dessus."
+"<0>Les routes principales</0>, dessinées en gris, ont étés définies automatiquement\n"
+"à partir de données issues d'<1>OpenStreetMap</1>, vous pouvez toutefois redéfinir un segment de route en cliquant dessus."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
 "Main roads are typically better suited to support higher levels of\n"
 "traffic than neighbourhood roads."
 msgstr ""
-"Les routes principales sont typiquement plus adaptés pour un plus\n"
+"Les routes principales sont typiquement plus adaptées pour un plus\n"
 "gros volume de circulation que les routes résidentielles."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click a road to reclassify it"
-msgstr "Cliquez sur une route pour la re-classifier"
+msgstr "Cliquez sur une route pour la redéfinir"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Toggle segment"
@@ -1989,19 +1987,19 @@ msgstr "Changer un segment"
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify multiple roads by drawing a route crossing them"
-msgstr "Re-classifier plusieurs routes en dessinant un tracé qui les suit"
+msgstr "Redéfinir plusieurs routes en dessinant un tracé qui les suit"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Mark as main along a route"
-msgstr "Marquer comme principale le long d'un tracé"
+msgstr "Définir un tracé comme route principale"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Erase main classification"
-msgstr "Effacer une classification comme principale"
+msgstr "Déclasser la route principales"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Erase all main roads"
-msgstr "Effacer toutes les routes principale"
+msgstr "Déclasser toutes les routes principales"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
@@ -2026,19 +2024,19 @@ msgstr "<0/> Afficher les entrées des cellules<1>2</1>"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Road thickness depends on shortcuts<1>1</1>"
-msgstr "<0/> L'épaisseur des routes dépends des raccourcis<1>1</1>"
+msgstr "<0/> Épaisseur proportionnelle aux raccourcis<1>1</1>"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Draw roads:"
-msgstr "Dessiner les routes :"
+msgstr "Afficher :"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Worst shortcuts"
-msgstr "Pires raccourcis"
+msgstr "Raccourcis"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Cell"
-msgstr "Cellule"
+msgstr "Cellules"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Edits (either filter or direction)"
@@ -2046,11 +2044,11 @@ msgstr "Modifications (filtres ou sens)"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Speed limit"
-msgstr "Limite de vitesse"
+msgstr "Limites de vitesse"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Neighbourhood stats"
-msgstr "Stats du quartier"
+msgstr "Statistiques du quartier"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Click to add modal filter"
@@ -2089,7 +2087,7 @@ msgstr ""
 
 #: src/common/LanguagePicker.svelte
 msgid "<0/> Language <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
-msgstr ""
+msgstr "<0/> Langue <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
 
 #: src/user_guide/Page.svelte
 msgid ""
