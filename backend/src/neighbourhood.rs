@@ -449,14 +449,7 @@ impl Neighbourhood {
         let derived = self.derived.as_ref().unwrap();
         let intersection = map.get_i(i);
 
-        // Major junctions have at least three main roads connected -- usually two along the
-        // neighborhood boundary and at least one other one.
-        let major_junction = intersection
-            .roads
-            .iter()
-            .filter(|r| map.is_main_road[r])
-            .count()
-            >= 3;
+        let major_junction = map.is_major_junction(i);
 
         intersection.roads.iter().filter_map(move |r| {
             // Most borders only have one road in the interior of the neighbourhood. Draw an arrow

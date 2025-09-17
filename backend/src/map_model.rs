@@ -1156,6 +1156,17 @@ impl MapModel {
         self.bus_routes_on_roads.get(&way)
     }
 
+    pub fn is_major_junction(&self, i: IntersectionID) -> bool {
+        // Major junctions have at least three main roads connected -- usually two along the
+        // neighborhood boundary and at least one other one.
+        self.intersections[i.0]
+            .roads
+            .iter()
+            .filter(|r| self.is_main_road[r])
+            .count()
+            >= 3
+    }
+
     /// Find the shortest Road going from `i1` to `i2` or vice versa. When there are multiple roads
     /// between the intersections, return the shortest.
     fn find_road_between(&self, i1: IntersectionID, i2: IntersectionID) -> Option<&Road> {

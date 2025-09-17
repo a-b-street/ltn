@@ -45,6 +45,12 @@ impl Shortcuts {
                         if start_i == end_i {
                             continue;
                         }
+                        let weight =
+                            if map.is_major_junction(*start_i) && map.is_major_junction(*end_i) {
+                                50
+                            } else {
+                                1
+                            };
                         let end_intersection = map.get_i(*end_i);
                         'next_road: for end_r in &end_intersection.roads {
                             // It's not a "shortcut" unless it ends outside the interior after
@@ -103,7 +109,7 @@ impl Shortcuts {
                             // is indeed valid and doesn't cross any main roads
                             for r in shortcut_roads {
                                 let road = map.get_r(r);
-                                *count_per_road.entry(road.id).or_insert(0) += 1;
+                                *count_per_road.entry(road.id).or_insert(0) += weight;
                                 shortcut_length += Euclidean.length(&road.linestring);
                             }
 
@@ -165,6 +171,7 @@ impl Path {
 
         let length = Euclidean.length(&linestring);
         let mut f = map.mercator.to_wgs84_gj(&linestring);
+        // TODO weight
         f.set_property("directness", self.directness);
         f.set_property("length_meters", length);
         f
