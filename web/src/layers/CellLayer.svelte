@@ -53,7 +53,12 @@
   {...layerId(prefix + "border-entries")}
   filter={["==", ["get", "kind"], "border_entry"]}
   layout={{
-    "icon-image": "border_entry_arrow",
+    "icon-image": [
+      "case",
+      ["get", "major_junction"],
+      "major_border_entry_arrow",
+      "minor_border_entry_arrow",
+    ],
     "icon-rotate": ["get", "bearing_upon_entry"],
     "icon-allow-overlap": true,
     "icon-size": borderEntryIconSize(1.0),
@@ -67,7 +72,7 @@
   }}
   paint={{
     "icon-color": colorByCellColor(),
-    "icon-halo-color": "black",
+    "icon-halo-color": ["case", ["get", "major_junction"], "red", "black"],
     "icon-opacity": borderEntryIconOpacity(),
     // We can add a "stroke" to our icon with halo-width.
     //

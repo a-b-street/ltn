@@ -448,6 +448,16 @@ impl Neighbourhood {
     ) -> impl Iterator<Item = BorderEntry> + 'a {
         let derived = self.derived.as_ref().unwrap();
         let intersection = map.get_i(i);
+
+        // Major junctions have at least three main roads connected -- usually two along the
+        // neighborhood boundary and at least one other one.
+        let major_junction = intersection
+            .roads
+            .iter()
+            .filter(|r| map.is_main_road[r])
+            .count()
+            >= 3;
+
         intersection.roads.iter().filter_map(move |r| {
             // Most borders only have one road in the interior of the neighbourhood. Draw an arrow
             // for each of those. If there happen to be multiple interior roads for one border, the
@@ -481,11 +491,14 @@ impl Neighbourhood {
                     .expect("non-empty roads only");
                 euclidean_bearing(entry.end, entry.start)
             };
+
             let cell_color = derived.render_cells.colors_per_border[&i];
+
             Some(BorderEntry {
                 geometry: intersection.point,
                 bearing_upon_entry,
                 cell_color,
+                major_junction,
             })
         })
     }
@@ -573,6 +586,7 @@ struct BorderEntry {
     geometry: Point,
     cell_color: Color,
     bearing_upon_entry: f64,
+    major_junction: bool,
 }
 
 struct NeighbourhoodShortcutsRouterInput<'a> {

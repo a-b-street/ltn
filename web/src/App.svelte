@@ -1,7 +1,8 @@
 <script lang="ts">
   import { loadLocale } from "wuchale/load-utils";
   import "./locales/loader.svelte.js";
-  import borderEntryArrorUrl from "../assets/arrow-big-up.png?url";
+  import majorBorderEntryArrorUrl from "../assets/arrow-big-up-thick.png?url";
+  import minorBorderEntryArrorUrl from "../assets/arrow-big-up-thin.png?url";
   import onewayArrowUrl from "../assets/arrow.png?url";
   import favicon from "../assets/favicon.ico?url";
   import diagonalUrl from "../assets/filters/diagonal_filter_icon.png?url";
@@ -245,8 +246,13 @@
                 url: onewayArrowUrl,
               },
               {
-                id: "border_entry_arrow",
-                url: borderEntryArrorUrl,
+                id: "minor_border_entry_arrow",
+                url: minorBorderEntryArrorUrl,
+                options: { sdf: true },
+              },
+              {
+                id: "major_border_entry_arrow",
+                url: majorBorderEntryArrorUrl,
                 options: { sdf: true },
               },
               {

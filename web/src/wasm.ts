@@ -419,6 +419,7 @@ export interface RenderNeighbourhoodOutput {
           kind: "border_entry";
           cell_color: "disconnected" | "pedestrianized" | number;
           bearing_upon_entry: number;
+          major_junction: boolean;
         }
       >
     | Feature<
