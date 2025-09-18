@@ -398,7 +398,7 @@ msgstr ""
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "What do you want to name the neighbourhood?"
-msgstr ""
+msgstr "Hogyan szeretnéd elnevezni a környéket?"
 
 #: src/AddNeighbourhoodMode.svelte
 #: src/edit/SnapRouteSelector.svelte
@@ -472,7 +472,7 @@ msgstr "Környék létrehozása"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0/> Start over"
-msgstr ""
+msgstr "<0/> Újrakezdés"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Your neighbourhood overall"
@@ -1914,68 +1914,68 @@ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Editing tools"
-msgstr ""
+msgstr "Forgalomcsillapítási eszközök"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Show before edits"
-msgstr ""
+msgstr "<0/> Beavatkozások előtti állapot"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add a modal filter (hotkey 1)"
-msgstr ""
+msgstr "Forgalomszűrő hozzáadása (gyorsbillentyű: 1)"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add a modal filter"
-msgstr ""
+msgstr "Forgalomszűrő hozzáadása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Toggle one-way (hotkey 2)"
-msgstr ""
+msgstr "Egyirányúsítás (gyorsbillentyű: 2)"
 
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reverse directions"
-msgstr ""
+msgstr "Irány megfordítása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Restrict turns (hotkey 3)"
-msgstr ""
+msgstr "Bekanyarodás tiltása (gyorsbillentyű 3)"
 
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Restrict turns"
-msgstr ""
+msgstr "Bekanyarodás tiltása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify main roads (hotkey 4)"
-msgstr ""
+msgstr "Főutak újrabesorolása (gyorsbillentyű: 4)"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Change main/minor roads"
-msgstr ""
+msgstr "Fő-/mellékutak váltása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Undo Ctrl+Z"
-msgstr ""
+msgstr "Visszavonás Ctrl+Z"
 
 #. placeholder {0}: gj.undo_length
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Undo ({0}) Ctrl+Z"
-msgstr ""
+msgstr "Visszavonás ({0}) Ctrl+Z"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Redo Ctrl+Y"
-msgstr ""
+msgstr "Újra Ctrl+Y"
 
 #. placeholder {0}: gj.redo_length
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Redo ({0}) Ctrl+Y"
-msgstr ""
+msgstr "Újra ({0}) Ctrl+Y"
 
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add modal filter"
-msgstr ""
+msgstr "Forgalomszűrő hozzáadása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
@@ -1986,19 +1986,19 @@ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Change modal filter type"
-msgstr ""
+msgstr "Forgalomszűrő típusának módosítása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add many modal filters along a line"
-msgstr ""
+msgstr "Több forgalomszűrő elhelyezése egy vonal mentén"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add along a line"
-msgstr ""
+msgstr "Hozzáadás egy vonal mentén"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Toggle one-way"
-msgstr ""
+msgstr "Egyirányúsítás"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
@@ -2015,7 +2015,7 @@ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify main roads"
-msgstr ""
+msgstr "Főutak újrabesorolása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
@@ -2031,28 +2031,28 @@ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click a road to reclassify it"
-msgstr ""
+msgstr "Kattints egy útra az újrabesoroláshoz"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Toggle segment"
-msgstr ""
+msgstr "Szakasz váltása"
 
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify multiple roads by drawing a route crossing them"
-msgstr ""
+msgstr "Több út újrabesorolása útvonalrajzolássa"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Mark as main along a route"
-msgstr ""
+msgstr "Főút jelölése útvonal mentén"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Erase main classification"
-msgstr ""
+msgstr "Főútkategória törlése"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Erase all main roads"
-msgstr ""
+msgstr "Minden főút törlése"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
@@ -2062,71 +2062,71 @@ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Map style"
-msgstr ""
+msgstr "Térkép stílusa"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Animate shortcuts<1>1</1>"
-msgstr ""
+msgstr "<0/> Egérutak animációja<1>1</1>"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Show entries into cells<1>2</1>"
-msgstr ""
+msgstr "<0/> Bejáratok mutatása mikrokörzetekben<1>2</1>"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Road thickness depends on shortcuts<1>1</1>"
-msgstr ""
+msgstr "Útvastagság az egérutak alapján"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Draw roads:"
-msgstr ""
+msgstr "Út rajzolása:"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Worst shortcuts"
-msgstr ""
+msgstr "Legtöbb egérút"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Cell"
-msgstr ""
+msgstr "Mikrokörzet"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Edits (either filter or direction)"
-msgstr ""
+msgstr "Módosítások (szűrő/irány)"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Speed limit"
-msgstr ""
+msgstr "Sebességhatár"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Neighbourhood stats"
-msgstr ""
+msgstr "Környék statisztikái"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Click to add modal filter"
-msgstr ""
+msgstr "<0/> Kattints a forgalomszűrő hozzáadásához"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click to change direction"
-msgstr ""
+msgstr "Irány megfordítása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click to designate a main road or not"
-msgstr ""
+msgstr "Főút kijelölése/eltávolítása"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click to create a turn restriction from here"
-msgstr ""
+msgstr "Kanyarodás tiltatása innen"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click to delete filter"
-msgstr ""
+msgstr "Forgalomszűrő törlése"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click to delete turn restriction"
-msgstr ""
+msgstr "Bekanyarodási tilalom törlése"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Add turn restriction"
-msgstr ""
+msgstr "Bekanyarodási tilalom hozzáadása"
 
 #. placeholder {0}: action.kind == "turn_restriction" ? action.from_road_name : "???"
 #. placeholder {1}: props.name || "unnamed road"
