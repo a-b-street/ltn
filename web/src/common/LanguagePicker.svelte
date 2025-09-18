@@ -19,7 +19,7 @@
 
 <label>
   <Languages /> Language
-  <select bind:value {onchange}>
+  <select bind:value {onchange} style="width: 80%">
     <option value="en">English</option>
     <option value="fr">Français</option>
     <option value="hu">Magyar</option>

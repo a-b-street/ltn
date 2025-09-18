@@ -52,7 +52,7 @@
     let lat = e.lngLat.lat;
     if (source == "google") {
       window.open(
-        `http://maps.google.com/maps?q=&layer=c&cbll=${lat},${lon}&cbp=11,0,0,0,0`,
+        `https://maps.google.com/maps?q=&layer=c&cbll=${lat},${lon}&cbp=11,0,0,0,0`,
         "_blank",
       );
     } else if (source == "bing") {

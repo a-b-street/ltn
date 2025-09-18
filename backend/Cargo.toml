@@ -17,10 +17,6 @@ flate2 = "1.1.1"
 geo.workspace = true
 geojson.workspace = true
 itertools = "0.14.0"
-# Note: i_overlay doesn't follow semver, and only guarantees non-breaking across patch versions.
-# https://github.com/iShape-Rust/iOverlay?tab=readme-ov-file#versioning-policy
-# So we pin to a minor version.
-i_overlay = { version = ">=2.0.0,<2.1.0", default-features = false }
 log = "0.4.20"
 nanorand = { version = "0.7.0", default-features = false, features = ["wyrand"] }
 osm-reader = { git = "https://github.com/a-b-street/osm-reader", features = ["serde"] }

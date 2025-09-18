@@ -24,7 +24,7 @@
     prettyPrintDistance,
     prettyPrintTime,
   } from "./common";
-  import { ModalFilterLayer } from "./layers";
+  import { colorByCellColor, ModalFilterLayer } from "./layers";
   import {
     backend,
     ensurePointInVisibleBounds,
@@ -148,7 +148,7 @@
         {...layerId("cells")}
         filter={["==", ["get", "kind"], "cell"]}
         paint={{
-          "fill-color": ["get", "color"],
+          "fill-color": colorByCellColor(),
           "fill-opacity": 0.6,
         }}
       />

@@ -34,7 +34,8 @@
 
   let { prevMode }: Props = $props();
 
-  let neighbourhoodGj = $backend!.renderNeighbourhood();
+  let neighbourhoodGj =
+    prevMode == "neighbourhood" ? $backend!.renderNeighbourhood() : null;
 
   let gj = $derived(
     $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty),
@@ -128,13 +129,13 @@
 
   {#snippet main()}
     {#if prevMode == "neighbourhood"}
-      <GeoJSON data={neighbourhoodGj} generateId>
+      <GeoJSON data={neighbourhoodGj!} generateId>
         <HighlightBoundaryLayer />
         <CellLayer />
         <OneWayLayer />
         <NeighbourhoodRoadLayer
           interactive={false}
-          maxShortcuts={neighbourhoodGj.maxShortcuts}
+          maxShortcuts={neighbourhoodGj!.maxShortcuts}
         />
       </GeoJSON>
     {/if}

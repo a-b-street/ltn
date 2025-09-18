@@ -49,8 +49,9 @@ you're using a tool to edit the `.po` file that's handy, please share it so we
 can list it here! And don't forget to add yourself to the credits in
 `web/src/About.svelte`.
 
-When the app changes and new strings to translate appear, `npx wuchale init`
-should pick them up.
+When the app changes and new strings to translate appear, they should be
+detected and added to the `.po` automatically. Run `npx wuchale init` if
+something goes wrong.
 
 ### Tests
 

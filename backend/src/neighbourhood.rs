@@ -12,11 +12,11 @@ use geo::{
 use geojson::{Feature, FeatureCollection};
 use rstar::{primitives::GeomWithData, RTree};
 use serde::{Deserialize, Serialize};
-use utils::Mercator;
+use utils::{aabb, Mercator};
 use web_time::Instant;
 
 use crate::boundary_stats::{BoundaryStats, PreparedContextData};
-use crate::geo_helpers::{aabb, buffer_aabb, clip_linestring_to_polygon};
+use crate::geo_helpers::{buffer_aabb, clip_linestring_to_polygon};
 use crate::map_model::DiagonalFilter;
 use crate::render_cells::Color;
 use crate::route::RouterInput;

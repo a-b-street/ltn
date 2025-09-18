@@ -139,7 +139,7 @@
 
     <p>
       License: <a
-        href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
         target="_blank"
       >
         Open Government License
