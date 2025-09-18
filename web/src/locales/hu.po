@@ -418,33 +418,34 @@ msgstr ""
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "The colors are arbitrary, just to distinguish better."
-msgstr ""
+msgstr "A színek csak a könnyebb megkülönböztetést szolgálják"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0><0/> Choose area</0> or <1><0/> Draw area</1>"
-msgstr ""
+msgstr "<0><0/> Terület kiválasztása</0> or <1><0/> Terület rajzolása</1>"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "1. Click an area to start your neighbourhood"
-msgstr ""
+msgstr "Kattints egy területre a környéked létrehozásához."
 
 #: src/AddNeighbourhoodMode.svelte
 msgid ""
 "These particular boundaries are suggested by finding roads,\n"
 "railways, and water that form severances."
 msgstr ""
-
+"Ezeket a határokat az utak, vasutak és vízfelületek alapján javasoljuk,\n"
+"amelyek elválasztó vonalat képeznek."
 #: src/AddNeighbourhoodMode.svelte
 msgid "2. Include additional areas"
-msgstr ""
+msgstr "2. További területek hozzáadása"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Click any adjacent areas you'd like to add to your boundary."
-msgstr ""
+msgstr "Kattints a környékhez hozzáadni kívánt szomszédos területekre."
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "1. Draw your neighbourhood"
-msgstr ""
+msgstr "1. Környékhatár rajzolása"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "2. Refine your boundary"
@@ -467,7 +468,7 @@ msgstr ""
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Create neighborhood"
-msgstr ""
+msgstr "Környék létrehozása"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0/> Start over"
@@ -819,23 +820,23 @@ msgstr "Olvasd el a felhasználói útmutatót"
 
 #: src/title/TitleMode.svelte
 msgid "Your projects"
-msgstr ""
+msgstr "Feltöltött projektek"
 
 #: src/title/TitleMode.svelte
 msgid "Rename project"
-msgstr ""
+msgstr "Projekt átnevezése"
 
 #: src/title/TitleMode.svelte
 msgid "Delete project"
-msgstr ""
+msgstr "Projekt törlése"
 
 #: src/title/TitleMode.svelte
 msgid "Start a new project"
-msgstr ""
+msgstr "Új projekt kezdése"
 
 #: src/title/TitleMode.svelte
 msgid "New project"
-msgstr ""
+msgstr "Új projekt"
 
 #: src/title/TitleMode.svelte
 msgid "Waiting for MapLibre and WASM to load..."
@@ -843,27 +844,27 @@ msgstr ""
 
 #: src/edit/EditIntersectionPopup.svelte
 msgid "Remove diagonal filter"
-msgstr ""
+msgstr "Átlós forgalomszűrő eltávolítása"
 
 #: src/edit/EditIntersectionPopup.svelte
 msgid "<0>❌</0> <1/> Delete diagonal filter"
-msgstr ""
+msgstr "<0>❌</0> <1/> Átlós forgalomszűrő törlése"
 
 #: src/edit/EditIntersectionPopup.svelte
 msgid "Rotate diagonal filter"
-msgstr ""
+msgstr "Átlós forgalomszűrő forgatása"
 
 #: src/edit/EditIntersectionPopup.svelte
 msgid "<0>↻</0> <1/> Rotate diagonal filter"
-msgstr ""
+msgstr "<0>↻</0> <1/> Átlós forgalomszűrő forgatása"
 
 #: src/edit/EditIntersectionPopup.svelte
 msgid "Add diagonal filter"
-msgstr ""
+msgstr "Átlós forgalomszűrő hozzáadása"
 
 #: src/edit/EditIntersectionPopup.svelte
 msgid "<0>+</0> <1/> Add diagonal filter"
-msgstr ""
+msgstr "<0>+</0> <1/> Átlós forgalomszűrő hozzáadása"
 
 #: src/common/draw_area/AreaControls.svelte
 #: src/edit/SnapRouteSelector.svelte
