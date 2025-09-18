@@ -302,10 +302,13 @@
     $mutationCounter++;
   }
 
-  let shortcutDescriptionText =
-    "Shortcuts are routes from one main road to another, which cut through the neighborhood's interior.";
-  let cellsDescriptionText =
-    "Cells are the colored area reachable without travelling along a main road.";
+  // These aren't really state, but this gets wuchale to work
+  let shortcutDescriptionText = $state(
+    "Shortcuts are routes from one main road to another, which cut through the neighborhood's interior.",
+  );
+  let cellsDescriptionText = $state(
+    "Cells are the colored area reachable without travelling along a main road.",
+  );
 
   let turnRestrictionUrls: Record<any, string> = {
     left: noLeftUrl,
