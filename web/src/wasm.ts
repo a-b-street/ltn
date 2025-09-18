@@ -442,7 +442,7 @@ export interface RenderNeighbourhoodOutput {
 
 export type AllShortcuts = FeatureCollection<
   LineString,
-  { directness: number; length_meters: number }
+  { directness: number; length_meters: number; weight: number }
 >;
 
 export type CompareRoute = FeatureCollection<

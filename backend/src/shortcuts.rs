@@ -15,6 +15,7 @@ pub struct Path {
     // TODO: dedupe - make this `Route`
     steps: Vec<(RoadID, Direction)>,
     directness: f64,
+    weight: usize,
 }
 
 impl Shortcuts {
@@ -130,6 +131,7 @@ impl Shortcuts {
                             paths.push(Path {
                                 steps: route.steps,
                                 directness,
+                                weight,
                             });
                         }
                     }
@@ -171,9 +173,9 @@ impl Path {
 
         let length = Euclidean.length(&linestring);
         let mut f = map.mercator.to_wgs84_gj(&linestring);
-        // TODO weight
         f.set_property("directness", self.directness);
         f.set_property("length_meters", length);
+        f.set_property("weight", self.weight);
         f
     }
 }

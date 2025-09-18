@@ -103,6 +103,7 @@
         </b>
         the length of the shortest route using all roads, not just this neighbourhood
       </p>
+      <p>And has weight <b>{action.gj.features[action.shortcutIndex].properties!.weight}</b></p>
     {/if}
   {/snippet}
 
