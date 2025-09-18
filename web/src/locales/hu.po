@@ -679,7 +679,7 @@ msgstr ""
 
 #: src/title/ChooseArea.svelte
 msgid "Click to start a new project in {0}"
-msgstr ""
+msgstr "Kattints új projekt hozzzáadásához {0}"
 
 #: src/title/LoadSavedProject.svelte
 msgid "LAD_"
