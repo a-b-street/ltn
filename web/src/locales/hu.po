@@ -750,7 +750,7 @@ msgstr "Olvasd el a felhasználói útmutatót"
 
 #: src/title/TitleMode.svelte
 msgid "Your projects"
-msgstr ""
+msgstr "A te projektjeid"
 
 #: src/title/TitleMode.svelte
 msgid "Rename project"
