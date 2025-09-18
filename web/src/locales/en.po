@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.838Z\n"
-"PO-Revision-Date: 2025-08-30T15:40:37.908Z\n"
+"PO-Revision-Date: 2025-09-18T10:22:09.088Z\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: \n"
@@ -203,22 +203,28 @@ msgstr "Export metrics to GeoJSON"
 msgid "FeatureCollection"
 msgstr "FeatureCollection"
 
+#. placeholder {0}: props.area_km2.toFixed(1)
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0>Area:</0> {0} km²"
 msgstr "<0>Area:</0> {0} km²"
 
+#. placeholder {0}: prettyPrintPercent( props.households_with_cars_or_vans, props.total_households, )
+#. placeholder {1}: props.total_households.toLocaleString()
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0>Car or van ownership</0> <1/> {0} of approximately {1} households have at least one car or van."
 msgstr "<0>Car or van ownership</0> <1/> {0} of approximately {1} households have at least one car or van."
 
+#. placeholder {0}: Math.round( props.population / props.area_km2, ).toLocaleString()
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0>Population density</0> <1/> {0} people / km²"
 msgstr "<0>Population density</0> <1/> {0} people / km²"
 
+#. placeholder {0}: (props.number_stats19_collisions / props.area_km2).toFixed( 1, )
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0>Pedestrian and cyclist collisions</0> <1/> {0} / km²"
 msgstr "<0>Pedestrian and cyclist collisions</0> <1/> {0} / km²"
 
+#. placeholder {0}: (props.number_pois / props.area_km2).toFixed(1)
 #: src/AddNeighbourhoodMode.svelte
 msgid "<0>Points of interest</0> <1/> {0} / km²"
 msgstr "<0>Points of interest</0> <1/> {0} / km²"
@@ -258,6 +264,7 @@ msgstr "Escape"
 msgid "Back"
 msgstr "Back"
 
+#. placeholder {0}: gj.features.length.toLocaleString()
 #: src/DebugDemandMode.svelte
 msgid "Trips begin and end in {0} zones"
 msgstr "Trips begin and end in {0} zones"
@@ -266,18 +273,23 @@ msgstr "Trips begin and end in {0} zones"
 msgid "Trips from <0/> Trips to"
 msgstr "Trips from <0/> Trips to"
 
+#. placeholder {0}: showTo ? "from" : "to"
+#. placeholder {1}: hoveredId == null ? "each zone" : "this zone"
 #: src/DebugDemandMode.svelte
 msgid "Trips {0} {1}:"
 msgstr "Trips {0} {1}:"
 
+#. placeholder {0}: current.properties.sum_from.toLocaleString()
 #: src/DebugDemandMode.svelte
 msgid "Total trips from here: {0}"
 msgstr "Total trips from here: {0}"
 
+#. placeholder {0}: current.properties.sum_to.toLocaleString()
 #: src/DebugDemandMode.svelte
 msgid "Total trips to here: {0}"
 msgstr "Total trips to here: {0}"
 
+#. placeholder {0}: current.properties .counts_from[hoveredId]
 #: src/DebugDemandMode.svelte
 msgid "Total intra-zonal trips starting and ending here: {0}"
 msgstr "Total intra-zonal trips starting and ending here: {0}"
@@ -318,10 +330,14 @@ msgstr "Turn restrictions:"
 msgid "Click an intersection to inspect its movements."
 msgstr "Click an intersection to inspect its movements."
 
+#. placeholder {0}: data.before.toLocaleString()
+#. placeholder {1}: data.after.toLocaleString()
+#. placeholder {2}: Math.round((100 * data.after) / data.before)
 #: src/ImpactDetailMode.svelte
 msgid "{0} routes cross here <0>before your changes</0> , and {1} <1>after your changes</1> . That's {2}% of the original traffic."
 msgstr "{0} routes cross here <0>before your changes</0> , and {1} <1>after your changes</1> . That's {2}% of the original traffic."
 
+#. placeholder {0}: routes[idx].count.toLocaleString()
 #: src/ImpactDetailMode.svelte
 msgid ""
 "The routes are currently sampled, to speed things up. This one sample\n"
@@ -390,6 +406,7 @@ msgstr "Hover on a road to compare"
 msgid "Route after changes"
 msgstr "Route after changes"
 
+#. placeholder {0}: (props.time_after / props.time_before).toFixed(1)
 #: src/ImpactOneDestinationMode.svelte
 msgid "Time ratio: {0}"
 msgstr "Time ratio: {0}"
@@ -484,6 +501,8 @@ msgstr ""
 msgid "Only show roads with at least this many daily trips before or after <0/>"
 msgstr "Only show roads with at least this many daily trips before or after <0/>"
 
+#. placeholder {0}: props.before.toLocaleString()
+#. placeholder {1}: props.after.toLocaleString()
 #: src/PredictImpactMode.svelte
 msgid "{0} before, {1} after"
 msgstr "{0} before, {1} after"
@@ -492,6 +511,7 @@ msgstr "{0} before, {1} after"
 msgid "Drag markers for a route"
 msgstr "Drag markers for a route"
 
+#. placeholder {0}: $mainRoadPenalty
 #: src/RouteMode.svelte
 msgid "Slow-down factor for main roads: {0} <0/>"
 msgstr "Slow-down factor for main roads: {0} <0/>"
@@ -548,10 +568,13 @@ msgstr "Pick a different road"
 msgid "This shortcut is <0>{0}x</0> the length of the shortest route using all roads, not just this neighbourhood"
 msgstr "This shortcut is <0>{0}x</0> the length of the shortest route using all roads, not just this neighbourhood"
 
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
 #: src/ViewShortcutsMode.svelte
 msgid "{0} shortcuts through {1}"
 msgstr "{0} shortcuts through {1}"
 
+#. placeholder {0}: props.name ?? "unnamed road"
 #: src/ViewShortcutsMode.svelte
 msgid "Main road: {0}"
 msgstr "Main road: {0}"
@@ -565,6 +588,7 @@ msgstr "Help"
 msgid "Area <0/>"
 msgstr "Area <0/>"
 
+#. placeholder {0}: neighbourhoodBoundary.properties.area_km2.toFixed(1)
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} km²"
 msgstr "{0} km²"
@@ -573,6 +597,7 @@ msgstr "{0} km²"
 msgid "SIMD <0/>"
 msgstr "SIMD <0/>"
 
+#. placeholder {0}: 1 + Math.floor(neighbourhoodBoundary.properties.simd / 20)
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "quintile {0}"
 msgstr "quintile {0}"
@@ -581,6 +606,7 @@ msgstr "quintile {0}"
 msgid "Population density <0/>"
 msgstr "Population density <0/>"
 
+#. placeholder {0}: Math.round( neighbourhoodBoundary.properties.population / neighbourhoodBoundary.properties.area_km2, ).toLocaleString()
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} people / km²"
 msgstr "{0} people / km²"
@@ -589,6 +615,7 @@ msgstr "{0} people / km²"
 msgid "Car ownership <0/>"
 msgstr "Car ownership <0/>"
 
+#. placeholder {0}: prettyPrintPercent( neighbourhoodBoundary.properties.households_with_cars_or_vans, neighbourhoodBoundary.properties.total_households, )
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} of households"
 msgstr "{0} of households"
@@ -597,6 +624,7 @@ msgstr "{0} of households"
 msgid "POI density <0/>"
 msgstr "POI density <0/>"
 
+#. placeholder {0}: ( neighbourhoodBoundary.properties.number_stats19_collisions / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
 #: src/common/NeighbourhoodBoundarySummary.svelte
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} / km²"
@@ -642,11 +670,13 @@ msgstr "Street view"
 msgid "Click the map to see street view <0/> <1/> <2>Street view source</2> <3><0/> Google Street View</3> <4><0/> Bing Streetside</4>"
 msgstr "Click the map to see street view <0/> <1/> <2>Street view source</2> <3><0/> Google Street View</3> <4><0/> Bing Streetside</4>"
 
+#. placeholder {0}: existingName
 #: src/pick_neighbourhood/ManageProject.svelte
 #: src/title/TitleMode.svelte
 msgid "Please name this copy of project {0}"
 msgstr "Please name this copy of project {0}"
 
+#. placeholder {0}: $currentProject!.project_name
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Project: {0}"
 msgstr "Project: {0}"
@@ -673,18 +703,22 @@ msgstr "Copy project"
 msgid "Open another project"
 msgstr "Open another project"
 
+#. placeholder {0}: edits.modalFilters
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} new modal filter(s) added"
 msgstr "{0} new modal filter(s) added"
 
+#. placeholder {0}: edits.deletedModalFilters
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} existing modal filter(s) removed"
 msgstr "{0} existing modal filter(s) removed"
 
+#. placeholder {0}: edits.travelFlows
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} road segment direction(s) changed"
 msgstr "{0} road segment direction(s) changed"
 
+#. placeholder {0}: osmTimestamp.toDateString()
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Map data is from {0}"
 msgstr "Map data is from {0}"
@@ -697,10 +731,12 @@ msgstr "If this area has changed since then, please contact <0>dabreegster@gmail
 msgid "Debug route-snapper"
 msgstr "Debug route-snapper"
 
+#. placeholder {0}: name
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Really delete neighbourhood {0}? You can't undo this."
 msgstr "Really delete neighbourhood {0}? You can't undo this."
 
+#. placeholder {0}: name
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "Rename neighbourhood {0} to what?"
 msgstr "Rename neighbourhood {0} to what?"
@@ -729,6 +765,7 @@ msgstr ""
 "Compare the prioritisation or individual metrics across your\n"
 "neighbourhoods."
 
+#. placeholder {0}: Math.round(props.population / props.area_km2).toLocaleString()
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid ""
 "<0>Population density:</0> {0} people\n"
@@ -737,10 +774,12 @@ msgstr ""
 "<0>Population density:</0> {0} people\n"
 "/ km²"
 
+#. placeholder {0}: (props.number_stats19_collisions / props.area_km2).toFixed(1)
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "<0>Pedestrian and cyclist collisions:</0> {0} / km²"
 msgstr "<0>Pedestrian and cyclist collisions:</0> {0} / km²"
 
+#. placeholder {0}: (props.number_pois / props.area_km2).toFixed(1)
 #: src/pick_neighbourhood/PickNeighbourhoodMode.svelte
 msgid "<0>Points of interest:</0> {0} / km²"
 msgstr "<0>Points of interest:</0> {0} / km²"
@@ -767,6 +806,7 @@ msgstr ""
 "The LTN tool can be used anywhere in the world. Some regions have extra\n"
 "datasets. If you'd like to specialize the tool, please email Dustin at <0>dabreegster@gmail.com</0>."
 
+#. placeholder {0}: ladChoice
 #: src/title/ChooseArea.svelte
 msgid "LAD_{0}"
 msgstr "LAD_{0}"
@@ -780,6 +820,7 @@ msgstr "Choose a boundary below or on the map to begin:"
 msgid "Road labels"
 msgstr "Road labels"
 
+#. placeholder {0}: data!.properties!.name
 #: src/title/ChooseArea.svelte
 msgid "Click to start a new project in {0}"
 msgstr "Click to start a new project in {0}"
@@ -808,10 +849,12 @@ msgstr "Load a built-in area: <0/>"
 msgid "or..."
 msgstr "or..."
 
+#. placeholder {0}: projectName
 #: src/title/TitleMode.svelte
 msgid "Really delete project {0}? You can't undo this."
 msgstr "Really delete project {0}? You can't undo this."
 
+#. placeholder {0}: existingName
 #: src/title/TitleMode.svelte
 msgid "Rename project {0} to what?"
 msgstr "Rename project {0} to what?"
@@ -1057,6 +1100,10 @@ msgstr "Households with at least one car or van"
 msgid "Show households from the Scottish census with at least one car."
 msgstr "Show households from the Scottish census with at least one car."
 
+#. placeholder {0}: props.id
+#. placeholder {1}: props.population.toLocaleString()
+#. placeholder {2}: props.imd_rank
+#. placeholder {3}: props.imd_percentile
 #: src/context/Population.svelte
 msgid ""
 "Data zone {0} has {1} people, and a SIMD rank of {2}, making it less deprived\n"
@@ -1065,10 +1112,16 @@ msgstr ""
 "Data zone {0} has {1} people, and a SIMD rank of {2}, making it less deprived\n"
 "than {3}% of data zones."
 
+#. placeholder {0}: props.id
+#. placeholder {1}: prettyPrintPercent( props.households_with_cars_or_vans, props.total_households, )
+#. placeholder {2}: props.total_households.toLocaleString()
 #: src/context/Population.svelte
 msgid "In data zone {0} {1} of approximately {2} households have at least one car or van."
 msgstr "In data zone {0} {1} of approximately {2} households have at least one car or van."
 
+#. placeholder {0}: props.id
+#. placeholder {1}: props.population.toLocaleString()
+#. placeholder {2}: Math.round( props.population / (props.area / 1e6), ).toLocaleString()
 #: src/context/Population.svelte
 msgid "Data zone {0} has {1} people, with a density of {2} people per square kilometer"
 msgstr "Data zone {0} has {1} people, with a density of {2} people per square kilometer"
@@ -1113,14 +1166,17 @@ msgstr "Network type: <0/>"
 msgid "Color by: <0/>"
 msgstr "Color by: <0/>"
 
+#. placeholder {0}: props[key].toLocaleString()
 #: src/context/RouteNetwork.svelte
 msgid "Cyclists: {0}"
 msgstr "Cyclists: {0}"
 
+#. placeholder {0}: props.gradient
 #: src/context/RouteNetwork.svelte
 msgid "Gradient: {0}%"
 msgstr "Gradient: {0}%"
 
+#. placeholder {0}: props.quietness
 #: src/context/RouteNetwork.svelte
 msgid "Cycle-friendliness: {0}%"
 msgstr "Cycle-friendliness: {0}%"
@@ -2109,6 +2165,7 @@ msgstr "<0/> Snap boundary to roads"
 msgid "Undo"
 msgstr "Undo"
 
+#. placeholder {0}: undoStates.length
 #: src/common/draw_area/AreaControls.svelte
 msgid "Undo ({0})"
 msgstr "Undo ({0})"
@@ -2117,11 +2174,21 @@ msgstr "Undo ({0})"
 msgid "<0>Click</0> to toggle snapping"
 msgstr "<0>Click</0> to toggle snapping"
 
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
+#. placeholder {2}: Math.round(props.speed_mph)
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
+#. placeholder {2}: Math.round(props.speed_mph)
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/ShowBeforeEdits.svelte
 msgid "{0} shortcuts through {1} ({2} mph)"
 msgstr "{0} shortcuts through {1} ({2} mph)"
 
+#. placeholder {0}: props.name ?? "unnamed road"
+#. placeholder {1}: Math.round(props.speed_mph)
+#. placeholder {0}: props.name ?? "unnamed road"
+#. placeholder {1}: Math.round(props.speed_mph)
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/ShowBeforeEdits.svelte
 msgid "Main road: {0} ({1} mph)"
@@ -2189,6 +2256,7 @@ msgstr "Change main/minor roads"
 msgid "Undo Ctrl+Z"
 msgstr "Undo Ctrl+Z"
 
+#. placeholder {0}: gj.undo_length
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Undo ({0}) Ctrl+Z"
 msgstr "Undo ({0}) Ctrl+Z"
@@ -2197,6 +2265,7 @@ msgstr "Undo ({0}) Ctrl+Z"
 msgid "Redo Ctrl+Y"
 msgstr "Redo Ctrl+Y"
 
+#. placeholder {0}: gj.redo_length
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Redo ({0}) Ctrl+Y"
 msgstr "Redo ({0}) Ctrl+Y"
@@ -2371,6 +2440,8 @@ msgstr "Click to delete turn restriction"
 msgid "Add turn restriction"
 msgstr "Add turn restriction"
 
+#. placeholder {0}: action.kind == "turn_restriction" ? action.from_road_name : "???"
+#. placeholder {1}: props.name || "unnamed road"
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Create a turn restriction from {0} to {1}"
 msgstr "<0/> Create a turn restriction from {0} to {1}"
