@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.919Z\n"
-"PO-Revision-Date: 2025-09-18T10:22:09.535Z\n"
+"PO-Revision-Date: 2025-09-19T09:49:39.381Z\n"
 "Last-Translator: \n"
 "Language: hu\n"
 "Language-Team: \n"
@@ -573,6 +573,7 @@ msgid "POI density <0/>"
 msgstr ""
 
 #. placeholder {0}: ( neighbourhoodBoundary.properties.number_stats19_collisions / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
+#. placeholder {0}: ( neighbourhoodBoundary.properties.number_pois / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
 #: src/common/NeighbourhoodBoundarySummary.svelte
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} / km²"
@@ -618,6 +619,7 @@ msgstr ""
 msgid "Click the map to see street view <0/> <1/> <2>Street view source</2> <3><0/> Google Street View</3> <4><0/> Bing Streetside</4>"
 msgstr ""
 
+#. placeholder {0}: existingName
 #. placeholder {0}: existingName
 #: src/pick_neighbourhood/ManageProject.svelte
 #: src/title/TitleMode.svelte
@@ -1850,25 +1852,11 @@ msgstr ""
 msgid "Table of Contents"
 msgstr ""
 
-#. placeholder {0}: props.shortcuts
-#. placeholder {1}: props.name ?? "unnamed road"
-#. placeholder {2}: Math.round(props.speed_mph)
-#. placeholder {0}: props.shortcuts
-#. placeholder {1}: props.name ?? "unnamed road"
-#. placeholder {2}: Math.round(props.speed_mph)
-#: src/edit/NeighbourhoodMode.svelte
-#: src/edit/ShowBeforeEdits.svelte
-msgid "{0} shortcuts through {1} ({2} mph)"
-msgstr ""
+#~ msgid "{0} shortcuts through {1} ({2} mph)"
+#~ msgstr ""
 
-#. placeholder {0}: props.name ?? "unnamed road"
-#. placeholder {1}: Math.round(props.speed_mph)
-#. placeholder {0}: props.name ?? "unnamed road"
-#. placeholder {1}: Math.round(props.speed_mph)
-#: src/edit/NeighbourhoodMode.svelte
-#: src/edit/ShowBeforeEdits.svelte
-msgid "Main road: {0} ({1} mph)"
-msgstr ""
+#~ msgid "Main road: {0} ({1} mph)"
+#~ msgstr ""
 
 #: src/edit/FreehandLine.svelte
 msgid "Feature"
@@ -2091,9 +2079,8 @@ msgstr ""
 msgid "Edits (either filter or direction)"
 msgstr ""
 
-#: src/edit/NeighbourhoodMode.svelte
-msgid "Speed limit"
-msgstr ""
+#~ msgid "Speed limit"
+#~ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Neighbourhood stats"
@@ -2136,9 +2123,8 @@ msgstr ""
 #~ msgid "Language <0><0>English</0> <1>Français</1> <2>Magyar</2></0>"
 #~ msgstr ""
 
-#: src/common/LanguagePicker.svelte
-msgid "<0/> Language <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
-msgstr ""
+#~ msgid "<0/> Language <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -2451,4 +2437,53 @@ msgid ""
 "You may want to try a few different proposals for an LTN. Each alternate\n"
 "proposal will be in its own project. From the main screen, you can\n"
 "quickly copy a project and switch between projects."
+msgstr ""
+
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
+#. placeholder {2}: printSpeed(props.speed_mph)
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
+#. placeholder {2}: printSpeed(props.speed_mph)
+#: src/edit/NeighbourhoodMode.svelte
+#: src/edit/ShowBeforeEdits.svelte
+msgid "{0} shortcuts through {1} ({2})"
+msgstr ""
+
+#. placeholder {0}: props.name ?? "unnamed road"
+#. placeholder {1}: printSpeed(props.speed_mph)
+#. placeholder {0}: props.name ?? "unnamed road"
+#. placeholder {1}: printSpeed(props.speed_mph)
+#: src/edit/NeighbourhoodMode.svelte
+#: src/edit/ShowBeforeEdits.svelte
+msgid "Main road: {0} ({1})"
+msgstr ""
+
+#: src/context/ContextualLayers.svelte
+msgid "Measurement units"
+msgstr ""
+
+#: src/context/ContextualLayers.svelte
+msgid "Imperial (mph) <0/> Metric (kmph)"
+msgstr ""
+
+#. placeholder {0}: $useMetricUnits ? "kmph" : "mph"
+#: src/edit/NeighbourhoodMode.svelte
+msgid "Speed limit ({0})"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "<0/> Language"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "English"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "Français"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "Magyar"
 msgstr ""

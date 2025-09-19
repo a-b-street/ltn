@@ -6,7 +6,8 @@ export let speedColorScale = [
   "#900c3f",
   "#581845",
 ];
-export let speedLimits = [20, 30, 40, 50, 60, 70];
+export let speedLimitsMPH = [20, 30, 40, 50, 60, 70];
+export let speedLimitsKMPH = [30, 50, 65, 80, 95, 110];
 
 // Commonly used color ramp from https://www.ons.gov.uk/census/maps/choropleth, dark to light.
 let commonQuintileColorScale = [

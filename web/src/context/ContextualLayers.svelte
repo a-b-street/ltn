@@ -8,6 +8,7 @@
     devMode,
     maptilerBasemap,
     showExistingFiltersAndTRs,
+    useMetricUnits,
   } from "../stores";
   import BusRoutes from "./BusRoutes.svelte";
   import CBD from "./CBD.svelte";
@@ -80,6 +81,15 @@
         </select>
 
         <LanguagePicker />
+
+        <span style="font-size: 20px; margin-left: 8px; margin-top: 4px;">
+          Measurement units
+        </span>
+        <label>
+          Imperial (mph)
+          <input type="checkbox" role="switch" bind:checked={$useMetricUnits} />
+          Metric (kmph)
+        </label>
 
         <ContextLayerButton label="Debugging tools" bind:show={$devMode} />
       </div>

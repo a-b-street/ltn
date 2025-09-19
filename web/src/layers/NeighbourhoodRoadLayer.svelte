@@ -14,10 +14,11 @@
   import {
     signGreen,
     speedColorScale,
-    speedLimits,
+    speedLimitsKMPH,
+    speedLimitsMPH,
     Style,
   } from "../common/colors";
-  import { roadStyle, thickRoadsForShortcuts } from "../stores";
+  import { roadStyle, thickRoadsForShortcuts, useMetricUnits } from "../stores";
 
   interface Props {
     maxShortcuts: number;
@@ -53,9 +54,16 @@
       );
     }
     if (style == "speeds") {
+      if ($useMetricUnits) {
+        return makeRamp(
+          ["*", 1.60934, ["get", "speed_mph"]],
+          speedLimitsKMPH,
+          speedColorScale,
+        ) as ExpressionSpecification;
+      }
       return makeRamp(
         ["get", "speed_mph"],
-        speedLimits,
+        speedLimitsMPH,
         speedColorScale,
       ) as ExpressionSpecification;
     }
