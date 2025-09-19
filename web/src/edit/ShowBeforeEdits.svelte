@@ -7,7 +7,7 @@
     NeighbourhoodRoadLayer,
     OneWayLayer,
   } from "../layers";
-  import { backend, showBeforeEdits } from "../stores";
+  import { backend, printSpeed, showBeforeEdits } from "../stores";
   import type { RenderNeighbourhoodOutput } from "../wasm";
 
   let prefix = "before-edits-";
@@ -44,12 +44,12 @@
               <p>
                 {props.shortcuts} shortcuts through {props.name ??
                   "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
+                ({printSpeed(props.speed_mph)})
               </p>
             {:else if props.kind == "main_road"}
               <p>
                 Main road: {props.name ?? "unnamed road"}
-                ({Math.round(props.speed_mph)} mph)
+                ({printSpeed(props.speed_mph)})
               </p>
             {/if}
           {/snippet}
