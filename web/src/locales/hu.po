@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.919Z\n"
-"PO-Revision-Date: 2025-09-18T10:22:09.535Z\n"
+"PO-Revision-Date: 2025-09-19T15:09:00.257Z\n"
 "Last-Translator: \n"
 "Language: hu\n"
 "Language-Team: \n"
@@ -268,7 +268,7 @@ msgid ""
 "This mode estimates the impact of all your changes on traffic around the\n"
 "entire area. It's based on many assumptions and must be interpreted very\n"
 "carefully. <0>Explore the origin/destination demand data used</0>"
-msgstr "Ez a mód az összes változtatásod forgalomra gyakorolt hatását becsüli meg az egész területen. Sok feltételezésre épül, ezért nagyon óvatosan kell értelmezni. <0>Fedezd fel a használt kiindulási/célforgalmi adatokat</0>"
+msgstr "Ez a mód az összes változtatás forgalomra gyakorolt hatását becsüli meg az egész területen. Sok feltételezésre épül, ezért nagyon óvatosan kell értelmezni. <0>Fedezd fel a használt kiindulási/célforgalmi adatokat</0>"
 
 #: src/PredictImpactMode.svelte
 msgid "About the 2011 home to work data"
@@ -435,6 +435,7 @@ msgid ""
 msgstr ""
 "Ezeket a határokat olyan utak, vasutak és vízfelületek alapján javasoljuk,\n"
 "amelyek elválasztó vonalat képeznek."
+
 #: src/AddNeighbourhoodMode.svelte
 msgid "2. Include additional areas"
 msgstr "2. További területek hozzáadása"
@@ -464,7 +465,7 @@ msgstr "3. Kész?"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "When you're done, click \"Create\"."
-msgstr "Ha kész vagy, kattints a "Létrehozás” gombra."
+msgstr "Ha kész vagy, kattints a \"Létrehozás” gombra."
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Create neighborhood"
@@ -574,6 +575,7 @@ msgid "POI density <0/>"
 msgstr ""
 
 #. placeholder {0}: ( neighbourhoodBoundary.properties.number_stats19_collisions / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
+#. placeholder {0}: ( neighbourhoodBoundary.properties.number_pois / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
 #: src/common/NeighbourhoodBoundarySummary.svelte
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} / km²"
@@ -619,6 +621,7 @@ msgstr ""
 msgid "Click the map to see street view <0/> <1/> <2>Street view source</2> <3><0/> Google Street View</3> <4><0/> Bing Streetside</4>"
 msgstr ""
 
+#. placeholder {0}: existingName
 #. placeholder {0}: existingName
 #: src/pick_neighbourhood/ManageProject.svelte
 #: src/title/TitleMode.svelte
@@ -887,7 +890,7 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "Existing modal filters and turn restrictions"
-msgstr ""
+msgstr "Meglévő forgalomszűrők és bekanyarodási tilalmak"
 
 #: src/context/ContextualLayers.svelte
 msgid "Metrics"
@@ -903,7 +906,7 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "Basemap"
-msgstr ""
+msgstr "Térkép típusa"
 
 #: src/context/ContextualLayers.svelte
 msgid "MapTiler Dataviz"
@@ -911,11 +914,11 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "MapTiler Streets"
-msgstr ""
+msgstr "MapTiler Utcák"
 
 #: src/context/ContextualLayers.svelte
 msgid "MapTiler Satellite"
-msgstr ""
+msgstr "MapTiler Műhold"
 
 #: src/context/ContextualLayers.svelte
 msgid "OS Open Zoomstack"
@@ -1798,8 +1801,8 @@ msgstr ""
 #~ msgid ""
 #~ "This will download a GeoJSON file. You can email this, copy to Sharepoint,\n"
 #~ "or otherwise transfer to somebody else. At the bottom of the very first\n"
-
-
+#~ ""
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid "Multiple proposals"
@@ -1860,7 +1863,7 @@ msgstr ""
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/ShowBeforeEdits.svelte
 msgid "{0} shortcuts through {1} ({2} mph)"
-msgstr ""
+msgstr "{0} egérút az {1}-n keresztül ({2} mph)"
 
 #. placeholder {0}: props.name ?? "unnamed road"
 #. placeholder {1}: Math.round(props.speed_mph)
@@ -1869,7 +1872,7 @@ msgstr ""
 #: src/edit/NeighbourhoodMode.svelte
 #: src/edit/ShowBeforeEdits.svelte
 msgid "Main road: {0} ({1} mph)"
-msgstr ""
+msgstr "Főút: {0} ({1} mph)"
 
 #: src/edit/FreehandLine.svelte
 msgid "Feature"
@@ -1982,7 +1985,7 @@ msgid ""
 "Modal filters restrict what kind of traffic can pass through a road\n"
 "segment. Place them strategically to deter shortcuts through your\n"
 "neighbourhood."
-msgstr "A forgalomszűrők azt korlátozzák, hogy milyen forgalom haladhat át egy út szakaszon. Helyezd el őket stratégiailag, hogy megakadályozd az egérutak használatát a környékeden."
+msgstr "A forgalomszűrők azt korlátozzák, hogy milyen forgalom haladhat át egy útszakaszon. Helyezd el őket stratégiailag, hogy megakadályozd az egérutak használatát a környékeden."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Change modal filter type"
