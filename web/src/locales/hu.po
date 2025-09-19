@@ -147,7 +147,7 @@ msgstr ""
 
 #: src/BackButton.svelte
 msgid "Back"
-msgstr ""
+msgstr "Vissza"
 
 #: src/DebugIntersectionsMode.svelte
 msgid "Purple intersections have some kind of turn restriction."
@@ -226,12 +226,12 @@ msgstr ""
 msgid ""
 "This shows the change in driving time to one destination from everywhere\n"
 "within the neighbourhood. Drag the pin around to change that destination."
-msgstr ""
+msgstr "Ez a nézet a környék minden pontjáról egy célhelyre vezető vezetési idő változását mutatja. Húzd a jelzőt máshova a cél módosításához."
 
 #: src/ImpactOneDestinationMode.svelte
 #: src/RouteMode.svelte
 msgid "Route before changes"
-msgstr ""
+msgstr "Útvonal a beavatkozások előtt"
 
 #: src/ImpactOneDestinationMode.svelte
 #: src/ImpactOneDestinationMode.svelte
@@ -243,12 +243,12 @@ msgstr ""
 #: src/ImpactOneDestinationMode.svelte
 #: src/ImpactOneDestinationMode.svelte
 msgid "Hover on a road to compare"
-msgstr ""
+msgstr "Húzd az egeret egy út fölé az összehasonlításhoz"
 
 #: src/ImpactOneDestinationMode.svelte
 #: src/RouteMode.svelte
 msgid "Route after changes"
-msgstr ""
+msgstr "Útvonal a beavatkozások után"
 
 #. placeholder {0}: (props.time_after / props.time_before).toFixed(1)
 #: src/ImpactOneDestinationMode.svelte
@@ -268,7 +268,7 @@ msgid ""
 "This mode estimates the impact of all your changes on traffic around the\n"
 "entire area. It's based on many assumptions and must be interpreted very\n"
 "carefully. <0>Explore the origin/destination demand data used</0>"
-msgstr ""
+msgstr "Ez a mód az összes változtatásod forgalomra gyakorolt hatását becsüli meg az egész területen. Sok feltételezésre épül, ezért nagyon óvatosan kell értelmezni. <0>Fedezd fel a használt kiindulási/célforgalmi adatokat</0>"
 
 #: src/PredictImpactMode.svelte
 msgid "About the 2011 home to work data"
@@ -308,11 +308,11 @@ msgstr ""
 
 #: src/PredictImpactMode.svelte
 msgid "<0/> Calculate quickly"
-msgstr ""
+msgstr "<0/> Gyorsabb számítás"
 
 #: src/PredictImpactMode.svelte
 msgid "<0/> Calculate more accurately"
-msgstr ""
+msgstr "<0/> Pontosabb számítás"
 
 #: src/PredictImpactMode.svelte
 msgid ""
@@ -320,40 +320,40 @@ msgid ""
 "roads have more traffic after edits. If hovering on a road doesn't show\n"
 "anything, there was no change there. Click a road to see example routes\n"
 "through it that've changed."
-msgstr ""
+msgstr "A piros utak forgalomnövekedést, a zöld utak forgalomcsökkenést jelölnek. A vastagabb utakra több forgalom esik a módosítások után. Ha egy útra húzod az egeret, és nem történik semmi, ott nem volt változás. Kattints egy útra, hogy lásd az azon áthaladó, módosult példaútvonalakat."
 
 #: src/PredictImpactMode.svelte
 msgid "Only show roads with at least this many daily trips before or after <0/>"
-msgstr ""
+msgstr "Csak azokat az utakat mutasd, amelyekre legalább ennyi napi utazás esik a <0/> előtt vagy után"
 
 #. placeholder {0}: props.before.toLocaleString()
 #. placeholder {1}: props.after.toLocaleString()
 #: src/PredictImpactMode.svelte
 msgid "{0} before, {1} after"
-msgstr ""
+msgstr "{0} előtte, {1} utána"
 
 #: src/RouteMode.svelte
 msgid "Drag markers for a route"
-msgstr ""
+msgstr "Húzd a jelzőket az útvonalhoz"
 
 #. placeholder {0}: $mainRoadPenalty
 #: src/RouteMode.svelte
 msgid "Slow-down factor for main roads: {0} <0/>"
-msgstr ""
+msgstr "Főutak torlódási tényezője: {0} <0/>"
 
 #: src/RouteMode.svelte
 msgid ""
 "Increase to see how drivers may detour in heavy traffic. 1 means\n"
 "free-flow."
-msgstr ""
+msgstr "Növeld az értéket, hogy lásd, milyen alternatív útvonalakat választhatnak gépjárművezetők torlódás esetén. 1 azt jelenti, hogy a forgalom zavartalan."
 
 #: src/ViewShortcutsMode.svelte
 msgid "No shortcuts here"
-msgstr ""
+msgstr "Nem található egérút"
 
 #: src/ViewShortcutsMode.svelte
 msgid "Click a road to see shortcuts"
-msgstr ""
+msgstr "Kattints egy útra, hogy lásd az áthaladó egérutakat"
 
 #: src/ViewShortcutsMode.svelte
 msgid ""
@@ -363,15 +363,15 @@ msgid ""
 "considered a \"good shortcut\" in practice -- this tool doesn't know any\n"
 "real traffic patterns; it's just looking for any possible path. This\n"
 "view lets you understand the limits of this assumption."
-msgstr ""
+msgstr "Ez az összes lehetséges egérutat mutatja, amely átszeli a kiválasztott kék utat. Egy egérút olyan útvonal, amely főutakról indul és oda érkezik, miközben kisebb utcákon halad keresztül. Gyakorlati szempontból nem feltétlenül tekinthető „jó egérútnak” – ez az eszköz nem ismeri a valós forgalmi mintázatokat, csak az összes lehetséges útvonalat keresi. Ez a nézet segít megérteni a feltételezés korlátait."
 
 #: src/ViewShortcutsMode.svelte
 msgid "Pick a different road"
-msgstr ""
+msgstr "Másik út választása"
 
 #: src/ViewShortcutsMode.svelte
 msgid "This shortcut is <0>{0}x</0> the length of the shortest route using all roads, not just this neighbourhood"
-msgstr ""
+msgstr "Ez az egérút <0>{0}×</0> hosszabb, mint a legrövidebb útvonal, amely az összes utat érinti, nem csak ezt a környéket."
 
 #. placeholder {0}: props.shortcuts
 #. placeholder {1}: props.name ?? "unnamed road"
@@ -386,15 +386,15 @@ msgstr ""
 
 #: src/SetBoundaryMode.svelte
 msgid "Adjust boundary"
-msgstr ""
+msgstr "Környékhatár változtatása"
 
 #: src/SetBoundaryMode.svelte
 msgid "Finish"
-msgstr ""
+msgstr "Befejezés"
 
 #: src/SetBoundaryMode.svelte
 msgid "Cancel"
-msgstr ""
+msgstr "Mégsem"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "What do you want to name the neighbourhood?"
@@ -433,7 +433,7 @@ msgid ""
 "These particular boundaries are suggested by finding roads,\n"
 "railways, and water that form severances."
 msgstr ""
-"Ezeket a határokat az utak, vasutak és vízfelületek alapján javasoljuk,\n"
+"Ezeket a határokat olyan utak, vasutak és vízfelületek alapján javasoljuk,\n"
 "amelyek elválasztó vonalat képeznek."
 #: src/AddNeighbourhoodMode.svelte
 msgid "2. Include additional areas"
@@ -460,11 +460,11 @@ msgstr ""
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "3. Finished?"
-msgstr ""
+msgstr "3. Kész?"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "When you're done, click \"Create\"."
-msgstr ""
+msgstr "Ha kész vagy, kattints a "Létrehozás” gombra."
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Create neighborhood"
@@ -531,7 +531,7 @@ msgstr ""
 #: src/common/HelpButton.svelte
 #: src/common/HelpButton.svelte
 msgid "Help"
-msgstr ""
+msgstr "Súgó"
 
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "Area <0/>"
@@ -1798,8 +1798,8 @@ msgstr ""
 #~ msgid ""
 #~ "This will download a GeoJSON file. You can email this, copy to Sharepoint,\n"
 #~ "or otherwise transfer to somebody else. At the bottom of the very first\n"
-#~ "Choose Project screen, you can then load this project from its file:"
-#~ msgstr ""
+
+
 
 #: src/user_guide/Page.svelte
 msgid "Multiple proposals"
@@ -1982,7 +1982,7 @@ msgid ""
 "Modal filters restrict what kind of traffic can pass through a road\n"
 "segment. Place them strategically to deter shortcuts through your\n"
 "neighbourhood."
-msgstr ""
+msgstr "A forgalomszűrők azt korlátozzák, hogy milyen forgalom haladhat át egy út szakaszon. Helyezd el őket stratégiailag, hogy megakadályozd az egérutak használatát a környékeden."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Change modal filter type"
@@ -2004,14 +2004,14 @@ msgstr "Egyirányúsítás"
 msgid ""
 "Click on a road segment to toggle its direction. This will change\n"
 "the direction of traffic flow on that road."
-msgstr ""
+msgstr "Kattints egy útszakaszra az irányváltáshoz. Ezzel megváltoztatod a forgalom haladási irányát azon az úton."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
 "To restrict certain turns, first click on the source road, then the\n"
 "destination road. Traffic will no longer be able to turn from the\n"
 "source road to the destination road."
-msgstr ""
+msgstr "Bizonyos kanyarodások tiltásához először kattints a kiinduló útra, majd a célútra. A forgalom ezután nem tud majd a kiinduló útról a célútra kanyarodni."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Reclassify main roads"
@@ -2021,13 +2021,13 @@ msgstr "Főutak újrabesorolása"
 msgid ""
 "<0>Main roads</0>, drawn in grey, were classified automatically\n"
 "using data from <1>OpenStreetMap</1>, but you can reclassify a road segment by clicking on it."
-msgstr ""
+msgstr "A <0>Főutak</0>, szürkével jelölve, az <1>OpenStreetMap</1> adatai alapján automatikusan lettek besorolva, de egy útszakaszt a kattintással újrabesorolhatsz."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid ""
 "Main roads are typically better suited to support higher levels of\n"
 "traffic than neighbourhood roads."
-msgstr ""
+msgstr "A főutak általában jobban alkalmasak nagyobb forgalom lebonyolítására, mint a környékbeli utak."
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Click a road to reclassify it"
@@ -2078,7 +2078,7 @@ msgstr "Útvastagság az egérutak alapján"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Draw roads:"
-msgstr "Út rajzolása:"
+msgstr "Utak színezése:"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Worst shortcuts"
