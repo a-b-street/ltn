@@ -324,7 +324,7 @@ msgstr "A piros utak forgalomnövekedést, a zöld utak forgalomcsökkenést jel
 
 #: src/PredictImpactMode.svelte
 msgid "Only show roads with at least this many daily trips before or after <0/>"
-msgstr "Csak azokat az utakat mutasd, amelyekre legalább ennyi napi utazás esik a <0/> előtt vagy után"
+msgstr "Csak azokat az utakat mutasd, amelyekre legalább ennyi napi utazás esik a beavatkozások előtt vagy után<0/>"
 
 #. placeholder {0}: props.before.toLocaleString()
 #. placeholder {1}: props.after.toLocaleString()
@@ -658,22 +658,22 @@ msgstr ""
 #. placeholder {0}: edits.modalFilters
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} new modal filter(s) added"
-msgstr ""
+msgstr "{0} új forgalomszűrő hozzáadva"
 
 #. placeholder {0}: edits.deletedModalFilters
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} existing modal filter(s) removed"
-msgstr ""
+msgstr "{0} meglévő forgalomszűrő eltávolítva"
 
 #. placeholder {0}: edits.travelFlows
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "{0} road segment direction(s) changed"
-msgstr ""
+msgstr "{0} útszakasz iránya megváltozott"
 
 #. placeholder {0}: osmTimestamp.toDateString()
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "Map data is from {0}"
-msgstr ""
+msgstr "A térképadatok forrása: {0}"
 
 #: src/pick_neighbourhood/ManageProject.svelte
 msgid "If this area has changed since then, please contact <0>dabreegster@gmail.com</0> to use newer OpenStreetMap data."
