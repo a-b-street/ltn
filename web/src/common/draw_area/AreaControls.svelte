@@ -285,7 +285,6 @@
   >
     <span class="dot" class:snapped={waypt.snapped}>{idx + 1}</span>
     <Popup openOn="hover" popupClass="edit-waypoint-popup">
-      {#snippet children({ data })}
         <ul style="padding-right: 0; padding-left: 20px; margin: 0;">
           <li>
             <b>Click and drag</b>
@@ -300,7 +299,6 @@
             to delete
           </li>
         </ul>
-      {/snippet}
     </Popup>
   </Marker>
 {/each}

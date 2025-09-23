@@ -8,7 +8,6 @@
     GeoJSON,
     hoverStateFilter,
     LineLayer,
-    Popup,
     type LayerClickInfo,
   } from "svelte-maplibre";
   import { downloadGeneratedFile } from "svelte-utils";
@@ -23,6 +22,7 @@
     prettyPrintPercent,
     refreshLoadingScreen,
   } from "./common";
+  import Popup from "./Popup.svelte";
   import AreaControls from "./common/draw_area/AreaControls.svelte";
   import { type Waypoint } from "./common/draw_area/stores";
   import NeighbourhoodBoundarySummary from "./common/NeighbourhoodBoundarySummary.svelte";
@@ -423,11 +423,10 @@
         >
           {#if selectedPrioritization != "simd"}
             <Popup openOn="hover">
-              {#snippet children({ data })}
-                {@const props = data!.properties!}
+              {#snippet children({ props } : { props: GeneratedBoundaryFeature["properties"] })}
                 {#if selectedPrioritization == "none" || selectedPrioritization == "area"}
                   <b>Area:</b>
-                  {props.area_km2.toFixed(1)} km²
+                  {props.area_km23.toFixed(1)} km²
                 {:else if selectedPrioritization == "car_ownership"}
                   <b>Car or van ownership</b>
                   <br />
