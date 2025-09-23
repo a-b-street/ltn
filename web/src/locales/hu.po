@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.919Z\n"
-"PO-Revision-Date: 2025-09-18T10:22:09.535Z\n"
+"PO-Revision-Date: 2025-09-23T09:40:16.741Z\n"
 "Last-Translator: \n"
 "Language: hu\n"
 "Language-Team: \n"
@@ -573,6 +573,7 @@ msgid "POI density <0/>"
 msgstr ""
 
 #. placeholder {0}: ( neighbourhoodBoundary.properties.number_stats19_collisions / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
+#. placeholder {0}: ( neighbourhoodBoundary.properties.number_pois / neighbourhoodBoundary.properties.area_km2 ).toFixed(1)
 #: src/common/NeighbourhoodBoundarySummary.svelte
 #: src/common/NeighbourhoodBoundarySummary.svelte
 msgid "{0} / km²"
@@ -618,6 +619,7 @@ msgstr ""
 msgid "Click the map to see street view <0/> <1/> <2>Street view source</2> <3><0/> Google Street View</3> <4><0/> Bing Streetside</4>"
 msgstr ""
 
+#. placeholder {0}: existingName
 #. placeholder {0}: existingName
 #: src/pick_neighbourhood/ManageProject.svelte
 #: src/title/TitleMode.svelte
