@@ -38,7 +38,7 @@
     prefix = "",
   }: Props = $props();
 
-  function roadLineColor(
+  function interiorRoadLineColor(
     style: "shortcuts" | "cells" | "edits" | "speeds",
     maxShortcuts: number,
   ): DataDrivenPropertyValueSpecification<string> {
@@ -82,6 +82,20 @@
     );
   }
 
+  function mainRoadLineColor(
+    style: "shortcuts" | "cells" | "edits" | "speeds",
+  ): DataDrivenPropertyValueSpecification<string> {
+    if (style == "edits") {
+      return hoverStateFilter(
+        // @ts-expect-error hoverStateFilter is not properly typed - it should accept an expression
+        ["case", ["get", "edited"], signGreen, "gray"],
+        Style.mapFeature.hover.backgroundColor,
+      );
+    }
+
+    return hoverStateFilter("gray", Style.mapFeature.hover.backgroundColor);
+  }
+
   function lineWidth(
     thickRoadsForShortcuts: boolean,
     maxShortcuts: number,
@@ -121,7 +135,7 @@
   filter={["==", ["get", "kind"], "interior_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, maxShortcuts, 0),
-    "line-color": roadLineColor($roadStyle, maxShortcuts),
+    "line-color": interiorRoadLineColor($roadStyle, maxShortcuts),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{
@@ -156,10 +170,7 @@
   filter={["==", ["get", "kind"], "main_road"]}
   paint={{
     "line-width": lineWidth($thickRoadsForShortcuts, maxShortcuts, 4),
-    "line-color": hoverStateFilter(
-      "gray",
-      Style.mapFeature.hover.backgroundColor,
-    ),
+    "line-color": mainRoadLineColor($roadStyle),
     "line-opacity": hoverStateFilter(1.0, 0.5),
   }}
   layout={{
