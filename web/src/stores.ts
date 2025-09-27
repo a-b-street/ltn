@@ -131,6 +131,7 @@ export let showExistingFiltersAndTRs = writable(true);
 export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
   writable("shortcuts");
 export let thickRoadsForShortcuts = writable(false);
+export let useMetricUnits = writable(false);
 
 // Settings for impact prediction
 export let fastSample: Writable<boolean> = writable(true);
@@ -191,5 +192,14 @@ export function ensurePointInVisibleBounds(point: Writable<LngLat>) {
 
   if (!bounds.contains(get(point))) {
     point.set(randomPoint(bounds));
+  }
+}
+
+export function printSpeed(mph: number): string {
+  if (get(useMetricUnits)) {
+    let kmph = Math.round(1.60934 * mph);
+    return `${kmph} kmph`;
+  } else {
+    return `${Math.round(mph)} mph`;
   }
 }

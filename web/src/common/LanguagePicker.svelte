@@ -18,7 +18,9 @@
 </script>
 
 <label>
-  <Languages /> Language
+  <span style="font-size: 20px; margin-left: 8px; margin-top: 4px;">
+    <Languages /> Language
+  </span>
   <select bind:value {onchange} style="width: 80%">
     <option value="en">English</option>
     <option value="fr">Français</option>
