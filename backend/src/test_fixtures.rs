@@ -79,7 +79,7 @@ impl NeighbourhoodFixture {
 
         // CNT files are pre-built with everything already
         if self.is_cnt {
-            let path = format!("../web/public/cnt/maps_v3/{}.bin.gz", self.study_area_name);
+            let path = format!("../web/public/cnt/maps_v4/{}.bin.gz", self.study_area_name);
             let input_bytes = std::fs::read(&path).context(format!("unable to read '{path}'"))?;
             let mut gunzipped = Vec::new();
             let mut decoder = flate2::read::GzDecoder::new(Cursor::new(input_bytes));
