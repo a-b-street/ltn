@@ -39,7 +39,11 @@
     pageTitle,
     roadLineWidth,
   } from "../common";
-  import { speedColorScale, speedLimits } from "../common/colors";
+  import {
+    speedColorScale,
+    speedLimitsKMPH,
+    speedLimitsMPH,
+  } from "../common/colors";
   import type { Waypoint } from "../common/draw_area/stores";
   import type { Intersection } from "../common/Intersection";
   import { ModalFilterType } from "../common/ModalFilterType";
@@ -61,10 +65,12 @@
     map,
     mode,
     mutationCounter,
+    printSpeed,
     roadStyle,
     saveCurrentProject,
     showBeforeEdits,
     thickRoadsForShortcuts,
+    useMetricUnits,
   } from "../stores";
   import type { AllShortcuts, NeighbourhoodBoundaryFeature } from "../wasm";
   import ChangeFilterModal from "./ChangeFilterModal.svelte";
@@ -669,13 +675,15 @@
         <option value="shortcuts">Worst shortcuts</option>
         <option value="cells">Cell</option>
         <option value="edits">Edits (either filter or direction)</option>
-        <option value="speeds">Speed limit</option>
+        <option value="speeds"
+          >Speed limit ({$useMetricUnits ? "kmph" : "mph"})</option
+        >
       </select>
     </label>
     {#if $roadStyle == "speeds"}
       <SequentialLegend
         colorScale={speedColorScale}
-        labels={{ limits: speedLimits }}
+        labels={{ buckets: $useMetricUnits ? speedLimitsKMPH : speedLimitsMPH }}
       />
     {/if}
     <h2>Neighbourhood stats</h2>
@@ -709,12 +717,12 @@
                 <p>
                   {props.shortcuts} shortcuts through {props.name ??
                     "unnamed road"}
-                  ({Math.round(props.speed_mph)} mph)
+                  ({printSpeed(props.speed_mph)})
                 </p>
               {:else if props.kind == "main_road"}
                 <p>
                   Main road: {props.name ?? "unnamed road"}
-                  ({Math.round(props.speed_mph)} mph)
+                  ({printSpeed(props.speed_mph)})
                 </p>
               {/if}
               {#if action.kind == "filter"}
