@@ -14,7 +14,7 @@
   import {
     signGreen,
     speedColorScale,
-    speedLimitsKMPH,
+    speedLimitsKPH,
     speedLimitsMPH,
     Style,
   } from "../common/colors";
@@ -57,7 +57,7 @@
       if ($useMetricUnits) {
         return makeRamp(
           ["*", 1.60934, ["get", "speed_mph"]],
-          speedLimitsKMPH,
+          speedLimitsKPH,
           speedColorScale,
         ) as ExpressionSpecification;
       }

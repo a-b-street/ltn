@@ -83,12 +83,12 @@
         <LanguagePicker />
 
         <span style="font-size: 20px; margin-left: 8px; margin-top: 4px;">
-          Measurement units
+          Speed units
         </span>
         <label>
           Imperial (mph)
           <input type="checkbox" role="switch" bind:checked={$useMetricUnits} />
-          Metric (kmph)
+          Metric (km/h)
         </label>
 
         <ContextLayerButton label="Debugging tools" bind:show={$devMode} />

@@ -41,7 +41,7 @@
   } from "../common";
   import {
     speedColorScale,
-    speedLimitsKMPH,
+    speedLimitsKPH,
     speedLimitsMPH,
   } from "../common/colors";
   import type { Waypoint } from "../common/draw_area/stores";
@@ -676,14 +676,14 @@
         <option value="cells">Cell</option>
         <option value="edits">Edits (either filter or direction)</option>
         <option value="speeds"
-          >Speed limit ({$useMetricUnits ? "kmph" : "mph"})</option
+          >Speed limit ({$useMetricUnits ? "k/ph" : "mph"})</option
         >
       </select>
     </label>
     {#if $roadStyle == "speeds"}
       <SequentialLegend
         colorScale={speedColorScale}
-        labels={{ buckets: $useMetricUnits ? speedLimitsKMPH : speedLimitsMPH }}
+        labels={{ buckets: $useMetricUnits ? speedLimitsKPH : speedLimitsMPH }}
       />
     {/if}
     <h2>Neighbourhood stats</h2>
