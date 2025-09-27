@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.838Z\n"
-"PO-Revision-Date: 2025-09-27T11:13:23.588Z\n"
+"PO-Revision-Date: 2025-09-27T14:35:21.739Z\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: \n"
@@ -511,18 +511,15 @@ msgstr "{0} before, {1} after"
 msgid "Drag markers for a route"
 msgstr "Drag markers for a route"
 
-#. placeholder {0}: $mainRoadPenalty
-#: src/RouteMode.svelte
-msgid "Slow-down factor for main roads: {0} <0/>"
-msgstr "Slow-down factor for main roads: {0} <0/>"
+#~ msgid "Slow-down factor for main roads: {0} <0/>"
+#~ msgstr "Slow-down factor for main roads: {0} <0/>"
 
-#: src/RouteMode.svelte
-msgid ""
-"Increase to see how drivers may detour in heavy traffic. 1 means\n"
-"free-flow."
-msgstr ""
-"Increase to see how drivers may detour in heavy traffic. 1 means\n"
-"free-flow."
+#~ msgid ""
+#~ "Increase to see how drivers may detour in heavy traffic. 1 means\n"
+#~ "free-flow."
+#~ msgstr ""
+#~ "Increase to see how drivers may detour in heavy traffic. 1 means\n"
+#~ "free-flow."
 
 #: src/SetBoundaryMode.svelte
 msgid "Adjust boundary"
@@ -2980,3 +2977,36 @@ msgstr "Magyar"
 #: src/context/ContextualLayers.svelte
 msgid "Speed units"
 msgstr "Speed units"
+
+#. placeholder {0}: $mainRoadPenalty
+#: src/RouteMode.svelte
+msgid ""
+"Slow-down factor for main roads: {0} <0/> <1>Increase to see how drivers may detour in heavy traffic. 1 means\n"
+"free-flow.</1>"
+msgstr ""
+"Slow-down factor for main roads: {0} <0/> <1>Increase to see how drivers may detour in heavy traffic. 1 means\n"
+"free-flow.</1>"
+
+#~ msgid ""
+#~ "<0/> img\n"
+#~ "Ignore automated traffic bollards (for residents and other exemptions)"
+#~ msgstr ""
+#~ "<0/> img\n"
+#~ "Ignore automated traffic bollards (for residents and other exemptions)"
+
+#~ msgid ""
+#~ "<0/> url: ModalFilterType.automatedBollard.iconURL,\n"
+#~ "img\n"
+#~ "Ignore automated traffic bollards (for residents and other exemptions)"
+#~ msgstr ""
+#~ "<0/> url: ModalFilterType.automatedBollard.iconURL,\n"
+#~ "img\n"
+#~ "Ignore automated traffic bollards (for residents and other exemptions)"
+
+#: src/RouteMode.svelte
+msgid "Automated traffic bollard"
+msgstr "Automated traffic bollard"
+
+#: src/RouteMode.svelte
+msgid "<0/> <1/> Ignore automated traffic bollards (for residents and other exemptions)"
+msgstr "<0/> <1/> Ignore automated traffic bollards (for residents and other exemptions)"

@@ -10,7 +10,8 @@ use utils::{deserialize_nodemap, LineSplit, NodeMap};
 
 use crate::map_model::{DiagonalFilter, Direction};
 use crate::{
-    Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID, TravelFlow,
+    FilterKind, Intersection, IntersectionID, MapModel, ModalFilter, Position, Road, RoadID,
+    TravelFlow,
 };
 
 // For vehicles only
@@ -23,6 +24,7 @@ pub struct Router {
     #[serde(deserialize_with = "deserialize_nodemap")]
     node_map: NodeMap<(RoadID, Direction)>,
     pub main_road_penalty: f64,
+    pub ignore_automated_bollards: bool,
 }
 
 impl Clone for Router {
@@ -31,11 +33,13 @@ impl Clone for Router {
         let path_calculator = RefCell::new(Some(fast_paths::create_calculator(&ch)));
         let node_map = self.node_map.clone();
         let main_road_penalty = self.main_road_penalty;
+        let ignore_automated_bollards = self.ignore_automated_bollards;
         Self {
             ch,
             path_calculator,
             node_map,
             main_road_penalty,
+            ignore_automated_bollards,
         }
     }
 }
@@ -52,6 +56,7 @@ pub struct Route {
 /// Most of the methods delegate to the entire map (e.g. `get_i`), but `roads_iter` allows you to
 /// specify a subset of roads, so we can build a routing graph focused within a single neighborhood.
 pub trait RouterInput {
+    fn ignore_automated_bollards(&self) -> bool;
     fn roads_iter(&self) -> impl Iterator<Item = &Road>;
     fn closest_road(&self) -> &RTree<GeomWithData<LineString, RoadID>>;
 
@@ -59,7 +64,16 @@ pub trait RouterInput {
     fn get_i(&self, i: IntersectionID) -> &Intersection;
     fn modal_filter(&self, r: RoadID) -> Option<&ModalFilter>;
     fn has_modal_filter(&self, r: RoadID) -> bool {
-        self.modal_filter(r).is_some()
+        match self.modal_filter(r) {
+            Some(f) => {
+                if self.ignore_automated_bollards() && f.kind == FilterKind::AutomatedBollard {
+                    false
+                } else {
+                    true
+                }
+            }
+            None => false,
+        }
     }
     fn travel_flow(&self, r: RoadID) -> TravelFlow;
     fn diagonal_filter(&self, i: IntersectionID) -> Option<&DiagonalFilter>;
@@ -93,6 +107,7 @@ impl Router {
             path_calculator,
             node_map,
             main_road_penalty: 1.0,
+            ignore_automated_bollards: false,
         }
     }
 
@@ -145,6 +160,7 @@ impl Router {
             path_calculator,
             node_map,
             main_road_penalty,
+            ignore_automated_bollards: router_input.ignore_automated_bollards(),
         }
     }
 
@@ -181,6 +197,7 @@ impl Router {
         )
     }
 
+    // TODO I think we need to plum bthrough the option here
     pub fn route_from_positions(
         &self,
         router_input: &impl RouterInput,
@@ -480,7 +497,7 @@ mod tests {
         let mut map = load_osm_xml("simple_four_way_intersection");
         let Route { steps, .. } = map
             .router_before
-            .route_from_roads(&map.router_input_before(), r(3), r(2))
+            .route_from_roads(&map.router_input_before(false), r(3), r(2))
             .unwrap();
         assert_eq!(
             steps,
@@ -493,7 +510,7 @@ mod tests {
             Some(vec![r(2)]),
             FilterKind::NoEntry,
         );
-        map.rebuild_router(1.0);
+        map.rebuild_router(1.0, false);
         let router_after = map.router_after.as_ref().unwrap();
         // A route starting or ending there should fail. route_from_roads uses the middle of the
         // road, so it hits the filter.
@@ -525,7 +542,7 @@ mod tests {
             steps: valid_path, ..
         } = map
             .router_before
-            .route_from_roads(&map.router_input_before(), r(0), r(3))
+            .route_from_roads(&map.router_input_before(false), r(0), r(3))
             .unwrap();
         assert_eq!(
             valid_path,
@@ -534,7 +551,7 @@ mod tests {
         // attempting illegal left turn
         let invalid_path =
             map.router_before
-                .route_from_roads(&map.router_input_before(), r(0), r(2));
+                .route_from_roads(&map.router_input_before(false), r(0), r(2));
         assert!(invalid_path.is_none());
     }
 
@@ -555,7 +572,7 @@ mod tests {
         let mut map = load_osm_xml("simple_four_way_intersection");
 
         map.turn_restrictions[1] = vec![(r(1), r(3)), (r(3), r(0)), (r(0), r(2)), (r(2), r(1))];
-        map.rebuild_router(1.1);
+        map.rebuild_router(1.1, false);
 
         let Route {
             steps: right_turn_path,

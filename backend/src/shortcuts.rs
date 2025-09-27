@@ -19,10 +19,14 @@ pub struct Path {
 
 impl Shortcuts {
     pub fn new(map: &MapModel, neighbourhood: &Neighbourhood, cells: &Vec<Cell>) -> Self {
-        let router_input_after = neighbourhood.shortcuts_router_input_after(map);
-        let router_input_before = neighbourhood.shortcuts_router_input_before(map);
+        let ignore_automated_bollards = false;
+        let router_input_after =
+            neighbourhood.shortcuts_router_input_after(map, ignore_automated_bollards);
+        let router_input_before =
+            neighbourhood.shortcuts_router_input_before(map, ignore_automated_bollards);
         // Heavily penalize using main roads, so more shortcuts use local roads.
-        let router_after = Router::new(&router_input_after, 2.0);
+        let main_road_penalty = 2.0;
+        let router_after = Router::new(&router_input_after, main_road_penalty);
 
         let mut paths = Vec::new();
         let mut count_per_road = HashMap::new();

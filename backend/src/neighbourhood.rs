@@ -302,19 +302,29 @@ impl Neighbourhood {
             .collect()
     }
 
-    pub fn shortcuts_router_input_before<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
+    pub fn shortcuts_router_input_before<'a>(
+        &'a self,
+        map: &'a MapModel,
+        ignore_automated_bollards: bool,
+    ) -> impl RouterInput + 'a {
         NeighbourhoodShortcutsRouterInput {
             map: &map,
             neighbourhood: &self,
             before: true,
+            ignore_automated_bollards,
         }
     }
 
-    pub fn shortcuts_router_input_after<'a>(&'a self, map: &'a MapModel) -> impl RouterInput + 'a {
+    pub fn shortcuts_router_input_after<'a>(
+        &'a self,
+        map: &'a MapModel,
+        ignore_automated_bollards: bool,
+    ) -> impl RouterInput + 'a {
         NeighbourhoodShortcutsRouterInput {
             map: &map,
             neighbourhood: &self,
             before: false,
+            ignore_automated_bollards,
         }
     }
 
@@ -579,9 +589,13 @@ struct NeighbourhoodShortcutsRouterInput<'a> {
     pub(crate) map: &'a MapModel,
     pub(crate) neighbourhood: &'a Neighbourhood,
     before: bool,
+    ignore_automated_bollards: bool,
 }
 
 impl RouterInput for NeighbourhoodShortcutsRouterInput<'_> {
+    fn ignore_automated_bollards(&self) -> bool {
+        self.ignore_automated_bollards
+    }
     fn roads_iter(&self) -> impl Iterator<Item = &Road> {
         self.neighbourhood
             .interior_roads

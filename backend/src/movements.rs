@@ -14,7 +14,7 @@ impl MapModel {
         let mut features = Vec::new();
 
         let intersection = self.get_i(i);
-        for (r1, r2) in intersection.allowed_movements(&self.router_input_after()) {
+        for (r1, r2) in intersection.allowed_movements(&self.router_input_after(false)) {
             let road1 = self.get_r(r1);
             let road2 = self.get_r(r2);
             let polygon = render_arrow(i, 0, road1, road2);

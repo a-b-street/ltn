@@ -62,7 +62,7 @@ impl Impact {
             );
             self.counts_before = map
                 .router_before
-                .od_to_counts(&map.router_input_before(), requests);
+                .od_to_counts(&map.router_input_before(false), requests);
         }
 
         if self.counts_after.is_empty() || fast_sample != self.last_fast_sample {
@@ -74,7 +74,7 @@ impl Impact {
                 .router_after
                 .as_ref()
                 .expect("need to rebuild_router")
-                .od_to_counts(&map.router_input_after(), requests);
+                .od_to_counts(&map.router_input_after(false), requests);
         }
         self.last_fast_sample = fast_sample;
 
@@ -123,8 +123,8 @@ impl Impact {
 
         let mut changed_paths = Vec::new();
 
-        let router_input_before = map.router_input_before();
-        let router_input_after = map.router_input_after();
+        let router_input_before = map.router_input_before(false);
+        let router_input_after = map.router_input_after(false);
         let router_after = map.router_after.as_ref().unwrap();
 
         // TODO We could remember the indices of requests that have changes

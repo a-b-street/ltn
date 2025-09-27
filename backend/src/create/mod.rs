@@ -145,7 +145,7 @@ pub fn create_from_osm(
     apply_turn_restrictions(&mut map, osm.turn_restrictions);
 
     info!("Creating the router");
-    let router_before = Router::new(&map.router_input_before(), 1.0);
+    let router_before = Router::new(&map.router_input_before(false), 1.0);
     map.router_before = router_before;
 
     Ok(map)

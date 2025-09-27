@@ -1,3 +1,5 @@
+import automatedBollardIconUrl from "../../assets/filters/automated_bollard_icon.gif?url";
+import automatedBollardImageUrl from "../../assets/filters/automated_bollard.gif?url";
 import busGateIconUrl from "../../assets/filters/bus_gate_icon.gif?url";
 import busGateImageUrl from "../../assets/filters/bus_gate.gif?url";
 import noEntryIconUrl from "../../assets/filters/no_entry_icon.gif?url";
@@ -46,6 +48,8 @@ export class ModalFilterType {
         return ModalFilterType.busGate;
       case "school_street":
         return ModalFilterType.schoolStreet;
+      case "automated_bollard":
+        return ModalFilterType.automatedBollard;
       default:
         console.assert(`unknown filter type: "${filterType}"`);
         return undefined;
@@ -80,11 +84,19 @@ export class ModalFilterType {
     schoolStreetImageUrl,
     schoolStreetIconUrl,
   );
+  static automatedBollard = new ModalFilterType(
+    "automated_bollard",
+    "Automated traffic bollard",
+    "A bollard that raises and lowers automatically. Residents, emergency vehicles, and other exemptions can pass through it.",
+    automatedBollardImageUrl,
+    automatedBollardIconUrl,
+  );
 
   static allTypes = [
     ModalFilterType.walkCycleOnly,
     ModalFilterType.noEntry,
     ModalFilterType.busGate,
     ModalFilterType.schoolStreet,
+    ModalFilterType.automatedBollard,
   ];
 }

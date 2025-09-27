@@ -12,6 +12,7 @@
     prettyPrintDistance,
     prettyPrintTime,
   } from "./common";
+  import { ModalFilterType } from "./common/ModalFilterType";
   import {
     CellLayer,
     HighlightBoundaryLayer,
@@ -22,6 +23,7 @@
   import {
     backend,
     ensurePointInVisibleBounds,
+    ignoreAutomatedBollards,
     mainRoadPenalty,
     mode,
     routePtA,
@@ -38,7 +40,12 @@
     prevMode == "neighbourhood" ? $backend!.renderNeighbourhood() : null;
 
   let gj = $derived(
-    $backend!.compareRoute($routePtA, $routePtB, $mainRoadPenalty),
+    $backend!.compareRoute(
+      $routePtA,
+      $routePtB,
+      $mainRoadPenalty,
+      $ignoreAutomatedBollards,
+    ),
   );
   let routeBefore = $derived(
     gj.features.find((f) => f.properties.kind == "before"),
@@ -111,6 +118,8 @@
       </p>
     {/if}
 
+    <hr />
+
     <label>
       Slow-down factor for main roads: {$mainRoadPenalty}
       <input
@@ -120,11 +129,24 @@
         max="5.0"
         step="0.1"
       />
+
+      <i>
+        Increase to see how drivers may detour in heavy traffic. 1 means
+        free-flow.
+      </i>
     </label>
-    <i>
-      Increase to see how drivers may detour in heavy traffic. 1 means
-      free-flow.
-    </i>
+
+    <hr />
+
+    <label>
+      <input type="checkbox" bind:checked={$ignoreAutomatedBollards} />
+      <img
+        src={ModalFilterType.automatedBollard.iconURL}
+        alt="Automated traffic bollard"
+        width="20"
+      />
+      Ignore automated traffic bollards (for residents and other exemptions)
+    </label>
   {/snippet}
 
   {#snippet main()}
