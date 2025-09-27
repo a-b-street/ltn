@@ -67,8 +67,6 @@ pub struct MapModel {
     pub undo_stack: Vec<Command>,
     #[serde(skip)]
     pub redo_stack: Vec<Command>,
-    // TODO Remove old field and regenerate files
-    pub reclassifications_in_progress: BTreeSet<RoadID>,
     pub boundaries: BTreeMap<String, NeighbourhoodBoundary>,
 
     // Only present in serialized MapModels
@@ -108,7 +106,7 @@ pub struct Road {
     pub way: osm_reader::WayID,
     pub linestring: LineString,
     pub tags: Tags,
-    pub speed_mph: usize,
+    pub speed_mph: f64,
 }
 
 impl fmt::Debug for Road {
@@ -1180,7 +1178,7 @@ impl Road {
     // How long does it take for a car following the speed limit to cross this road?
     pub fn cost_seconds(&self) -> f64 {
         let meters = Euclidean.length(&self.linestring);
-        let meters_per_second = (self.speed_mph as f64) * 0.44704;
+        let meters_per_second = self.speed_mph * 0.44704;
         meters / meters_per_second
     }
 
