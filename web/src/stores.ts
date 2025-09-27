@@ -198,7 +198,7 @@ export function ensurePointInVisibleBounds(point: Writable<LngLat>) {
 export function printSpeed(mph: number): string {
   if (get(useMetricUnits)) {
     let kph = Math.round(1.60934 * mph);
-    return `${kph} k/ph`;
+    return `${kph} km/h`;
   } else {
     return `${Math.round(mph)} mph`;
   }

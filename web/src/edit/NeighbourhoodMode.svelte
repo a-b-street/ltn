@@ -676,7 +676,7 @@
         <option value="cells">Cell</option>
         <option value="edits">Edits (either filter or direction)</option>
         <option value="speeds"
-          >Speed limit ({$useMetricUnits ? "k/ph" : "mph"})</option
+          >Speed limit ({$useMetricUnits ? "km/h" : "mph"})</option
         >
       </select>
     </label>
