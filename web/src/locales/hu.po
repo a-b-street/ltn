@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.919Z\n"
-"PO-Revision-Date: 2025-09-23T09:40:16.741Z\n"
+"PO-Revision-Date: 2025-09-27T10:26:36.905Z\n"
 "Last-Translator: \n"
 "Language: hu\n"
 "Language-Team: \n"
@@ -1852,25 +1852,11 @@ msgstr ""
 msgid "Table of Contents"
 msgstr ""
 
-#. placeholder {0}: props.shortcuts
-#. placeholder {1}: props.name ?? "unnamed road"
-#. placeholder {2}: Math.round(props.speed_mph)
-#. placeholder {0}: props.shortcuts
-#. placeholder {1}: props.name ?? "unnamed road"
-#. placeholder {2}: Math.round(props.speed_mph)
-#: src/edit/NeighbourhoodMode.svelte
-#: src/edit/ShowBeforeEdits.svelte
-msgid "{0} shortcuts through {1} ({2} mph)"
-msgstr ""
+#~ msgid "{0} shortcuts through {1} ({2} mph)"
+#~ msgstr ""
 
-#. placeholder {0}: props.name ?? "unnamed road"
-#. placeholder {1}: Math.round(props.speed_mph)
-#. placeholder {0}: props.name ?? "unnamed road"
-#. placeholder {1}: Math.round(props.speed_mph)
-#: src/edit/NeighbourhoodMode.svelte
-#: src/edit/ShowBeforeEdits.svelte
-msgid "Main road: {0} ({1} mph)"
-msgstr ""
+#~ msgid "Main road: {0} ({1} mph)"
+#~ msgstr ""
 
 #: src/edit/FreehandLine.svelte
 msgid "Feature"
@@ -2093,9 +2079,8 @@ msgstr ""
 msgid "Edits (either filter or direction)"
 msgstr ""
 
-#: src/edit/NeighbourhoodMode.svelte
-msgid "Speed limit"
-msgstr ""
+#~ msgid "Speed limit"
+#~ msgstr ""
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Neighbourhood stats"
@@ -2138,9 +2123,8 @@ msgstr ""
 #~ msgid "Language <0><0>English</0> <1>Français</1> <2>Magyar</2></0>"
 #~ msgstr ""
 
-#: src/common/LanguagePicker.svelte
-msgid "<0/> Language <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
-msgstr ""
+#~ msgid "<0/> Language <1><0>English</0> <1>Français</1> <2>Magyar</2></1>"
+#~ msgstr ""
 
 #: src/user_guide/Page.svelte
 msgid ""
@@ -2453,4 +2437,56 @@ msgid ""
 "You may want to try a few different proposals for an LTN. Each alternate\n"
 "proposal will be in its own project. From the main screen, you can\n"
 "quickly copy a project and switch between projects."
+msgstr ""
+
+#. placeholder {0}: $useMetricUnits ? "k/ph" : "mph"
+#: src/edit/NeighbourhoodMode.svelte
+msgid "Speed limit ({0})"
+msgstr ""
+
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
+#. placeholder {2}: printSpeed(props.speed_mph)
+#. placeholder {0}: props.shortcuts
+#. placeholder {1}: props.name ?? "unnamed road"
+#. placeholder {2}: printSpeed(props.speed_mph)
+#: src/edit/NeighbourhoodMode.svelte
+#: src/edit/ShowBeforeEdits.svelte
+msgid "{0} shortcuts through {1} ({2})"
+msgstr ""
+
+#. placeholder {0}: props.name ?? "unnamed road"
+#. placeholder {1}: printSpeed(props.speed_mph)
+#. placeholder {0}: props.name ?? "unnamed road"
+#. placeholder {1}: printSpeed(props.speed_mph)
+#: src/edit/NeighbourhoodMode.svelte
+#: src/edit/ShowBeforeEdits.svelte
+msgid "Main road: {0} ({1})"
+msgstr ""
+
+#~ msgid "Measurement units"
+#~ msgstr ""
+
+#: src/context/ContextualLayers.svelte
+msgid "Imperial (mph) <0/> Metric (km/h)"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "<0/> Language"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "English"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "Français"
+msgstr ""
+
+#: src/common/LanguagePicker.svelte
+msgid "Magyar"
+msgstr ""
+
+#: src/context/ContextualLayers.svelte
+msgid "Speed units"
 msgstr ""
