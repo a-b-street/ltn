@@ -56,13 +56,13 @@
     if (style == "speeds") {
       if ($useMetricUnits) {
         return makeRamp(
-          ["*", 1.60934, ["get", "speed_mph"]],
+          ["round", ["*", 1.60934, ["get", "speed_mph"]]],
           speedLimitsKPH,
           speedColorScale,
         ) as ExpressionSpecification;
       }
       return makeRamp(
-        ["get", "speed_mph"],
+        ["round", ["get", "speed_mph"]],
         speedLimitsMPH,
         speedColorScale,
       ) as ExpressionSpecification;
