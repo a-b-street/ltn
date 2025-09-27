@@ -16,10 +16,6 @@ npm ci
 npm run wasm-release
 npm run build --if-present
 
-# TODO Vite suddenly broke and I have no idea why. Hack around it.
-# new URL('backend_bg.wasm', import.meta.url) doesn't exist at build time, it will remain unchanged to be resolved at runtime
-ln -s assets/backend_bg.wasm dist/
-
 # Overwrite the global version of the app with the CNT deployment
 mv -f dist/cnt.html dist/index.html
 rm -f dist/england.html
