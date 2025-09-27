@@ -31,7 +31,7 @@ rm -f SG_IntermediateZone_Bdry_2011* SG_IntermediateZoneBdry_2011.zip
 ## Generating map model files
 
 ```
-mkdir -p ../../web/public/cnt/maps_v3
+mkdir -p ../../web/public/cnt/maps_v4
 
 cargo run --release -- \
   --study-area-boundaries boundaries.geojson \
@@ -39,5 +39,5 @@ cargo run --release -- \
   --od-zones zones.geojson \
   --od-csv od.csv \
   --scotland-context-data \
-  --out-dir ../../web/public/cnt/maps_v3/
+  --out-dir ../../web/public/cnt/maps_v4/
 ```

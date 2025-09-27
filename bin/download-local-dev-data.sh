@@ -22,10 +22,10 @@ cd "${APP_ROOT}/web/public"
 
 # Scotland specific data
 jq '.features[] | .properties.kind + "_" + .properties.name' ../../data_prep/scotland/boundaries.geojson | sed 's/"//g' | while read x; do
-    download_to_subdir cnt/maps_v3 "https://assets.cnt.scot/maps_v3/$x.bin.gz"
+    download_to_subdir cnt/maps_v4 "https://assets.cnt.scot/maps_v4/$x.bin.gz"
     # TODO These files should be served as .gz, but they are somehow getting decompressed
-    mv cnt/maps_v3/$x.bin.gz cnt/maps_v3/$x.bin
-    gzip cnt/maps_v3/$x.bin
+    mv cnt/maps_v4/$x.bin.gz cnt/maps_v4/$x.bin
+    gzip cnt/maps_v4/$x.bin
 done
 
 for x in bus_routes.pmtiles cbd.pmtiles population.pmtiles railways.geojson route_network.pmtiles stats19.pmtiles; do
