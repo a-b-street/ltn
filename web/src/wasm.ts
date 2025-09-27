@@ -273,6 +273,7 @@ export class Backend {
     pt1: LngLat,
     pt2: LngLat,
     mainRoadPenalty: number,
+    ignoreAutomatedBollards: boolean,
   ): CompareRoute {
     return JSON.parse(
       this.inner.compareRoute(
@@ -281,6 +282,7 @@ export class Backend {
         pt2.lng,
         pt2.lat,
         mainRoadPenalty,
+        ignoreAutomatedBollards,
       ),
     );
   }

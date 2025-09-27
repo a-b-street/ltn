@@ -217,6 +217,10 @@
                 url: ModalFilterType.schoolStreet.iconURL,
               },
               {
+                id: ModalFilterType.automatedBollard.filterType,
+                url: ModalFilterType.automatedBollard.iconURL,
+              },
+              {
                 id: "diagonal_filter",
                 url: diagonalUrl,
               },

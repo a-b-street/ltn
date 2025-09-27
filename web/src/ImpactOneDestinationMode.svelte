@@ -52,14 +52,17 @@
     if (!hovered) {
       return emptyGeojson() as CompareRoute;
     }
+    let mainRoadPenalty = 1.0;
+    let ignoreAutomatedBollards = false;
     return $backend!.compareRoute(
       new LngLat(hovered.properties!.pt1_x, hovered.properties!.pt1_y),
       $oneDestination,
-      1.0,
+      mainRoadPenalty,
+      ignoreAutomatedBollards,
     );
   }
 
-  function compareRoute(f: Feature) {
+  function checkOneRoute(f: Feature) {
     $routePtA = new LngLat(f.properties!.pt1_x, f.properties!.pt1_y);
     $routePtB = $oneDestination;
     $mode = { mode: "route", prevMode: "impact-one-destination" };
@@ -170,7 +173,7 @@
           "line-width": 5,
         }}
         manageHoverState
-        onclick={(e) => compareRoute(e.features[0])}
+        onclick={(e) => checkOneRoute(e.features[0])}
         bind:hovered
       >
         <Popup openOn="hover">

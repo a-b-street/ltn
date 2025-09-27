@@ -936,11 +936,18 @@ impl MapModel {
         Ok(())
     }
 
-    pub fn router_input_before(&self) -> impl RouterInput + use<'_> {
+    pub fn router_input_before(
+        &self,
+        ignore_automated_bollards: bool,
+    ) -> impl RouterInput + use<'_> {
         struct RouterInputBefore<'a> {
             map: &'a MapModel,
+            ignore_automated_bollards: bool,
         }
         impl RouterInput for RouterInputBefore<'_> {
+            fn ignore_automated_bollards(&self) -> bool {
+                self.ignore_automated_bollards
+            }
             fn roads_iter(&self) -> impl Iterator<Item = &Road> {
                 self.map.roads.iter()
             }
@@ -976,14 +983,24 @@ impl MapModel {
             }
         }
 
-        RouterInputBefore { map: self }
+        RouterInputBefore {
+            map: self,
+            ignore_automated_bollards,
+        }
     }
 
-    pub fn router_input_after(&self) -> impl RouterInput + use<'_> {
+    pub fn router_input_after(
+        &self,
+        ignore_automated_bollards: bool,
+    ) -> impl RouterInput + use<'_> {
         struct RouterInputAfter<'a> {
             map: &'a MapModel,
+            ignore_automated_bollards: bool,
         }
         impl RouterInput for RouterInputAfter<'_> {
+            fn ignore_automated_bollards(&self) -> bool {
+                self.ignore_automated_bollards
+            }
             fn roads_iter(&self) -> impl Iterator<Item = &Road> {
                 self.map.roads.iter()
             }
@@ -1015,46 +1032,73 @@ impl MapModel {
                 &self.map.turn_restrictions[i.0]
             }
         }
-        RouterInputAfter { map: self }
+        RouterInputAfter {
+            map: self,
+            ignore_automated_bollards,
+        }
     }
 
     // Lazily builds the router if needed.
-    pub fn rebuild_router(&mut self, main_road_penalty: f64) {
+    pub fn rebuild_router(&mut self, main_road_penalty: f64, ignore_automated_bollards: bool) {
         if self
             .router_before_with_penalty
             .as_ref()
-            .map(|r| r.main_road_penalty != main_road_penalty)
+            .map(|r| {
+                (r.main_road_penalty, r.ignore_automated_bollards)
+                    != (main_road_penalty, ignore_automated_bollards)
+            })
             .unwrap_or(true)
         {
-            let router_before_with_penalty =
-                if self.router_before.main_road_penalty == main_road_penalty {
-                    self.router_before.clone()
-                } else {
-                    Router::new(&self.router_input_before(), main_road_penalty)
-                };
+            let router_before_with_penalty = if self.router_before.main_road_penalty
+                == main_road_penalty
+                && self.router_before.ignore_automated_bollards == ignore_automated_bollards
+            {
+                self.router_before.clone()
+            } else {
+                Router::new(
+                    &self.router_input_before(ignore_automated_bollards),
+                    main_road_penalty,
+                )
+            };
             self.router_before_with_penalty = Some(router_before_with_penalty);
         }
 
         if self
             .router_after
             .as_ref()
-            .map(|r| r.main_road_penalty != main_road_penalty)
+            .map(|r| {
+                (r.main_road_penalty, r.ignore_automated_bollards)
+                    != (main_road_penalty, ignore_automated_bollards)
+            })
             .unwrap_or(true)
         {
-            let router_after = Router::new(&self.router_input_after(), main_road_penalty);
+            let router_after = Router::new(
+                &self.router_input_after(ignore_automated_bollards),
+                main_road_penalty,
+            );
             self.router_after = Some(router_after);
         }
     }
 
-    pub fn compare_route(&mut self, pt1: Coord, pt2: Coord, main_road_penalty: f64) -> GeoJson {
-        self.rebuild_router(main_road_penalty);
+    pub fn compare_route(
+        &mut self,
+        pt1: Coord,
+        pt2: Coord,
+        main_road_penalty: f64,
+        ignore_automated_bollards: bool,
+    ) -> GeoJson {
+        self.rebuild_router(main_road_penalty, ignore_automated_bollards);
 
         let mut features = Vec::new();
         if let Some(route) = self
             .router_before_with_penalty
             .as_ref()
             .unwrap()
-            .route_from_points(&self.router_input_before(), pt1, pt2)
+            .route_from_points(
+                &self.router_input_before(ignore_automated_bollards),
+                pt1,
+                pt2,
+            )
         {
             let (distance, time) = route.get_distance_and_time(self);
             let mut f = self.mercator.to_wgs84_gj(&route.to_linestring(self));
@@ -1064,7 +1108,7 @@ impl MapModel {
             features.push(f);
         }
         if let Some(route) = self.router_after.as_ref().unwrap().route_from_points(
-            &self.router_input_after(),
+            &self.router_input_after(ignore_automated_bollards),
             pt1,
             pt2,
         ) {
@@ -1083,11 +1127,13 @@ impl MapModel {
         pt2: Coord,
         from: Vec<RoadID>,
     ) -> FeatureCollection {
-        // main_road_penalty doesn't seem relevant for this question
-        self.rebuild_router(1.0);
+        // main_road_penalty doesn't seem relevant for this question. For now,
+        // ignore_automated_bollards is always false.
+        let ignore_automated_bollards = false;
+        self.rebuild_router(1.0, ignore_automated_bollards);
 
-        let router_input_before = self.router_input_before();
-        let router_input_after = self.router_input_after();
+        let router_input_before = self.router_input_before(ignore_automated_bollards);
+        let router_input_after = self.router_input_after(ignore_automated_bollards);
 
         // From every road, calculate the route before and after to the one destination
         let mut features = Vec::new();
@@ -1300,6 +1346,7 @@ pub enum FilterKind {
     NoEntry,
     BusGate,
     SchoolStreet,
+    AutomatedBollard,
     DiagonalFilter,
 }
 
@@ -1311,6 +1358,7 @@ impl FilterKind {
             Self::NoEntry => "no_entry",
             Self::BusGate => "bus_gate",
             Self::SchoolStreet => "school_street",
+            Self::AutomatedBollard => "automated_bollard",
             Self::DiagonalFilter => "diagonal_filter",
         }
     }
@@ -1321,6 +1369,7 @@ impl FilterKind {
             "no_entry" => Ok(Self::NoEntry),
             "bus_gate" => Ok(Self::BusGate),
             "school_street" => Ok(Self::SchoolStreet),
+            "automated_bollard" => Ok(Self::AutomatedBollard),
             "diagonal_filter" => Ok(Self::DiagonalFilter),
             _ => bail!("Invalid FilterKind: {x}"),
         }

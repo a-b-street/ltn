@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.919Z\n"
-"PO-Revision-Date: 2025-09-27T11:13:24.877Z\n"
+"PO-Revision-Date: 2025-09-27T14:35:21.748Z\n"
 "Last-Translator: \n"
 "Language: hu\n"
 "Language-Team: \n"
@@ -336,16 +336,13 @@ msgstr ""
 msgid "Drag markers for a route"
 msgstr ""
 
-#. placeholder {0}: $mainRoadPenalty
-#: src/RouteMode.svelte
-msgid "Slow-down factor for main roads: {0} <0/>"
-msgstr ""
+#~ msgid "Slow-down factor for main roads: {0} <0/>"
+#~ msgstr ""
 
-#: src/RouteMode.svelte
-msgid ""
-"Increase to see how drivers may detour in heavy traffic. 1 means\n"
-"free-flow."
-msgstr ""
+#~ msgid ""
+#~ "Increase to see how drivers may detour in heavy traffic. 1 means\n"
+#~ "free-flow."
+#~ msgstr ""
 
 #: src/ViewShortcutsMode.svelte
 msgid "No shortcuts here"
@@ -2489,4 +2486,30 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "Speed units"
+msgstr ""
+
+#. placeholder {0}: $mainRoadPenalty
+#: src/RouteMode.svelte
+msgid ""
+"Slow-down factor for main roads: {0} <0/> <1>Increase to see how drivers may detour in heavy traffic. 1 means\n"
+"free-flow.</1>"
+msgstr ""
+
+#~ msgid ""
+#~ "<0/> img\n"
+#~ "Ignore automated traffic bollards (for residents and other exemptions)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "<0/> url: ModalFilterType.automatedBollard.iconURL,\n"
+#~ "img\n"
+#~ "Ignore automated traffic bollards (for residents and other exemptions)"
+#~ msgstr ""
+
+#: src/RouteMode.svelte
+msgid "Automated traffic bollard"
+msgstr ""
+
+#: src/RouteMode.svelte
+msgid "<0/> <1/> Ignore automated traffic bollards (for residents and other exemptions)"
 msgstr ""

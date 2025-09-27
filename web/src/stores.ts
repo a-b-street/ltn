@@ -115,6 +115,7 @@ export let routePtA: Writable<LngLat> = writable(new LngLat(0, 0));
 export let routePtB: Writable<LngLat> = writable(new LngLat(0, 0));
 export let oneDestination: Writable<LngLat> = writable(new LngLat(0, 0));
 export let mainRoadPenalty: Writable<number> = writable(1.0);
+export let ignoreAutomatedBollards: Writable<boolean> = writable(false);
 // A way for different components to know when internal app state has changed
 // and they might need to rerender
 export let mutationCounter: Writable<number> = writable(1);

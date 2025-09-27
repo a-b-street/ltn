@@ -551,13 +551,17 @@ impl LTN {
         x2: f64,
         y2: f64,
         main_road_penalty: f64,
+        ignore_automated_bollards: bool,
     ) -> Result<String, JsValue> {
         let pt1 = self.map.mercator.pt_to_mercator(Coord { x: x1, y: y1 });
         let pt2 = self.map.mercator.pt_to_mercator(Coord { x: x2, y: y2 });
-        Ok(
-            serde_json::to_string(&self.map.compare_route(pt1, pt2, main_road_penalty))
-                .map_err(err_to_js)?,
-        )
+        Ok(serde_json::to_string(&self.map.compare_route(
+            pt1,
+            pt2,
+            main_road_penalty,
+            ignore_automated_bollards,
+        ))
+        .map_err(err_to_js)?)
     }
 
     /// Returns GJ with a LineString per interior road
@@ -576,7 +580,7 @@ impl LTN {
     /// Returns GJ with a LineString per road, with before/after counts
     #[wasm_bindgen(js_name = predictImpact)]
     pub fn predict_impact(&mut self, fast_sample: bool) -> Result<String, JsValue> {
-        self.map.rebuild_router(1.0);
+        self.map.rebuild_router(1.0, false);
         let mut impact = self.map.impact.take().unwrap();
         let out = impact.recalculate(&self.map, fast_sample);
         self.map.impact = Some(impact);
