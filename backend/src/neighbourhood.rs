@@ -5,8 +5,8 @@ use crate::geo_helpers::{
 };
 use anyhow::Result;
 use geo::{
-    Coord, CoordNum, Euclidean, Length, LineString, MapCoordsInPlace, MultiLineString, Point,
-    Polygon, Simplify,
+    BooleanOps, Coord, CoordNum, Euclidean, Length, LineString, MapCoordsInPlace, MultiLineString,
+    Point, Polygon, Simplify,
 };
 use geojson::{Feature, FeatureCollection};
 use rstar::{primitives::GeomWithData, RTree};
@@ -15,7 +15,7 @@ use utils::{aabb, Mercator};
 use web_time::Instant;
 
 use crate::boundary_stats::{BoundaryStats, PreparedContextData};
-use crate::geo_helpers::{buffer_aabb, clip_linestring_to_polygon};
+use crate::geo_helpers::buffer_aabb;
 use crate::map_model::DiagonalFilter;
 use crate::render_cells::Color;
 use crate::route::RouterInput;
@@ -496,10 +496,8 @@ impl Neighbourhood {
 }
 
 fn is_road_mostly_inside(line_string: &LineString, polygon: &Polygon) -> bool {
-    let clipped = {
-        let fragments = clip_linestring_to_polygon(line_string, polygon);
-        MultiLineString(fragments)
-    };
+    let invert = false;
+    let clipped = polygon.clip(&MultiLineString(vec![line_string.clone()]), invert);
     let ratio_inside = Euclidean.length(&clipped) / Euclidean.length(line_string);
     ratio_inside > 0.99
 }
