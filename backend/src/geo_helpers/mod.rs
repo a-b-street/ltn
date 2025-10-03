@@ -1,6 +1,3 @@
-mod slice_nearest_boundary;
-pub use slice_nearest_boundary::SliceNearestFrechetBoundary;
-
 use anyhow::Result;
 use geo::line_measures::InterpolatableLine;
 use geo::{
