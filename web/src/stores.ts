@@ -127,6 +127,8 @@ export let maptilerBasemap: Writable<string> = writable("streets-v2");
 export let currentFilterType: Writable<string> = writable("walk_cycle_only");
 export let animateShortcuts = writable(false);
 export let drawBorderEntries = writable(true);
+// This default value must match the backend
+export let hideUnimportantCells = writable(false);
 export let showExistingFiltersAndTRs = writable(true);
 export let roadStyle: Writable<"shortcuts" | "cells" | "edits" | "speeds"> =
   writable("shortcuts");

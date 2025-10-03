@@ -11,6 +11,8 @@ pub struct Cell {
     pub roads: BTreeMap<RoadID, PercentInterval>,
     /// Intersections where this cell touches the boundary of the neighbourhood.
     pub border_intersections: BTreeSet<IntersectionID>,
+    /// The cell only contains service roads and can be visually de-emphasized
+    pub unimportant: bool,
 }
 
 impl Cell {
@@ -56,6 +58,7 @@ impl Cell {
                 let mut cell = Cell {
                     roads: BTreeMap::new(),
                     border_intersections: BTreeSet::from([road.src_i]),
+                    unimportant: false,
                 };
                 cell.roads.insert(
                     road.id,
@@ -70,6 +73,7 @@ impl Cell {
                 let mut cell = Cell {
                     roads: BTreeMap::new(),
                     border_intersections: BTreeSet::from([road.dst_i]),
+                    unimportant: false,
                 };
                 cell.roads.insert(
                     road.id,
@@ -162,9 +166,8 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
                     continue;
                 }
 
-                // TODO This happens near weird geometry. This is OK, but should root-cause it.
+                // TODO This happens near weird geometry. This is OK, but should someday root-cause it.
                 if !neighbourhood.interior_roads.contains(next) {
-                    error!("A cell leaked out to {next} from {i}");
                     continue;
                 }
 
@@ -173,9 +176,18 @@ fn floodfill(map: &MapModel, start: RoadID, neighbourhood: &Neighbourhood) -> Ce
         }
     }
 
+    let unimportant = if map.hide_unimportant_cells {
+        visited_roads
+            .keys()
+            .all(|r| map.get_r(*r).tags.is("highway", "service"))
+    } else {
+        false
+    };
+
     Cell {
         roads: visited_roads,
         border_intersections: cell_borders,
+        unimportant,
     }
 }
 

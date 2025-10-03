@@ -464,6 +464,11 @@ impl Neighbourhood {
                 return None;
             }
 
+            // If the cell is unimportant (only service roads), also skip the arrow.
+            if derived.render_cells.unimportant_roads.contains(r) {
+                return None;
+            }
+
             // Find the angle pointing into the neighbourhood
             let road = map.get_r(*r);
             let bearing_upon_entry = if road.src_i == i {

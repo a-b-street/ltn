@@ -553,6 +553,13 @@
             target="_blank">details</a
           >)
         </li>
+        <li>
+          3 October 2025 - allow small cells with service roads to be hidden
+          (see <a
+            href="https://github.com/a-b-street/ltn/pull/428"
+            target="_blank">details</a
+          >)
+        </li>
       </ul>
 
       <h3 id="credits">Credits</h3>

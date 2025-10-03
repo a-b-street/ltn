@@ -62,6 +62,7 @@
     currentFilterType,
     devMode,
     drawBorderEntries,
+    hideUnimportantCells,
     map,
     mode,
     mutationCounter,
@@ -311,7 +312,9 @@
   let shortcutDescriptionText =
     "Shortcuts are routes from one main road to another, which cut through the neighborhood's interior.";
   let cellsDescriptionText =
-    "Cells are the colored area reachable without travelling along a main road.";
+    "Cells are the coloured area reachable without travelling along a main road.";
+  let unimportantCellsText =
+    "Hide the coloured areas only containing small service roads.";
 
   let turnRestrictionUrls: Record<any, string> = {
     left: noLeftUrl,
@@ -352,6 +355,11 @@
         f.properties.cell_color == "disconnected",
     ).length,
   );
+
+  function changeUnimportantCells() {
+    $backend!.setHideUnimportantCells($hideUnimportantCells);
+    $mutationCounter++;
+  }
 </script>
 
 <svelte:window onkeydown={onKeyDown} />
@@ -653,6 +661,18 @@
       Show entries into cells<span
         class="footnote-ref"
         data-tippy-content={cellsDescriptionText}>2</span
+      >
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        bind:checked={$hideUnimportantCells}
+        onchange={changeUnimportantCells}
+      />
+      Hide small cells<span
+        class="footnote-ref"
+        data-tippy-content={unimportantCellsText}>3</span
       >
     </label>
 

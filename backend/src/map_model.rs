@@ -77,6 +77,9 @@ pub struct MapModel {
 
     // Only present after finish_loading
     pub project_details: Option<ProjectDetails>,
+
+    #[serde(skip)]
+    pub hide_unimportant_cells: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
