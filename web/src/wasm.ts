@@ -356,6 +356,10 @@ export class Backend {
     }
     return null;
   }
+
+  setHideUnimportantCells(hide: boolean) {
+    this.inner.setHideUnimportantCells(hide);
+  }
 }
 
 export type Impact = FeatureCollection<

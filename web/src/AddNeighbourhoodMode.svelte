@@ -363,7 +363,7 @@
         {:else}
           <span style="text-align:center;">
             {#if addMode == "choose-area"}
-              Empty so far. Click a colored area to get started.
+              Empty so far. Click a coloured area to get started.
             {:else if addMode == "draw-area"}
               {#if waypoints.length < 3}
                 Empty so far. Click the map to add points around your

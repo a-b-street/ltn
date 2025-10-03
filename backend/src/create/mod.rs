@@ -127,6 +127,7 @@ pub fn create_from_osm(
         boundaries: BTreeMap::new(),
         serialized_context_data,
         context_data: None,
+        hide_unimportant_cells: false,
     };
     if let Some(mut demand) = demand {
         info!("Load demand data");

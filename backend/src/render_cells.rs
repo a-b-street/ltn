@@ -53,6 +53,8 @@ pub struct RenderCells {
     /// Each road belongs to one or more cells; arbitrarily pick one of those cells and put its
     /// color here
     pub colors_per_road: HashMap<RoadID, Color>,
+    /// Roads belonging to an unimportant cell
+    pub unimportant_roads: HashSet<RoadID>,
 }
 
 impl RenderCells {
@@ -70,9 +72,15 @@ impl RenderCells {
             None,
         );
 
+        let mut unimportant_roads = HashSet::new();
+
         // Initially fill out the grid based on the roads in each cell
         let mut warn_leak = true;
         for (cell_idx, cell) in cells.iter().enumerate() {
+            if cell.unimportant {
+                unimportant_roads.extend(cell.roads.keys().cloned());
+                continue;
+            }
             for (r, interval) in &cell.roads {
                 let road = map.get_r(*r);
                 let slice = slice_linestring(&road.linestring, interval.start, interval.end);
@@ -143,34 +151,39 @@ impl RenderCells {
             }
         }
 
+        let mut result = RenderCells {
+            polygons_per_cell: Vec::new(),
+            colors: Vec::new(),
+            colors_per_border: HashMap::new(),
+            colors_per_road: HashMap::new(),
+            unimportant_roads,
+        };
+
         if true {
             finalize(
+                &mut result,
                 grid,
                 cells,
                 cell_colors,
                 bounds,
                 &MultiPolygon::new(vec![boundary_polygon]),
-            )
+            );
         } else {
-            debug_grid(grid, cells, cell_colors, bounds)
+            debug_grid(&mut result, grid, cells, cell_colors, bounds);
         }
+
+        result
     }
 }
 
 fn finalize(
+    result: &mut RenderCells,
     main_grid: Grid<Option<usize>>,
     cells: &Vec<Cell>,
     cell_colors: Vec<Color>,
     bounds: Rect,
     boundary: &MultiPolygon,
-) -> RenderCells {
-    let mut result = RenderCells {
-        polygons_per_cell: Vec::new(),
-        colors: Vec::new(),
-        colors_per_border: HashMap::new(),
-        colors_per_road: HashMap::new(),
-    };
-
+) {
     for (idx, color) in cell_colors.into_iter().enumerate() {
         // contour will find where the grid is >= a threshold value. The main grid has one
         // number per cell, so we can't directly use it -- the area >= some cell index is
@@ -227,23 +240,15 @@ fn finalize(
             result.colors_per_road.insert(*r, color);
         }
     }
-
-    result
 }
 
 fn debug_grid(
+    result: &mut RenderCells,
     grid: Grid<Option<usize>>,
     cells: &Vec<Cell>,
     cell_colors: Vec<Color>,
     bounds: Rect,
-) -> RenderCells {
-    let mut result = RenderCells {
-        polygons_per_cell: Vec::new(),
-        colors: Vec::new(),
-        colors_per_border: HashMap::new(),
-        colors_per_road: HashMap::new(),
-    };
-
+) {
     for (idx, color) in cell_colors.into_iter().enumerate() {
         let mut squares = Vec::new();
         for x in 0..grid.width {
@@ -277,8 +282,6 @@ fn debug_grid(
             result.colors_per_road.insert(*r, color);
         }
     }
-
-    result
 }
 
 /// Returns a set of adjacent indices. The pairs are symmetric -- (x, y) and (y, x) will both be

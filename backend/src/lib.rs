@@ -662,6 +662,12 @@ impl LTN {
         self.map.osm_timestamp
     }
 
+    #[wasm_bindgen(js_name = setHideUnimportantCells)]
+    pub fn set_hide_unimportant_cells(&mut self, value: bool) {
+        self.map.hide_unimportant_cells = value;
+        self.after_edit();
+    }
+
     // TODO This is also internal to MapModel. But not sure who should own Neighbourhood or how to
     // plumb, so duplicting here.
     fn after_edit(&mut self) {
