@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Copy, FileDown, Pencil, Trash2 } from "lucide-svelte";
   import type { LngLatBoundsLike } from "maplibre-gl";
+  import { untrack } from "svelte";
   import { SplitComponent } from "svelte-utils/top_bar_layout";
   import cntBoundariesUrl from "../../assets/cnt_boundaries.geojson?url";
   import englandBoundariesUrl from "../../assets/england_boundaries.geojson?url";
@@ -29,46 +30,47 @@
   import { loadingMessage, loadingProgress, loadProject } from "./loader";
   import LoadSavedProject from "./LoadSavedProject.svelte";
 
-  interface Props {
-    wasmReady: boolean;
-  }
-
-  let { wasmReady }: Props = $props();
+  let { wasmReady }: { wasmReady: boolean } = $props();
 
   // When other modes reset here, they can't clear state without a race condition
-  {
-    $backend = null;
-    $routeTool = null;
-    $currentProjectID = undefined;
+  $backend = null;
+  $routeTool = null;
+  $currentProjectID = undefined;
 
-    if ($firstTimeLoadProjectFromURL) {
-      let params = new URLSearchParams(window.location.search);
-      let projectID = params.get("project") as ProjectID;
-      if (projectID) {
-        loadProjectFromUrlParam(projectID);
-      }
-      $firstTimeLoadProjectFromURL = false;
-    } else {
-      // Update the URL
-      let url = new URL(window.location.href);
-      url.searchParams.delete("project");
-      window.history.replaceState(null, "", url.toString());
-    }
-  }
+  $effect(() => {
+    // If we're loading a project from URL, we need to wait for the WASM module
+    // to be loaded. The project loading touches lots of state, so use
+    // untrack to only run on wasmReady.
+    if (wasmReady) {
+      untrack(() => {
+        if ($firstTimeLoadProjectFromURL) {
+          let params = new URLSearchParams(window.location.search);
+          let projectID = params.get("project") as ProjectID;
+          if (projectID) {
+            loadProjectFromUrlParam(projectID);
+          }
+          $firstTimeLoadProjectFromURL = false;
+        } else {
+          // Update the URL
+          let url = new URL(window.location.href);
+          url.searchParams.delete("project");
+          window.history.replaceState(null, "", url.toString());
+        }
 
-  {
-    // The App component intiailizes the map to the proper zoom,
-    // so no need to redundantly do it here for the first load.
-    if ($map && !$firstTimeLoadProjectFromURL) {
-      let bounds = [-180, -90, 180, 90] as LngLatBoundsLike;
-      if ($appFocus == "cnt") {
-        bounds = [-8.943, 54.631, -0.901, 59.489];
-      } else if ($appFocus == "england") {
-        bounds = [-5.96, 49.89, 2.31, 55.94];
-      }
-      $map.fitBounds(bounds, { duration: 500 });
+        // The App component intiailizes the map to the proper zoom,
+        // so no need to redundantly do it here for the first load.
+        if ($map && !$firstTimeLoadProjectFromURL) {
+          let bounds = [-180, -90, 180, 90] as LngLatBoundsLike;
+          if ($appFocus == "cnt") {
+            bounds = [-8.943, 54.631, -0.901, 59.489];
+          } else if ($appFocus == "england") {
+            bounds = [-5.96, 49.89, 2.31, 55.94];
+          }
+          $map.fitBounds(bounds, { duration: 500 });
+        }
+      });
     }
-  }
+  });
 
   let studyAreas = $state($projectStorage.studyAreaProjects());
 
