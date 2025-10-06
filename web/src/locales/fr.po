@@ -938,11 +938,11 @@ msgstr ""
 #: src/context/ContextualLayers.svelte
 #: src/context/ContextualLayers.svelte
 msgid "Layers"
-msgstr ""
+msgstr "Couches"
 
 #: src/context/ContextualLayers.svelte
 msgid "Existing modal filters and turn restrictions"
-msgstr ""
+msgstr "Filtres modaux et interdictions de tourner existants"
 
 #: src/context/ContextualLayers.svelte
 msgid "Metrics"
@@ -957,7 +957,7 @@ msgid "Active travel"
 msgstr ""
 
 #: src/context/ContextualLayers.svelte
-msgid "Basemap"
+msgid "Carte"
 msgstr ""
 
 #: src/context/ContextualLayers.svelte
@@ -978,7 +978,7 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "Debugging tools"
-msgstr ""
+msgstr "Outils de débogage"
 
 #: src/context/POIs.svelte
 msgid "POIs"
@@ -1248,7 +1248,7 @@ msgstr ""
 
 #: src/prioritization/PrioritizationSelect.svelte
 msgid "Area"
-msgstr ""
+msgstr "Surface"
 
 #: src/prioritization/PrioritizationSelect.svelte
 msgid "Points of interest"
@@ -2455,7 +2455,7 @@ msgstr ""
 #. placeholder {0}: $useMetricUnits ? "km/h" : "mph"
 #: src/edit/NeighbourhoodMode.svelte
 msgid "Speed limit ({0})"
-msgstr ""
+msgstr "Limitations de vitesse ({0})"
 
 #. placeholder {0}: props.shortcuts
 #. placeholder {1}: props.name ?? "unnamed road"
@@ -2482,7 +2482,7 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "Imperial (mph) <0/> Metric (km/h)"
-msgstr ""
+msgstr "Impériale (mph) <0/> Métrique (km/h)"
 
 #: src/common/LanguagePicker.svelte
 msgid "<0/> Language"
@@ -2502,12 +2502,12 @@ msgstr ""
 
 #: src/context/ContextualLayers.svelte
 msgid "Speed units"
-msgstr ""
+msgstr "Unités de vitesse"
 
 #: src/edit/NeighbourhoodMode.svelte
 msgid "<0/> Hide small cells<1>3</1>"
-msgstr ""
+msgstr "<0/> Masquer les petites cellules<1>3</1>"
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Empty so far. Click a coloured area to get started."
-msgstr ""
+msgstr "Pour l'instant vide. Cliquez sur une zone colorée pour commencer."
