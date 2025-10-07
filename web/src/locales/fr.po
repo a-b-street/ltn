@@ -957,8 +957,8 @@ msgid "Active travel"
 msgstr ""
 
 #: src/context/ContextualLayers.svelte
-msgid "Carte"
-msgstr ""
+msgid "Basemap"
+msgstr "Carte"
 
 #: src/context/ContextualLayers.svelte
 msgid "MapTiler Dataviz"
