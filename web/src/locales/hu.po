@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-30T11:22:11.919Z\n"
-"PO-Revision-Date: 2025-10-03T10:09:05.456Z\n"
+"PO-Revision-Date: 2025-10-07T10:06:23.436Z\n"
 "Last-Translator: \n"
 "Language: hu\n"
 "Language-Team: \n"
@@ -2496,4 +2496,10 @@ msgstr ""
 
 #: src/AddNeighbourhoodMode.svelte
 msgid "Empty so far. Click a coloured area to get started."
+msgstr ""
+
+#: src/user_guide/Page.svelte
+msgid ""
+"3 October 2025 - allow small cells with service roads to be hidden\n"
+"(see <0>details</0>)"
 msgstr ""

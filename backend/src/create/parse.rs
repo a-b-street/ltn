@@ -41,7 +41,11 @@ impl OsmReader for Osm {
         if node_ids.len() < 2 {
             return;
         }
-        if tags.has("railway") && (!tags.has("layer") || tags.is("layer", "0")) {
+        // Trams, platforms, and railways above/below ground don't act as severances
+        if tags.has("railway")
+            && (!tags.has("layer") || tags.is("layer", "0"))
+            && !tags.is_any("railway", vec!["platform", "tram"])
+        {
             self.railways.push(LineString(
                 node_ids.into_iter().map(|n| node_mapping[&n]).collect(),
             ));
