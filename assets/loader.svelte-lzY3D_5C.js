@@ -368,5 +368,5 @@ Sharepoint, or otherwise transfer to somebody else. At the bottom of the
 very first Choose Project screen, you can then load this project from
 its file:`,`You may want to try a few different proposals for an LTN. Each alternate
 proposal will be in its own project. From the main screen, you can
-quickly copy a project and switch between projects.`,"Measurement units",["Imperial (mph) ",[0]," Metric (km/h)"],["Speed limit (",0,")"],[0," shortcuts through ",1," (",2,")"],["Main road: ",0," (",1,")"],[[0]," Language"],"English","Français","Magyar","Speed units",[[0]," Hide small cells",[1,"3"]],"Empty so far. Click a coloured area to get started.",null,[`3 October 2025 - allow small cells with service roads to be hidden
+quickly copy a project and switch between projects.`,"Measurement units",["Imperial (mph) ",[0]," Metric (km/h)"],["Speed limit (",0,")"],[0," shortcuts through ",1," (",2,")"],["Main road: ",0," (",1,")"],[[0]," Language"],"English","Français","Magyar","Speed units",[[0]," Hide small cells",[1,"3"]],"Empty so far. Click a coloured area to get started.",[`3 October 2025 - allow small cells with service roads to be hidden
 (see `,[0,"details"],")"]];export{e as c};
