@@ -89,6 +89,18 @@ impl MapModel {
                 return vec![];
             };
             let relevant_splitters = severance_rtree.locate_in_envelope_intersecting(&envelope);
+
+            let mut fc = Vec::new();
+            fc.push(self.mercator.to_wgs84_gj(&boundary_polygon));
+            for x in severance_rtree.locate_in_envelope_intersecting(&envelope) {
+                fc.push(self.mercator.to_wgs84_gj(x));
+            }
+            utils::download_string(
+                &serde_json::to_string(&geojson::GeoJson::from(fc)).unwrap(),
+                "debug.geojson",
+            )
+            .unwrap();
+
             split_polygon(&boundary_polygon, relevant_splitters)
         }) {
             let area_km_2 = polygon.unsigned_area() / 1000. / 1000.;
