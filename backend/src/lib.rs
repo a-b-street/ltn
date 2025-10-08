@@ -37,6 +37,7 @@ mod render_cells;
 mod route;
 mod route_snapper;
 mod shortcuts;
+mod traffic;
 // TODO: We could hide this behind a feature flag - it's used by both tests and benches
 pub mod test_fixtures;
 #[cfg(test)]
@@ -623,6 +624,11 @@ impl LTN {
                 .collect::<Vec<_>>(),
         ))
         .map_err(err_to_js)?)
+    }
+
+    #[wasm_bindgen(js_name = getAllTrafficPredictions)]
+    pub fn get_all_traffic_predictions(&self) -> Result<String, JsValue> {
+        self.map.get_all_traffic_predictions().map_err(err_to_js)
     }
 
     #[wasm_bindgen(js_name = getMovements)]

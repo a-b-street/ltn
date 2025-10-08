@@ -172,6 +172,9 @@
               <ModeLink mode={{ mode: "debug-intersections" }} />
             </li>
           {/if}
+          <li>
+            <ModeLink mode={{ mode: "debug-traffic" }} />
+          </li>
         </ul>
       </nav>
     </div>

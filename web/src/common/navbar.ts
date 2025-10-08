@@ -27,6 +27,8 @@ export function pageTitle(mode: Mode["mode"]): string {
       return "Impact detail";
     case "debug-intersections":
       return "Debug intersections";
+    case "debug-traffic":
+      return "Debug traffic";
     case "debug-neighbourhood":
       return "Debug neighbourhood";
     case "debug-demand":

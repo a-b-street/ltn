@@ -47,6 +47,7 @@
   import DebugDemandMode from "./DebugDemandMode.svelte";
   import DebugIntersectionsMode from "./DebugIntersectionsMode.svelte";
   import DebugNeighbourhoodMode from "./DebugNeighbourhoodMode.svelte";
+  import DebugTrafficMode from "./DebugTrafficMode.svelte";
   import NeighbourhoodMode from "./edit/NeighbourhoodMode.svelte";
   import ImpactDetailMode from "./ImpactDetailMode.svelte";
   import ImpactOneDestinationMode from "./ImpactOneDestinationMode.svelte";
@@ -328,6 +329,8 @@
                 <DebugNeighbourhoodMode />
               {:else if $mode.mode == "debug-intersections"}
                 <DebugIntersectionsMode />
+              {:else if $mode.mode == "debug-traffic"}
+                <DebugTrafficMode />
               {:else if $mode.mode == "debug-demand"}
                 <DebugDemandMode />
               {/if}

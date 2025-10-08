@@ -71,6 +71,9 @@ export type Mode =
     }
   | {
       mode: "debug-demand";
+    }
+  | {
+      mode: "debug-traffic";
     };
 
 export type AppFocus = "global" | "cnt" | "england";

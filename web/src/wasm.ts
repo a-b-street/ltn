@@ -319,6 +319,13 @@ export class Backend {
     return JSON.parse(this.inner.getAllIntersections());
   }
 
+  getAllTrafficPredictions(): FeatureCollection<
+    LineString,
+    { kind: "low" | "medium" | "high" }
+  > {
+    return JSON.parse(this.inner.getAllTrafficPredictions());
+  }
+
   getMovements(intersection: number): FeatureCollection<Polygon> {
     return JSON.parse(this.inner.getMovements(intersection));
   }

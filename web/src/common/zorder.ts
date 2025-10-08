@@ -131,6 +131,8 @@ const layerZorder = [
   "debug-demand-fill",
   "debug-demand-outline",
 
+  "debug-traffic",
+
   "one-ways",
   "before-edits-one-ways",
 
