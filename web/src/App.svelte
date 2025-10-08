@@ -82,16 +82,18 @@
   onMount(async () => {
     await backendPkg.default();
     await routeSnapperPkg.default();
-    wasmReady = true;
 
     // When running locally if a vite public/ directory is set up, load from that for speed
     try {
       let resp = await fetch("/severance_pbfs/areas.json");
-      if (resp.ok) {
-        $useLocalVite = true;
-        console.log("Using local asset files");
-      }
+      // Vite locally returns index.html instead of 404, so actually check if this file appears correct
+      await resp.json();
+      $useLocalVite = true;
+      console.log("Using local asset files");
     } catch (err) {}
+
+    // Also block loading projects until we know whether to use local or remote assets
+    wasmReady = true;
   });
 
   let map: Map | undefined = $state();
