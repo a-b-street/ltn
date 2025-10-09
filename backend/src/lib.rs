@@ -191,7 +191,14 @@ impl LTN {
 
     #[wasm_bindgen(js_name = generatedBoundaries)]
     pub fn generated_boundaries(&self) -> Result<String, JsValue> {
-        Ok(serde_json::to_string(&self.map.generated_boundaries()).map_err(err_to_js)?)
+        let gj = GeoJson::from(
+            self.map
+                .generated_boundaries()
+                .into_iter()
+                .map(|boundary| boundary.to_feature(&self.map))
+                .collect::<Vec<_>>(),
+        );
+        Ok(serde_json::to_string(&gj).map_err(err_to_js)?)
     }
 
     /// `boundaries_to_merge`: FeatureCollection of Polygon geometries.

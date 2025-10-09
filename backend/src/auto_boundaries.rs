@@ -3,14 +3,13 @@ use crate::geo_helpers::buffer_polygon;
 use crate::{MapModel, NeighbourhoodBoundary, NeighbourhoodDefinition};
 use anyhow::Result;
 use geo::{Area, BoundingRect, LineString, MultiPolygon, Polygon, Relate};
-use geojson::{Feature, FeatureCollection};
+use geojson::Feature;
 use rstar::RTree;
 use serde::{Deserialize, Serialize};
 use utils::split_polygon;
 
 impl MapModel {
-    pub fn generated_boundaries(&self) -> FeatureCollection {
-        let mut features = Vec::new();
+    pub fn generated_boundaries(&self) -> Vec<GeneratedBoundary> {
         let splitters = self
             .roads
             .iter()
@@ -71,6 +70,7 @@ impl MapModel {
         let severance_rtree = RTree::bulk_load(splitters.cloned().collect());
         let multiple_boundary_polygons = boundary_mercator.0.len() > 1;
 
+        let mut boundaries = Vec::new();
         for polygon in boundary_mercator.into_iter().flat_map(|boundary_polygon| {
             if multiple_boundary_polygons {
                 let area_km_2 = boundary_polygon.unsigned_area() / 1000. / 1000.;
@@ -126,14 +126,10 @@ impl MapModel {
                 boundary_stats,
             };
 
-            features.push(generated_boundary.to_feature(self));
+            boundaries.push(generated_boundary);
         }
 
-        FeatureCollection {
-            features,
-            bbox: None,
-            foreign_members: None,
-        }
+        boundaries
     }
 
     pub fn generate_merged_boundary(
