@@ -194,6 +194,7 @@
           <MapLibre
             {style}
             hash
+            preserveDrawingBuffer={true}
             bind:map
             bind:loaded
             bounds={initialBounds}

@@ -15,6 +15,7 @@
   import POIs from "./POIs.svelte";
   import Population from "./Population.svelte";
   import RailwayStations from "./RailwayStations.svelte";
+  import Screenshotter from "./Screenshotter.svelte";
   import Stats19 from "./Stats19.svelte";
 
   let expand = $state(false);
@@ -92,6 +93,8 @@
         </label>
 
         <ContextLayerButton label="Debugging tools" bind:show={$devMode} />
+
+        <Screenshotter />
       </div>
     </div>
   </div>
