@@ -364,4 +364,5 @@ very first Choose Project screen, you can then load this project from
 its file:`,`You may want to try a few different proposals for an LTN. Each alternate
 proposal will be in its own project. From the main screen, you can
 quickly copy a project and switch between projects.`,"Measurement units",["Impériale (mph) ",[0]," Métrique (km/h)"],["Limitations de vitesse (",0,")"],[0," shortcuts through ",1," (",2,")"],["Main road: ",0," (",1,")"],[[0]," Language"],"English","Français","Magyar","Unités de vitesse",[[0]," Masquer les petites cellules",[1,"3"]],"Pour l'instant vide. Cliquez sur une zone colorée pour commencer.",[`3 October 2025 - allow small cells with service roads to be hidden
-(see `,[0,"details"],")"]];export{e as c};
+(see `,[0,"details"],")"],`13 October 2025 - fix for animated shortcuts when showing the LTN
+before edits`];export{e as c};
