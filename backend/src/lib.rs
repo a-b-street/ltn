@@ -505,10 +505,13 @@ impl LTN {
     #[wasm_bindgen(js_name = getAllShortcutsBeforeEdits)]
     pub fn get_all_shortcuts_before_edits(&mut self) -> Result<String, JsValue> {
         self.run_before_edits(|ltn| {
-            let derived = ltn
-                .neighbourhood
-                .as_ref()
-                .expect("no neighbourhood")
+            let Some(name) = ltn.neighbourhood.as_ref().map(|n| n.name()) else {
+                return Err("no current neighbourhood".into());
+            };
+            let boundary = ltn.map.boundaries.get(name).unwrap();
+            let neighbourhood =
+                Neighbourhood::new(&ltn.map, boundary.clone()).map_err(err_to_js)?;
+            let derived = neighbourhood
                 .derived
                 .as_ref()
                 .expect("neighbourhood has no derived state yet");

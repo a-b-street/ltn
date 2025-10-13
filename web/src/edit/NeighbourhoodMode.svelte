@@ -122,7 +122,7 @@
   );
 
   let allShortcuts = $state(emptyGeojson() as AllShortcuts);
-  let lastShortcutCalculation = $state(0);
+  let lastShortcutCalculation = $state([0, $showBeforeEdits]);
 
   onMount(() => {
     initTooltips();
@@ -137,12 +137,22 @@
     saveCurrentProject();
   }
 
-  function recalculateShortcuts(_x: number, animate: boolean) {
-    if ($mutationCounter == lastShortcutCalculation || !animate) {
+  function recalculateShortcuts(
+    _x: number,
+    animate: boolean,
+    showBefore: boolean,
+  ) {
+    let cacheKey = [$mutationCounter, showBefore];
+    if (
+      JSON.stringify(cacheKey) == JSON.stringify(lastShortcutCalculation) ||
+      !animate
+    ) {
       return;
     }
-    allShortcuts = $backend!.getAllShortcuts();
-    lastShortcutCalculation = $mutationCounter;
+    allShortcuts = showBefore
+      ? $backend!.getAllShortcutsBeforeEdits()
+      : $backend!.getAllShortcuts();
+    lastShortcutCalculation = cacheKey;
   }
 
   function onClickLine(f: Feature, pt: LngLat) {
@@ -346,7 +356,7 @@
     rerender($mutationCounter);
   });
   $effect(() => {
-    recalculateShortcuts($mutationCounter, $animateShortcuts);
+    recalculateShortcuts($mutationCounter, $animateShortcuts, $showBeforeEdits);
   });
   let numDisconnectedCells = $derived(
     gj.features.filter(
@@ -773,7 +783,7 @@
       />
     </GeoJSON>
 
-    {#if $animateShortcuts && $mutationCounter == lastShortcutCalculation}
+    {#if $animateShortcuts && JSON.stringify( [$mutationCounter, $showBeforeEdits], ) == JSON.stringify(lastShortcutCalculation)}
       <AnimatePaths paths={allShortcuts} />
     {/if}
 

@@ -560,6 +560,10 @@
             target="_blank">details</a
           >)
         </li>
+        <li>
+          13 October 2025 - fix for animated shortcuts when showing the LTN
+          before edits
+        </li>
       </ul>
 
       <h3 id="credits">Credits</h3>
