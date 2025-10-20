@@ -3,7 +3,6 @@ use geo::{
     BooleanOps, Buffer, Coord, Distance, Euclidean, Intersects, Length, Line, LineIntersection,
     LineLocatePoint, LineString, MultiPolygon, Point, Polygon, Validation,
 };
-use rstar::AABB;
 
 /// Looks for the first place ls2 crosses ls1. Returns the percent_along ls1 of that point.
 pub fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64> {
@@ -24,19 +23,6 @@ pub fn linestring_intersection(ls1: &LineString, ls2: &LineString) -> Option<f64
     }
     // TODO Didn't find it...
     None
-}
-
-pub fn buffer_aabb(aabb: AABB<Point>, buffer_meters: f64) -> AABB<Point> {
-    AABB::from_corners(
-        Point::new(
-            aabb.lower().x() - buffer_meters,
-            aabb.lower().y() - buffer_meters,
-        ),
-        Point::new(
-            aabb.upper().x() + buffer_meters,
-            aabb.upper().y() + buffer_meters,
-        ),
-    )
 }
 
 /// Buffers a polygon, returning the largest of the output Polygons

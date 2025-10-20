@@ -1,7 +1,7 @@
 use crate::boundary_stats::{ContextData, PreparedContextData};
 use crate::geo_helpers::{
-    angle_between_bearings, angle_of_pt_on_line, bearing_from_endpoint, buffer_aabb,
-    invert_multi_polygon, limit_angle, linestring_intersection, split_bearing,
+    angle_between_bearings, angle_of_pt_on_line, bearing_from_endpoint, invert_multi_polygon,
+    limit_angle, linestring_intersection, split_bearing,
 };
 use crate::impact::Impact;
 use crate::neighbourhood::{NeighbourhoodBoundary, NeighbourhoodDefinition};
@@ -17,7 +17,7 @@ use rstar::{primitives::GeomWithData, RTree, AABB};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fmt;
-use utils::{osm2graph, Mercator, Tags};
+use utils::{buffer_aabb, osm2graph, Mercator, Tags};
 
 #[derive(Serialize, Deserialize)]
 pub struct MapModel {

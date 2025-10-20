@@ -11,11 +11,10 @@ use geo::{
 use geojson::{Feature, FeatureCollection};
 use rstar::{primitives::GeomWithData, RTree};
 use serde::{Deserialize, Serialize};
-use utils::{aabb, Mercator};
+use utils::{aabb, buffer_aabb, Mercator};
 use web_time::Instant;
 
 use crate::boundary_stats::{BoundaryStats, PreparedContextData};
-use crate::geo_helpers::buffer_aabb;
 use crate::map_model::DiagonalFilter;
 use crate::render_cells::Color;
 use crate::route::RouterInput;
