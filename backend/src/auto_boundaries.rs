@@ -93,18 +93,6 @@ impl MapModel {
         }) {
             let area_km_2 = polygon.unsigned_area() / 1000. / 1000.;
 
-            // Discard small areas.
-            //
-            // We might want to tweak this threshold.
-            //
-            // In general, it's better to err on the side of a "too low", threshold, the downside of which is primarily the visual distraction of tiny irrelevant sliver areas.
-            // Whereas having this number "too high" will potentially preclude more areas someone wants to choose.
-            // .0025km (50m x 50m)
-            let min_area_km_2 = 0.0025;
-            if area_km_2 < min_area_km_2 {
-                continue;
-            }
-
             // Truly huge areas typically indicate "all the non-settlement" land - a negative left
             // after removing all the settlements.
             let max_area_km2 = 50.0;
@@ -138,12 +126,13 @@ impl MapModel {
     ) -> Result<NeighbourhoodBoundary> {
         let original_boundaries = MultiPolygon(boundaries_to_merge);
 
-        // Merged boundaries must be adjacent, but it's important to allow a little slop,
-        // because our severance-based boundary generation can insert tiny slivers between
-        // neighbourhoods.
-        let adjacency_tolerance = 15.0;
-        // Note that buffering geometries will union them if the buffering results in overlap,
-        // no need for an explicit `unary_union` step.
+        // Merged boundaries must be adjacent. The severance-based boundary generation inserts tiny
+        // slivers between neighbourhoods near dual carriageways, and for now, the user must
+        // explicitly include those.
+        //
+        // What we do here is mostly equivalent to a unary union, but due to slight floating point
+        // issues, that's brittle. Instead buffer the polygons very slightly and union them.
+        let adjacency_tolerance = 0.1;
         let polygon = buffer_polygon(&original_boundaries, adjacency_tolerance)?;
         let (exterior, _interiors) = polygon.into_inner();
         let solid = Polygon::new(exterior, vec![]);
