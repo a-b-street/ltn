@@ -16,6 +16,7 @@ fast_paths = "1.0.0"
 flate2 = "1.1.1"
 geo.workspace = true
 geojson.workspace = true
+getrandom = { version = "=0.2.16", features = ["js"] }
 itertools = "0.14.0"
 log = "0.4.20"
 nanorand = { version = "0.7.0", default-features = false, features = ["wyrand"] }
