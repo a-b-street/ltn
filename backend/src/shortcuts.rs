@@ -93,7 +93,7 @@ impl Shortcuts {
                                 // border intersection, then that route will be counted as two
                                 // distinct shortcuts.
                                 if neighbourhood.main_roads.contains(&r) {
-                                    break 'next_road;
+                                    continue 'next_road;
                                 }
 
                                 shortcut_roads.push(*r);
