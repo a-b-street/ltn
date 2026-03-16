@@ -178,6 +178,6 @@ impl GeneratedBoundary {
     pub fn to_feature(&self, map: &MapModel) -> Feature {
         let mut projected = self.clone();
         map.mercator.to_wgs84_in_place(&mut projected.geometry);
-        geojson::ser::to_feature(projected).expect("should have no unserializable fields")
+        geojson::ser::to_feature(&projected).expect("should have no unserializable fields")
     }
 }

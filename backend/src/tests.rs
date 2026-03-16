@@ -58,7 +58,7 @@ fn prune_features(mut gj: FeatureCollection) -> FeatureCollection {
     for f in &mut gj.features {
         if matches!(
             f.geometry.as_ref().unwrap().value,
-            geojson::Value::LineString(_)
+            geojson::GeometryValue::LineString { .. }
         ) {
             let props = f.properties.as_mut().unwrap();
             props.retain(|k, _| {

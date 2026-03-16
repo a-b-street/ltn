@@ -139,7 +139,7 @@ impl NeighbourhoodDefinition {
         let mut projected = self.clone();
         map.mercator.to_wgs84_in_place(&mut projected.geometry);
         let mut feature =
-            geojson::ser::to_feature(projected).expect("should have no unserializable fields");
+            geojson::ser::to_feature(&projected).expect("should have no unserializable fields");
         let props = feature
             .properties
             .as_mut()
@@ -179,7 +179,7 @@ impl NeighbourhoodBoundary {
         map.mercator
             .to_wgs84_in_place(&mut projected.definition.geometry);
         let mut feature =
-            geojson::ser::to_feature(projected).expect("should have no unserializable fields");
+            geojson::ser::to_feature(&projected).expect("should have no unserializable fields");
         let props = feature
             .properties
             .as_mut()
@@ -573,7 +573,7 @@ impl BorderEntry {
         let mut projected = self.clone();
         mercator.to_wgs84_in_place(&mut projected.geometry);
         let mut feature =
-            geojson::ser::to_feature(projected).expect("should have no unserializable fields");
+            geojson::ser::to_feature(&projected).expect("should have no unserializable fields");
         let props = feature
             .properties
             .as_mut()
