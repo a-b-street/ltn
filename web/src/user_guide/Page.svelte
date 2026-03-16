@@ -564,6 +564,12 @@
           13 October 2025 - fix for animated shortcuts when showing the LTN
           before edits
         </li>
+        <li>
+          16 March 2026 - fix for shortcuts when main roads have one-ways (see <a
+            href="https://github.com/a-b-street/ltn/pull/436"
+            target="_blank">details</a
+          >)
+        </li>
       </ul>
 
       <h3 id="credits">Credits</h3>
