@@ -1,3 +1,4 @@
 {
   "plugins": ["prettier-plugin-svelte", "@ianvs/prettier-plugin-sort-imports"],
+  "endOfLine": "auto",
 }

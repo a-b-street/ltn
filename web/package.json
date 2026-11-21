@@ -10,7 +10,7 @@
     "wasm-release": "wasm-pack build --release --target web ../backend",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "fmt": "npx prettier --write *.html src/**",
+    "fmt": "npx prettier --write *.html src",
     "test": "vitest run",
     "test:watch": "vitest"
   },
